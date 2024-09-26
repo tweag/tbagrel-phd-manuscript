@@ -1,0 +1,192 @@
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{ottstyling}[2023/12/07 Custom operators and commands for OTT rendering]
+
+\RequirePackage{stmaryrd}
+\RequirePackage{bbold}
+\RequirePackage[safe]{tipa}
+\RequirePackage{halloweenmath}
+\RequirePackage{calc}
+\RequirePackage{stmaryrd} % [only,llparenthesis,rrparenthesis]
+
+\newcommand{\biggerbrackl}{{\scriptstyle\bigl[}}
+\newcommand{\biggerbrackr}{{\scriptstyle\bigr]}}
+\newcommand{\biggerparenl}{{\scriptstyle\bigl(}}
+\newcommand{\biggerparenr}{{\scriptstyle\bigr)}}
+
+% Big comma for Ampar
+% \DeclareSymbolFont{bbsymbol}{U}{bbold}{m}{n}
+% \DeclareMathSymbol{\bbcomma}{\mathbin}{bbsymbol}{"2C}
+\newcommand{\bbcomma}{\mathrel{\hspace*{-0.2ex}\raisebox{-1.3ex}{\textasciicircum}}\hspace*{-0.5ex}}
+
+% Allow sans-serif + bold font in math mode
+
+\newcommand{\textBF}[1]{%
+    \pdfliteral direct {2 Tr 0.1 w} %the second factor is the boldness
+     #1%
+    \pdfliteral direct {0 Tr 0 w}%
+}
+
+
+% \DeclareMathAlphabet{\mathsfbf}{T1}{\sfdefault}{sb}{n}
+\newcommand{\mathsfbf}[1]{\mathsf{\textBF{#1}}}
+%\DeclareMathAlphabet{\mathsfbf}{T1}{\sfdefault}{b}{n}
+\DeclareMathAlphabet{\mathsfit}{T1}{\sfdefault}{m}{it}
+% If slanted TT is ever needed: (tried, works decently well)
+% https://tex.stackexchange.com/questions/183204/inconsolata-italics
+
+\definecolor{ntcolor}{RGB}{100, 100, 100}
+\definecolor{kwcolor}{RGB}{0, 0, 0}
+\definecolor{ctorcolor}{RGB}{0, 0, 0}
+% \definecolor{??color}{HTML}{F8980F} % yellow-orange, underlined
+\definecolor{typcolor}{HTML}{176FC1} % blue, bold
+\definecolor{spcolor}{HTML}{1C5737} % dark green, not official one
+\definecolor{modecolor}{HTML}{F35EB7} % green-blue, tt
+\definecolor{mvcolor}{HTML}{000000} % 00AAA0 pink, sf
+\definecolor{hnamecolor}{HTML}{F14B2D} % red, itshape
+
+\renewcommand{\ottnt}[1]{\textcolor{ntcolor}{\mathsf{#1}}}
+\renewcommand{\ottmv}[1]{\textcolor{mvcolor}{\mathit{#1}}}
+\renewcommand{\ottkw}[1]{\textcolor{kwcolor}{\mathsfbf{#1}}}
+
+\newcommand{\ottstype}[1]{\textcolor{typcolor}{\mathsf{#1}}}
+\newcommand{\ottsxval}[1]{\textcolor{ntcolor}{\mathsf{\replacewv{\overline{#1}}}}}
+\newcommand{\ottsctor}[1]{\textcolor{ctorcolor}{\mathsf{#1}}}
+\newcommand{\ottssp}[1]{\textcolor{spcolor}{\mathit{#1}}}
+\newcommand{\ottseff}[1]{#1} % no special rendering for effects at the moment
+\newcommand{\ottshname}[1]{\textcolor{hnamecolor}{\mathit{#1}}}
+\newcommand{\ottsmode}[1]{\textcolor{modecolor}{\mathsf{#1}}}
+
+% Replace normal l with fancy round l in label names
+% \newcommand{\replacelell}[1]{%
+%   \begingroup%
+%   \mathcode`l=\ell%
+%   #1%
+%   \endgroup%
+% }
+
+% Replace w with v in extend values rendering (as a bar is added)
+\newcommand{\replacewv}[1]{%
+  \begingroup%
+  \mathcode`w=\mathcode`v
+  #1%
+  \endgroup%
+}
+
+% Used to allow tabs and newlines in OTT terms
+\def\activespaces{
+  \def\mynewline{\\}
+  \def\myspace##1{\myrepeat{##1}{\phantom{\texttt{aaa}}}}
+}
+\def\visiblespaces{
+  \def\mynewline{\ottssp{\backslash\!n} }
+  \def\myspace##1{\myrepeat{##1}{\ottssp{\langle\ldots\rangle}}}
+}
+\visiblespaces{}
+\makeatletter
+  \newcount\my@repeat@count
+  \newcommand{\myrepeat}[2]{%
+    \begingroup
+    \my@repeat@count=\z@
+    \@whilenum\my@repeat@count<#1\do{#2\advance\my@repeat@count\@ne}%
+    \endgroup
+  }
+\makeatother
+
+% \def\showcasem{
+%   \def\mycasem##1{##1}
+% }
+% \def\hidecasem{
+%   \def\mycasem##1{}
+% }
+% \showcasem
+% \newcommand{\withhiddencasem}[1]{%
+%   \hidecasem%
+%   #1%
+%   \showcasem%
+% }
+
+% Short equal operator and assignment operator
+\makeatletter
+\newcommand{\shorteq}{%
+  \settowidth{\@tempdima}{--}% Width of hyphen
+  \resizebox{\@tempdima}{\height}{=}%
+}
+\makeatother
+\newcommand{\assigneq}{\mathrel{%
+  \!\raisebox{0.09ex}{$\mathop{:}$\hspace{-0.1ex}%
+  }%
+  \shorteq\hspace{-0.2ex}%
+}%
+}
+
+% Lambda abstraction with and without type annotation
+% \newcommand{\lam}[3]{\ottsctor{\lambda}\,#1\!:\!#2\,\textbf{.}\,#3}
+\newcommand{\lamnt}[3]{\ottsctor{\lambda}{#1}\,_{\myfunvm{#2}}\!\!\mapsto#3}
+\newcommand{\lamvnt}[3]{\ottsctor{\,\!^{\scriptscriptstyle \pmb{\mathrm{v}}}\!\lambda}{#1}\,_{\myfunvm{#2}}\!\!\mapsto#3}
+\newcommand{\lamsnt}[3]{\ottsctor{\,\!^{\scriptscriptstyle \mathit{s}}\!\lambda}{#1}\,_{\myfunvm{#2}}\!\!\mapsto#3}
+% \newcommand{\Lam}[2]{\ottsctor{\Lambda}\,#1\,\textbf{.}\,#2}
+\newcommand{\munt}[2]{\ottsctor{\mu}{#1}\,\mapsto#2}
+
+% Constructor for exponential
+\newcommand{\expcons}[1]{\ottsctor{\scriptstyle E}_{#1}\,}
+
+% Raised and scaled bullet for fillCompomp
+\newlength{\mylen}
+\setbox1=\hbox{$\circ$}\setbox2=\hbox{$\scriptstyle\pmb{\circ}$}
+\setlength{\mylen}{\dimexpr0.5\ht1-0.56\ht2}
+\def\mycirc{\raisebox{\mylen}{$\scriptstyle\pmb{\circ}$} }
+
+% Raised cdot for negative context product
+% https://tex.stackexchange.com/questions/597955/a-math-font-size-knowledgeable-raisebox
+\makeatletter
+\newcommand{\topprod}[1]{\mathpalette\abcd@{#1\ottsmode{\cdot} } }
+\newcommand{\abcd@}[2]{%
+  % #1 = math style
+  % #2 = text to be lowered
+  \raisebox{%
+    % we make it so that the top of the
+    % lowered part is at the formula axis
+    \dimexpr+\abcd@fontdimen{#1}%
+  }{%
+    % we don't want that \scriptspace kicks in
+    \scriptspace=\z@
+    % the part to be lowered
+    $\m@th#1#2$%
+  }%
+}
+\newcommand{\abcd@fontdimen}[1]{%
+  % the height of the formula axis is \fontdimen22 <math font of family 2>
+  \fontdimen22
+  \ifx#1\displaystyle\textfont\else
+  \ifx#1\textstyle\textfont\else
+  \ifx#1\scriptstyle\scriptfont\else
+  \scriptscriptfont\fi\fi\fi 2
+}
+\makeatother
+
+% Restriction command for context restricted to destinations
+\def\restriction#1#2{\mathchoice
+              {\setbox1\hbox{${\displaystyle #1}_{\scriptstyle #2}$}
+              \restrictionaux{#1}{#2} }
+              {\setbox1\hbox{${\textstyle #1}_{\scriptstyle #2}$}
+              \restrictionaux{#1}{#2} }
+              {\setbox1\hbox{${\scriptstyle #1}_{\scriptscriptstyle #2}$}
+              \restrictionaux{#1}{#2} }
+              {\setbox1\hbox{${\scriptscriptstyle #1}_{\scriptscriptstyle #2}$}
+              \restrictionaux{#1}{#2} } }
+\def\restrictionaux#1#2{ {#1\,\smash{\vrule height .8\ht1 depth .85\dp1} }_{\,#2} }
+
+\newcommand{\cupplus}{\,\text{\makebox[0pt][l]{$\cup$}\raisebox{.40ex}{\hspace{.15ex}$\scriptscriptstyle+$}}~}
+\newcommand{\cupdouble}{\,\text{\makebox[0pt][l]{$\cup$}\raisebox{.40ex}{\hspace{.15ex}$\scriptscriptstyle\cup$}}~}
+
+\newcommand{\pluseq}{
+  \raisebox{-0.135ex}{\scalebox{0.5}{$\ottshname{\stackrel{+}{=}}$}}
+}
+
+\newcommand{\destminus}{\to}
+\newcommand{\patu}{\,\fatsemi\,}
+
+\newcommand{\alignedin}{\hspace*{\widthof{$\ottkw{let}$}-\widthof{$\ottkw{in}$}}\ottkw{in}}
+\newcommand{\holesq}{\textcolor{hnamecolor}{\square}}
+\setlength{\fboxsep}{.3\fboxsep}
+\newcommand{\hboxed}[1]{\boxed{\hspace*{0.3ex}#1\hspace*{0.3ex}}}

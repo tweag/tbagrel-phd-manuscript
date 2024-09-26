@@ -1,0 +1,23 @@
+name: Continuous integration
+on: [push, pull_request]
+env:
+  nixpkgs-url: https://github.com/NixOS/nixpkgs/archive/574d1eac1c200690e27b8eb4e24887f8df7ac27c.tar.gz
+jobs:
+  build-pdf:
+    name: Generate PDF artifact
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v22
+      with:
+        nix_path: nixpkgs=${{ env.nixpkgs-url }}
+    - name: Build Nix dependencies
+      run: nix-shell --pure --run "echo '=== Nix dependencies installed ==='"
+    - name: Make PDF
+      run: nix-shell --pure --run "make"
+    - name: Upload PDF
+      uses: actions/upload-artifact@v3
+      with:
+        name: tbagrel_phd_manuscript
+        path: tbagrel_phd_manuscript.pdf
+        retention-days: 90

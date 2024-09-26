@@ -1,0 +1,54 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=Normal] (0) at (0, 0) {};
+		\node [style=Normal] (1) at (4, 0) {};
+		\node [style=Normal] (2) at (0, -1) {};
+		\node [style=Normal] (3) at (4, -1) {};
+		\node [style=Normal] (4) at (0, -3) {};
+		\node [style=Normal] (5) at (4, -3) {};
+		\node [style=Normal] (6) at (2, -0.5) {};
+		\node [style=Normal] (7) at (2, -0.5) {\mintinline{haskellc}`¤Incomplete`};
+		\node [style=Normal] (8) at (1, -1) {};
+		\node [style=Normal] (9) at (1, -3) {};
+		\node [style=Normal] (11) at (0.125, -2.125) {};
+		\node [style=Normal] (12) at (0.875, -2.125) {};
+		\node [style=Normal] (13) at (0.875, -2.875) {};
+		\node [style=Normal] (14) at (0.125, -2.875) {};
+		\node [style=Normal] (15) at (1.125, -2.125) {};
+		\node [style=Normal] (16) at (1.125, -2.875) {};
+		\node [style=Normal] (17) at (3.875, -2.125) {};
+		\node [style=Normal] (18) at (3.875, -2.875) {};
+		\node [style=Normal] (19) at (3.125, -2.125) {};
+		\node [style=Normal] (20) at (3.125, -2.875) {};
+		\node [style=Normal] (21) at (2.25, -2.5) {\mintinline{haskellc}`¤Dest`};
+		\node [style=Bullet] (24) at (3.5, -2.5) {};
+		\node [style=Normal] (25) at (0.5, -2.875) {};
+		\node [style=Normal] (26) at (0.5, -1.5) {};
+		\node [style=Small] (27) at (0.5, -1.5) {\hspace{0.3ex}\mintinline{haskellc}`⩴[Int]`};
+		\node [style=Normal] (28) at (2.5, -1.5) {};
+		\node [style=Small] (29) at (2.5, -1.5) {\mintinline{haskellc}`d ⩴ Dest [Int]`};
+		\node [style=Medium] (30) at (2, 0.5) {\mintinline{haskellc}`alloc ⩴ Incomplete [Int] (Dest [Int])`};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=NormalEdge] (0.center) to (1.center);
+		\draw [style=NormalEdge] (1.center) to (3.center);
+		\draw [style=NormalEdge] (3.center) to (2.center);
+		\draw [style=NormalEdge] (2.center) to (0.center);
+		\draw [style=NormalEdge] (2.center) to (4.center);
+		\draw [style=NormalEdge] (4.center) to (5.center);
+		\draw [style=NormalEdge] (5.center) to (3.center);
+		\draw [style=NormalEdge] (8.center) to (9.center);
+		\draw [style=red] (11.center) to (12.center);
+		\draw [style=red] (12.center) to (13.center);
+		\draw [style=red] (13.center) to (14.center);
+		\draw [style=red] (14.center) to (11.center);
+		\draw [style=NormalEdge] (15.center) to (19.center);
+		\draw [style=NormalEdge] (19.center) to (17.center);
+		\draw [style=NormalEdge] (17.center) to (18.center);
+		\draw [style=NormalEdge] (18.center) to (20.center);
+		\draw [style=NormalEdge] (20.center) to (19.center);
+		\draw [style=NormalEdge] (20.center) to (16.center);
+		\draw [style=NormalEdge] (16.center) to (15.center);
+		\draw [style=Arrow, bend left=75, looseness=0.75] (24) to (25.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

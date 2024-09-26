@@ -1,0 +1,28 @@
+#!/bin/env bash
+
+arguments=()
+
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -l)
+    arguments+=("$1")
+
+    shift
+    lexer=$1
+
+    if [[ "$lexer" == "haskellc" ]]; then
+      arguments+=("./hc.py:HC")
+      arguments+=("-x")
+    else
+      arguments+=("${lexer}")
+    fi
+
+    ;;
+  *)
+    arguments+=("$1")
+    ;;
+  esac
+  shift
+done
+
+pygmentize "${arguments[@]}"

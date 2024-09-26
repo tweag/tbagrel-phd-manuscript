@@ -1,0 +1,1062 @@
+embed
+{{ coq
+Import EqNotations.
+Require Import Dest.ExtNat.
+Require Import Coq.Structures.Equalities.
+Require Import Coq.Arith.PeanoNat.
+Require Import Coq.Arith.Compare_dec.
+Require Import Coq.MSets.MSetList.
+Require Import Coq.MSets.MSetFacts.
+Require Import Coq.Logic.FunctionalExtensionality.
+(* Grumble, grumble: we shouldn't need to Import Dest.Finitely, but if
+   we don't we can't use the coercions. *)
+Require Import Dest.Finitely.
+Require Dest.Permutation.
+
+Module Nat' <: OrderedTypeWithLeibniz.
+  Include PeanoNat.Nat.
+  Lemma eq_leibniz : forall x y, eq x y -> x = y.
+  Proof. trivial.
+  Qed.
+End Nat'.
+Module HNames := MSetList.MakeWithLeibniz(Nat').
+Module HNamesFacts := MSetFacts.Facts(HNames).
+
+(* We need to predefine eq_dec for mode so that Ott can generate eq_dec for type *)
+(* Will be aliased later to mul *)
+Inductive _mul : Type :=
+  | Lin : _mul
+  | Ur : _mul.
+Theorem mul_eq_dec : forall (p1 p2: _mul), {p1 = p2} + {p1 <> p2}.
+Proof.
+  decide equality.
+Defined.
+Definition age_eq_dec : forall (a1 a2: ext_nat), {a1 = a2} + {a1 <> a2} := ext_eq_dec.
+Theorem mode_eq_dec : forall (m1 m2: option (_mul * ext_nat)), {m1 = m2} + {m1 <> m2}.
+Proof.
+  decide equality. destruct a, p.
+  - destruct (mul_eq_dec _m _m0), (age_eq_dec e e0); subst; auto.
+    * right. congruence.
+    * right. congruence.
+    * right. congruence.
+Defined.
+}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NAMES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+metavar var, x, y, d, dd, un, xs, ys, ex, st, tree, tl, tr, dtree, f, dh, dt, dx, dy, dxs, dys, dv, dtlr, dtl, dtr, q, tok, z, front, back ::= {{ com Variable names }}
+ {{ tex \ottmv{[[var]]} }} {{ coq nat }}
+
+indexvar k ::= {{ coq nat }} {{ com Index for ranges }}
+
+grammar
+
+hname, h, hd :: 'hname_' ::= {{ com Hole (or destination) name, represented by a natural number }} {{ coq nat }} {{ tex \ottshname{[[hname]]} }}
+  | 1 :: S :: 1 {{ coq 1 }} {{ tex \textcolor{hnamecolor}{\mathtt{1} } }}
+  | 2 :: S :: 2 {{ coq 2 }} {{ tex \textcolor{hnamecolor}{\mathtt{2} } }}
+  | h + h' :: M :: Add {{ coq ([[h]] + [[h']]) }} {{ tex [[h]]\hspace*{-.2ex}\ottshname{+}\hspace*{-.2ex}[[h']] }}
+  | h [ H ⩲ h' ] :: M :: Cshift {{ com Shift by $[[h']]$ if $[[h]] \in [[H]]$ }} {{ coq (hname_cshift [[h]] [[H]] [[h']]) }} {{ tex [[h]]\ottshname{[}[[H]][[⩲]][[h']]\ottshname{]} }}
+  | max ( H ) :: M :: Max {{ com Maximum of a set of hole names }} {{ coq (hname_max [[H]]) }} {{ tex \ottshname{\mathsfbf{max}(}[[H]]\ottshname{)} }}
+  | ( h ) :: S :: InvisibleParen {{ coq [[h]] }} {{ tex [[h]] }}
+
+hnames, H :: 'hnames_' ::= {{ com Set of hole names }} {{ coq HNames.t }} {{ tex \ottshname{[[hnames]]} }}
+  | { h1 , .. , hk } :: :: FromList {{ coq (hnames_ [[h1..hk]]) }}
+  | H1 ∪ H2 :: M :: Union {{ com Union of sets }} {{ coq (HNames.union [[H1]] [[H2]]) }} {{ tex [[H1]]\ottshname{\cup}\,[[H2]] }}
+  | H1 ⨆ H2 :: M :: DisjointUnion {{ com Disjoint union of sets }} {{ coq (HNames.union [[H1]] [[H2]]) }} {{ tex [[H1]]\ottshname{\sqcup}\,[[H2]] }}
+  | H ⩲ h' :: M :: Shift {{ com Shift all names from $[[H]]$ by $[[h']]$. }} {{ coq (hnames_shift [[H]] [[h']]) }}
+  | 'hnames(' O ) :: M :: FromCtx {{ com Hole names bound by the typing context $[[O]]$ }} {{ tex \ottshname{\mathsfbf{hnames}(}[[O]]\ottshname{)} }} {{ coq (hnames_ctx [[O]]) }}
+  | 'hnames(' C ) :: M :: FromEctx {{ com Hole names bound by the evaluation context $[[C]]$ }} {{ tex \ottshname{\mathsfbf{hnames}(}[[C]]\ottshname{)} }} {{ coq (hnames_ectxs [[C]]) }}
+  | ( H ) :: S :: Paren {{ coq [[H]] }} {{ tex \ottshname{(}[[H]]\ottshname{)} }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LANGUAGE SYNTAX (STATIC)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+term, t, u :: 'term_' ::= {{ com Term }}
+  | v :: :: Val {{ com Value }}
+  | x :: :: Var {{ com Variable }}
+  | t' t :: :: App {{ com Application }} {{ tex [[t']]~[[t]] }}
+  | t ; u :: :: PatU {{ com Pattern-match on unit }} {{ tex [[t]]\patu[[u]] }}
+  | t ►case m { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } :: :: PatS {{ com Pattern-match on sum }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\{\ottsctor{Inl}\,[[x1]][[⟼]][[u1]]\,,~\ottsctor{Inr}\,[[x2]][[⟼]][[u2]]\} }} % (+ bind x1 in u1 +) (+ bind x2 in u2 +)
+  | t ►case m ( x1 , x2 ) ⟼ u :: :: PatP {{ com Pattern-match on product }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\,\ottsctor{(}[[x1]]\,\ottsctor{,}~[[x2]]\ottsctor{)}[[⟼]][[u]] }} % (+ bind x1 in u +) (+ bind x2 in u +)
+  | t ►case m ᴇ n x ⟼ u :: :: PatE {{ com Pattern-match on exponential }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\,\expcons{[[n]]}[[x]][[⟼]][[u]] }} % (+ bind x in u +)
+  | t ►case m t' ⟼ u :: S :: SugarPatNested {{ com Pattern-match on nested structure }} {{ coq (term_Val val_Unit) }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\,[[t']][[⟼]][[u]] }} % Coq translation is a placeholder
+  | t ►case m { t1 ⟼ u1 , t2 ⟼ u2 } :: S :: SugarPatNestedS {{ com Pattern-match on nested structure }} {{ coq (term_Val val_Unit) }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\,\{[[t1]][[⟼]][[u1]]\,,~[[t2]][[⟼]][[u2]]\} }} % Coq translation is a placeholder
+  | t ►map x ⟼ t' :: :: Map {{ com Map over the right side of ampar }} {{ tex \ottkw{map}~[[t]]~\ottkw{with}~[[x]][[⟼]][[t']] }} % (+ bind x in u +
+  | to⧔ u :: :: ToA {{ tex \ottkw{to}_{\ottkw{\ltimes} }\,[[u]] }} {{ com Wrap into a trivial ampar }}
+  | from⧔ t :: :: FromA {{ tex \ottkw{from}_{\ottkw{\ltimes} }\,[[t]] }} {{ com Convert ampar to a pair }}
+  | alloc :: :: Alloc {{ tex \ottsctor{alloc} }}
+  | t ⨞ () :: :: FillU {{ com Fill destination with unit }}
+  | t ⨞ Inl :: :: FillL {{ com Fill destination with left variant }}
+  | t ⨞ Inr :: :: FillR {{ com Fill destination with right variant }}
+  | t ⨞ ᴇ m :: :: FillE {{ com Fill destination with exponential constructor }} {{ tex [[t]][[⨞]]\,\expcons{[[m]]} }}
+  | t ⨞ (,) :: :: FillP {{ com Fill destination with product constructor }}
+  | t ⨞ ( λ x m ⟼ u ) :: :: FillF {{ com Fill destination with function }} {{ tex [[t]][[⨞]](\lamnt{[[x]]}{[[m]]}{[[u]]}) }} % (+ bind x in u +)
+  | t ⨞· t' :: :: FillComp {{ com Fill destination with root of other ampar }} {{ tex [[t]]\mathop{\triangleleft\mycirc}[[t']] }}
+  | t ◀ t' :: :: FillLeaf {{ com Fill destination with supplied term }} {{ tex [[t]]\blacktriangleleft[[t']] }}
+
+  | t [ x ≔ v ] :: M :: Sub {{ coq (term_sub [[t]] [[x]] [[v]]) }} {{ tex [[t]][ [[x]] \assigneq [[v]] ] }} {{ com Variable subsitution in term }}
+  | ( t ) :: S :: Paren {{ coq [[t]] }} {{ tex ([[t]]) }}
+  | b1 sp1 t b2 sp2 :: S :: BreakSpacing1 {{ coq [[t]] }} {{ tex [[b1]][[sp1]][[t]][[b2]][[sp2]] }}
+  | b1 sp1 t b2 :: S :: BreakSpacing2 {{ coq [[t]] }} {{ tex [[b1]][[sp1]][[t]][[b2]] }}
+  | b sp t :: S :: BreakSpaacing3 {{ coq [[t]] }} {{ tex [[b]][[sp]][[t]] }}
+  % | t b spe :: S :: BreakSpacing3 {{ coq [[t]] }}
+  | t ►case m { b1 sp1 Inl x1 ⟼ u1 , b2 sp2 Inr x2 ⟼ u2 b3 } :: S :: PatSsp1 {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\{[[b1]][[sp1]]\ottsctor{Inl}\,[[x1]][[⟼]][[u1]]\,,[[b2]][[sp2]]\ottsctor{Inr}\,[[x2]][[⟼]][[u2]][[b3]]\} }} {{ coq (term_PatS [[t]] [[m]] [[x1]] [[u1]] [[x2]] [[u2]]) }} % (+ bind x1 in u1 +) (+ bind x2 in u2 +)
+  | t ►case m { b1 sp1 Inl x1 ⟼ u1 , b2 sp2 Inr x2 ⟼ u2 b3 sp3 } :: S :: PatSsp2 {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\{[[b1]][[sp1]]\ottsctor{Inl}\,[[x1]][[⟼]][[u1]]\,,[[b2]][[sp2]]\ottsctor{Inr}\,[[x2]][[⟼]][[u2]][[b3]][[sp3]]\} }} {{ coq (term_PatS [[t]] [[m]] [[x1]] [[u1]] [[x2]] [[u2]]) }} % (+ bind x1 in u1 +) (+ bind x2 in u2 +)
+  | t ►case m b sp ( x1 , x2 ) ⟼ u :: S :: PatPsp {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\,[[b]][[sp]]\ottsctor{(}[[x1]]\,\ottsctor{,}~[[x2]]\ottsctor{)}\![[⟼]][[u]] }} {{ coq (term_PatP [[t]] [[m]] [[x1]] [[x2]] [[u]]) }} % (+ bind x1 in u +) (+ bind x2 in u +)
+  | t ►case m b sp ᴇ n x ⟼ u :: S :: PatEsp {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\,[[b]][[sp]]\expcons{[[n]]}[[x]][[⟼]][[u]] }} {{ coq (term_PatE [[t]] [[m]] [[n]] [[x]] [[u]]) }} % (+ bind x in u +)
+  | t ►case m { t1 ⟼ u1 , t2 ⟼ u2 b sp } :: S :: SugarPatNestedSsp2 {{ com Pattern-match on nested structure }} {{ coq (term_Val val_Unit) }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\,\{[[t1]][[⟼]][[u1]]\,,~[[t2]][[⟼]][[u2]][[b]][[sp]]\} }} % Coq translation is a placeholder
+  | t ►case m { t1 ⟼ u1 , t2 ⟼ u2 b } :: S :: SugarPatNestedSsp1 {{ com Pattern-match on nested structure }} {{ coq (term_Val val_Unit) }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }~[[t]]~\ottkw{of}~\,\{[[t1]][[⟼]][[u1]]\,,~[[t2]][[⟼]][[u2]][[b]]\} }} % Coq translation is a placeholder
+
+  % Here we have to redefined all sugar construct in the same way as in sterm
+  | from⧔' t :: S :: SugarFromA' {{ coq (sterm_FromA' [[t]]) }} {{ tex \ottkw{from}_{\ottkw{\ltimes} }' [[t]] }}
+  | ˢ() :: S :: SugarUnit {{ coq (sterm_Unit) }} {{ tex \ottsctor{()} }}
+  | ˢλ x m ⟼ u :: S :: SugarFun {{ coq (sterm_Fun [[x]] [[m]] [[u]]) }} {{ tex \lamnt{[[x]]}{[[m]]}{[[u]]} }} % (+ bind x in u +)
+  | ˢInl t :: S :: SugarLeft {{ coq (sterm_Left [[t]]) }} {{ tex \ottsctor{Inl}\,[[t]] }}
+  | ˢInr t :: S :: SugarRight {{ coq (sterm_Right [[t]]) }} {{ tex \ottsctor{Inr}\,[[t]] }}
+  | ˢᴇ m t :: S :: SugarExp {{ coq (sterm_Exp [[m]] [[t]]) }} {{ tex \expcons{[[m]]}[[t]] }}
+  | ˢ( t1 , t2 ) :: S :: SugarProd {{ coq (sterm_Prod [[t1]] [[t2]]) }} {{ tex \ottsctor{(}[[t1]]\,\ottsctor{,}~[[t2]]\ottsctor{)} }}
+
+  | ˢ[] :: S :: SugarPNil {{ tex \ottsctor{[]} }} {{ coq (term_Val val_Unit) }} % Coq translation is a placeholder
+  | t1 'ˢ::' t2 :: S :: SugarPCons {{ tex [[t1]]\,\ottsctor{::}\,[[t2]] }} {{ coq (term_Val val_Unit) }} % Coq translation is a placeholder
+  | ˢ0 :: S :: SugarZero {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{0} }} % Coq translation is a placeholder 
+  | ˢ1 :: S :: SugarOne {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{1} }} % Coq translation is a placeholder
+  | ˢ2 :: S :: SugarTwo {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{2} }} % Coq translation is a placeholder
+  | H ˢ⟨ t2 ❟ t1 ⟩ :: S :: SugarAmpar {{ coq (term_Val val_Unit) }} {{ tex _{[[H]]\!}\ottsctor{\langle}[[t2]]\,\ottsctor{\bbcomma}~[[t1]]\ottsctor{\rangle} }} % Coq translation is a placeholder
+  | ˢNil :: S :: SugarNil {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{Nil} }}
+  | ˢNode t1 t2 t3 :: S :: SugarNode {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{Node}~[[t1]]~[[t2]]~[[t3]] }}
+  | true :: S :: SugarTrue {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{true} }}
+  | false :: S :: SugarFalse {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{false} }}
+  | succ t :: S :: SugarSucc {{ coq (term_Succ [[t]]) }} {{ tex \ottkw{succ}~[[t]] }}
+  | fillWithInlCtor t :: S :: SugarFillWithInlCtor {{ coq (term_Val val_Unit) }} {{ tex \ottkw{fillWithInlCtor}~[[t]] }}
+  | fillWithPairCtor t :: S :: SugarFillWithPairCtor {{ coq (term_Val val_Unit) }} {{ tex \ottkw{fillWithPairCtor}~[[t]] }}
+  | t ⨞ [] :: S :: SugarFillEmpty {{ coq (term_Val val_Unit) }} {{ tex [[t]]\triangleleft\ottsctor{[]} }}
+  | t ⨞ (::) :: S :: SugarFillCons {{ coq (term_Val val_Unit) }} {{ tex [[t]]\triangleleft\ottsctor{(::)} }}
+  | t append t' :: S :: SugarSnoc {{ coq (term_Val val_Unit) }} {{ tex [[t]]~\ottkw{append}~[[t']] }}
+  | t concat t' :: S :: SugarConcat {{ coq (term_Val val_Unit) }} {{ tex [[t]]~\ottkw{concat}~[[t']] }}
+  | toList t :: S :: SugarToList {{ coq (term_Val val_Unit) }} {{ tex \ottkw{to}_{\ottkw{List} }~[[t]] }}
+  | singleton t :: S :: SugarSingleton {{ coq (term_Val val_Unit) }} {{ tex \ottkw{singleton}~[[t]] }}
+  | t enqueue t' :: S :: SugarEnqueue {{ coq (term_Val val_Unit) }} {{ tex [[t]]~\ottkw{enqueue}~[[t']] }}
+  | dequeue t :: S :: SugarDequeue {{ coq (term_Val val_Unit) }} {{ tex \ottkw{dequeue}~[[t]] }}
+  | reverse t :: S :: SugarReverse {{ coq (term_Val val_Unit) }} {{ tex \ottkw{reverse}~[[t]] }}
+  | t ⨞ Nil :: S :: SugarFillNil {{ coq (term_Val val_Unit) }} {{ tex [[t]]\triangleleft\ottsctor{Nil} }}
+  | t ⨞ Node :: S :: SugarFillNode {{ coq (term_Val val_Unit) }} {{ tex [[t]]\triangleleft\ottsctor{Node} }}
+  | go t1 t2 t3 :: S :: SugarGo {{ coq (term_Val val_Unit) }} {{ tex \ottkw{go}~[[t1]]~[[t2]]~[[t3]] }}
+  | mapAccumBFS t1 t2 t3 :: S :: SugarMapAccumBFS {{ coq (term_Val val_Unit) }} {{ tex \ottkw{mapAccumBFS}~[[t1]]~[[t2]]~[[t3]] }}
+  | relabelDPS t :: S :: SugarRelabelDPS {{ coq (term_Val val_Unit) }} {{ tex \ottkw{relabelDPS}~[[t]] }}
+  | dup t :: S :: Dup {{ coq (term_Val val_Unit) }} {{ tex \ottkw{dup}~[[t]] }}
+  | drop t :: S :: Drop {{ coq (term_Val val_Unit) }} {{ tex \ottkw{drop}~[[t]] }}
+  | allocIP :: S :: SugarAllocIP {{ coq (term_Val val_Unit) }} {{ tex \ottkw{alloc}_{\ottkw{ip} } }}
+  | allocCoW :: S :: SugarAllocCoW {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{alloc}_{\ottsctor{cow} } }}
+  | alloc' t :: S :: SugarAllocP {{ coq (term_Val val_Unit) }} {{ tex \ottkw{alloc'}~[[t]] }}
+  | deref t :: S :: SugarDeref {{ coq (term_Val val_Unit) }} {{ tex \ottkw{deref}~[[t]] }}
+  | let x ≔ t in u :: S :: SugarLet {{ coq (term_App (sterm_Fun [[x]] (Some (pair Lin (Fin 0))) [[u]]) ([[t]])) }} {{ tex \ottkw{let}~[[x]]\assigneq[[t]]~\ottkw{in}~[[u]] }}
+  | let x ≔ t in b u :: S :: SugarLetSp1 {{ coq (term_App (sterm_Fun [[x]] (Some (pair Lin (Fin 0))) [[u]]) ([[t]])) }} {{ tex \ottkw{let}~[[x]]\assigneq[[t]]~\ottkw{in}[[b]][[u]] }}
+  | let x ≔ t in b sp u :: S :: SugarLetSp2 {{ coq (term_App (sterm_Fun [[x]] (Some (pair Lin (Fin 0))) [[u]]) ([[t]])) }} {{ tex \ottkw{let}~[[x]]\assigneq[[t]]~\ottkw{in}[[b]][[sp]][[u]] }}
+  | ༼ t ༽ :: S :: InvisParen {{ coq [[t]] }} {{ tex [[t]] }}
+  | ul< t > :: S :: Underline {{ coq [[t]] }} {{ tex \uwave{[[t]]} }}
+
+sterm, s {{ tex \ottnt{\tilde{t} } }} :: 'sterm_' ::= {{ com Syntactic sugar for terms }}
+  | from⧔' t :: M :: SugarFromA' {{ com Extract left side of ampar when right side is unit }}  {{ coq (sterm_FromA' [[t]]) }}
+  | ˢ() :: M :: SugarUnit {{ com Unit }} {{ coq (sterm_Unit) }}
+  | ˢλ x m ⟼ u :: M :: SugarFun {{ com Allocate function }} {{ coq (sterm_Fun [[x]] [[m]] [[u]]) }} % (+ bind x in u +)
+  | ˢInl t :: M :: SugarLeft {{ com Allocate left variant }} {{ coq (sterm_Left [[t]]) }}
+  | ˢInr t :: M :: SugarRight {{ com Allocate right variant }} {{ coq (sterm_Right [[t]]) }}
+  | ˢᴇ m t :: M :: SugarExp {{ com Allocate exponential }} {{ coq (sterm_Exp [[m]] [[t]]) }}
+  | ˢ( t1 , t2 ) :: M :: SugarProd {{ com Allocate product }} {{ coq (sterm_Prod [[t1]] [[t2]]) }}
+
+val, v :: 'val_' ::= {{ com Value }}
+  | + h :: :: Hole {{ com Hole }} {{ tex \ottshname{\hboxed{[[h]]} } }}
+  | - h :: :: Dest {{ tex \ottshname{\destminus}[[h]] }} {{ com Destination }}
+  | () :: :: Unit {{ com Unit }}
+  | ᵛλ x m ⟼ u :: :: Fun {{ tex \lamvnt{[[x]]}{[[m]]}{[[u]]} }} {{ com Function with no free variable }} % (+ bind x in t +)
+  | Inl v :: :: Left {{ com Left variant for sum }}
+  | Inr v :: :: Right {{ com Right variant for sum }}
+  | ᴇ m v :: :: Exp {{ tex \expcons{[[m]]}[[v]] }} {{ com Exponential }}
+  | ( v1 , v2 ) :: :: Prod {{ tex \ottsctor{(}[[v1]]\,\ottsctor{,}~[[v2]]\ottsctor{)} }} {{ com Product }}
+  | H ⟨ v2 ❟ v1 ⟩ :: :: Ampar {{ com Ampar }} {{ tex _{[[H]]\!}\ottsctor{\langle}[[v2]]\,\ottsctor{\bbcomma}~[[v1]]\ottsctor{\rangle} }}
+  | v [ H ⩲ h' ] :: M :: Cshift {{ com Shift hole names inside $[[v]]$ by $[[h']]$ if they belong to $[[H]]$. }} {{ coq (val_cshift [[v]] [[H]] [[h']]) }} {{ tex [[v]]\ottshname{[}[[H]][[⩲]][[h']]\ottshname{]} }}
+  | ( v ) :: S :: Paren {{ coq [[v]] }} {{ tex ([[v]]) }}
+  | v [ h ≔ H' v' ] :: M :: Fill {{ tex [[v]]\hspace*{0.11em}\llparenthesis [[h]]\assigneq_{[[H']]}\,[[v']]\hspace*{0.11em}\rrparenthesis }} {{ coq (val_fill [[v]] [[h]] [[H']] [[v']]) }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DYNAMIC SYNTAX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ectxs, C :: 'ectxs_' ::= {{ com Evaluation context stack }} {{ coq (list ectx) }}
+  | ⬜ :: :: Nil {{ coq nil }} {{ com Represent the empty stack / "identity" evaluation context }}
+%  | c :: S :: S {{ coq (cons [[c]] nil) }}
+  | C ∘ c :: :: Comp {{ coq (cons [[c]] [[C]]) }} {{ tex [[C]]\hspace*{0.4em}\circ\hspace*{0.4em}[[c]] }} {{ com Push $[[c]]$ on top of $[[C]]$ }}
+  | C [ h ≔ H v ] :: M :: Fill {{ tex [[C]]\hspace*{0.11em}\llparenthesis [[h]]\assigneq_{[[H]]}\,[[v]]\hspace*{0.11em}\rrparenthesis }} {{ com Fill $[[h]]$ in $[[C]]$ with value $[[v]]$ (that may contain holes) }} {{ coq (ectxs_fill [[C]] [[h]] [[H]] [[v]]) }}
+  | ( C ) :: S :: Paren {{ coq [[C]] }} {{ tex \biggerparenl[[C]]\biggerparenr }}
+
+ectx, c :: 'ectx_' ::= {{ com Evaluation context component }}
+  | t' ⬜ :: :: App1 {{ tex [[t']]~[[⬜]] }}
+  | ⬜ v :: :: App2  {{ tex [[⬜]]~[[v]] }}
+  | ⬜ ; u :: :: PatU {{ tex [[⬜]]\patu[[u]] }}
+  | ⬜ ►case m { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } :: :: PatS {{ tex \ottkw{case}_{[[m]]}~[[⬜]]~\ottkw{of}~\{\ottsctor{Inl}\,[[x1]][[⟼]][[u1]]\,,~\ottsctor{Inr}\,[[x2]][[⟼]][[u2]]\} }} % (+ bind x1 in u1 +) (+ bind x2 in u2 +)
+  | ⬜ ►case m ( x1 , x2 ) ⟼ u :: :: PatP {{ tex \ottkw{case}_{[[m]]}~[[⬜]]~\ottkw{of}~\ottsctor{(}[[x1]]\,\ottsctor{,}~[[x2]]\ottsctor{)}[[⟼]][[u]] }}  % (+ bind x1 in u +) (+ bind x2 in u +)
+  | ⬜ ►case m ᴇ n x ⟼ u :: :: PatE {{ tex \ottkw{case}_{[[m]]}~[[⬜]]~\ottkw{of}~\expcons{[[n]]}[[x]][[⟼]][[u]] }} % (+ bind x in u +)
+  | ⬜ ►map x ⟼ t' :: :: Map {{ tex \ottkw{map}~[[⬜]]~\ottkw{with}~[[x]][[⟼]][[t']] }} % (+ bind x in u +)
+
+  | to⧔ ⬜ :: :: ToA {{ tex \ottkw{to}_{\ottkw{\ltimes} }\,[[⬜]] }}
+  | from⧔ ⬜ :: :: FromA {{ tex \ottkw{from}_{\ottkw{\ltimes} }\,[[⬜]] }}
+  | ⬜ ⨞ () :: :: FillU
+  | ⬜ ⨞ Inl :: :: FillL
+  | ⬜ ⨞ Inr :: :: FillR
+  | ⬜ ⨞ ᴇ m :: :: FillE {{ tex [[⬜]][[⨞]]\,\expcons{[[m]]} }}
+  | ⬜ ⨞ (,) :: :: FillP
+  | ⬜ ⨞ ( λ x m ⟼ u ) :: :: FillF {{ tex [[⬜]][[⨞]](\lamnt{[[x]]}{[[m]]}{[[u]]}) }} % (+ bind x in u +)
+  | ⬜ ⨞· t' :: :: FillComp1 {{ tex [[⬜]]\mathop{\triangleleft\mycirc}[[t']] }}
+  | v ⨞· ⬜ :: :: FillComp2 {{ tex [[v]]\mathop{\triangleleft\mycirc}[[⬜]] }}
+  | ⬜ ◀ t' :: :: FillLeaf1 {{ tex [[⬜]]\blacktriangleleft[[t']] }}
+  | v ◀ ⬜ :: :: FillLeaf2 {{ tex [[v]]\blacktriangleleft[[⬜]] }}
+  | H ᵒᵖ⟨ v2 ❟ ⬜ ⟩ :: :: OpenAmpar {{ tex ^{\text{op}\!}_{[[H]]\!}\ottsctor{\langle}[[v2]]\,\ottsctor{\bbcomma}~[[⬜]]\ottsctor{\rangle} }} {{ com Open ampar, binding hole names in the next components }}
+  | ( c ) :: S :: Paren {{ coq [[c]] }} {{ tex [[c]] }} % {{ tex \biggerparenl[[c]]\biggerparenr }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TYPING SYNTAX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+type, T, U, S :: 'type_' ::= {{ com Type }} {{ tex \ottstype{[[type]]} }} {{ coq-equality decide equality. apply mode_eq_dec. apply mode_eq_dec. apply mode_eq_dec. }}
+  | ① :: :: Unit {{ tex \ottstype{1} }} {{ com Unit }}
+  | T1 ⨁ T2 :: :: Sum {{ tex [[T1]]\ottstype{\oplus}[[T2]] }} {{ com Sum }}
+  | T1 ⨂ T2 :: :: Prod {{ tex [[T1]]\ottstype{\otimes}[[T2]] }} {{ com Product }}
+  | ! m T :: :: Exp {{ tex \ottstype{!}_{[[m]]}[[T]] }} {{ com Exponential }}
+  | U ⧔ T :: :: Ampar {{ tex [[U]]\,\ottstype{\ltimes}\,[[T]] }} {{ com Ampar }}
+  | T m → U :: :: Fun {{ tex [[T]]\,_{\myfuntm{[[m]]} }\!\ottstype{\to}\,[[U]] }} {{ com Function }}
+  | ⌊ T ⌋ m :: :: Dest {{ tex \ottstype{\lfloor}\,\!_{\mydestm{[[m]]} }[[T]]\ottstype{\rfloor} }} {{ com Destination }}
+  | ( T ) :: S :: Paren {{ tex \ottstype{(}[[T]]\ottstype{)} }} {{ coq [[T]]}}
+
+  | Nat :: S :: SugarNat {{ tex \ottstype{Nat} }} {{ coq type_Unit }}
+  | Bool :: S :: SugarBool {{ tex \ottstype{Bool} }} {{ coq type_Unit }}
+  | List T :: S :: SugarList {{ tex \ottstype{List}~[[T]] }} {{ coq type_Unit }}
+  | DList T :: S :: SugarDList {{ tex \ottstype{DList}~[[T]] }} {{ coq type_Unit }}
+  | Queue T :: S :: SugarQueue {{ tex \ottstype{Queue}~[[T]] }} {{ coq type_Unit }}
+  | Tree T :: S :: SugarTree {{ tex \ottstype{Tree}~[[T]] }} {{ coq type_Unit }}
+  | X :: S :: SugarTypeVar {{ tex \ottmv{X} }} {{ coq type_Unit }}
+  | E :: S :: SugarEffect {{ tex \ottstype{E} }} {{ coq type_Unit }}
+  | Token :: S :: SugarToken {{ tex \ottstype{Token} }} {{ coq type_Unit }}
+
+mode, m, n :: 'mode_' ::= {{ tex \ottsmode{[[mode]]} }} {{ com Mode (Semiring) }} {{ coq option (mul * age) }}
+  | p a :: :: Pair {{ com Pair of a multiplicity and age }} {{ tex [[p]]\hspace{-0.15ex}[[a]] }} {{ coq (Some (pair [[p]] [[a]])) }}
+  | ☠ :: :: Err {{ tex \ottsmode{\skull} }} {{ coq None }} {{ com Error case (incompatible types, multiplicities, or ages) }}
+  | m1 · ... · mk :: S :: Times {{ com Semiring product }} {{ coq (mode_times' [[m1...mk]]) }}
+  | ( m ) :: S :: Paren {{ tex \ottsmode{(}[[m]]\ottsmode{)} }} {{ coq [[m]] }}
+
+mul, p :: 'mul_' ::= {{ tex \ottsmode{[[mul]]} }} {{ com Multiplicity (Semiring, first component of mode) }} {{ coq _mul }}
+  | ¹ :: :: Lin {{ tex \ottsmode{1} }} {{ com Linear use }} {{ coq Lin }}
+  | ω :: :: Ur {{ tex \ottsmode{\omega} }} {{ com Non-linear use }} {{ coq Ur }}
+  | p1 . ... . pk :: S :: Times {{ com Semiring product }} {{ coq (mul_times' [[p1...pk]]) }}
+  | ( p ) :: S :: Paren {{ tex \ottsmode{(}[[p]]\ottsmode{)} }} {{ coq [[p]] }}
+
+age, a :: 'age_' ::= {{ tex \ottsmode{[[age]]} }} {{ com Age (Semiring, second component of mode) }} {{ coq ext_nat }}
+  | ν :: :: 0 {{ tex \ottsmode{\nu} }} {{ com Born now }} {{ coq (Fin 0) }}
+  | ↑ :: :: 1 {{ tex \ottsmode{\uparrow} }} {{ com One scope older }} {{ coq (Fin 1) }}
+  | ∞ :: :: Inf {{ tex \ottsmode{\infty} }} {{ com Infinitely old / static }} {{ coq Inf }}
+  | a1 · ... · ak :: S :: Times {{ com Semiring product }} {{ coq (age_times' [[a1...ak]]) }}
+  | ( a ) :: S :: Paren {{ tex \ottsmode{(}[[a]]\ottsmode{)} }} {{ coq [[a]] }}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hidden in final document, just for Coq generation
+
+binding_var :: 'binding_' ::=
+  | ₓ m T :: :: Var {{ tex \,\!_{[[m]]}[[T]] }}
+binding_dh :: 'binding_' ::=
+  | ₋ m ⌊ T ⌋ n :: :: Dest {{ tex \,\!_{[[m]]}\ottstype{\lfloor}\,\!_{[[n]]}[[T]]\ottstype{\rfloor} }}
+  | ₊ T n :: :: Hole {{ tex \,\!_{[[n]]}[[T]] }}
+
+name :: 'name_' ::=
+  | ˣ x :: :: Var {{ tex [[x]] }}
+  | ʰ h :: :: DH {{ tex [[h]] }}
+
+subrules
+  sterm <:: term
+
+embed
+{{ coq
+
+Definition binding_type_of (n : name) : Type :=
+  match n with
+  | name_Var _ => binding_var
+  | name_DH _ => binding_dh
+  end.
+
+Definition cast_binding_rename (h : hname) (h' : hname) (b : binding_type_of (name_DH h)): binding_type_of (name_DH h') :=
+  b.
+
+Definition name_eq_dec (x y : name) : {x = y} + {x<>y}.
+Proof.
+  decide equality.
+  - apply Nat.eq_dec.
+  - apply Nat.eq_dec.
+Defined.
+
+}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+grammar
+
+ctx, O {{ tex \Omega }}, G {{ tex \Theta }}, D {{ tex \Delta }}, P {{ tex \Gamma }} :: 'ctx_' ::= {{ com Typing context }} {{ coq Finitely.T name binding_type_of }}
+  % | ⦅ mvar mdest mhole ⦆ :: :: Maps {{ com Actual representation of contexts for Coq proofs (cannot hide) }} {{ tex \llparenthesis\,[[mvar]]~[[mdest]]~[[mhole]]\,\rrparenthesis }}
+  | { } :: S :: Empty {{ coq ctx_empty }} {{ tex \smallbullet }}
+  | { x : m T } :: :: VarSing {{ coq (ctx_singleton (name_Var [[x]]) (binding_Var [[m]] [[T]])) }} {{ tex [[x]]:\!_{\![[m]]}[[T]] }} {{ com Variable typing binding }}
+  | { + h : T n } :: :: HoleSing {{ coq (ctx_singleton (name_DH [[h]]) (binding_Hole [[T]] [[n]])) }} {{ tex \ottshname{\hboxed{[[h]]} }:\!_{\![[n]]}[[T]] }} {{ com Hole typing binding }}
+  | { - h : m ⌊ T ⌋ n } :: :: DestSing {{ coq (ctx_singleton (name_DH [[h]]) (binding_Dest [[m]] [[T]] [[n]])) }} {{ tex \ottshname{\destminus}[[h]]:\!_{\![[m]]}\ottstype{\lfloor}\,\!_{[[n]]}[[T]]\ottstype{\rfloor} }} {{ com Destination typing binding }}
+  | m · O :: M :: Stimes {{ com Multiply the leftmost mode of each binding by $[[m]]$ }} {{ coq (stimes [[m]] [[O]]) }}
+  | O1 + O2 :: M :: Union {{ coq (union [[O1]] [[O2]]) }} {{ com Sum (incompatible bindings get tagged with $\ottsmode{\skull}$) }}
+  | O1 , O2 :: M :: DisjointUnion {{ coq (union [[O1]] [[O2]]) }} {{ com Disjoint sum }} {{ tex [[O1]],~[[O2]] }}
+  | -⁻¹ D :: M :: HminusInv {{ coq (hminus_inv [[D]]) }} {{ tex \ottshname{\destminus^{\scriptscriptstyle\text{-}1} }[[D]] }} {{ com Transforms dest bindings into a hole bindings }}
+  | - G :: S :: Hminus {{ coq (hminus [[G]]) }} {{ com Transforms hole bindings into dest bindings }} {{ tex \ottshname{\destminus}[[G]] }}
+  | O [ H ⩲ h' ] :: M :: Cshift {{ com Shift hole/dest names by $[[h']]$ if they belong to $[[H]]$ }} {{ coq (ctx_cshift [[O]] [[H]] [[h']]) }} {{ tex [[O]]\ottshname{[}[[H]][[⩲]][[h']]\ottshname{]} }}
+  | ( O ) :: S :: Paren {{ coq [[O]] }} {{ tex ([[O]]) }}
+
+embed
+{{ coq
+(******************************************************************************
+ * NAMES
+ *****************************************************************************)
+
+Definition shift_one (h' : hname) (h'' : hname) : Permutation.Transposition.T :=
+  {| Permutation.Transposition.from := h''; Permutation.Transposition.to := h''+h'|}
+.
+
+Definition shift_perm (H : hnames) (h' : hname) : Permutation.T :=
+  List.map (shift_one h') (HNames.elements H)
+.
+
+Definition hname_cshift (h : hname) (H : HNames.t) (h' : hname) : hname :=
+  Permutation.sem (shift_perm H h') h
+.
+
+Fixpoint hnames_ (l : list nat) : HNames.t :=
+  match l with
+  | nil => HNames.empty
+  | h :: t => HNames.add h (hnames_ t)
+  end.
+
+Definition hname_max (H : HNames.t) : nat := match HNames.max_elt H with
+  | Some h => h
+  | None => 0
+  end.
+
+Definition hnames_shift (H : HNames.t) (h' : nat) : HNames.t :=
+  HNames.fold (fun h acc => HNames.add (h + h') acc) H HNames.empty.
+
+Definition hnames_cshift (H H': HNames.t) (h' : nat) : HNames.t :=
+  HNames.fold (fun h acc => HNames.add (hname_cshift h H' h') acc) H HNames.empty.
+
+Fixpoint hnames_dom (dom: list name) : HNames.t :=
+  match dom with
+  | nil => HNames.empty
+  | name_Var _ :: xs => hnames_dom xs
+  | name_DH h :: xs => HNames.add h (hnames_dom xs)
+  end.
+Definition hnames_ctx (G : ctx) : HNames.t :=
+  hnames_dom (dom G).
+
+Fixpoint hnames_ectxs (C : ectxs) : HNames.t := match C with
+  | nil => HNames.empty
+  | cons c xs => let H := match c with
+    | ectx_OpenAmpar H' v => H'
+    | _ => HNames.empty
+  end in (HNames.union H (hnames_ectxs xs))
+end.
+
+Definition HDisjoint (H1 H2 : HNames.t) : Prop :=
+  HNames.Empty (HNames.inter H1 H2).
+
+Notation "H1 '##' H2" := (HDisjoint H1 H2) (at level 50, no associativity).
+
+(******************************************************************************
+ * TERMS
+ *****************************************************************************)
+
+Fixpoint term_sub (te: term) (x':var) (v':val) : term := match te with
+  (* | term_Val v => val_sub v x' v' *)
+  | term_Val v => term_Val v
+  | term_Var x => match Nat.eq_dec x x' with | left _ => term_Val v' | right _ => term_Var x end
+  | term_App t t' => term_App (term_sub t x' v') (term_sub t' x' v')
+  | term_PatU t u => term_PatU (term_sub t x' v') (term_sub u x' v')
+  | term_PatS t m x1 u1 x2 u2 =>
+    let u1' := match Nat.eq_dec x1 x' with | left _ => u1 | right _ => term_sub u1 x' v' end in
+    let u2' := match Nat.eq_dec x2 x' with | left _ => u2 | right _ => term_sub u2 x' v' end in
+    term_PatS (term_sub t x' v') m x1 u1' x2 u2'
+  | term_PatP t m x1 x2 u =>
+    let u' := match Nat.eq_dec x1 x', Nat.eq_dec x2 x' with | left _, left _ | left _, right _ | right _, left _ => u | right _, right _ => term_sub u x' v' end in
+    term_PatP (term_sub t x' v') m x1 x2 u'
+  | term_PatE t m n x u =>
+    let u' := match Nat.eq_dec x x' with | left _ => u | right _ => term_sub u x' v' end in
+    term_PatE (term_sub t x' v') m n x u'
+  | term_Map t x t' =>
+    let t'' := match Nat.eq_dec x x' with | left _ => t' | right _ => term_sub t' x' v' end in
+    term_Map (term_sub t x' v') x t''
+  | term_ToA u => term_ToA (term_sub u x' v')
+  | term_FromA t => term_FromA (term_sub t x' v')
+  | term_Alloc => term_Alloc
+  | term_FillU t => term_FillU (term_sub t x' v')
+  | term_FillL t => term_FillL (term_sub t x' v')
+  | term_FillR t => term_FillR (term_sub t x' v')
+  | term_FillE t m => term_FillE (term_sub t x' v') m
+  | term_FillP t => term_FillP (term_sub t x' v')
+  | term_FillF t x m u =>
+    let u' := match Nat.eq_dec x x' with | left _ => u | right _ => term_sub u x' v' end in
+    term_FillF (term_sub t x' v') x m u'
+  | term_FillComp t t' => term_FillComp (term_sub t x' v') (term_sub t' x' v')
+  | term_FillLeaf t t' => term_FillLeaf (term_sub t x' v') (term_sub t' x' v')
+end.
+
+Definition NotVal (t: term) : Prop := forall (v : val), t <> term_Val v.
+Lemma NotVal_dec : forall (t : term), {exists v, t = term_Val v} + {NotVal t}.
+Proof.
+  intros t. destruct t.
+  { left. exists v; tauto. }
+  all: right; congruence.
+Qed.
+
+Definition sterm_FromA' (t : term) :=
+  (term_PatP
+    (term_FromA
+      (term_Map t 0
+        (term_PatU
+          (term_Var 0)
+          (term_Val (val_Exp (Some (Lin, Inf)) val_Unit))
+        )
+      )
+    )
+    (Some (Lin, (Fin 0))) 1 2
+    (term_PatE
+      (term_Var 2)
+      (Some (Lin, (Fin 0))) (Some (Lin, Inf)) 3
+      (term_PatU
+        (term_Var 3)
+        (term_Var 1)
+      )
+    )
+  ).
+
+Definition sterm_Unit :=
+  (sterm_FromA'
+    (term_Map
+      term_Alloc
+      0
+      (term_FillU
+        (term_Var 0)
+      )
+    )
+  ).
+
+Definition sterm_Fun (x : var) (m : mode) (u : term) :=
+  (sterm_FromA'
+    (term_Map
+      term_Alloc
+      0
+      (term_FillF
+        (term_Var 0)
+        x m u
+      )
+    )
+  ).
+
+Definition sterm_Left (t : term) :=
+  (sterm_FromA'
+    (term_Map
+      term_Alloc
+      0
+      (term_FillLeaf
+        (term_FillL
+          (term_Var 0)
+        )
+        t
+      )
+    )
+  ).
+
+Definition sterm_Right (t : term) :=
+  (sterm_FromA'
+    (term_Map
+      term_Alloc
+      0
+      (term_FillLeaf
+        (term_FillR
+          (term_Var 0)
+        )
+        t
+      )
+    )
+  ).
+
+Definition sterm_Exp (m : mode) (t : term) :=
+  (sterm_FromA'
+    (term_Map
+      term_Alloc
+      0
+      (term_FillLeaf
+        (term_FillE
+          (term_Var 0)
+          m
+        )
+        t
+      )
+    )
+  ).
+
+Definition sterm_Prod (t1 t2 : term) :=
+  (sterm_FromA'
+    (term_Map
+      term_Alloc
+      0
+      (term_PatP
+        (term_FillP
+          (term_Var 0)
+        )
+        (Some (Lin, (Fin 0))) 1 2
+        (term_PatU
+          (term_FillLeaf
+            (term_Var 1)
+            t1
+          )
+          (term_FillLeaf
+            (term_Var 2)
+            t2
+          )
+        )
+      )
+    )
+  ).
+
+(******************************************************************************
+ * VALUES
+ *****************************************************************************)
+
+Fixpoint val_fill (va: val) (h':hname) (H':hnames) (v':val) : val := match va with
+  | val_Hole h => match Nat.eq_dec h h' with | left _ => v' | right _ => val_Hole h end
+  | val_Dest h => val_Dest h
+  | val_Unit => val_Unit
+  | val_Fun x m u => val_Fun x m u (* No hole in a value function allowed *)
+  | val_Left v => val_Left (val_fill v h' H' v')
+  | val_Right v => val_Right (val_fill v h' H' v')
+  | val_Exp m v => val_Exp m (val_fill v h' H' v')
+  | val_Prod v1 v2 => val_Prod (val_fill v1 h' H' v') (val_fill v2 h' H' v')
+  | val_Ampar H v2 v1 => val_Ampar H v2 v1 (* No foreign hole allowed in ampar *)
+end.
+
+Fixpoint val_cshift (va : val) (H : hnames) (h' : hname) : val :=
+  match va with
+  | val_Hole h => val_Hole (hname_cshift h H h')
+  | val_Dest h => val_Dest (hname_cshift h H h')
+  | val_Unit => val_Unit
+  | val_Fun x m u => val_Fun x m (term_cshift u H h') (* We can have dests captured in a function *)
+  | val_Left v => val_Left (val_cshift v H h')
+  | val_Right v => val_Right (val_cshift v H h')
+  | val_Exp m v => val_Exp m (val_cshift v H h')
+  | val_Prod v1 v2 => val_Prod (val_cshift v1 H h') (val_cshift v2 H h')
+  | val_Ampar H' v2 v1 => val_Ampar (hnames_cshift H' H h') (val_cshift v2 H h') (val_cshift v1 H h') (* We can have foreign dests captured in both sides of an ampar, but this shouldn't touch H' *)
+  end
+with term_cshift (te : term) (H : hnames) (h' : hname) : term :=
+  match te with
+  | term_Val v => term_Val (val_cshift v H h')
+  | term_Var x => term_Var x
+  | term_App t t' => term_App (term_cshift t H h') (term_cshift t' H h')
+  | term_PatU t u => term_PatU (term_cshift t H h') (term_cshift u H h')
+  | term_PatS t m x1 u1 x2 u2 => term_PatS (term_cshift t H h') m x1 (term_cshift u1 H h') x2 (term_cshift u2 H h')
+  | term_PatP t m x1 x2 u => term_PatP (term_cshift t H h') m x1 x2 (term_cshift u H h')
+  | term_PatE t m n x u => term_PatE (term_cshift t H h') m n x (term_cshift u H h')
+  | term_Map t x t' => term_Map (term_cshift t H h') x (term_cshift t' H h')
+  | term_ToA u => term_ToA (term_cshift u H h')
+  | term_FromA t => term_FromA (term_cshift t H h')
+  | term_Alloc => term_Alloc
+  | term_FillU t => term_FillU (term_cshift t H h')
+  | term_FillL t => term_FillL (term_cshift t H h')
+  | term_FillR t => term_FillR (term_cshift t H h')
+  | term_FillE t m => term_FillE (term_cshift t H h') m
+  | term_FillP t => term_FillP (term_cshift t H h')
+  | term_FillF t x m u => term_FillF (term_cshift t H h') x m (term_cshift u H h')
+  | term_FillComp t t' => term_FillComp (term_cshift t H h') (term_cshift t' H h')
+  | term_FillLeaf t t' => term_FillLeaf (term_cshift t H h') (term_cshift t' H h')
+end.
+
+(******************************************************************************
+ * TYPE
+ *****************************************************************************)
+
+Definition max_runtime_var : var := 3.
+
+Definition UserDefined (G : ctx) := forall (x : var), Finitely.In (name_Var x) G -> x > max_runtime_var.
+
+(* Alias to the one defined by Ott *)
+Definition type_eq_dec : forall (T1 T2: type), {T1 = T2} + {T1 <> T2} := eq_type.
+
+(******************************************************************************
+ * MULTIPLICITY
+ *****************************************************************************)
+
+Definition mul_plus (p1 p2: _mul) : _mul := Ur.
+Definition mul_times (p1 p2: _mul) : _mul :=
+  match p1, p2 with
+  | Lin, Lin => Lin
+  | _, _ => Ur
+  end.
+Definition mul_times' (pl: list _mul) : _mul :=
+  List.fold_right mul_times Lin pl.
+Inductive MulSubtype : _mul -> _mul -> Prop :=
+  | MulSubtypeProofEq : forall (p : _mul), MulSubtype p p
+  | MulSubtypeProofUr : forall (p2 : _mul), MulSubtype Ur p2.
+Theorem MulSubtype_dec : forall (p1 p2: _mul), {MulSubtype p1 p2} + {~MulSubtype p1 p2}.
+Proof.
+  intros p1 p2. destruct p1, p2.
+  - left. exact (MulSubtypeProofEq Lin).
+  - right. intros contra. inversion contra.
+  - left. exact (MulSubtypeProofUr Lin).
+  - left. exact (MulSubtypeProofEq Ur).
+Defined.
+
+(******************************************************************************
+ * AGE
+ *****************************************************************************)
+
+Definition age_times (a1 a2 : age) : age := ext_plus a1 a2.
+Definition age_times' (al: list age) : age := ext_plus' al.
+Definition age_plus (a1 a2: age) : age :=
+  match age_eq_dec a1 a2 with
+  | left _ => a1
+  | right _ => Inf
+  end.
+Inductive AgeSubtype : age -> age -> Prop :=
+  | AgeSubtypeProofEq : forall (a : age), AgeSubtype a a
+  | AgeSubtypeProofInf : forall (a2 : age), AgeSubtype Inf a2.
+Theorem AgeSubtype_dec : forall (a1 a2: age), {AgeSubtype a1 a2} + {~(AgeSubtype a1 a2)}.
+Proof.
+  intros a1 a2. destruct a1, a2.
+  - assert ({n = n0} + {n <> n0}) by apply Nat.eq_dec. destruct H.
+    * rewrite e. left. exact (AgeSubtypeProofEq (Fin n0)).
+    * right. intros contra. inversion contra. congruence.
+  - right. intros contra. inversion contra.
+  - left. exact (AgeSubtypeProofInf (Fin n)).
+  - left. exact (AgeSubtypeProofEq Inf).
+Defined.
+
+(******************************************************************************
+ * MODE
+ *****************************************************************************)
+
+Definition mode_plus (m1 m2: mode) : mode :=
+  match m1, m2 with
+  | None, _ => None
+  | _, None => None
+  | Some (p1, a1), Some (p2, a2) => Some (mul_plus p1 p2, age_plus a1 a2)end.
+Definition mode_times (m1 m2: mode) : mode :=
+  match m1, m2 with
+  | None, _ => None
+  | _, None => None
+  | Some (p1, a1), Some (p2, a2) => Some (mul_times p1 p2, age_times a1 a2)
+  end.
+Definition mode_times' (ml: list mode) : mode :=
+  List.fold_right mode_times (Some (Lin, Fin 0)) ml.
+Inductive ModeSubtype : mode -> mode -> Prop :=
+  | ModeSubtypeProofNone : forall (m2 : mode), ModeSubtype None m2 (* skull represents contradictory requirements, so we must never be able to provide a value with multiplicity skull *)
+  | ModeSubtypeProofPair : forall (p1 p2 : _mul) (a1 a2 : age), MulSubtype p1 p2 -> AgeSubtype a1 a2 -> ModeSubtype (Some (p1, a1)) (Some (p2, a2)).
+Theorem ModeSubtype_dec : forall (m1 m2: mode), {ModeSubtype m1 m2} + {~ModeSubtype m1 m2}.
+Proof.
+  intros m1 m2. destruct m1 as [(p1 & a1)|], m2 as [(p2 & a2)|].
+  - destruct (MulSubtype_dec p1 p2), (AgeSubtype_dec a1 a2).
+    + left. exact (ModeSubtypeProofPair p1 p2 a1 a2 m a).
+    + right. intros contra. inversion contra. congruence.
+    + right. intros contra. inversion contra. congruence.
+    + right. intros contra. inversion contra. congruence.
+  - right. intros contra. inversion contra.
+  - left. exact (ModeSubtypeProofNone (Some (p2, a2))).
+  - left. exact (ModeSubtypeProofNone None).
+Defined.
+
+Notation "n '<:' m" := (ModeSubtype m n) (at level 50, no associativity).
+
+(******************************************************************************
+ * BINDERS
+ *****************************************************************************)
+
+Inductive IsValid : mode -> Prop :=
+  IsValidProof : forall (pa : mul * age), IsValid (Some pa).
+Theorem IsValid_dec : forall (m : mode), {IsValid m} + {~IsValid m}.
+Proof.
+  intros m. destruct m as [pa|].
+  - left. exact (IsValidProof pa).
+  - right. intros contra. inversion contra.
+Qed.
+Inductive IsLin : mode -> Prop :=
+  IsLinProof : forall (a : age), IsLin (Some (Lin, a)).
+Theorem IsLin_dec : forall (m : mode), {IsLin m} + {~IsLin m}.
+Proof.
+  intros m. destruct m as [pa|].
+  - destruct pa as [p a]. destruct p.
+    + left. exact (IsLinProof a).
+    + right. intros contra. inversion contra.
+  - right. intros contra. inversion contra.
+Qed.
+Inductive IsFinAge : mode -> Prop :=
+  IsFinAgeProof : forall (p : mul) (k : nat), IsFinAge (Some (p, Fin k)).
+Theorem IsFinAge_dec : forall (m : mode), {IsFinAge m} + {~IsFinAge m}.
+Proof.
+  intros m. destruct m as [pa|].
+  - destruct pa as [p a]. destruct a.
+    + left. exact (IsFinAgeProof p n).
+    + right. intros contra. inversion contra.
+  - right. intros contra. inversion contra.
+Qed.
+Definition IsLinNu (m : mode) : Prop := m = Some (Lin, Fin 0).
+Theorem IsLinNu_dec : forall (m : mode), {IsLinNu m} + {~IsLinNu m}.
+Proof.
+  unfold IsLinNu. intros m. apply mode_eq_dec.
+Qed.
+Inductive IsUr : mode -> Prop :=
+  IsUrProof : forall (a : age), IsUr (Some (Ur, a)).
+Theorem IsUr_dec : forall (m : mode), {IsUr m} + {~IsUr m}.
+Proof.
+  intros m. destruct m as [pa|].
+  - destruct pa as [p a]. destruct p.
+    + right. intros contra. inversion contra.
+    + left. exact (IsUrProof a).
+  - right. intros contra. inversion contra.
+Qed.
+
+(******************************************************************************
+ * BINDERS
+ *****************************************************************************)
+
+Definition mode_of {n : name} (binding: binding_type_of n): mode :=
+  match n return (binding_type_of n) -> mode with
+  | name_Var _ => fun binding => match binding with
+    | binding_Var m _ => m
+    end
+  | name_DH _ => fun binding => match binding with
+    | binding_Dest m _ _ => m
+    | binding_Hole _ n => n
+    end
+  end binding.
+
+Definition union_var (b1 b2 : binding_var) : binding_var := match b1, b2 with
+  | binding_Var m1 T1, binding_Var m2 T2 => match type_eq_dec T1 T2 with
+    | left _ => binding_Var (mode_plus m1 m2) T1
+    | right _ => binding_Var None type_Unit
+    end
+  end.
+
+Definition union_dh (b1 b2 : binding_dh) : binding_dh := match b1, b2 with
+  | binding_Dest m11 T1 m12, binding_Dest m21 T2 m22 => match type_eq_dec T1 T2, mode_eq_dec m12 m22 with
+    | left _, left _ => binding_Dest (mode_plus m11 m21) T1 m12
+    | _, _ => binding_Dest None type_Unit None
+    end
+  | binding_Hole T1 n1, binding_Hole T2 n2 => match type_eq_dec T1 T2 with
+    | left _ => binding_Hole T1 (mode_plus n1 n2)
+    | right _ => binding_Hole type_Unit None
+    end
+  | _, _ => binding_Hole type_Unit None
+  end.
+
+Definition stimes_var (m' : mode) (b : binding_var) : binding_var := match b with
+  | binding_Var m T => binding_Var (mode_times m' m) T
+end.
+Definition stimes_dh (m' : mode) (b : binding_dh) : binding_dh := match b with
+  | binding_Dest m T n => binding_Dest (mode_times m' m) T n
+  | binding_Hole T n => binding_Hole T (mode_times m' n)
+end.
+
+Definition IsDisposable x : binding_type_of x -> Prop :=
+  match x with
+  | name_Var _ => fun binding => IsUr (mode_of binding)
+  | name_DH _ => fun binding => match binding with
+    | binding_Dest m T n => IsUr (mode_of binding)
+    | binding_Hole T n => False
+    end
+  end.
+
+Definition IsDest x : binding_type_of x -> Prop :=
+  match x with
+  | name_Var _ => fun _ => False
+  | name_DH h => fun b => match b with binding_Dest _  _  _ => True | _ => False end
+  end.
+
+Definition IsVar x : binding_type_of x -> Prop :=
+  match x with
+  | name_Var _ => fun _ => True
+  | name_DH _ => fun _ => False
+  end.
+
+(******************************************************************************
+ * CONTEXTS
+ *****************************************************************************)
+
+Definition ctx_singleton (v : name) (binding: binding_type_of v): ctx :=
+  Finitely.singleton v (name_eq_dec) binding.
+
+Definition ctx_empty : ctx := Finitely.empty.
+
+Definition fsimple (T:Type -> Type) (f_var : T binding_var) (f_dh : T binding_dh) : forall (n:name), T (binding_type_of n) := fun n =>
+  match n return T (binding_type_of n) with
+  | name_Var _ => f_var
+  | name_DH _ => f_dh
+  end.
+
+Definition union (G1 G2 : ctx) : ctx :=
+  Finitely.merge_with (fsimple (fun t => t -> t -> t) union_var union_dh) G1 G2.
+
+Definition stimes (m' : mode) (G : ctx) : ctx :=
+  Finitely.map (fsimple (fun t => t -> t) (stimes_var m') (stimes_dh m')) G.
+
+Definition hminus_inv (G : ctx) : ctx :=
+  Finitely.map (fsimple (fun t => t -> t)
+    (fun binding => binding_Var None type_Unit)
+    (fun binding => match binding with
+      | binding_Dest (Some (Lin, (Fin 0))) T n => binding_Hole T n
+      | binding_Dest _ _ _ => binding_Dest None type_Unit None
+      | binding_Hole _ _ => binding_Hole type_Unit None
+      end)
+    )
+    G.
+
+Definition hminus (G : ctx) : ctx :=
+  Finitely.map (fsimple (fun t => t -> t)
+    (fun binding => binding_Var None type_Unit)
+    (fun binding => match binding with
+      | binding_Dest _ _ _ => binding_Dest None type_Unit None
+      | binding_Hole T n => binding_Dest (Some (Lin, (Fin 0))) T n
+      (* TODO: should we check that n is valid? *)
+      end)
+    )
+    G.
+
+Definition pre_shift (p : Permutation.T) (n : name) : name :=
+  match n with
+  | name_Var x => name_Var x
+  | name_DH h => name_DH (Permutation.sem p h)
+  end.
+
+Definition post_process (p : Permutation.T) n : binding_type_of (pre_shift p n) -> binding_type_of n :=
+  match n with
+  | name_Var _ => fun b => b
+  | name_DH _ => fun b => b
+  end.
+
+#[program]
+Definition ctx_shift (p : Permutation.T) (G : ctx) : ctx :=
+  map (post_process p) (
+  precomp (pre_shift p )
+    (
+      fun n => match n with
+      | name_Var x => name_Var x :: nil
+      | name_DH h => name_DH (Permutation.sem (List.rev p) h) :: nil
+      end
+    ) G).
+Next Obligation.
+  unfold List.In, pre_shift.
+  destruct w as [xx|xh].
+  { tauto. }
+  rewrite Permutation.post_inverse.
+  tauto.
+Qed.
+
+Definition ctx_cshift (G : ctx) (H : hnames) (h' : hname) : ctx := ctx_shift (List.rev (shift_perm H h')) G.
+
+Definition DestOnly G : Prop := forall x b, G x = Some b -> IsDest x b.
+
+Definition VarOnly G : Prop := forall x b, G x = Some b -> IsVar x b.
+
+Definition NoVar G : Prop := forall x b, G x = Some b -> ~IsVar x b.
+
+Definition LinNuOnly (G : ctx) : Prop := forall (n : name) (binding: binding_type_of n), G n = Some binding -> IsLinNu (mode_of binding).
+Definition LinOnly (G : ctx) : Prop := forall (n : name) (binding: binding_type_of n), G n = Some binding -> IsLin (mode_of binding).
+Definition FinAgeOnly (G : ctx) : Prop := forall (n : name) (binding: binding_type_of n), G n = Some binding -> IsFinAge (mode_of binding).
+Definition ValidOnly (G: ctx) : Prop := forall (n : name) (binding: binding_type_of n), G n = Some binding -> IsValid (mode_of binding).
+Definition Disjoint (G1 G2 : ctx) : Prop :=
+  forall x, Finitely.In x G1 -> Finitely.In x G2 -> False.
+
+Notation "G '#' H" := (Disjoint G H) (at level 50, no associativity).
+
+Definition DisposableOnly (G: ctx) : Prop :=
+  forall (n : name) (binding: binding_type_of n), G n = Some binding -> IsDisposable n binding.
+
+(*
+Inductive CompatibleVar : ctx -> var -> mode -> type -> Prop :=
+  | ctx_CompatibleProof : forall (P : ctx) (x : var) (m m': mode) (T : type),
+    DisposableOnly P -> P # (ctx_singleton (name_Var x) (binding_Var m' T)) -> ModeSubtype m' m -> CompatibleVar (union P (ctx_singleton (name_Var x) (binding_Var m' T))) x m T.
+
+(* Alternative definition for CompatibleVar, we might want to prove that it is equivalent to the inductive definition *)
+Definition CompatibleVar' (P: ctx) (x: var) (m : mode) (T: type) : Prop :=
+  forall (n : name) (binding: binding_type_of n), P n = Some binding -> (
+    (n = (name_Var x) -> exists m', binding = binding_Var m' T /\ ModeSubtype m' m)
+ /\ (n <> (name_Var x) -> IsDisposable binding)).
+*)
+
+(******************************************************************************
+ * EVALUATION CONTEXTS
+ *****************************************************************************)
+
+Fixpoint ectxs_fill (C: ectxs) (h':hname) (H' : hnames) (v':val) : ectxs := match C with
+  | (cons (ectx_OpenAmpar H v) C) => if HNames.mem h' H then (cons (ectx_OpenAmpar (HNames.union (HNames.remove h' H) H') (val_fill v h' H' v')) C) else (cons (ectx_OpenAmpar H v) (ectxs_fill C h' H' v'))
+  | (cons c C) => (cons c (ectxs_fill C h' H' v'))
+  | nil => nil
+end.
+
+(*****************************************************************************)
+}}
+
+grammar
+
+spacing, sp :: 'sp_' ::= {{ tex \ottssp{[[spacing]]} }}
+  | ‥‥ :: :: space1 {{ tex \myspace{1} }}
+  | ‥‥‥‥ :: :: space2 {{ tex \myspace{2} }}
+  | ‥‥‥‥‥‥ :: :: space3 {{ tex \myspace{3} }}
+  | ‥‥‥‥‥‥‥‥ :: :: space4 {{ tex \myspace{4} }}
+  | ‥‥‥‥‥‥‥‥‥‥ :: :: space5 {{ tex \myspace{5} }}
+  | ‥‥‥‥‥‥‥‥‥‥‥‥ :: :: space6 {{ tex \myspace{6} }}
+  | ‥‥‥‥‥‥‥‥‥‥‥‥‥‥ :: :: space7 {{ tex \myspace{7} }}
+  | ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥ :: :: space8 {{ tex \myspace{8} }}
+  | ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥ :: :: space9 {{ tex \myspace{9} }}
+  | ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥ :: :: space10 {{ tex \myspace{10} }}
+
+% spacing_end, spe :: 'spe_' ::= {{ tex \ottssp{[[spacing_end]]} }}
+%   | …… :: :: space1e {{ tex \myspace{1} }}
+%   | ………… :: :: space2e {{ tex \myspace{2} }}
+%   | ……………… :: :: space3e {{ tex \myspace{3} }}
+%   | …………………… :: :: space4e {{ tex \myspace{4} }}
+%   | ………………………… :: :: space5e {{ tex \myspace{5} }}
+%   | ……………………………… :: :: space6e {{ tex \myspace{6} }}
+
+line_break, b :: 'b_' ::= {{ tex \ottssp{[[line_break]]} }}
+  | ⮒ :: :: break {{ tex \mynewline }}
+
+terminals :: 'terminals_' ::=
+
+% === Term syntax ===
+  | ⬜ :: :: idectx {{ tex [] }}
+  | ⟼ :: :: mapsto {{ tex \mapsto }}
+  | () :: :: unit {{ tex \ottsctor{()} }}
+  | Inl :: :: inl {{ tex \ottsctor{Inl} }}
+  | Inr :: :: inr {{ tex \ottsctor{Inr} }}
+  | (,) :: :: prod {{ tex \ottsctor{({,})} }}
+  | ⨞ :: :: fill {{ tex \triangleleft }}
+  | · :: :: semiring {{ tex \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} } }}
+  | ⩲ :: :: rename {{ tex \pluseq }}
+
+% === Contexts ===
+  | + :: :: union {{ tex + }}
+
+% === Typing & Semantics ===
+  | ⟶ :: :: red {{ tex ~\longrightarrow~ }}
+  | '⟶*' :: :: reds {{ tex ~\longrightarrow^*~ }}
+  | '|' :: :: store {{ tex \hspace*{1ex}|\hspace*{1ex} }}
+  | ⊢ :: :: vdash {{ tex \,\pmb{\vdash}\, }}
+  | ˢ⊢ :: :: svdash {{ tex \,\pmb{\vdash}\, }}
+  | ⊣ :: :: dashv {{ tex \,\pmb{\dashv}\, }}
+  | ⫦ :: :: dvdash {{ tex \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\, }}
+  | : :: :: colon {{ tex \pmb{:} }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+heap_assign, w :: 'heapa_' ::=
+  | h ≔ ⬜ :: :: Empty {{ tex [[h]]\assigneq\holesq }}
+  | h ≔ v :: :: Val {{ tex [[h]]\assigneq[[v]] }}
+  | ul< w > :: S :: Underline {{ tex \uwave{[[w]]} }} {{ coq ([[w]]) }}
+
+heap, Z {{ tex \mathcal{S} }} :: 'heap_' ::=
+  | { w1 , .. , wk } :: :: List
+  | Z1 ⨆ Z2 :: :: Union {{ tex [[Z1]] \sqcup [[Z2]] }}
+
+pred :: '_' ::= {{ com Serves for the .mng file. Isn't used in the actual rules }}
+  | DestOnly G :: :: DestOnly {{ tex \texttt{DestOnly}~[[G]] }}
+  | LinOnly G :: :: LinOnly {{ tex \texttt{LinOnly}~[[G]] }}
+  | ValidOnly G :: :: ValidOnly {{ tex \texttt{ValidOnly}~[[G]] }}
+  | FinAgeOnly G :: :: FinAgeOnly {{ tex \texttt{FinAgeOnly}~[[G]] }}
+  | DisposableOnly G :: :: DisposableOnly {{ tex \texttt{DisposableOnly}~[[G]] }}
+  | G1 # G2 :: :: Disjoint {{ tex [[G1]]\texttt{\#}[[G2]] }}
+  | H1 ## H2 :: :: HDisjoint {{ tex [[H1]]\texttt{\#\#}[[H2]] }}
+  | IsValid m :: :: IsValid {{ tex \texttt{IsValid}~[[m]] }}
+  | m1 <: m2 :: :: ModeSubtype {{ tex [[m1]]~\mathtt{<:}~[[m2]] }}
+  | NotVal t :: :: NotVal {{ tex \texttt{NotVal}~[[t]] }}
+  | h1 = h2 :: :: hname_eq {{ tex [[h1]] \texttt{=} [[h2]] }}
+
+  | G ⫦ v : T :: :: Ty_val
+  | P ⊢ t : T :: :: Ty_term
+  | P ˢ⊢ t : T :: :: Ty_sterm
+  | D ⊣ C : T1 ↣ T2 :: :: Ty_ectxs {{ com Typing of evaluation contexts }} {{ tex [[D]][[⊣]][[C]][[:]][[T1]]\ottstype{\rightarrowtail}[[T2]] }}
+  | ⊢ C [ t ] : T :: :: Ty {{ tex [[⊢]][[C]]\biggerbrackl [[t]] \biggerbrackr[[:]][[T]] }}
+  | C [ t ] ⟶ C' [ t' ] :: :: Sem {{ tex [[C]]\biggerbrackl [[t]] \biggerbrackr[[⟶]][[C']]\biggerbrackl [[t']] \biggerbrackr }}
+  | C [ t ] :: :: Cmd {{ tex [[C]]\biggerbrackl [[t]] \biggerbrackr }}
+  | Z | t ⟶ Z' | t' :: :: HeapSem
+  | Z | t :: :: HeapCmd
+
+parsing
+ctx_Union <= ctx_Stimes
+ctx_DisjointUnion <= ctx_Stimes
+ctx_Stimes <= ctx_Hminus
+ctx_Union left ctx_Union
+ctx_DisjointUnion left ctx_DisjointUnion
+term_Val <= term_Paren
+term_Map <= term_PatU
+term_Map <= term_PatS
+term_Map <= term_PatP
+term_Map <= term_PatE
+term_Map <= term_SugarPatNested
+term_Map <= term_SugarPatNestedS
+term_Map <= term_PatSsp1
+term_Map <= term_PatSsp2
+term_Map <= term_PatPsp
+term_Map <= term_PatEsp
+term_Map <= term_SugarPatNestedSsp2
+term_Map <= term_SugarPatNestedSsp1
+term_Map right term_Map
+term_SugarLet <= term_PatU
+term_SugarLet <= term_PatS
+term_SugarLet <= term_PatP
+term_SugarLet <= term_PatE
+term_SugarLet <= term_SugarPatNested
+term_SugarLet <= term_SugarPatNestedS
+term_SugarLet <= term_PatSsp1
+term_SugarLet <= term_PatSsp2
+term_SugarLet <= term_PatPsp
+term_SugarLet <= term_PatEsp
+term_SugarLet <= term_SugarPatNestedSsp2
+term_SugarLet <= term_SugarPatNestedSsp1
+term_SugarLet right term_SugarLet
+term_SugarLetSp1 <= term_PatU
+term_SugarLetSp1 <= term_PatS
+term_SugarLetSp1 <= term_PatP
+term_SugarLetSp1 <= term_PatE
+term_SugarLetSp1 <= term_SugarPatNested
+term_SugarLetSp1 <= term_SugarPatNestedS
+term_SugarLetSp1 <= term_PatSsp1
+term_SugarLetSp1 <= term_PatSsp2
+term_SugarLetSp1 <= term_PatPsp
+term_SugarLetSp1 <= term_PatEsp
+term_SugarLetSp1 <= term_SugarPatNestedSsp2
+term_SugarLetSp1 <= term_SugarPatNestedSsp1
+term_SugarLetSp1 right term_SugarLetSp1
+term_SugarLetSp2 <= term_PatU
+term_SugarLetSp2 <= term_PatS
+term_SugarLetSp2 <= term_PatP
+term_SugarLetSp2 <= term_PatE
+term_SugarLetSp2 <= term_SugarPatNested
+term_SugarLetSp2 <= term_SugarPatNestedS
+term_SugarLetSp2 <= term_PatSsp1
+term_SugarLetSp2 <= term_PatSsp2
+term_SugarLetSp2 <= term_PatPsp
+term_SugarLetSp2 <= term_PatEsp
+term_SugarLetSp2 <= term_SugarPatNestedSsp2
+term_SugarLetSp2 <= term_SugarPatNestedSsp1
+term_SugarLetSp2 right term_SugarLetSp2
+term_SugarFun <= term_PatU
+term_SugarFun <= term_PatS
+term_SugarFun <= term_PatP
+term_SugarFun <= term_PatE
+term_SugarFun <= term_SugarPatNested
+term_SugarFun <= term_SugarPatNestedS
+term_SugarFun <= term_PatSsp1
+term_SugarFun <= term_PatSsp2
+term_SugarFun <= term_PatPsp
+term_SugarFun <= term_PatEsp
+term_SugarFun <= term_SugarPatNestedSsp2
+term_SugarFun <= term_SugarPatNestedSsp1
+term_SugarFun right term_SugarFun
