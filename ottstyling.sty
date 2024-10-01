@@ -30,15 +30,15 @@
 % \DeclareMathAlphabet{\mathsfbf}{T1}{\sfdefault}{sb}{n}
 \newcommand{\mathsfbf}[1]{\mathsf{\textBF{#1}}}
 %\DeclareMathAlphabet{\mathsfbf}{T1}{\sfdefault}{b}{n}
-\DeclareMathAlphabet{\mathsfit}{T1}{\sfdefault}{m}{it}
+%\DeclareMathAlphabet{\mathsfit}{T1}{\sfdefault}{m}{it}
 % If slanted TT is ever needed: (tried, works decently well)
 % https://tex.stackexchange.com/questions/183204/inconsolata-italics
 
 \definecolor{ntcolor}{RGB}{100, 100, 100}
 \definecolor{kwcolor}{RGB}{0, 0, 0}
 \definecolor{ctorcolor}{RGB}{0, 0, 0}
-% \definecolor{??color}{HTML}{F8980F} % yellow-orange, underlined
-\definecolor{typcolor}{HTML}{176FC1} % blue, bold
+% \definecolor{??color}{HTML}{CF5C00} % yellow-orange, underlined
+\definecolor{typcolor}{HTML}{214A87} % blue, bold
 \definecolor{spcolor}{HTML}{1C5737} % dark green, not official one
 \definecolor{modecolor}{HTML}{F35EB7} % green-blue, tt
 \definecolor{mvcolor}{HTML}{000000} % 00AAA0 pink, sf
@@ -48,7 +48,7 @@
 \renewcommand{\ottmv}[1]{\textcolor{mvcolor}{\mathit{#1}}}
 \renewcommand{\ottkw}[1]{\textcolor{kwcolor}{\mathsfbf{#1}}}
 
-\newcommand{\ottstype}[1]{\textcolor{typcolor}{\mathsf{#1}}}
+\newcommand{\ottstype}[1]{\textcolor{typcolor}{\mathsfbf{#1}}}
 \newcommand{\ottsxval}[1]{\textcolor{ntcolor}{\mathsf{\replacewv{\overline{#1}}}}}
 \newcommand{\ottsctor}[1]{\textcolor{ctorcolor}{\mathsf{#1}}}
 \newcommand{\ottssp}[1]{\textcolor{spcolor}{\mathit{#1}}}

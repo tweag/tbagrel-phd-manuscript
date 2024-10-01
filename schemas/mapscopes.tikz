@@ -161,7 +161,7 @@
 		\node [style=smallannot] (160) at (-3, 1) {\sciii{subst}};
 		\node [style=smallannot] (161) at (-8.075, 2.25) {\sci{fill}};
 		\node [style=smallannot] (162) at (-12.025, 6.85) {\scz{fill}};
-		\node [style=smallannot] (163) at (-10.8, -3) {reduces};
+		\node [style=smallannot] (163) at (-10.8, -3) {dashedreduces};
 		\node [style=smallannot] (164) at (-6.15, -0.625) {\scii{fill}};
 		\node [style=code] (165) at (5.75, 9) {\scz{$\mathit{x_0}\,:\,\mathsf{\omega\hspace{-0.15ex}\nu}$}};
 		\node [style=code] (166) at (5.75, 7.5) {\scz{$\mathit{x_0}\,:\,\mathsf{\omega\hspace{-0.15ex}\!\uparrow}$}};
@@ -246,7 +246,7 @@
 		\draw [style=a3, in=90, out=15, looseness=0.75] (70.center) to (109.center);
 		\draw [style=a2, in=90, out=15, looseness=0.75] (32.center) to (110.center);
 		\draw [style=a1, in=90, out=15, looseness=0.75] (11.center) to (111.center);
-		\draw [style=red, in=-180, out=-90, looseness=0.75] (112.center) to (113.center);
+		\draw [style=dashedred, in=-180, out=-90, looseness=0.75] (112.center) to (113.center);
 		\draw [style=s2s] (41.center) to (116.center);
 		\draw [style=s2s] (116.center) to (115.center);
 		\draw [style=s2s] (115.center) to (114.center);

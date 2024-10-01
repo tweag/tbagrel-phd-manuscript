@@ -4,15 +4,15 @@
 % \tikzstyle{NAME}=[PROPERTY LIST]
 
 % Node styles
-\tikzstyle{Normal}=[scale=0.75]
-\tikzstyle{Medium}=[scale=0.55]
-\tikzstyle{Small}=[scale=0.45]
+\tikzstyle{Normal}=[scale=0.65]
+\tikzstyle{Medium}=[scale=0.50]
+\tikzstyle{Small}=[scale=0.42]
 \tikzstyle{Bullet}=[fill=black, draw=none, shape=circle, scale=0.35]
 \tikzstyle{Grey Bullet}=[fill=gray, draw=gray, shape=circle, scale=0.35]
 
 % Edge styles
 \tikzstyle{NormalEdge}=[-, draw=black, line width=0.75pt]
-\tikzstyle{red}=[-, draw=red, line width=0.75pt]
+\tikzstyle{red}=[-, draw=hnamecolor, line width=0.75pt]
 \tikzstyle{Arrow}=[->, line width=0.75pt]
 \tikzstyle{Arrow dotted}=[densely dashed,->, line width=0.75pt]
 \tikzstyle{Arrow dotted grey}=[densely dashed,draw=gray, ->, line width=0.75pt]
@@ -42,4 +42,4 @@
 \tikzstyle{a1}=[draw=scicolor, ->]
 \tikzstyle{a2}=[draw=sciicolor, ->]
 \tikzstyle{a3}=[draw=sciiicolor, ->]
-\tikzstyle{red}=[densely dotted, draw={rgb,255: red,0; green,0; blue,0}, ->]
+\tikzstyle{dashedred}=[densely dotted, draw={rgb,255: red,0; green,0; blue,0}, ->]

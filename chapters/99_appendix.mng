@@ -1,0 +1,115 @@
+\chapter{Full reduction rules for \destcalculus{}}\label{apx:full-reduction-rules}
+
+\newlength{\widthaugment}
+\NewEnviron{augmentwidth}[1]
+  {\setlength{\widthaugment}{#1}
+   \pgfmathsetmacro{\myratio}{\linewidth / (\widthaugment + \linewidth)}
+   \scalebox{\myratio}{\begin{minipage}{\linewidth+\widthaugment}\BODY
+   \end{minipage}}}
+
+\renewenvironment{rulesection}[3][\relax]
+  {\trivlist\item
+   \ifx#1\relax\else\def\ottalt@rulesection@prefix{#1-}\fi
+   %\drulesectionhead{#2}{#3}%
+   \nopagebreak[4]%
+   \noindent}
+  {\endtrivlist}
+\renewcommand\ottaltinferrule[4]{
+  \inferrule*[narrower=0.3,right=#1,#2]
+    {#3}
+    {#4}
+}
+
+\begin{ottfig}[h]{\caption{Full reduction rules for \destcalculus{} (part 1)}\label{fig:sem-full1}}\begin{augmentwidth}{1.7cm}
+\drules{$[[C [ t ] ⟶ C' [ t' ] ]]$}{Small-step evaluation of commands}{%
+Focus-AppOne,
+Unfocus-AppOne,
+Focus-AppTwo,
+Unfocus-AppTwo,
+Red-App,
+%
+Focus-PatU,
+Unfocus-PatU,
+Red-PatU,
+%
+Focus-PatS,
+Unfocus-PatS,
+Red-PatL,
+Red-PatR,
+%
+Focus-PatP,
+Unfocus-PatP,
+Red-PatP,
+%
+Focus-PatE,
+Unfocus-PatE,
+Red-PatE,
+%
+Focus-Map,
+Unfocus-Map,
+Open-Ampar,
+Close-Ampar
+}
+\end{augmentwidth}\end{ottfig}
+
+\TODO{Fix overflowing figure}
+
+\begin{ottfig}[h]{\caption{Full reduction rules for \destcalculus{} (part 2)}\label{fig:sem-full2}}\begin{augmentwidth}{1.7cm}
+\drules{}{}{%
+Focus-ToA,
+Unfocus-ToA,
+Red-ToA,
+%
+Focus-FromA,
+Unfocus-FromA,
+Red-FromA,
+%
+Red-Alloc,
+%
+Focus-FillU,
+Unfocus-FillU,
+Red-FillU,
+%
+Focus-FillL,
+Unfocus-FillL,
+Red-FillL,
+%
+Focus-FillR,
+Unfocus-FillR,
+Red-FillR,
+%
+Focus-FillE,
+Unfocus-FillE,
+Red-FillE,
+%
+Focus-FillP,
+Unfocus-FillP,
+Red-FillP,
+%
+Focus-FillF,
+Unfocus-FillF,
+Red-FillF,
+%
+Focus-FillCompOne,
+Unfocus-FillCompOne,
+Focus-FillCompTwo,
+Unfocus-FillCompTwo,
+Red-FillComp,
+%
+Focus-FillLeafOne,
+Unfocus-FillLeafOne,
+Focus-FillLeafTwo,
+Unfocus-FillLeafTwo,
+Red-FillLeaf
+}
+\end{augmentwidth}\end{ottfig}
+
+% Local Variables:
+% eval: (auto-fill-mode 0)
+% eval: (visual-line-mode 1)
+% ispell-local-dictionary: "en_US"
+% End:
+% LocalWords:  ampar combinators combinator Gentzen sequent semirings
+% LocalWords:  involutive dualization autocompletion Ott backends Coq
+% LocalWords:  extensionality semiring setoid allocator pointwise
+% LocalWords:  denotational unevaluated exponentials

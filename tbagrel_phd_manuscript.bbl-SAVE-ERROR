@@ -1,0 +1,863 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{ynt/global//global/global}
+    \entry{larus_restructuring_1989}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=2365a41942be37c500542112fe30f687}{%
+           family={Larus},
+           familyi={L\bibinitperiod},
+           given={James\bibnamedelima Richard},
+           giveni={J\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {University of California, Berkeley}%
+      }
+      \strng{namehash}{2365a41942be37c500542112fe30f687}
+      \strng{fullhash}{2365a41942be37c500542112fe30f687}
+      \strng{bibnamehash}{2365a41942be37c500542112fe30f687}
+      \strng{authorbibnamehash}{2365a41942be37c500542112fe30f687}
+      \strng{authornamehash}{2365a41942be37c500542112fe30f687}
+      \strng{authorfullhash}{2365a41942be37c500542112fe30f687}
+      \field{labelalpha}{Lar89}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{C scURARE, the program restructurer described in this dissertation, automatically transforms a sequential Lisp program into an equivalent concurrent program that executes on a multiprocessor. C scURARE first analyzes a program to find its control and data dependences. This analysis is most difficult for references to structures connected by pointers. C scURARE uses a new data-dependence algorithm, which finds and classifies these dependences. The analysis is conservative and may detect conflicts that do not arise in practice. A programmer can temper and refine its results with declarations. Dependences constrain the program's concurrent execution because, in general, two conflicting statements cannot execute in a different order without affecting the program's result. A restructurer must know all dependences in order to preserve them. However, not all dependences are essential to produce the program's result. C scURARE attempts to transform the program so it computes its result with fewer conflicts. An optimized program will execute with less synchronization and more concurrency. C scURARE then examines loops in a program to find those that are unconstrained or lightly constrained by dependences. By necessity, C scURARE treats recursive functions as loops and does not limit itself to explicit program loops. Recursive functions offer several advantages over explicit loops since they provide a convenient framework for inserting locks and handling the dynamic behavior of symbolic programs. Loops that are suitable for concurrent execution are changed to execute on a set of concurrent server processes. These servers execute single loop iterations and therefore need to be extremely inexpensive to invoke. Restructured programs execute significantly faster than the original sequential programs. This improvement is large enough to attract programmers to a multiprocessor, particularly since it requires little effort on their part. Although restructured programs may not make optimal use of a multiprocessor's parallelism, they make good use of a programmer's time.}
+      \field{note}{AAI9006407}
+      \field{title}{Restructuring symbolic programs for concurrent execution on multiprocessors}
+      \field{type}{phd}
+      \field{year}{1989}
+    \endentry
+    \entry{jones_gibbons_linearbfs_93}{article}{}
+      \name{author}{1}{}{%
+        {{hash=d7effacc4950f11aea627dc1bac84255}{%
+           family={Gibbons},
+           familyi={G\bibinitperiod},
+           given={Jeremy},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {en-gb}%
+      }
+      \strng{namehash}{d7effacc4950f11aea627dc1bac84255}
+      \strng{fullhash}{d7effacc4950f11aea627dc1bac84255}
+      \strng{bibnamehash}{d7effacc4950f11aea627dc1bac84255}
+      \strng{authorbibnamehash}{d7effacc4950f11aea627dc1bac84255}
+      \strng{authornamehash}{d7effacc4950f11aea627dc1bac84255}
+      \strng{authorfullhash}{d7effacc4950f11aea627dc1bac84255}
+      \field{labelalpha}{Gib93}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{abstract}{This paper is about an application of the mathematics of the zip, reduce (fold) and accumulate (scan) operations on lists. It gives an account of the derivation of a linear-time breadth-first tree traversal algorithm, and of a subtle and efficient breadth-first tree labelling algorithm.}
+      \field{note}{Number: No. 71}
+      \field{number}{No. 71}
+      \field{shorttitle}{Linear-time {Breadth}-first {Tree} {Algorithms}}
+      \field{title}{Linear-time {Breadth}-first {Tree} {Algorithms}: {An} {Exercise} in the {Arithmetic} of {Folds} and {Zips}}
+      \field{urlday}{18}
+      \field{urlmonth}{10}
+      \field{urlyear}{2023}
+      \field{year}{1993}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.cs.ox.ac.uk/publications/publication2363-abstract.html
+      \endverb
+      \verb{url}
+      \verb https://www.cs.ox.ac.uk/publications/publication2363-abstract.html
+      \endverb
+    \endentry
+    \entry{launchbury_lazy_1994}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=3b40232599ad9da3d826e3ed2afc0683}{%
+           family={Launchbury},
+           familyi={L\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod}}}%
+        {{hash=b53297525d22bba28e8a789aec2fb226}{%
+           family={Peyton\bibnamedelima Jones},
+           familyi={P\bibinitperiod\bibinitdelim J\bibinitperiod},
+           given={Simon\bibnamedelima L.},
+           giveni={S\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{2d33952fe275b5df28522333f65d27f2}
+      \strng{fullhash}{2d33952fe275b5df28522333f65d27f2}
+      \strng{bibnamehash}{2d33952fe275b5df28522333f65d27f2}
+      \strng{authorbibnamehash}{2d33952fe275b5df28522333f65d27f2}
+      \strng{authornamehash}{2d33952fe275b5df28522333f65d27f2}
+      \strng{authorfullhash}{2d33952fe275b5df28522333f65d27f2}
+      \field{labelalpha}{LP94}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Some algorithms make critical internal use of updatable state, even though their external specification is purely functional. Based on earlier work on monads, we present a way of securely encapsulating stateful computations that manipulate multiple, named, mutable objects, in the context of a non-strict, purely-functional language. The security of the encapsulation is assured by the type system, using parametricity. Intriguingly, this parametricity requires the provision of a (single) constant with a rank-2 polymorphic type.}
+      \field{booktitle}{Proceedings of the {ACM} {SIGPLAN} 1994 conference on {Programming} language design and implementation}
+      \field{isbn}{978-0-89791-662-2}
+      \field{month}{6}
+      \field{series}{{PLDI} '94}
+      \field{title}{Lazy functional state threads}
+      \field{urlday}{11}
+      \field{urlmonth}{12}
+      \field{urlyear}{2023}
+      \field{year}{1994}
+      \field{urldateera}{ce}
+      \field{pages}{24\bibrangedash 35}
+      \range{pages}{12}
+      \verb{doi}
+      \verb 10.1145/178243.178246
+      \endverb
+      \verb{urlraw}
+      \verb https://dl.acm.org/doi/10.1145/178243.178246
+      \endverb
+      \verb{url}
+      \verb https://dl.acm.org/doi/10.1145/178243.178246
+      \endverb
+    \endentry
+    \entry{girard_linear_1995}{incollection}{}
+      \name{author}{1}{}{%
+        {{hash=a5a9f2c1255a817f6a5f5751b5bcfc5f}{%
+           family={Girard},
+           familyi={G\bibinitperiod},
+           given={J.-Y.},
+           giveni={J\bibinithyphendelim Y\bibinitperiod}}}%
+      }
+      \name{editor}{3}{}{%
+        {{hash=b2918bf11715bb95276ff254fb247d4b}{%
+           family={Girard},
+           familyi={G\bibinitperiod},
+           given={Jean-Yves},
+           giveni={J\bibinithyphendelim Y\bibinitperiod}}}%
+        {{hash=f8053921fb01448b725ea4aa3ebbbd85}{%
+           family={Lafont},
+           familyi={L\bibinitperiod},
+           given={Yves},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=db4858ea4ea6b01897d451d269ccee9d}{%
+           family={Regnier},
+           familyi={R\bibinitperiod},
+           given={Laurent},
+           giveni={L\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {en}%
+      }
+      \list{location}{1}{%
+        {Cambridge}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{a5a9f2c1255a817f6a5f5751b5bcfc5f}
+      \strng{fullhash}{a5a9f2c1255a817f6a5f5751b5bcfc5f}
+      \strng{bibnamehash}{a5a9f2c1255a817f6a5f5751b5bcfc5f}
+      \strng{authorbibnamehash}{a5a9f2c1255a817f6a5f5751b5bcfc5f}
+      \strng{authornamehash}{a5a9f2c1255a817f6a5f5751b5bcfc5f}
+      \strng{authorfullhash}{a5a9f2c1255a817f6a5f5751b5bcfc5f}
+      \strng{editorbibnamehash}{32a2520a444928a3d5e0fcf0effe8e35}
+      \strng{editornamehash}{32a2520a444928a3d5e0fcf0effe8e35}
+      \strng{editorfullhash}{32a2520a444928a3d5e0fcf0effe8e35}
+      \field{labelalpha}{Gir95}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{booktitle}{Advances in {Linear} {Logic}}
+      \field{isbn}{978-0-511-62915-0}
+      \field{shorttitle}{Linear {Logic}}
+      \field{title}{Linear {Logic}: its syntax and semantics}
+      \field{urlday}{21}
+      \field{urlmonth}{3}
+      \field{urlyear}{2022}
+      \field{year}{1995}
+      \field{urldateera}{ce}
+      \field{pages}{1\bibrangedash 42}
+      \range{pages}{42}
+      \verb{doi}
+      \verb 10.1017/CBO9780511629150.002
+      \endverb
+      \verb{urlraw}
+      \verb https://www.cambridge.org/core/product/identifier/CBO9780511629150A008/type/book_part
+      \endverb
+      \verb{url}
+      \verb https://www.cambridge.org/core/product/identifier/CBO9780511629150A008/type/book_part
+      \endverb
+      \keyw{linear,logic}
+    \endentry
+    \entry{minamide_functional_1998}{inproceedings}{}
+      \name{author}{1}{}{%
+        {{hash=3ea35a29a61324b47d9588937962c2b0}{%
+           family={Minamide},
+           familyi={M\bibinitperiod},
+           given={Yasuhiko},
+           giveni={Y\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{3ea35a29a61324b47d9588937962c2b0}
+      \strng{fullhash}{3ea35a29a61324b47d9588937962c2b0}
+      \strng{bibnamehash}{3ea35a29a61324b47d9588937962c2b0}
+      \strng{authorbibnamehash}{3ea35a29a61324b47d9588937962c2b0}
+      \strng{authornamehash}{3ea35a29a61324b47d9588937962c2b0}
+      \strng{authorfullhash}{3ea35a29a61324b47d9588937962c2b0}
+      \field{labelalpha}{Min98}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Data structures with a hole, in other words data structures with an uninitialized field, are useful to write efficient programs: they enable us to construct functional data structures flexibly and write functions such as append and map as tail recursive functions. In this paper we present an approach to introducing data structures with a hole into call-by-value functional programming languages like ML. Data structures with a hole are formalized as a new form of λ-abstraction called hole abstraction. The novel features of hole abstraction are that expressions inside hole abstraction are evaluated and application is implemented by destructive update of a hole. We present a simply typed call-by-value λ-calculus extended with hole abstractions. Then we show a compilation method of hole abstraction and prove correctness of the compilation.}
+      \field{booktitle}{Proceedings of the 25th {ACM} {SIGPLAN}-{SIGACT} symposium on {Principles} of programming languages}
+      \field{isbn}{978-0-89791-979-1}
+      \field{month}{1}
+      \field{series}{{POPL} '98}
+      \field{title}{A functional representation of data structures with a hole}
+      \field{urlday}{15}
+      \field{urlmonth}{3}
+      \field{urlyear}{2022}
+      \field{year}{1998}
+      \field{urldateera}{ce}
+      \field{pages}{75\bibrangedash 84}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1145/268946.268953
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/268946.268953
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/268946.268953
+      \endverb
+      \keyw{calculus,destination}
+    \endentry
+    \entry{okasaki_bfs_2000}{inproceedings}{}
+      \name{author}{1}{}{%
+        {{hash=e4e76cfb2d550f0048c93839f784f76d}{%
+           family={Okasaki},
+           familyi={O\bibinitperiod},
+           given={Chris},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{fullhash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{bibnamehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authorbibnamehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authornamehash}{e4e76cfb2d550f0048c93839f784f76d}
+      \strng{authorfullhash}{e4e76cfb2d550f0048c93839f784f76d}
+      \field{labelalpha}{Oka00}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{abstract}{Every programmer has blind spots. Breadth-first numbering is an interesting toy problem that exposes a blind spot common to many---perhaps most---functional programmers.}
+      \field{booktitle}{Proceedings of the fifth {ACM} {SIGPLAN} international conference on {Functional} programming}
+      \field{isbn}{978-1-58113-202-1}
+      \field{month}{9}
+      \field{series}{{ICFP} '00}
+      \field{shorttitle}{Breadth-first numbering}
+      \field{title}{Breadth-first numbering: lessons from a small exercise in algorithm design}
+      \field{urlday}{12}
+      \field{urlmonth}{10}
+      \field{urlyear}{2023}
+      \field{year}{2000}
+      \field{urldateera}{ce}
+      \field{pages}{131\bibrangedash 136}
+      \range{pages}{6}
+      \verb{doi}
+      \verb 10.1145/351240.351253
+      \endverb
+      \verb{file}
+      \verb Full Text PDF:/home/thomas/Zotero/storage/RWTQGQAF/Okasaki - 2000 - Breadth-first numbering lessons from a small exer.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://dl.acm.org/doi/10.1145/351240.351253
+      \endverb
+      \verb{url}
+      \verb https://dl.acm.org/doi/10.1145/351240.351253
+      \endverb
+      \keyw{Breadth-first numbering,breadth-first traversal,views}
+    \endentry
+    \entry{protzenko_mezzo_2013}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=f33aae5dd832a1ed4cb88dd24de0dd75}{%
+           family={Protzenko},
+           familyi={P\bibinitperiod},
+           given={Jonathan},
+           giveni={J\bibinitperiod}}}%
+        {{hash=0f01c7f7d5be720471b86a3d309410d6}{%
+           family={Pottier},
+           familyi={P\bibinitperiod},
+           given={François},
+           giveni={F\bibinitperiod}}}%
+      }
+      \strng{namehash}{20bc1e421c2e61fe73449de5135d94f2}
+      \strng{fullhash}{20bc1e421c2e61fe73449de5135d94f2}
+      \strng{bibnamehash}{20bc1e421c2e61fe73449de5135d94f2}
+      \strng{authorbibnamehash}{20bc1e421c2e61fe73449de5135d94f2}
+      \strng{authornamehash}{20bc1e421c2e61fe73449de5135d94f2}
+      \strng{authorfullhash}{20bc1e421c2e61fe73449de5135d94f2}
+      \field{labelalpha}{PP13}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{We present Mezzo, a typed programming language of ML lineage. Mezzo is equipped with a novel static discipline of duplicable and affine permissions, which controls aliasing and ownership. This rules out certain mistakes, including representation exposure and data races, and enables new idioms, such as gradual initialization, memory re-use, and (type)state changes. Although the core static discipline disallows sharing a mutable data structure, Mezzo offers several ways of working around this restriction, including a novel dynamic ownership control mechanism which we dub "adoption and abandon".}
+      \field{booktitle}{Proceedings of the 18th {ACM} {SIGPLAN} international conference on {Functional} programming}
+      \field{month}{9}
+      \field{note}{arXiv:1311.7242 [cs]}
+      \field{title}{Programming with {Permissions} in {Mezzo}}
+      \field{urlday}{16}
+      \field{urlmonth}{10}
+      \field{urlyear}{2023}
+      \field{year}{2013}
+      \field{urldateera}{ce}
+      \field{pages}{173\bibrangedash 184}
+      \range{pages}{12}
+      \verb{doi}
+      \verb 10.1145/2500365.2500598
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/1311.7242
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/1311.7242
+      \endverb
+      \keyw{Computer Science - Programming Languages,D.3.2}
+    \endentry
+    \entry{yang_efficient_2015}{inproceedings}{}
+      \name{author}{6}{}{%
+        {{hash=f9d2ff5b2b1eae8899aaa1de16304948}{%
+           family={Yang},
+           familyi={Y\bibinitperiod},
+           given={Edward\bibnamedelima Z.},
+           giveni={E\bibinitperiod\bibinitdelim Z\bibinitperiod}}}%
+        {{hash=b3794f1dae8df58f65fcb0d0b3a3f19a}{%
+           family={Campagna},
+           familyi={C\bibinitperiod},
+           given={Giovanni},
+           giveni={G\bibinitperiod}}}%
+        {{hash=6735b2e3e84130af4d41ddd85bcc3c28}{%
+           family={Ağacan},
+           familyi={A\bibinitperiod},
+           given={Ömer\bibnamedelima S.},
+           giveni={Ö\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+        {{hash=b91ead2c951eff134944e2e2c16d3c7b}{%
+           family={El-Hassany},
+           familyi={E\bibinithyphendelim H\bibinitperiod},
+           given={Ahmed},
+           giveni={A\bibinitperiod}}}%
+        {{hash=1b93b4ddc9606077f4d06138b5e988a6}{%
+           family={Kulkarni},
+           familyi={K\bibinitperiod},
+           given={Abhishek},
+           giveni={A\bibinitperiod}}}%
+        {{hash=921b02de077231634ad5943b4c9e5c9f}{%
+           family={Newton},
+           familyi={N\bibinitperiod},
+           given={Ryan\bibnamedelima R.},
+           giveni={R\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {en}%
+      }
+      \list{location}{1}{%
+        {Vancouver BC Canada}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{bdee053fead262cff34115ba6cea0404}
+      \strng{fullhash}{2fdfd8fdd3d2df8027af50eb9fc74500}
+      \strng{bibnamehash}{bdee053fead262cff34115ba6cea0404}
+      \strng{authorbibnamehash}{bdee053fead262cff34115ba6cea0404}
+      \strng{authornamehash}{bdee053fead262cff34115ba6cea0404}
+      \strng{authorfullhash}{2fdfd8fdd3d2df8027af50eb9fc74500}
+      \field{labelalpha}{Yan+15}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{In distributed applications, the transmission of non-contiguous data structures is greatly slowed down by the need to serialize them into a buffer before sending. We describe Compact Normal Forms, an API that allows programmers to explicitly place immutable heap objects into regions, which can both be accessed like ordinary data as well as efﬁciently transmitted over the network. The process of placing objects into compact regions (essentially a copy) is faster than any serializer and can be amortized over a series of functional updates to the data structure in question. We implement this scheme in the Glasgow Haskell Compiler and show that even with the space expansion attendant with memory-oriented data structure representations, we achieve between ×2 and ×4 speedups on fast local networks with sufﬁciently large data structures.}
+      \field{booktitle}{Proceedings of the 20th {ACM} {SIGPLAN} {International} {Conference} on {Functional} {Programming}}
+      \field{isbn}{978-1-4503-3669-7}
+      \field{month}{8}
+      \field{title}{Efficient communication and collection with compact normal forms}
+      \field{urlday}{4}
+      \field{urlmonth}{4}
+      \field{urlyear}{2022}
+      \field{year}{2015}
+      \field{urldateera}{ce}
+      \field{pages}{362\bibrangedash 374}
+      \range{pages}{13}
+      \verb{doi}
+      \verb 10.1145/2784731.2784735
+      \endverb
+      \verb{urlraw}
+      \verb https://dl.acm.org/doi/10.1145/2784731.2784735
+      \endverb
+      \verb{url}
+      \verb https://dl.acm.org/doi/10.1145/2784731.2784735
+      \endverb
+      \keyw{compact-regions,memory,serialization}
+    \endentry
+    \entry{shaikhha_destination-passing_2017}{inproceedings}{}
+      \name{author}{4}{}{%
+        {{hash=b75988079955093b6f0b28641393adb8}{%
+           family={Shaikhha},
+           familyi={S\bibinitperiod},
+           given={Amir},
+           giveni={A\bibinitperiod}}}%
+        {{hash=8eb0347090bee0e3077a241bdad85387}{%
+           family={Fitzgibbon},
+           familyi={F\bibinitperiod},
+           given={Andrew},
+           giveni={A\bibinitperiod}}}%
+        {{hash=ac370005fbe7908b1923dd54aa4f05b3}{%
+           family={Peyton\bibnamedelima Jones},
+           familyi={P\bibinitperiod\bibinitdelim J\bibinitperiod},
+           given={Simon},
+           giveni={S\bibinitperiod}}}%
+        {{hash=a9cce1a83cd369bf8d01d9b87074a780}{%
+           family={Vytiniotis},
+           familyi={V\bibinitperiod},
+           given={Dimitrios},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {en}%
+      }
+      \list{location}{1}{%
+        {Oxford UK}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{16398706ce228873c7d82bcf858af811}
+      \strng{fullhash}{3cf4a5f7048430398a45b8acc22ee709}
+      \strng{bibnamehash}{16398706ce228873c7d82bcf858af811}
+      \strng{authorbibnamehash}{16398706ce228873c7d82bcf858af811}
+      \strng{authornamehash}{16398706ce228873c7d82bcf858af811}
+      \strng{authorfullhash}{3cf4a5f7048430398a45b8acc22ee709}
+      \field{labelalpha}{Sha+17}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{We show how to compile high-level functional array-processing programs, drawn from image processing and machine learning, into C code that runs as fast as hand-written C. The key idea is to transform the program to destination-passing style, which in turn enables a highly-efficient stack-like memory allocation discipline.}
+      \field{booktitle}{Proceedings of the 6th {ACM} {SIGPLAN} {International} {Workshop} on {Functional} {High}-{Performance} {Computing}}
+      \field{isbn}{978-1-4503-5181-2}
+      \field{month}{9}
+      \field{title}{Destination-passing style for efficient memory management}
+      \field{urlday}{15}
+      \field{urlmonth}{3}
+      \field{urlyear}{2022}
+      \field{year}{2017}
+      \field{urldateera}{ce}
+      \field{pages}{12\bibrangedash 23}
+      \range{pages}{12}
+      \verb{doi}
+      \verb 10.1145/3122948.3122949
+      \endverb
+      \verb{urlraw}
+      \verb https://dl.acm.org/doi/10.1145/3122948.3122949
+      \endverb
+      \verb{url}
+      \verb https://dl.acm.org/doi/10.1145/3122948.3122949
+      \endverb
+      \keyw{destination,mutable}
+    \endentry
+    \entry{bernardy_linear_2018}{article}{}
+      \name{author}{5}{}{%
+        {{hash=4c7a19f9fca666a1e4615709da59e5b1}{%
+           family={Bernardy},
+           familyi={B\bibinitperiod},
+           given={Jean-Philippe},
+           giveni={J\bibinithyphendelim P\bibinitperiod}}}%
+        {{hash=59f8d0975576850933f270255f8bda7c}{%
+           family={Boespflug},
+           familyi={B\bibinitperiod},
+           given={Mathieu},
+           giveni={M\bibinitperiod}}}%
+        {{hash=921b02de077231634ad5943b4c9e5c9f}{%
+           family={Newton},
+           familyi={N\bibinitperiod},
+           given={Ryan\bibnamedelima R.},
+           giveni={R\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+        {{hash=b73850cf5129427618751c841759c46c}{%
+           family={Jones},
+           familyi={J\bibinitperiod},
+           given={Simon\bibnamedelima Peyton},
+           giveni={S\bibinitperiod\bibinitdelim P\bibinitperiod}}}%
+        {{hash=5c0d1aa53bec47181fd27f6ce5dd7fa5}{%
+           family={Spiwack},
+           familyi={S\bibinitperiod},
+           given={Arnaud},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{151020dad0f4545a72b798ff90dd94df}
+      \strng{fullhash}{925127f371705ed263ef790f88460f51}
+      \strng{bibnamehash}{151020dad0f4545a72b798ff90dd94df}
+      \strng{authorbibnamehash}{151020dad0f4545a72b798ff90dd94df}
+      \strng{authornamehash}{151020dad0f4545a72b798ff90dd94df}
+      \strng{authorfullhash}{925127f371705ed263ef790f88460f51}
+      \field{labelalpha}{Ber+18}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{abstract}{Linear type systems have a long and storied history, but not a clear path forward to integrate with existing languages such as OCaml or Haskell. In this paper, we study a linear type system designed with two crucial properties in mind: backwards-compatibility and code reuse across linear and non-linear users of a library. Only then can the benefits of linear types permeate conventional functional programming. Rather than bifurcate types into linear and non-linear counterparts, we instead attach linearity to function arrows. Linear functions can receive inputs from linearly-bound values, but can also operate over unrestricted, regular values. To demonstrate the efficacy of our linear type system - both how easy it can be integrated in an existing language implementation and how streamlined it makes it to write programs with linear types - we implemented our type system in GHC, the leading Haskell compiler, and demonstrate two kinds of applications of linear types: mutable data with pure interfaces; and enforcing protocols in I/O-performing functions.}
+      \field{issn}{2475-1421}
+      \field{journaltitle}{Proceedings of the ACM on Programming Languages}
+      \field{month}{1}
+      \field{note}{arXiv:1710.09756 [cs]}
+      \field{number}{POPL}
+      \field{shorttitle}{Linear {Haskell}}
+      \field{title}{Linear {Haskell}: practical linearity in a higher-order polymorphic language}
+      \field{urlday}{23}
+      \field{urlmonth}{6}
+      \field{urlyear}{2022}
+      \field{volume}{2}
+      \field{year}{2018}
+      \field{urldateera}{ce}
+      \field{pages}{1\bibrangedash 29}
+      \range{pages}{29}
+      \verb{doi}
+      \verb 10.1145/3158093
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/1710.09756
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/1710.09756
+      \endverb
+      \keyw{Computer Science - Programming Languages}
+    \endentry
+    \entry{bour_tmc_2021}{article}{}
+      \name{author}{3}{}{%
+        {{hash=517bbdfd74c9fe90fe21a12eb11acfa5}{%
+           family={Bour},
+           familyi={B\bibinitperiod},
+           given={Frédéric},
+           giveni={F\bibinitperiod}}}%
+        {{hash=08f482cadba4b7ca990b3a37a0b20475}{%
+           family={Clément},
+           familyi={C\bibinitperiod},
+           given={Basile},
+           giveni={B\bibinitperiod}}}%
+        {{hash=e10aa2eb0305975e9fdf9d9ee612a9e3}{%
+           family={Scherer},
+           familyi={S\bibinitperiod},
+           given={Gabriel},
+           giveni={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{a69861226bc2db584735eecfd78609ae}
+      \strng{fullhash}{a69861226bc2db584735eecfd78609ae}
+      \strng{bibnamehash}{a69861226bc2db584735eecfd78609ae}
+      \strng{authorbibnamehash}{a69861226bc2db584735eecfd78609ae}
+      \strng{authornamehash}{a69861226bc2db584735eecfd78609ae}
+      \strng{authorfullhash}{a69861226bc2db584735eecfd78609ae}
+      \field{labelalpha}{BCS21}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{OCaml function calls consume space on the system stack. Operating systems set default limits on the stack space which are much lower than the available memory. If a program runs out of stack space, they get the dreaded "Stack Overflow" exception -- they crash. As a result, OCaml programmers have to be careful, when they write recursive functions, to remain in the so-called \_tail-recursive\_ fragment, using \_tail\_ calls that do not consume stack space. This discipline is a source of difficulties for both beginners and experts. Beginners have to be taught recursion, and then tail-recursion. Experts disagree on the "right" way to write `List.map`. The direct version is beautiful but not tail-recursive, so it crashes on larger inputs. The naive tail-recursive transformation is (slightly) slower than the direct version, and experts may want to avoid that cost. Some libraries propose horrible implementations, unrolling code by hand, to compensate for this performance loss. In general, tail-recursion requires the programmer to manually perform sophisticated program transformations. In this work we propose an implementation of "Tail Modulo Cons" (TMC) for OCaml. TMC is a program transformation for a fragment of non-tail-recursive functions, that rewrites them in \_destination-passing style\_{}. The supported fragment is smaller than other approaches such as continuation-passing-style, but the performance of the transformed code is on par with the direct, non-tail-recursive version. Many useful functions that traverse a recursive datastructure and rebuild another recursive structure are in the TMC fragment, in particular `List.map` (and `List.filter`, `List.append`, etc.). Finally those functions can be written in a way that is beautiful, correct on all inputs, and efficient.}
+      \field{journaltitle}{arXiv:2102.09823 [cs]}
+      \field{month}{2}
+      \field{note}{arXiv: 2102.09823}
+      \field{title}{Tail {Modulo} {Cons}}
+      \field{urlday}{22}
+      \field{urlmonth}{3}
+      \field{urlyear}{2022}
+      \field{year}{2021}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/2102.09823
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/2102.09823
+      \endverb
+      \keyw{caml,destination,mutable,tail-recursion}
+    \endentry
+    \entry{spiwack_linearly_2022}{article}{}
+      \name{author}{5}{}{%
+        {{hash=5c0d1aa53bec47181fd27f6ce5dd7fa5}{%
+           family={Spiwack},
+           familyi={S\bibinitperiod},
+           given={Arnaud},
+           giveni={A\bibinitperiod}}}%
+        {{hash=1157fbb8fbea4761d5f5bde7181d2df7}{%
+           family={Kiss},
+           familyi={K\bibinitperiod},
+           given={Csongor},
+           giveni={C\bibinitperiod}}}%
+        {{hash=4c7a19f9fca666a1e4615709da59e5b1}{%
+           family={Bernardy},
+           familyi={B\bibinitperiod},
+           given={Jean-Philippe},
+           giveni={J\bibinithyphendelim P\bibinitperiod}}}%
+        {{hash=1a7e72243faeace95ec8ba8cd5e3d543}{%
+           family={Wu},
+           familyi={W\bibinitperiod},
+           given={Nicolas},
+           giveni={N\bibinitperiod}}}%
+        {{hash=b2c4f62e26a8f80834f7b18db75d03a4}{%
+           family={Eisenberg},
+           familyi={E\bibinitperiod},
+           given={Richard\bibnamedelima A.},
+           giveni={R\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+      }
+      \strng{namehash}{121d499afcaad6a5e722a49d8f026b17}
+      \strng{fullhash}{5d0d85c3df0ec50ff2fecfd331d78a02}
+      \strng{bibnamehash}{121d499afcaad6a5e722a49d8f026b17}
+      \strng{authorbibnamehash}{121d499afcaad6a5e722a49d8f026b17}
+      \strng{authornamehash}{121d499afcaad6a5e722a49d8f026b17}
+      \strng{authorfullhash}{5d0d85c3df0ec50ff2fecfd331d78a02}
+      \field{labelalpha}{Spi+22}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{abstract}{A linear parameter must be consumed exactly once in the body of its function. When declaring resources such as file handles and manually managed memory as linear arguments, a linear type system can verify that these resources are used safely. However, writing code with explicit linear arguments requires bureaucracy. This paper presents linear constraints, a front-end feature for linear typing that decreases the bureaucracy of working with linear types. Linear constraints are implicit linear arguments that are filled in automatically by the compiler. We present linear constraints as a qualified type system,together with an inference algorithm which extends GHC's existing constraint solver algorithm. Soundness of linear constraints is ensured by the fact that they desugar into Linear Haskell.}
+      \field{journaltitle}{Proceedings of the ACM on Programming Languages}
+      \field{month}{8}
+      \field{number}{ICFP}
+      \field{shorttitle}{Linearly qualified types}
+      \field{title}{Linearly qualified types: generic inference for capabilities and uniqueness}
+      \field{urlday}{16}
+      \field{urlmonth}{10}
+      \field{urlyear}{2023}
+      \field{volume}{6}
+      \field{year}{2022}
+      \field{urldateera}{ce}
+      \field{pages}{95:137\bibrangedash 95:164}
+      \range{pages}{-1}
+      \verb{doi}
+      \verb 10.1145/3547626
+      \endverb
+      \verb{urlraw}
+      \verb https://dl.acm.org/doi/10.1145/3547626
+      \endverb
+      \verb{url}
+      \verb https://dl.acm.org/doi/10.1145/3547626
+      \endverb
+      \keyw{constraints,GHC,Haskell,inference,linear logic,linear types,qualified types}
+    \endentry
+    \entry{custom_ghc}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=d02c96e398feb26e7507de353826ba86}{%
+           family={Bagrel},
+           familyi={B\bibinitperiod},
+           given={Thomas},
+           giveni={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{d02c96e398feb26e7507de353826ba86}
+      \strng{fullhash}{d02c96e398feb26e7507de353826ba86}
+      \strng{bibnamehash}{d02c96e398feb26e7507de353826ba86}
+      \strng{authorbibnamehash}{d02c96e398feb26e7507de353826ba86}
+      \strng{authornamehash}{d02c96e398feb26e7507de353826ba86}
+      \strng{authorfullhash}{d02c96e398feb26e7507de353826ba86}
+      \field{extraname}{1}
+      \field{labelalpha}{Bag23}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{extraalpha}{1}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\\Software Heritage,\\\href{https://archive.softwareheritage.org/swh:1:dir:84c7e717fd5f189c6b6222e0fc92d0a82d755e7c;origin=https://github.com/tweag/ghc;visit=swh:1:snp:141fa3c28e01574deebb6cc91693c75f49717c32;anchor=swh:1:rev:184f838b352a0d546e574bdeb83c8c190e9dfdc2}{\texttt{swh:1:dir:84c7e717fd5f189c6b6222e0fc92d0a82d755e7c;\\ origin=https://github.com/tweag/ghc;\\ visit=swh:1:snp:141fa3c28e01574deebb6cc91693c75f49717c32;\\ anchor=swh:1:rev:184f838b352a0d546e574bdeb83c8c190e9dfdc2}}}
+      \field{title}{{GHC} with support for hollow constructor allocation}
+      \field{urlday}{19}
+      \field{urlmonth}{10}
+      \field{urlyear}{2023}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+    \endentry
+    \entry{linear_dest}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=d02c96e398feb26e7507de353826ba86}{%
+           family={Bagrel},
+           familyi={B\bibinitperiod},
+           given={Thomas},
+           giveni={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{d02c96e398feb26e7507de353826ba86}
+      \strng{fullhash}{d02c96e398feb26e7507de353826ba86}
+      \strng{bibnamehash}{d02c96e398feb26e7507de353826ba86}
+      \strng{authorbibnamehash}{d02c96e398feb26e7507de353826ba86}
+      \strng{authornamehash}{d02c96e398feb26e7507de353826ba86}
+      \strng{authorfullhash}{d02c96e398feb26e7507de353826ba86}
+      \field{extraname}{2}
+      \field{labelalpha}{Bag23}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{extraalpha}{2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Software Heritage,\\ \href{https://archive.softwareheritage.org/swh:1:rev:0e7db2e6b24aad348837ac78d8137712c1d8d12a;origin=https://github.com/tweag/linear-dest;visit=swh:1:snp:c0eb2661963bb176204b46788f4edd26f72ac83c}{\texttt{swh:1:rev:0e7db2e6b24aad348837ac78d8137712c1d8d12a;\\origin=https://github.com/tweag/linear-dest;\\visit=swh:1:snp:c0eb2661963bb176204b46788f4edd26f72ac83c}}}
+      \field{title}{\texttt{linear-dest}, a {Haskell} library that adds supports for {DPS} programming}
+      \field{urlday}{19}
+      \field{urlmonth}{10}
+      \field{urlyear}{2023}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+    \endentry
+    \entry{gibbons_phases_2023}{inproceedings}{}
+      \name{author}{4}{}{%
+        {{hash=d7effacc4950f11aea627dc1bac84255}{%
+           family={Gibbons},
+           familyi={G\bibinitperiod},
+           given={Jeremy},
+           giveni={J\bibinitperiod}}}%
+        {{hash=371c561235b0b05003f12e00633d9bc6}{%
+           family={Kidney},
+           familyi={K\bibinitperiod},
+           given={Donnacha\bibnamedelima Oisín},
+           giveni={D\bibinitperiod\bibinitdelim O\bibinitperiod}}}%
+        {{hash=ee8884e6f5c55d796fda4df39c101ebf}{%
+           family={Schrijvers},
+           familyi={S\bibinitperiod},
+           given={Tom},
+           giveni={T\bibinitperiod}}}%
+        {{hash=1a7e72243faeace95ec8ba8cd5e3d543}{%
+           family={Wu},
+           familyi={W\bibinitperiod},
+           given={Nicolas},
+           giveni={N\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {en}%
+      }
+      \list{location}{1}{%
+        {Seattle WA USA}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{30d033f3635f6a94bf80ea435b867368}
+      \strng{fullhash}{0a469e822b0915d68d72511a0a329fc3}
+      \strng{bibnamehash}{30d033f3635f6a94bf80ea435b867368}
+      \strng{authorbibnamehash}{30d033f3635f6a94bf80ea435b867368}
+      \strng{authornamehash}{30d033f3635f6a94bf80ea435b867368}
+      \strng{authorfullhash}{0a469e822b0915d68d72511a0a329fc3}
+      \field{labelalpha}{Gib+23}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{The large-scale structure of executing a computation can often be thought of as being separated into distinct phases. But the most natural form in which to specify that computation may well have a different and conflicting structure. For example, the computation might consist of gathering data from some locations, processing it, then distributing the results back to the same locations; it may be executed in three phases—gather, process, distribute—but mostly conveniently specified orthogonally—by location. We have recently shown that this multi-phase structure can be expressed as a novel applicative functor (also known as an idiom, or lax monoidal functor). Here we summarize the idea from the perspective of software architecture. At the end, we speculate about applications to choreography and multi-tier architecture.}
+      \field{booktitle}{Proceedings of the 1st {ACM} {SIGPLAN} {International} {Workshop} on {Functional} {Software} {Architecture}}
+      \field{isbn}{9798400702976}
+      \field{month}{8}
+      \field{title}{Phases in {Software} {Architecture}}
+      \field{urlday}{2}
+      \field{urlmonth}{10}
+      \field{urlyear}{2023}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+      \field{pages}{29\bibrangedash 33}
+      \range{pages}{5}
+      \verb{doi}
+      \verb 10.1145/3609025.3609479
+      \endverb
+      \verb{urlraw}
+      \verb https://dl.acm.org/doi/10.1145/3609025.3609479
+      \endverb
+      \verb{url}
+      \verb https://dl.acm.org/doi/10.1145/3609025.3609479
+      \endverb
+    \endentry
+    \entry{lorenzen_fp_2023}{article}{}
+      \name{author}{3}{}{%
+        {{hash=c3ac7fcbc4cb850e331b609af40aec34}{%
+           family={Lorenzen},
+           familyi={L\bibinitperiod},
+           given={Anton},
+           giveni={A\bibinitperiod}}}%
+        {{hash=e5226558e369b345b646dfde8b4fddf8}{%
+           family={Leijen},
+           familyi={L\bibinitperiod},
+           given={Daan},
+           giveni={D\bibinitperiod}}}%
+        {{hash=4ef018cfdc047b2a3577499d839bede3}{%
+           family={Swierstra},
+           familyi={S\bibinitperiod},
+           given={Wouter},
+           giveni={W\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {en}%
+      }
+      \strng{namehash}{44992e4414dfaf246cb439a3f814e880}
+      \strng{fullhash}{44992e4414dfaf246cb439a3f814e880}
+      \strng{bibnamehash}{44992e4414dfaf246cb439a3f814e880}
+      \strng{authorbibnamehash}{44992e4414dfaf246cb439a3f814e880}
+      \strng{authornamehash}{44992e4414dfaf246cb439a3f814e880}
+      \strng{authorfullhash}{44992e4414dfaf246cb439a3f814e880}
+      \field{labelalpha}{LLS23}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{shorttitle}
+      \field{abstract}{As functional programmers we always face a dilemma: should we write purely functional code, or sacrifice purity for efficiency and resort to in-place updates? This paper identifies precisely when we can have the best of both worlds: a wide class of purely functional programs can be executed safely using in-place updates without requiring allocation, provided their arguments are not shared elsewhere. We describe a linear \_fully in-place\_ (FIP) calculus where we prove that we can always execute such functions in a way that requires no (de)allocation and uses constant stack space. Of course, such a calculus is only relevant if we can express interesting algorithms; we provide numerous examples of in-place functions on datastructures such as splay trees or finger trees, together with in-place versions of merge sort and quick sort. We also show how we can generically derive a map function over \_any\_ polynomial data type that is fully in-place. Finally, we have implemented the rules of the FIP calculus in the Koka language. Using the Perceus reference counting garbage collection, this implementation dynamically executes FIP functions in-place whenever possible.}
+      \field{issn}{2475-1421}
+      \field{journaltitle}{Proceedings of the ACM on Programming Languages}
+      \field{month}{8}
+      \field{number}{ICFP}
+      \field{shorttitle}{{FP}$^2$}
+      \field{title}{{FP}$^2$: {Fully} in-{Place} {Functional} {Programming}}
+      \field{urlday}{11}
+      \field{urlmonth}{12}
+      \field{urlyear}{2023}
+      \field{volume}{7}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+      \field{pages}{275\bibrangedash 304}
+      \range{pages}{30}
+      \verb{doi}
+      \verb 10.1145/3607840
+      \endverb
+      \verb{urlraw}
+      \verb https://dl.acm.org/doi/10.1145/3607840
+      \endverb
+      \verb{url}
+      \verb https://dl.acm.org/doi/10.1145/3607840
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

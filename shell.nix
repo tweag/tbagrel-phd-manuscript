@@ -56,6 +56,7 @@ pkgs.mkShell
           lm
           lm-math
           logreq
+          lualatex-math
           mathpartir
           microtype
           minted
@@ -66,6 +67,7 @@ pkgs.mkShell
           ncctools
           newtx
           newunicodechar
+          nowidow
           oberdiek
           placeins
           pict2e
@@ -81,7 +83,7 @@ pkgs.mkShell
           tikz-cd
           todonotes
           tools
-          totpages
+          lastpage
           trimspaces
           txfonts
           ulem
@@ -100,9 +102,4 @@ pkgs.mkShell
       ];
     LANG="C.UTF-8";
     NIX_PATH = "nixpkgs=${pkgs.path}";
-    FONTCONFIG_FILE = pkgs.makeFontsConf { fontDirectories =
-    # Fonts for Xetex
-    [ pkgs.libertine
-      pkgs.inconsolata
-    ]; };
   }

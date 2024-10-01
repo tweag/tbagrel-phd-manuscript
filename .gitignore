@@ -387,9 +387,8 @@ TSWLatexianTemp*
 # End of https://www.toptal.com/developers/gitignore/api/latex,visualstudiocode,emacs
 
 **/.directory
+*.tex
 tbagrel_phd_manuscript.pdf
-tbagrel_phd_manuscript.tex
-destination_calculus_ott.tex
 destination_calculus_rules_mod.ott
 
 .direnv
