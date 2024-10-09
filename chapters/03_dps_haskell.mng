@@ -70,7 +70,7 @@ The implementation of destination-backed difference lists is presented in Listin
 % \end{figure}
 
 \begin{listing}[t]
-\small
+\figtextsize
 \begin{minted}{haskellc}
 data [a] = {- nil constructor -} [] | {- cons constructor -} (:) a [a]
 
@@ -187,7 +187,7 @@ on each node of the tree a relabeling function that can depend on a
 state.
 
 \begin{listing}[t]
-\small
+\figtextsize
 \begin{minted}{haskellc}
 data Tree a = ¤Nil | ¤Node a (Tree a) (Tree a)
 
@@ -243,7 +243,7 @@ Only the implementation of \mintinline{haskellc}`parseSList` will be presented h
 The implementation presented in Listing~\ref{table:impl-parser-naive} is quite standard: the accumulator \mintinline{haskellc}`acc` collects the nodes that are returned by \mintinline{haskellc}`parseSExpr` in the reverse order (because it's the natural building order for a linked list without destinations). When the end of the list is reached (line 5), the accumulator is reversed, wrapped in the \mintinline{haskellc}`¤SList` constructor, and returned.
 
 % \begin{listing}[t]
-% \small
+% \figtextsize
 % \begin{minted}[linenos,escapeinside=°°]{haskellc}
 % parseSExpr ⩴ ByteString → Int → Either Error SExpr
 % parseSExpr bs i = case bs !? i of
@@ -279,7 +279,7 @@ The implementation presented in Listing~\ref{table:impl-parser-naive} is quite s
 % \end{listing}
 
 % \begin{listing}[t]
-% \small
+% \figtextsize
 % \begin{minted}[linenos,escapeinside=°°]{haskellc}
 % parseSExprDPS ⩴ ByteString → Int → Dest SExpr ⊸ Either Error Int
 % parseSExprDPS bs i d = case bs !? i of
@@ -320,7 +320,7 @@ The implementation presented in Listing~\ref{table:impl-parser-naive} is quite s
 % \end{listing}
 
 \begin{listing}[t]
-\small
+\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 parseSList ⩴ ByteString → Int → [SExpr] → Either Error SExpr
 parseSList bs i acc = case bs !? i of
@@ -337,7 +337,7 @@ parseSList bs i acc = case bs !? i of
 \end{listing}
 
 \begin{listing}[b]
-\small
+\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 parseSListDPS ⩴ ByteString → Int → Dest [SExpr] ⊸ Either Error Int
 parseSListDPS bs i d = case bs !? i of
@@ -374,7 +374,7 @@ Thanks to that new implementation which is barely longer (in terms of lines of c
 Table~\ref{table:destination-api} presents my pure API for functional DPS programming. This API is sufficient to implement all the examples of Section~\ref{sec:motivating-examples}. This section explains its various parts in detail.
 
 \begin{listing}[t]
-\small
+\figtextsize
 \begin{minted}{haskellc}
 data Token
 consume   ⩴      Token ⊸ ()
@@ -417,7 +417,7 @@ Conversely, the function \mintinline{haskellc}`intoIncomplete` takes a non-linea
 Types aren't linear by themselves in Linear Haskell. Instead, functions can be made to use their arguments linearly or not. So in direct style, where the consumer of a resource isn't tied to the resource creation site, there is no way to state that the resource must be used exactly once:
 
 \begin{unbreakable}
-{\small
+{\figtextsize
 \begin{minted}{haskellc}
 createR           ⩴ Resource -- no way to force the result to be used exactly once
 consumeR          ⩴ Resource ⊸ ()
@@ -430,7 +430,7 @@ exampleShouldFail ⩴ () =
 The solution is to force the consumer of a resource to become explicit at the creation site of the resource, and to check through its signature that it is indeed a linear continuation:
 
 \begin{unbreakable}
-{\small
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 withR       ⩴ (Resource ⊸ a) ⊸ a
 consumeR    ⩴ Resource ⊸ ()
@@ -443,7 +443,7 @@ The \mintinline{haskellc}`Resource` type is in positive position in the signatur
 
 Still, this is not enough; because \mintinline{haskellc}`\x → x` is indeed a linear continuation, one could use \mintinline{haskellc}`withR (\x → x)` to leak a \mintinline{haskellc}`Resource`, and then use it in a non-linear fashion in the outside world. Hence we must forbid the resource from appearing anywhere in the return type of the continuation. To do that, we ask the return type to be wrapped in \mintinline{haskellc}`Ur`: because the resource comes from the left of a linear arrow, and doesn't implement \mintinline{haskellc}`Movable`, it cannot be wrapped in \mintinline{haskellc}`Ur` without breaking linearity (see Section~\ref{sec:intro-linearity}). On the other hand, a \mintinline{haskellc}`Movable` value of type \mintinline{haskellc}`()` or \mintinline{haskellc}`Int` can be returned:
 \begin{unbreakable}
-{\small
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 withR'       ⩴ (Resource ⊸ Ur a) ⊸ Ur a
 consumeR     ⩴ Resource ⊸ ()
@@ -457,7 +457,7 @@ This explicit \emph{scope function} trick will no longer be necessary when linea
 
 % \mintinline{haskellc}`Incomplete a b` has a linear functor instance to map on the \mintinline{haskellc}`b` side (the one carrying destinations) which forces the continuation to be linear:
 
-% {\small
+% {\figtextsize
 % \begin{minted}[escapeinside=°°]{haskellc}
 % instance Functor (Incomplete a) where
 %   fmap ⩴ ∀ b c. (b ⊸ c) ⊸ Incomplete a b ⊸ Incomplete b c
@@ -484,7 +484,7 @@ The last part of the API is the one in charge of actually building the structure
 \mintinline{haskellc}`fillComp ⩴ ∀ a b. Incomplete a b ⊸ Dest a ⊸ b` is used to plug two \mintinline{haskellc}`Incomplete` objects together. The target \mintinline{haskellc}`Incomplete` isn't represented in the signature of the function. Instead, only the target hole that will receive the address of the child is represented by \mintinline{haskellc}`Dest a`; and \mintinline{haskellc}`Incomplete a b` in the signature refers to the child object. A call to \mintinline{haskellc}`fillComp` always takes place in the scope of \mintinline{haskellc}`fmap`/\mintinline{haskellc}`<&>` over the parent object:
 
 \begin{unbreakable}
-{\small
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 parent ⩴ Incomplete BigStruct (Dest SmallStruct, Dest OtherStruct)
 child ⩴ Incomplete SmallStruct (Dest Int)
@@ -501,7 +501,7 @@ The resulting structure \mintinline{haskellc}`comp` is morally a \mintinline{has
 \mintinline{haskellc}`DestsOf` is a type family (i.e. a function operating on types) whose role is to map a constructor to the type of destinations for its fields. For example, \mintinline{haskellc}`DestsOf '[] [a] = ()` and \mintinline{haskellc}`DestsOf '(:) [a] = (Dest a, Dest [a])`. More generally, there is a duality between the type of a constructor \mintinline[escapeinside=°°]{haskellc}`¤Ctor ⩴ (¤f°$_1\ldots\,$°¤f°$_n$°) → a` and of the associated destination-filling functions \mintinline[escapeinside=°°]{haskellc}`fill @'Ctor ⩴ Dest a ⊸ (Dest ¤f°$_1\ldots\,$°Dest ¤f°$_n$°)`. Destination-based data building can be seen as more general than the usual bottom-up constructor approach, as we can recover \mintinline{haskellc}`¤Ctor` from the associated function \mintinline[escapeinside=°°]{haskellc}`fill @'Ctor`, but not the reverse:
 
 \begin{unbreakable}
-{\small
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 ¤Ctor ⩴ (¤f°$_1\ldots\,$°¤f°$_n$°) → a
 ¤Ctor (x°$_1\ldots\,$°x°$_n$°) = fromIncomplete_' (
@@ -545,7 +545,7 @@ A typeclass \mintinline{haskellc}`Region r` is also needed to carry around the d
 The \mintinline{haskellc}`withRegion` function is the new addition to the modified API presented in Listing~\ref{table:destination-api-regions} (the \mintinline{haskellc}`Token` type and its associated functions \mintinline{haskellc}`dup2` and \mintinline{haskellc}`consume` are unchanged). \mintinline{haskellc}`withRegion` is mostly a refinement over the \mintinline{haskellc}`withToken` function from Listing~\ref{table:destination-api}. It receives a continuation in which \mintinline{haskellc}`r` must be a free type variable. It then spawns both a new compact region and a fresh type \mintinline[escapeinside=°°]{haskellc}`°\muline{r}°` (not a variable), and uses the \mintinline{text}`reflection` library to provide an instance of \mintinline[escapeinside=°°]{haskellc}`Region °\muline{r}°` on-the-fly that links \mintinline[escapeinside=°°]{haskellc}`°\muline{r}°` and the \mintinline{haskellc}`RegionInfo` for the new region, and calls the continuation at type \mintinline[escapeinside=°°]{haskellc}`°\muline{r}°`. This is fairly standard practice since~\cite{launchbury_lazy_1994}.
 
 \begin{listing}[t]
-\small
+\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 type Region r ⩴ Constraint
 °\mnew{withRegion ⩴ ∀ a. (∀ r. Region r ⇒ Token ⊸ Ur a) ⊸ Ur a}°
@@ -601,7 +601,7 @@ In Section~\ref{ssec:impl-ghc}, we will see how to allocate a hollow heap object
 \mintinline{haskellc}`GHC.Generics` is a built-in Haskell library that provides compile-time inspection of a type metadata through the \mintinline{haskellc}`Generic` typeclass: list of constructors, their fields, memory representation, etc. And that typeclass can be derived automatically for any type! Here's, for example, the \mintinline{haskellc}`Generic` representation of \mintinline{haskellc}`Maybe a`:
 
 \begin{unbreakable}
-{\small
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 repl> :k! Rep (Maybe a) () -- display the Generic representation of Maybe a
 M1 D (MetaData "Maybe" "GHC.Maybe" "base" False) (
@@ -649,7 +649,7 @@ The gist of this implementation is presented in Listing~\ref{table:impl-reifyInf
 As an example, here is how to allocate a hollow \mintinline{haskellc}`¤Just` constructor in a compact region:
 
 \begin{unbreakable}
-{\small
+{\figtextsize
 \begin{minted}{haskellc}
 hollowJust ⩴ Maybe a = compactAddHollow#
   compactRegion#
@@ -666,7 +666,7 @@ The internal primop \mintinline{haskellc}`reifyInfoPtr#` that we introduced abov
 So we added a new type family \mintinline{haskellc}`LCtorToSymbol` inside GHC that inspects its (type-level) parameter representing a constructor, fetches its associated \mintinline{haskellc}`DataCon` structure, and returns a type-level string (kind \mintinline{haskellc}`Symbol`) carrying the constructor name, as presented in Listing~\ref{table:impl-LCtorToSymbol}.
 
 \begin{listing}[p]
-\small
+\figtextsize
 \begin{minted}{c}
 // compactAddHollow#
 //   ⩴ Compact# → Addr# → State# RealWorld → (# State# RealWorld, a #)
@@ -694,7 +694,7 @@ stg_compactAddHollowzh(P_ compact, W_ info) {
 \end{listing}
 
 \begin{listing}[p]
-\small
+\figtextsize
 \begin{minted}{haskellc}
 case primop of
   [...]
@@ -716,7 +716,7 @@ case primop of
 \end{listing}
 
 \begin{listing}[p]
-\small
+\figtextsize
 \begin{minted}{haskellc}
 matchFamLCtorToSymbol ⩴ [Type] → Maybe (CoAxiomRule, [Type], Type)
 matchFamLCtorToSymbol [kind, ty]
@@ -775,7 +775,7 @@ Finally, copying the result of the naive version to a compact region (for future
 % It seemed important to also measure the performance of a \mintinline{haskellc}`map` function implementation using destinations. In a strict functional language such as OCaml, the choice of implementation for \mintinline{haskellc}`map` is crucial as the naive one makes the stack grow linearly with the size of the processed list. A strict tail-recursive version (\mintinline{haskellc}`mapTR'`) takes $\mathcal{O}(1)$ space, but it requires an extra $\mathcal{O}(n)$ operation at the end of the processing (reversing the accumulator). 
 
 % With destinations, \mintinline{haskellc}`map` can be implemented in a tail-recursive fashion without the need for the reverse operation (as the list is built in a top-down approach). It can also be implemented as a fold:
-% {\small
+% {\figtextsize
 % \begin{minted}{haskellc}
 % append ⩴ Dest [a] ⊸ a → Dest [a]
 % append d x = let !(dh, dt) = fill @'(:) d in fillLeaf x dh ; dt

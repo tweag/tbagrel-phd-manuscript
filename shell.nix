@@ -58,6 +58,7 @@ pkgs.mkShell
           logreq
           lualatex-math
           mathpartir
+          mathspec
           microtype
           minted
           mmap

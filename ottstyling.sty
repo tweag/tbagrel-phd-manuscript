@@ -26,11 +26,9 @@
     \pdfliteral direct {0 Tr 0 w}%
 }
 
-
-% \DeclareMathAlphabet{\mathsfbf}{T1}{\sfdefault}{sb}{n}
-\newcommand{\mathsfbf}[1]{\mathsf{\textBF{#1}}}
-%\DeclareMathAlphabet{\mathsfbf}{T1}{\sfdefault}{b}{n}
-%\DeclareMathAlphabet{\mathsfit}{T1}{\sfdefault}{m}{it}
+% \newcommand{\mathbf}[1]{\mathsf{\textBF{#1}}}
+% \DeclareMathAlphabet{\mathbf}{T1}{\sfdefault}{b}{n}
+% \DeclareMathAlphabet{\mathsfit}{T1}{\sfdefault}{m}{it}
 % If slanted TT is ever needed: (tried, works decently well)
 % https://tex.stackexchange.com/questions/183204/inconsolata-italics
 
@@ -46,15 +44,15 @@
 
 \renewcommand{\ottnt}[1]{\textcolor{ntcolor}{\mathsf{#1}}}
 \renewcommand{\ottmv}[1]{\textcolor{mvcolor}{\mathit{#1}}}
-\renewcommand{\ottkw}[1]{\textcolor{kwcolor}{\mathsfbf{#1}}}
+\renewcommand{\ottkw}[1]{\textcolor{kwcolor}{\mathbf{#1}}}
 
-\newcommand{\ottstype}[1]{\textcolor{typcolor}{\mathsfbf{#1}}}
-\newcommand{\ottsxval}[1]{\textcolor{ntcolor}{\mathsf{\replacewv{\overline{#1}}}}}
-\newcommand{\ottsctor}[1]{\textcolor{ctorcolor}{\mathsf{#1}}}
+\newcommand{\ottstype}[1]{\textcolor{typcolor}{\mathbf{#1}}}
+% \newcommand{\ottsxval}[1]{\textcolor{ntcolor}{\mathsf{\replacewv{\overline{#1}}}}}
+\newcommand{\ottsctor}[1]{\textcolor{ctorcolor}{\mathrm{#1}}}
 \newcommand{\ottssp}[1]{\textcolor{spcolor}{\mathit{#1}}}
 \newcommand{\ottseff}[1]{#1} % no special rendering for effects at the moment
 \newcommand{\ottshname}[1]{\textcolor{hnamecolor}{\mathit{#1}}}
-\newcommand{\ottsmode}[1]{\textcolor{modecolor}{\mathsf{#1}}}
+\newcommand{\ottsmode}[1]{\textcolor{modecolor}{\mathrm{#1}}}
 
 % Replace normal l with fancy round l in label names
 % \newcommand{\replacelell}[1]{%

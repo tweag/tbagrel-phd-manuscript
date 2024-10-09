@@ -75,27 +75,46 @@
 
 %% General document setup
 \setmainlanguage{english}
-\setmainfont{Merriweather}[
+\setmainfont{Tinos}[
+  Path=./fonts/,
   Extension=.ttf,
   UprightFont=*-Regular,
   BoldFont=*-Bold,
   ItalicFont=*-Italic,
   BoldItalicFont=*-BoldItalic,
-  Scale=0.87]
-\setsansfont{Aileron}[
-  Extension=.otf,
-  UprightFont=*-Regular,
-  BoldFont=*-SemiBold,
-  ItalicFont=*-Italic,
-  BoldItalicFont=*-SemiBoldItalic,
+  Scale=1.00]
+\setsansfont{iosevka-quasi-proportional-ss07}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-regular,
+  BoldFont=*-semibold,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-semibolditalic,
   Scale=0.90]
 \setmonofont{Iosevka-Term-SS07}[
+  Path=fonts/,
   Extension=.ttf,
   UprightFont=*-Regular,
   BoldFont=*-Semibold,
   ItalicFont=*-Italic,
   BoldItalicFont=*-SemiboldItalic,
-  Scale=0.96]
+  Scale=0.90]
+\setmathrm{iosevka-quasi-proportional-ss07}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-regular,
+  BoldFont=*-semibold,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-semibolditalic,
+  Scale=0.90]
+\setmathsf{Tinos}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-Italic,
+  BoldFont=*-BoldItalic,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic,
+  Scale=1.00]
 % \setmonofont{Fira-Code-Nerd-Font-Complete}[
 %   Extension=.otf,
 %   UprightFont=*-Regular,
@@ -223,6 +242,7 @@
 \def\mydestm#1{\ifthenelse{\equal{#1}{[[¹ν]]}}{}{#1}}
 \def\mymul#1{\ifthenelse{\equal{#1}{[[¹]]}}{}{#1}}
 
+\let\figtextsize\normalsize
 \newcommand{\destcalculus}{\ensuremath{\lambda_d}}
 \newcommand{\destcalculusinplace}{\ensuremath{\lambda_{d\,\ottkw{ip}}}}
 \newtheorem{lem}{Lemma}
@@ -236,25 +256,24 @@
 #2 ~\pmb{:}~ #3 \\
 #4 ~\ifthenelse{\equal{#1}{}}{\btriangleq}{\btriangleqrec}~ #5
 \end{array}\\[\interdefskip]}
-
 \newcommand{\newoperatorb}[5][]{\phantom{a}\!\!\!\!\!\!\begin{array}[t]{l}%
 #2 ~\pmb{:}~ #3 \\
 #4 ~\ifthenelse{\equal{#1}{}}{\btriangleq}{\btriangleqrec}~\\\myspace{1}#5
 \end{array}\\[\interdefskip]}
 \newcommand{\figureratio}{0.9}
-\newcommand{\codehere}[2][t]{\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}{\small$#2$}\end{minipage}\end{center}}
+\newcommand{\codehere}[2][t]{\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}{\figtextsize$#2$}\end{minipage}\end{center}}
 \NewEnviron{codefig}[2][t]{\begin{figure}[#1]
 \codehere{\BODY}#2
 \end{figure}}
 \NewEnviron{ottfig}[2][t]{\begin{figure}[#1]\visiblespaces
-\small\BODY\activespaces #2
+\figtextsize\BODY\activespaces #2
 \end{figure}}
 \newcommand{\sidebysidecodehere}[4]{\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}
-\noindent\begin{minipage}[#1]{#2\linewidth-0.03\linewidth}{\small$#3$}\end{minipage}
+\noindent\begin{minipage}[#1]{#2\linewidth-0.03\linewidth}{\figtextsize$#3$}\end{minipage}
 \hfill
 \vrule width 0.5pt % Vertical rule of 1pt width
 \hfill
-\begin{minipage}[#1]{\linewidth-#2\linewidth-0.03\linewidth}{\small$#4$}\end{minipage}
+\begin{minipage}[#1]{\linewidth-#2\linewidth-0.03\linewidth}{\figtextsize$#4$}\end{minipage}
 \end{minipage}\end{center}
 }
 
@@ -313,8 +332,9 @@
 
 % =========================================================================== %
 
-\title{PhD thesis}
+\title{A Functional, Formal Perspective on Destination-Passing Style Programming}
 \author{Thomas Bagrel}
+\date{April, 2025}
 
 \begin{document}
 
@@ -333,9 +353,9 @@
 \tableofcontents
 
 \include{chapters/01_introduction}
-\include{chapters/02_dps_haskell}
-\include{chapters/03_ext_linear_nonlinear}
-\include{chapters/04_destination_calculus}
+\include{chapters/02_destination_calculus}
+\include{chapters/03_dps_haskell}
+\include{chapters/04_ext_linear_nonlinear}
 \include{chapters/05_related_work}
 \include{chapters/06_conclusion}
 

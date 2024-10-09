@@ -1,7 +1,61 @@
 \chapter{Introduction}\label{chap:global-intro}
 
-\section{Functional programming languages}
-
 \section{Destination passing style: taking roots in imperative world}
 
-\section{Linear types: a step towards functional DPS programming}
+- early C days
+
+- about passing around write pointers/references/capabilities
+
+- more control over memory management, pairs well with manual memory acquisition and relinquishing
+
+\section{Functional programming languages}
+
+- immutability and referential transparency
+
+- this brings huge avantages in terms of safety and reasoning about programs
+
+- usually garbage-collected or reference-counted, as manual memory management usually breaks referential transparency
+
+- can be made to work in a GC-free fashion, à la Rust, for a linear subset of the language (see Oxidizing Ocaml), but still experimental
+
+- conversely, not always efficient to build large data-structures because of immutability -> forces to build structures in full right of the bat, from the leaves up to the root
+
+- How to give more flexibility on data structure building while keeping the benefits of functional programming?
+
+\section{Functional structures with holes: pioneered by Minamide and quite active since}
+
+- Allow structures with holes to be a first-class type of the language
+
+- Structures no longer have to be built in full. Can be built incrementally, with holes to be filled later
+
+- When DPS is exposed to the user, usually write pointers are not exposed to the user; the latter can only compose/merge structures with holes. They work like linear functions (Minamide, TMRC, Imperative Nature of BF Search trees) so no safety proof is needed
+
+- When DPS has exposed write pointers, it is used in intermediary language; not in the user-facing one, in a framework where its usage is thought to be sound (TMC Ocaml)
+
+- Still, both of these approaches show promising results in terms of performance and expressiveness
+
+* Enable tail-recursion in usually non-tail-recursive contexts, e.g. map
+
+* Enable efficient and more flexible data structure building (e.g. when reading from a serialized source)
+
+- Proof of that with bench / graphs
+
+\section{Unifying and formalizing Functional DPS frameworks}
+
+- Can we go a step further, and design a unified framework for functional DPS?
+
+- This framework has to support first-class write-pointers, with safeguards to not break immutability and referential transparency
+
+- This framework has to be able to express the two previous approaches, and more
+
+- This framework has to be able to be used in a user-facing language, with a proof of soundness
+
+\section{Linear types: reconcile write pointers and immutability}
+
+- Linear types are a refinement of usual typing theory where variable uses can be counted
+
+- Functions have to announce in their signature how many times they use their arguments
+
+- This allows to track write pointers and ensure they are used exactly once
+
+- Using a write pointer exactly once before the structure is ever read is no different than giving a value to a field when the structure is defined, in terms of observability

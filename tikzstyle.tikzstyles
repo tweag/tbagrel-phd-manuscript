@@ -4,9 +4,9 @@
 % \tikzstyle{NAME}=[PROPERTY LIST]
 
 % Node styles
-\tikzstyle{Normal}=[scale=0.65]
-\tikzstyle{Medium}=[scale=0.50]
-\tikzstyle{Small}=[scale=0.42]
+\tikzstyle{Normal}=[scale=0.75]
+\tikzstyle{Medium}=[scale=0.60]
+\tikzstyle{Small}=[scale=0.47]
 \tikzstyle{Bullet}=[fill=black, draw=none, shape=circle, scale=0.35]
 \tikzstyle{Grey Bullet}=[fill=gray, draw=gray, shape=circle, scale=0.35]
 

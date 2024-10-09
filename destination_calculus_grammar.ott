@@ -58,7 +58,7 @@ hname, h, hd :: 'hname_' ::= {{ com Hole (or destination) name, represented by a
   | 2 :: S :: 2 {{ coq 2 }} {{ tex \textcolor{hnamecolor}{\mathtt{2} } }}
   | h + h' :: M :: Add {{ coq ([[h]] + [[h']]) }} {{ tex [[h]]\hspace*{-.2ex}\ottshname{+}\hspace*{-.2ex}[[h']] }}
   | h [ H ⩲ h' ] :: M :: Cshift {{ com Shift by $[[h']]$ if $[[h]] \in [[H]]$ }} {{ coq (hname_cshift [[h]] [[H]] [[h']]) }} {{ tex [[h]]\ottshname{[}[[H]][[⩲]][[h']]\ottshname{]} }}
-  | max ( H ) :: M :: Max {{ com Maximum of a set of hole names }} {{ coq (hname_max [[H]]) }} {{ tex \ottshname{\mathsfbf{max}(}[[H]]\ottshname{)} }}
+  | max ( H ) :: M :: Max {{ com Maximum of a set of hole names }} {{ coq (hname_max [[H]]) }} {{ tex \ottshname{\mathbf{max}(}[[H]]\ottshname{)} }}
   | ( h ) :: S :: InvisibleParen {{ coq [[h]] }} {{ tex [[h]] }}
 
 hnames, H :: 'hnames_' ::= {{ com Set of hole names }} {{ coq HNames.t }} {{ tex \ottshname{[[hnames]]} }}
@@ -66,8 +66,8 @@ hnames, H :: 'hnames_' ::= {{ com Set of hole names }} {{ coq HNames.t }} {{ tex
   | H1 ∪ H2 :: M :: Union {{ com Union of sets }} {{ coq (HNames.union [[H1]] [[H2]]) }} {{ tex [[H1]]\ottshname{\cup}\,[[H2]] }}
   | H1 ⨆ H2 :: M :: DisjointUnion {{ com Disjoint union of sets }} {{ coq (HNames.union [[H1]] [[H2]]) }} {{ tex [[H1]]\ottshname{\sqcup}\,[[H2]] }}
   | H ⩲ h' :: M :: Shift {{ com Shift all names from $[[H]]$ by $[[h']]$. }} {{ coq (hnames_shift [[H]] [[h']]) }}
-  | 'hnames(' O ) :: M :: FromCtx {{ com Hole names bound by the typing context $[[O]]$ }} {{ tex \ottshname{\mathsfbf{hnames}(}[[O]]\ottshname{)} }} {{ coq (hnames_ctx [[O]]) }}
-  | 'hnames(' C ) :: M :: FromEctx {{ com Hole names bound by the evaluation context $[[C]]$ }} {{ tex \ottshname{\mathsfbf{hnames}(}[[C]]\ottshname{)} }} {{ coq (hnames_ectxs [[C]]) }}
+  | 'hnames(' O ) :: M :: FromCtx {{ com Hole names bound by the typing context $[[O]]$ }} {{ tex \ottshname{\mathbf{hnames}(}[[O]]\ottshname{)} }} {{ coq (hnames_ctx [[O]]) }}
+  | 'hnames(' C ) :: M :: FromEctx {{ com Hole names bound by the evaluation context $[[C]]$ }} {{ tex \ottshname{\mathbf{hnames}(}[[C]]\ottshname{)} }} {{ coq (hnames_ectxs [[C]]) }}
   | ( H ) :: S :: Paren {{ coq [[H]] }} {{ tex \ottshname{(}[[H]]\ottshname{)} }}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

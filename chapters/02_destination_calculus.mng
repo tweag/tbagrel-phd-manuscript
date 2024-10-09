@@ -123,7 +123,7 @@ Now that we have an intuition of how destinations work, let's see how they can b
 We define lists as the fixpoint of the functor $[[X]] \mapsto [[① ⨁ (T ⨂ X)]]$. For convenience, we also define filling operators $\triangleleft\ottsctor{[]}$ and $\triangleleft\ottsctor{(::)}$:
 
 \sidebysidecodehere{b}{0.50}{
-\newtype[~\mathsfbf{rec}]{[[List T]]}{[[① ⨁ (T ⨂ (List T))]]}
+\newtype[~\mathbf{rec}]{[[List T]]}{[[① ⨁ (T ⨂ (List T))]]}
 \newoperator
   {\triangleleft\ottsctor{[]}}{[[⌊ List T ⌋ ¹ν ¹ν → ①]]}
   {[[d ⨞ [] ]]}{[[d ⨞Inl ⨞()]]}
@@ -259,7 +259,7 @@ In $\ottkw{mapAccumBFS}$, we create a new destination $[[dtree]]$ into which we 
 New in \cref{fig:impl-bfs} are the \textcolor{modecolor}{fuchsia} annotations: these are \emph{modes}. We'll describe modes in detail in \cref{sec:syntax-type-system}. In the meantime, $[[¹]]$ and $[[ω]]$ control linearity: we use $[[ω]]$ to mean that the state and function $[[f]]$ can be used many times. On the other hand, $[[∞]]$ is an \emph{age} annotation; in particular, the associated argument cannot carry destinations. Without these modes, our type system presented in~\cref{ssec:ty-term-val} would reject the example. Arguments with no modes are otherwise linear and can capture destinations. We introduce the exponential modality $[[! m T]]$ to reify mode $[[m]]$ in a type; this is useful to return several values having different modes from a function, like in $[[f]]$. An exponential is rarely needed in an argument position, as we have $[[(! m T) ¹ν → U]]\simeq[[T m → U]]$.
 
 \begin{codefig}{\caption{Breadth-first tree traversal in destination-passing style}\label{fig:impl-bfs}}
-\newoperator[~\mathsfbf{rec}]
+\newoperator[~\mathbf{rec}]
 {\ottkw{go}}{[[(S ω∞ → T1 ¹ν → (! ω∞ S) ⨂ T2) ω∞→ S ω∞ → Queue (Tree T1 ⨂ ⌊ Tree T2 ⌋ ¹ν) ¹ν → ①]]}
 {[[go f st q]]}{\!\!\!\begin{array}[t]{l}[[
 (dequeue q) ►case ¹ν {⮒
