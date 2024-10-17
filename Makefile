@@ -34,7 +34,7 @@ clean:
 	rm -f tbagrel_phd_manuscript.tar.gz
 	rm -rf _minted-tbagrel_phd_manuscript
 
-destination_calculus_rules_mod.ott : destination_calculus_rules.ott
+destination_calculus_rules_mod.ott: patch_rules.py destination_calculus_rules.ott
 	python patch_rules.py destination_calculus_rules.ott destination_calculus_rules_mod.ott
 
 destination_calculus_ott.tex: destination_calculus_grammar.ott destination_calculus_rules_mod.ott

@@ -90,7 +90,7 @@
   BoldFont=*-semibold,
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
-  Scale=0.90]
+  Scale=0.92]
 \setmonofont{Iosevka-Term-SS07}[
   Path=fonts/,
   Extension=.ttf,
@@ -98,7 +98,7 @@
   BoldFont=*-Semibold,
   ItalicFont=*-Italic,
   BoldItalicFont=*-SemiboldItalic,
-  Scale=0.90]
+  Scale=0.92]
 \setmathrm{iosevka-quasi-proportional-ss07}[
   Path=fonts/,
   Extension=.ttf,
@@ -106,7 +106,7 @@
   BoldFont=*-semibold,
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
-  Scale=0.90]
+  Scale=0.92]
 \setmathsf{Tinos}[
   Path=fonts/,
   Extension=.ttf,

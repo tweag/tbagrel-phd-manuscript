@@ -1,9 +1,9 @@
-\contentsline {listing}{\numberline {1}{\ignorespaces Implementation of difference lists with destinations}}{35}{listing.1}%
-\contentsline {listing}{\numberline {2}{\ignorespaces Implementation of breadth-first tree traversal with destinations}}{37}{listing.2}%
-\contentsline {listing}{\numberline {3}{\ignorespaces Implementation of the S-expression parser without destinations}}{39}{listing.3}%
-\contentsline {listing}{\numberline {4}{\ignorespaces Implementation of the S-expression parser with destinations}}{39}{listing.4}%
-\contentsline {listing}{\numberline {5}{\ignorespaces Destination API for Haskell}}{40}{listing.5}%
-\contentsline {listing}{\numberline {6}{\ignorespaces Destination API using compact regions}}{44}{listing.6}%
-\contentsline {listing}{\numberline {7}{\ignorespaces \texttt {compactAddHollow\#} implementation in \texttt {rts/Compact.cmm}}}{47}{listing.7}%
-\contentsline {listing}{\numberline {8}{\ignorespaces \texttt {reifyInfoPtr\#} implementation in \texttt {compiler/GHC/StgToCmm/Prim.hs}}}{47}{listing.8}%
-\contentsline {listing}{\numberline {9}{\ignorespaces \FVExtraRobustCommand \RobustMintInline \FVExtraAlwaysUnexpanded {\FVExtraUnexpandedReadStarOArgMArgBVArg {haskellc}{`}}LCtorToSymbol` implementation in \texttt {compiler/GHC/Builtin/Types/Literal.hs}}}{47}{listing.9}%
+\contentsline {listing}{\numberline {1}{\ignorespaces Implementation of difference lists with destinations}}{37}{listing.1}%
+\contentsline {listing}{\numberline {2}{\ignorespaces Implementation of breadth-first tree traversal with destinations}}{39}{listing.2}%
+\contentsline {listing}{\numberline {3}{\ignorespaces Implementation of the S-expression parser without destinations}}{41}{listing.3}%
+\contentsline {listing}{\numberline {4}{\ignorespaces Implementation of the S-expression parser with destinations}}{41}{listing.4}%
+\contentsline {listing}{\numberline {5}{\ignorespaces Destination API for Haskell}}{42}{listing.5}%
+\contentsline {listing}{\numberline {6}{\ignorespaces Destination API using compact regions}}{46}{listing.6}%
+\contentsline {listing}{\numberline {7}{\ignorespaces \texttt {compactAddHollow\#} implementation in \texttt {rts/Compact.cmm}}}{49}{listing.7}%
+\contentsline {listing}{\numberline {8}{\ignorespaces \texttt {reifyInfoPtr\#} implementation in \texttt {compiler/GHC/StgToCmm/Prim.hs}}}{49}{listing.8}%
+\contentsline {listing}{\numberline {9}{\ignorespaces \FVExtraRobustCommand \RobustMintInline \FVExtraAlwaysUnexpanded {\FVExtraUnexpandedReadStarOArgMArgBVArg {haskellc}{`}}LCtorToSymbol` implementation in \texttt {compiler/GHC/Builtin/Types/Literal.hs}}}{49}{listing.9}%
