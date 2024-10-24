@@ -6,7 +6,7 @@ The way memory management is done in a programming language is is a very importa
 
 Garbage collection (with tracing GC or reference-counting one) is a very convenient solution for memory management, that happens to be decently fast in most contexts, and let the user forget about memory management completely. It also doesn't hamper the addition of very high-level features to the language.
 
-In system programming however, and in many contexts with real-time constraints, garbage collection is dreaded has it incurs unpredictable overhead, often with actual pauses in the program execution to free some memory. In these contexts, programmers tend to rely on two memory managing schemes:
+In system programming however, and in many contexts with real-time constraints, garbage collection is dreaded as it incurs unpredictable overhead, often with actual pauses in the program execution to free some memory. In these contexts, programmers tend to rely on two memory managing schemes:
 
 \begin{itemize}
     \item manual allocation and deallocation of memory, with explicit mutation
@@ -17,13 +17,13 @@ The smart pointer scheme is, in practice, way safer than manual memory managemen
 
 It is a relatively recent development in PL: SBRM was already present in the first release of C++, but only for stack-allocated objects; heap-allocated objects had to be allocated and released manually. It's during the early 00's that actual smart pointers for heap objects were born, and progressively got adopted in C++, and then later, have been incorporated at the root of the Rust programming language.
 
-So, when smart pointers were not available, people developed good practices or guidelines to avoid the most common pitfalls of manual memory management. One of the most important principle is that the scope in which a resource is allocated must be the scope in charge of deallocation of the said resource. It makes tracking of resource management much easier. This has an immediate, major implication though: a function that produces a non-primitive result (i.e. not just an integer) should \emph{not} allocate that result itself. Because the result has to outlive the current scope, it should not, of course, be deallocated here. So it mustn't be allocated in the scope of the function, but rather, in the caller scope.
+So, when smart pointers were not available, people developed good practices or guidelines to avoid the most common pitfalls of manual memory management. One of the most important principle is that the scope in which a resource is allocated must be the scope in charge of deallocation of the said resource. It makes the management of resources much easier. This has an immediate, major implication though: a function that produces a non-primitive result (i.e. not just an integer) should \emph{not} allocate itself the memory space for that result. Indeed, the result has to outlive the current scope, so it should not be deallocated here. So it mustn't be allocated in the scope of the function, but rather, in the caller scope.
 
-In other words, the parent scope is responsible both for allocation and deallocation of inputs, but also \emph{outputs} that will be used by a function call. And outputs slots will be communicated to the function using pointers, or mutable references in higher level languages. We call such pointers \emph{out parameters} or \emph{destinations}: they represent the \emph{destinations} in which the function will write its outputs when it is called.
+In other words, the parent scope is responsible both for allocation and deallocation of inputs, but also \emph{outputs} that will be produced by a function call. And outputs slots will be communicated to the function using pointers, or mutable references in higher level languages. We call such pointers \emph{out parameters} or \emph{destinations}: they represent the \emph{destinations} in which the function will write its outputs when it is called.
 
 This is where the idea of destination-passing style programming takes its root: instead of letting functions allocate for their results, we can instead provide them with a write pointer, or write capability for a memory area that is large enough to hold their results.
 
-\emph{More control over memory}
+\paragraph{More control over memory}
 
 Making allocation a responsibility of the caller instead of the callee makes functions actually more flexible to use. This is an idea that will stay true even in the functional interpretation of DPS: destination-passing style is strictly more general than allocation with immediate initialization of data structures.
 
@@ -31,12 +31,14 @@ For example, in DPS, one can allocate a large chunk of memory at once, and divid
 
 \section{Functional programming languages}
 
-Functional programming languages are often considered to be at the totally opposite side of the spectrum compared to system languages that we just wrote about.
+Functional programming languages are often considered to be at the totally opposite side of the spectrum compared to system languages that we just spoke about.
 
 Functional programming doesn't have a unanimous definition, but most people agree that a functional language:
-- has lambda abstractions --- that's to say anonymous functions --- as first-class values of the language. In other terms, functions can be stored and passed around as parameters like normal values, and those functions are also able to capture part of their parents environments (aka. closures).
-- focuses on expressions rather than statements: every instruction returns a value of a given type.
-- build more complex expressions by applying and composing functions, instead of chaining statements
+\begin{itemize}
+\item has lambda abstractions --- that's to say anonymous functions --- as first-class values of the language. In other terms, functions can be stored and passed around as parameters like normal values, and those functions are also able to capture part of their parents environments (aka. closures).
+\item focuses on expressions rather than statements: every instruction returns a value of a given type.
+\item build more complex expressions by applying and composing functions, instead of chaining statements
+\end{itemize}
 
 From these principle follows that in functional languages, we are often more interested in building immutable data structures in declarative style, by stating how the new one should differ from the old one (structural sharing and persistent data structures), rather than mutating existing ones.
 
@@ -46,7 +48,7 @@ Still, many mainstream languages that are considered functional allow their expr
 
 \paragraph{Pure functional languages}
 
-In reaction, some languages take it one step further, and forbid side effects until the absolute boundaries of the main program. In other terms, everything the programmer writes are expressions that computes and return values with no side effects. The \emph{intention} of emitting a side effect (e.g. printing to the console) can be represented as a value, and only the runtime of the language will be responsible of evaluating this dedicated value into the proper side effect.
+In reaction, some languages take it one step further, and forbid side effects until the absolute boundaries of the main program. We name these \emph{pure functional programming languages}. In other terms, everything the programmer writes are expressions that computes and return values with no side effects. The \emph{intention} of emitting a side effect (e.g. printing to the console) can be represented as a value, and only the runtime of the language will be responsible of evaluating this dedicated value into the proper side effect.
 
 This blunt limitation to the way programs can interact with the outside actually brings many benefits. Programs can be totally modeled by mathematical values, and get much easier to reason about. We also get more inspection and analysis capabilities about the effects that a program will emit.
 
@@ -56,41 +58,45 @@ Having a program that we can reason about is a key ingredient to reducing the am
 
 \paragraph{Memory management in functional languages}
 
-- usually garbage-collected or reference-counted, as manual memory management usually breaks referential transparency
+Explicit memory management is at its core very \emph{impure}. Indeed, changing the state of memory in a way that it can be later inspected \emph{is} a side effect. As a result, most functional languages, even those which aren't fully \emph{pure}, like OCaml or Scala, tend to use a garbage collector to hide memory management and access from the user.
 
-- can be made to work in a GC-free fashion, à la Rust, for a linear subset of the language (see Oxidizing Ocaml), but still experimental
+However, it doesn't mean that functional languages have to completely give up with control over memory. It just means that memory control cannot be done using instructions like \mintinline{C}`malloc` or \mintinline{C}`free`; instead memory management have to be orthogonal to the ``business logic'' expressions.
 
-- conversely, not always efficient to build large data-structures because of immutability -> forces to build structures in full right of the bat, from the leaves up to the root
+In practice, that means that memory management should not impact the value of an expression of the being computed in the language. One way to do so is to use annotations that attach to a given function or block of code how it should be managed/where it should be allocated. Another way is to use a type system with \emph{modes} to indicate how a value should be managed memory-wise. Yet another would be to use magic, functions like \mintinline{haskellc}`oneShot` in Haskell that have the type of the identity function \mintinline{haskellc}`a -> a`, so they doesn't change the value being computed, but have special meaning for the compiler.
 
-- How to give more flexibility on data structure building while keeping the benefits of functional programming?
+There is still another solution though. We said earlier that side effects --- which are forbidden in pure functional language --- are modification of environment or memory that is observable in a way by the user. What if we can allow explicit memory management expressions but prevent the user from observing these (temporary) modification of the environment or memory?
+
+In fact, this is the path we'll follow to give more fine-grained control over memory while respecting the purity principle.
 
 \section{Functional structures with holes: pioneered by Minamide and quite active since}
 
-- Allow structures with holes to be a first-class type of the language
+Let's start by saying that in most contexts, not having pay attention to memory management at all in functional languages, thanks to the presence of a garbage collector, is actually quite efficient. Often it performs better than programs in which memory has to be managed manually at all time.
 
-- Structures no longer have to be built in full. Can be built incrementally, with holes to be filled later
+The biggest limitation comes in fact from the \emph{immutability} aspect of most functional languages. It only let us build data structures in their final form immediately. Any update that is not just expanding the original structure has to make a (partial) copy of that original structure.
 
-- When DPS is exposed to the user, usually write pointers are not exposed to the user; the latter can only compose/merge structures with holes. They work like linear functions (Minamide, TMRC, Imperative Nature of BF Search trees) so no safety proof is needed
+As a result, algorithms that creates large structures, either by reading an external source, or by transforming an existing structure, will have to silently allocate tons of intermediate structures that each represent an intermediary state of the processing. As said before, we have good reasons to favor immutability, but in that present case, it can gets in the way of performance optimization.
 
-- When DPS has exposed write pointers, it is used in intermediary language; not in the user-facing one, in a framework where its usage is thought to be sound (TMC Ocaml)
+One idea, pioneered by Minamide\cite{minamide_functional_1998}, is to extend the functional language with a specific type for structures that are yet incomplete. Incomplete structures are not allowed to be read until they are completed. This is enforced by the type system. That way, the actual mutation that take place, behind the hood, to update the structure from its incomplete state to the completed one cannot be observed by the user: the latter can only observe the final result, as in a normal immutable functional language. Using the type system to make sure intrinsically imperative/impure computations are safe and that their effects cannot be observed by the user is the key idea I will build upon in this document.
 
-- Still, both of these approaches show promising results in terms of performance and expressiveness
+In Minamide's work, incomplete structures, aka. \emph{structures with a hole} are formally represented by hole abstractions: a sort of pure function that takes a value having the type of the missing bit of the structure as an argument, and returns the structure completed using the supplied piece. In other terms it represents the pending construction of a structure, than can only be carried out when all its pieces have been supplied. However, hole abstractions can be composed, like LEGO bricks, and the composition can be computed immediately, with no need to wait for the missing piece of the resulting structure: $([[ˢλ x ¹ν ⟼ ˢ1 ˢ:: x]]) \circ ([[ˢλ y ¹ν ⟼ ˢ2 ˢ:: y]]) \leadsto [[ˢλ y ¹ν ⟼ ˢ1 ˢ:: ༼ˢ2 ˢ:: y༽]]$. Memory wise, each hole abstraction is not represented by a function object, but rather by a pair of pointers, one to the data structure that the hole abstraction describes, and one to the yet unspecified field in the data structure. Composition of two holes abstractions results, memory-wise, in the mutation of the previously missing field of the first one, to point to the root of the second one.
 
-* Enable tail-recursion in usually non-tail-recursive contexts, e.g. map
+In Minamide's system, the (pointer to the) hole and the structure that has the hole are inseparable. That's a reason why an incomplete structure is only allowed to have one hole. As a result, I would argue that with Minamide's system, we're not yet doing destination-passing style programming. Still, it is one of the first instances of a pure functional language that allows for data structures to be passed around with write permissions without compromising the guarantees of the language (memory safety, purity, etc).
 
-* Enable efficient and more flexible data structure building (e.g. when reading from a serialized source)
+This idea has been refreshed and extended more recently with \cite{leijen_trmc_2023} and \cite{lorenzen_searchtree_2024}.
 
-- Proof of that with bench / graphs
+To reach true destination-passing style programming however, we need a way to refer to the hole(s) of the incomplete structure without having to pass around the structure that has the hole(s). This in fact hasn't been explored much in functional settings so far. \cite{bour_tmc_2021} is probably the closest existing work on this matter, but destination-passing style is only used at the intermediary language level, in the compiler, to do optimizations, so the user can't make use of DPS in their code.
 
 \section{Unifying and formalizing Functional DPS frameworks}
 
-- Can we go a step further, and design a unified framework for functional DPS?
+What I'll develop on in this thesis is a functional language in \emph{structure with holes} are a first-class type in the language, as in~\cite{minamide_functional_1998}, but that also integrate first-class \emph{pointer to these holes}, aka. \emph{destinations}, as part of the user-facing language.
 
-- This framework has to support first-class write-pointers, with safeguards to not break immutability and referential transparency
+We'll see that combining these two features give us performance improvement of some functional algorithms like in~\cite{bour_tmc_2021} or \cite{leijen_trmc_2023}, but we also get some extra expressiveness that is usually a privilege of imperative languages only.
 
-- This framework has to be able to express the two previous approaches, and more
+In fact, I'll design a formal language that is based at its core on these two principles, breaking from the traditional way of building structures in functional languages; and I'll demonstrate how this can be implemented in a practical functional language and that predicted benefits of the approach are mostly preserved in this implementation.
 
-- This framework has to be able to be used in a user-facing language, with a proof of soundness
+The formal language will not only be the basis for the implementation, but will aim for at providing a framework that encompass most existing work on functional DPS, and can be used to prove that earlier work is indeed sound. Of course, immutability and referential transparency principles have to be part of this formal language.
+
+The implementation, on the other hand, should be the first instance of a user-facing functional language that supports effective write pointers to make flexible and efficient data structure building!
 
 \section{Linear types: reconcile write pointers and immutability}
 
