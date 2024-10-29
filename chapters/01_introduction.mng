@@ -1,60 +1,72 @@
 \chapter{Introduction}\label{chap:global-intro}
 
-\section{Destination passing style: taking roots in imperative world}
+\section{Memory management: a core design axis for programming languages}
 
-The way memory management is done in a programming language is is a very important aspect of the language design, as it has to integrate tightly to the core of the language and often restricts which kind of features the language can later host.
+Over the last fifty years, programming languages have evolved into indispensable tools, profoundly shaping how we interact with computers and process information across almost every domain. Much like human languages, the vast variety of programming languages reflects the diversity of computing needs, design philosophies, and objectives that developers and researchers have pursued. This diversity is a response to specialized applications, user preferences, and the continuous search for improvements in speed, efficiency, and expressiveness. Today, hundreds of programming languages exist, each with unique features and tailored strengths, making language selection a nuanced process for developers.
 
-Garbage collection (with tracing GC or reference-counting one) is a very convenient solution for memory management, that happens to be decently fast in most contexts, and let the user forget about memory management completely. It also doesn't hamper the addition of very high-level features to the language.
-
-In system programming however, and in many contexts with real-time constraints, garbage collection is dreaded as it incurs unpredictable overhead, often with actual pauses in the program execution to free some memory. In these contexts, programmers tend to rely on two memory managing schemes:
-
+At a high level, programming languages differ in how they handle core aspects of data and program execution, and they can be classified along several key dimensions. These dimensions often reveal the underlying principles of the language and its suitability for different types of applications. Some of the main characteristics that distinguish programming languages include:
 \begin{itemize}
-    \item manual allocation and deallocation of memory, with explicit mutation
-    \item \emph{smart pointers}, which covers memory allocation and initialization of said memory, and automatic deallocation when the resource goes out of scope
+    \item how the user communicates intent to the computer --- whether through explicit step-by-step instructions in procedural languages or through a more functional/declarative style that emphasizes what to compute rather than how;
+    \item the organization and manipulation of data --- whether through object-oriented paradigms that encapsulate domain data within objects than can interact with each other or through simpler data structures that can be operated on and dissected by functions and procedures;
+    \item the level of abstraction --- a higher-level language abstracts technical details to enable more complex functionality in fewer lines of code, while lower-level languages provide more control over the environment and execution of a task;
+    \item the management of memory --- whether memory allocation and deallocation are automatic, handled by the language itself, or require explicit intervention from the programmer;
+    \item side effects and exceptions --- whether they can in represented by the language, caught, and/or manipulated.
 \end{itemize}
 
-The smart pointer scheme is, in practice, way safer than manual memory management, but it requires a more subtle \emph{move} semantics for the language, and also requires a clear notion of scope (Scope-bound-resource-management, SBRM, aka RAII). It also needs a borrow-checking system --- that can reveal to be quite complex --- if smart-pointer-allocated resources are allowed to be shared (instead of moved).
+Among these, memory management is one of the most critical, yet often less visible, aspects of programming language design. Every program requires memory to store data and instructions, and this memory must be managed efficiently to prevent errors and maintain performance. Typically, programs operate with input sizes and data structures that can vary greatly, requiring dynamic memory allocation to ensure smooth execution. Therefore, memory management in a programming language must balance the need for flexibility with performance and reliability. The way a language handles memory management impacts not only how programmers write and structure their code but also the scope of features the language can support.
 
-It is a relatively recent development in PL: SBRM was already present in the first release of C++, but only for stack-allocated objects; heap-allocated objects had to be allocated and released manually. It's during the early 00's that actual smart pointers for heap objects were born, and progressively got adopted in C++, and then later, have been incorporated at the root of the Rust programming language.
+High-level languages, such as Python or Java, often manage memory automatically, through garbage collection. With automatic garbage collection (thanks to a tracing or reference-counting garbage collector), memory allocation and deallocation happen behind the scenes, freeing developers from the complexities of manual memory control. This automatic memory management simplifies programming, allowing developers to focus on functionality and making the language more accessible for rapid development. Although garbage collection is decently fast overall, it can be slow for some specific use-cases, and is also dreaded for its unpredictable overhead or pauses in the program execution.
 
-So, when smart pointers were not available, people developed good practices or guidelines to avoid the most common pitfalls of manual memory management. One of the most important principle is that the scope in which a resource is allocated must be the scope in charge of deallocation of the said resource. It makes the management of resources much easier. This has an immediate, major implication though: a function that produces a non-primitive result (i.e. not just an integer) should \emph{not} allocate itself the memory space for that result. Indeed, the result has to outlive the current scope, so it should not be deallocated here. So it mustn't be allocated in the scope of the function, but rather, in the caller scope.
+In contrast, low-level languages like C or Zig tend to provide developers with direct control over memory allocation and deallocation. It indeed allows for greater optimization and efficient resource usage, particularly useful in systems programming or performance-sensitive applications. This control, however, comes with increased risk; errors like memory leaks, buffer overflows, and dangling pointers can lead to instability and security vulnerabilities if not carefully detected and addressed.
 
-In other words, the parent scope is responsible both for allocation and deallocation of inputs, but also \emph{outputs} that will be produced by a function call. And outputs slots will be communicated to the function using pointers, or mutable references in higher level languages. We call such pointers \emph{out parameters} or \emph{destinations}: they represent the \emph{destinations} in which the function will write its outputs when it is called.
+Interestingly, some languages defy these typical categorizations by combining high-level features with rigorous memory management. For instance, Rust offers advanced abstractions without sacrificing strict control over memory. Through its unique ownership model, Rust provides safety guarantees comparable to those of garbage-collected languages but without the overhead. This makes it suitable for both high-level application programming and low-level systems development, bridging a gap that was traditionally divided by memory management style.
 
-This is where the idea of destination-passing style programming takes its root: instead of letting functions allocate for their results, we can instead provide them with a write pointer, or write capability for a memory area that is large enough to hold their results.
+Ultimately, memory management is more than a technical detail; it is a foundational characteristic that influences not only the efficiency and reliability of the language but also the range of possible features and applications. A language's approach to memory shapes everything from performance and security to developer experience.
+
+\section{Destination passing style: taking roots in the old imperative world}
+
+In programming languages where fine control over memory is essential, one approach is explicit manual memory allocation and deallocation, as seen in languages like C. Here, developers bear full responsibility for allocating memory when needed and freeing it once it's no longer in use. This allows for precise memory optimization but is highly error-prone, with memory errors such as use-after-free, double free, or memory leaks being notoriously difficult to debug.
+
+A more robust way to control memory, with fewer opportunities for error, involves managing resource lifetimes explicitly while allowing the language to handle for us allocation and deallocation at the start and end of each resource's lifetime. This technique draws on principles like smart pointers in C++ and the ownership model in Rust to manage resource lifetimes, as well as Scope-Bound Resource Management (SBRM) and Resource Acquisition is Initialization (RAII) to handle memory implicitly for these resources. Initially applicable only to stack-allocated objects in early C++, SBRM evolved with the introduction of smart pointers for heap-allocated objects in the early 2000s. These tools have since become fundamental to modern C++ and Rust, significantly improving memory safety and are now on the path to becoming the standard for memory management in systems programming.
+
+However, much system software was written before smart pointers and SBRM were available, leading to the establishment of a few best practices for managing resources in manual memory management. One key principle is that the scope that allocates a resource should also be responsible for deallocating it, simplifying memory management. This has a major implication though: functions that produce non-primitive results (i.e. data more complex than simple integers) should not themselves allocate the memory for those results. Since the results must often outlive the function's scope, they should be allocated by the caller's scope, not within the function itself.
+
+In practice, this means that the parent scope manages not only the allocation and deallocation of a function's inputs, but also those of \emph{the function's outputs}. Output slots are passed to functions as pointers (or mutable references in higher-level languages), allowing the function to write directly into memory managed by the caller. These pointers, called out parameters or \emph{destinations}, specify the exact memory location where the function should store its output.
+
+This idea forms the foundation of destination-passing style programming: instead of allowing functions to allocate memory for their outputs, the caller provides them with write access to a pre-allocated memory space that can hold the function's results.
 
 \paragraph{More control over memory}
 
-Making allocation a responsibility of the caller instead of the callee makes functions actually more flexible to use. This is an idea that will stay true even in the functional interpretation of DPS: destination-passing style is strictly more general than allocation with immediate initialization of data structures.
+Assigning memory allocation responsibility to the caller, rather than the callee, makes functions more flexible to use. Indeed, in DPS, memory allocation gets decoupled from the actual function logic. This holds true even in the functional interpretation of destination-passing style (DPS) that will follow: destination-passing style is strictly more general than immediate initialization of data structures.
 
-For example, in DPS, one can allocate a large chunk of memory at once, and divide it into smaller parts that will each be used as a result slot for a function call. Reducing the number of allocations almost always results in performance improvements, be it in manual memory management or in a GC-controlled context.
+In practice, DPS offers additional performance benefits. For example, a large memory block can be allocated in advance and divided into smaller segments, each designated as an output slot for a specific function call. This minimizes the number of separate allocations required, which is often a performance bottleneck, especially in contexts where memory allocation is intensive, both in manual memory management and garbage-collected environments.
 
 \section{Functional programming languages}
 
-Functional programming languages are often considered to be at the totally opposite side of the spectrum compared to system languages that we just spoke about.
+Functional programming languages are often seen as the opposite end of the spectrum from system languages.
 
-Functional programming doesn't have a unanimous definition, but most people agree that a functional language:
+Functional programming lacks a single definition, but most agree that a functional language:
 \begin{itemize}
-\item has lambda abstractions --- that's to say anonymous functions --- as first-class values of the language. In other terms, functions can be stored and passed around as parameters like normal values, and those functions are also able to capture part of their parents environments (aka. closures).
-\item focuses on expressions rather than statements: every instruction returns a value of a given type.
-\item build more complex expressions by applying and composing functions, instead of chaining statements
+    \item supports lambda abstractions, aka. anonymous functions, as first-class values, allowing functions to be stored, passed as parameters, and to capture parts of their parent environment (closures);
+    \item emphasizes expressions over statements, where each instruction produces a value of a specific type;
+    \item builds complex expressions by applying and composing functions rather than chaining statements.
 \end{itemize}
 
-From these principle follows that in functional languages, we are often more interested in building immutable data structures in declarative style, by stating how the new one should differ from the old one (structural sharing and persistent data structures), rather than mutating existing ones.
+From these principles, functional languages tend to favor immutable data structures and a declarative style, where new data structures are defined by specifying their differences from existing ones, often relying on structural sharing and persistent data structures instead of direct mutation.
 
-As \emph{everything is expression} in a functional language, such languages are well-suited to be mathematically formalized. In fact, that's not a pure coincidence: a lot of principles from functional programming languages are derived from mathematical principles, for instance the lambda calculus and its many extensions. Lambda calculus is a very minimal yet sufficient model of computation, that has as much expressive power as the empirical Turing machine, but has a very strong connection with Theory of Demonstration (formal proofs) thanks to the Curry-Howard isomorphism.
+Since “everything is an expression” in functional languages, they are particularly amenable to mathematical formalization. This is no accident: many core concepts in functional programming originate in mathematics, such as lambda calculus and its extensions. Lambda calculus, a minimal yet fully expressive model of computation, is as powerful as a Turing machine (which is a rather empirical model of computation) but also connects closely with formal proofs through the Curry-Howard isomorphism.
 
-Still, many mainstream languages that are considered functional allow their expressions to have side effects. Side effects encompass all the observable actions a program can take on its environment. E.g. writing to a file, or to the console, or altering memory. Side effects are hard to reason about, especially if any expression of the language is likely to emit one, but they are in fact a very crucial piece of any programming language: without them, there is no way for a program to communicate its results to the "outside".
+Despite this, many functional languages still permit expressions with side effects. Side effects encompass all the observable actions a program can take on its environment, e.g. writing to a file, or to the console, or altering memory. Side effects are hard to reason about, especially if any expression of the language is likely to emit one, but they are in fact a very crucial piece of any programming language: without them, there is no way for a program to communicate its results to the "outside".
 
 \paragraph{Pure functional languages}
 
-In reaction, some languages take it one step further, and forbid side effects until the absolute boundaries of the main program. We name these \emph{pure functional programming languages}. In other terms, everything the programmer writes are expressions that computes and return values with no side effects. The \emph{intention} of emitting a side effect (e.g. printing to the console) can be represented as a value, and only the runtime of the language will be responsible of evaluating this dedicated value into the proper side effect.
+In response, some languages enforce a stricter approach by disallowing side effects until the boundaries of the main program, a concept known as \emph{pure functional programming}. Here, all programmer-defined expressions compute and return values without side effects. Instead, the \emph{intention} of performing side effects (like printing to the console) can be represented as a value, which only the language runtime evaluates to trigger the intended side effect.
 
-This blunt limitation to the way programs can interact with the outside actually brings many benefits. Programs can be totally modeled by mathematical values, and get much easier to reason about. We also get more inspection and analysis capabilities about the effects that a program will emit.
+This restriction provides substantial benefits. Programs can be wholly modeled as mathematical functions, making reasoning about behavior easier and allowing for more powerful analysis of a program’s behavior.
 
-Finally, we get a very important property called \emph{referential transparency}: we can always substitute a function call for its result value, with no observable difference for the user. This is very not true in C for example: \mintinline{C}`write(myfile, string, 12)` cannot be substituted with just the value \mintinline{C}`12` that the function would return if everything went well. The latter would not produce the effect that the former do.
+A key property of pure functional languages is \emph{referential transparency}: any function call can be substituted with its result without altering the program’s behavior. This property is obviously absent in languages like C; for example, replacing \mintinline{C}`write(myfile, string, 12)` with the value \mintinline{C}`12` (its return if the write is successful) would not produce the intended behavior: the latter would not produce any write effect at all.
 
-Having a program that we can reason about is a key ingredient to reducing the amount of bugs in practical software, and improving safety in general. Formal methods can be applied much more efficiently, with reduced efforts and give more ambitious guarantees, on such languages.
+This ability to reason about programs as pure functions greatly improves the predictability of programs, especially across library boundaries, and overall improves software safety. Pure functional languages also support easier and more efficient application of formal methods, enabling stronger guarantees with less effort.
 
 \paragraph{Memory management in functional languages}
 
@@ -88,17 +100,23 @@ To reach true destination-passing style programming however, we need a way to re
 
 \section{Unifying and formalizing Functional DPS frameworks}
 
-What I'll develop on in this thesis is a functional language in \emph{structure with holes} are a first-class type in the language, as in~\cite{minamide_functional_1998}, but that also integrate first-class \emph{pointer to these holes}, aka. \emph{destinations}, as part of the user-facing language.
+What I'll develop on in this thesis is a functional language in which \emph{structure with holes} are a first-class type in the language, as in~\cite{minamide_functional_1998}, but that also integrate first-class \emph{pointer to these holes}, aka. \emph{destinations}, as part of the user-facing language.
 
-We'll see that combining these two features give us performance improvement of some functional algorithms like in~\cite{bour_tmc_2021} or \cite{leijen_trmc_2023}, but we also get some extra expressiveness that is usually a privilege of imperative languages only.
+We'll see that combining these two features give us performance improvement of some functional algorithms like in~\cite{bour_tmc_2021} or \cite{leijen_trmc_2023}, but we also get some extra expressiveness that is usually a privilege of imperative languages only. It should be indeed the first instance of a functional language that supports user-facing write pointers to make flexible and efficient data structure building!
 
-In fact, I'll design a formal language that is based at its core on these two principles, breaking from the traditional way of building structures in functional languages; and I'll demonstrate how this can be implemented in a practical functional language and that predicted benefits of the approach are mostly preserved in this implementation.
+In fact, I'll design a formal language that is based at its core on these two principles, breaking from the traditional way of building structures in functional languages; and I'll demonstrate how this can be implemented in a practical functional language and that predicted benefits of the approach are mostly preserved through this implementation.
 
-The formal language will not only be the basis for the implementation, but will aim for at providing a framework that encompass most existing work on functional DPS, and can be used to prove that earlier work is indeed sound. Of course, immutability and referential transparency principles have to be part of this formal language.
-
-The implementation, on the other hand, should be the first instance of a user-facing functional language that supports effective write pointers to make flexible and efficient data structure building!
+The formal language will not only be the basis for the implementation, but will aim at providing a framework that encompass most existing work on functional DPS, and can be used to prove that earlier work is indeed sound. Of course, immutability and referential transparency principles have to be part of this formal language.
 
 \section{Linear types: reconcile write pointers and immutability}
+
+We cannot just do imperative memory mutations in a functional setting and just hope for the best.
+
+We'll need tools to ensure only controlled mutations are allowed. Basically we want to allow for a structure to be partially uninitialized for a while, and have write pointers pointing to the uninitialized bits of the structure. But once the structure has been completely defined, with a value for each field, then it shouldn't change anymore. Otherwise we break immutability. In other terms, we want to ensure a write-once discipline for fields of a structure (which are mutated through the associated \emph{destination}s, aka. write pointers). Controlling the number of uses of destinations at runtime would be very inconvenient; instead, we need static guarantees that each destination is only used once.
+
+In PLT, when facing a need for new static guarantees, people design a type system that ensures that the desired guarantee holds if the program is well typed. This is exactly what I'm going to do here. It's made easier by the existence of a well-studied type system, \emph{linear types}, that can be used to track the number of uses of resources. 
+
+
 
 - Linear types are a refinement of usual typing theory where variable uses can be counted
 

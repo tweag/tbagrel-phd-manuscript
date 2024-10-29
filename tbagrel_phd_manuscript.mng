@@ -332,7 +332,7 @@
 
 % =========================================================================== %
 
-\title{A Functional, Formal Perspective on Destination-Passing Style Programming}
+\title{A Formal Approach of Safe Destination-Passing Style Programming for Functional Languages}
 \author{Thomas Bagrel}
 \date{April, 2025}
 
