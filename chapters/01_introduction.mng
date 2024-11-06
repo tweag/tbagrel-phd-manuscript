@@ -33,6 +33,9 @@ However, much system software was written before smart pointers and SBRM were av
 
 In practice, this means that the parent scope manages not only the allocation and deallocation of a function's inputs, but also those of \emph{the function's outputs}. Output slots are passed to functions as pointers (or mutable references in higher-level languages), allowing the function to write directly into memory managed by the caller. These pointers, called out parameters or \emph{destinations}, specify the exact memory location where the function should store its output.
 
+% Dire que ça vient aussi d'une contrainte de perf, et que sinon c'est pas possible de faire autrement: écrire dans un espace mmapé, network, ...
+% RDMA
+
 This idea forms the foundation of destination-passing style programming: instead of allowing functions to allocate memory for their outputs, the caller provides them with write access to a pre-allocated memory space that can hold the function's results.
 
 \paragraph{More control over memory}
@@ -71,6 +74,8 @@ This ability to reason about programs as pure functions greatly improves the pre
 \paragraph{Memory management in functional languages}
 
 Explicit memory management is inherently \emph{impure}, as modifying memory in a way that can later be inspected \emph{is} a side effect. Consequently, most functional languages, even those that aren’t fully \emph{pure} like OCaml or Scala, tend to rely on a garbage collector to abstract memory management and access away from the user.
+
+% Gestion automatique car sinon ça devient le bordel avec les closures
 
 However, this doesn’t mean that functional languages must entirely forgo memory control; it simply means that memory control cannot involve explicit instructions like \mintinline{C}`malloc` or \mintinline{C}`free`. Instead, memory management must remain orthogonal to the “business logic”, in other terms, expressions that carries the real meaning of the program.
 
@@ -118,7 +123,7 @@ Linear Logic, introduced by Jean-Yves Girard in the 1980s, refines classical and
 
 Through the Curry-Howard isomorphism, intuitionistic linear logic becomes the linear simply typed $\lambda$-calculus. It inherits the same property has linear logic: there is no weakening and contraction allowed for normal types, in other terms, by default, each variable in a typing context must be used exactly once to form a valid program.
 
-Only a variable with a type prefixed by the new modality $\ottstype{!}$, pronounced \emph{bang} or \emph{of course}, can be used multiple times. That way, we retain the expressive power of the full intuitionistic logic. A new function arrow $\ottstype{\multimap}$ is introduced to denote that a function uses its argument exactly once. The usual function type $[[T]] \ottstype{\to} [[U]]$, with no restrictions on how many times the argument of type $[[T]]$ is used, can be encoded as $\ottstype{(![[T]])\!\!\multimap}[[U]]$.
+Only a variable with a type prefixed by the new modality $\ottstype{!}$, pronounced \emph{bang} or \emph{of course}, can be used multiple times. That way, we retain the expressive power of the full intuitionistic logic. A new function arrow $\ottstype{\multimap}$ is introduced to denote that a function uses its argument exactly once. The usual function type $[[T]]\,\ottstype{\to}\,[[U]]$, with no restrictions on how many times the argument of type $[[T]]$ is used, can be encoded as $[[(!T) ⊸ U]]$.
 
 Leveraging a linear type system, we can design a language in which structures with holes are first-class citizens, and write pointers to these holes are only usable once. This ensures that each hole is filled exactly once, preserving immutability and making sure that structure are indeed completed before being read.
 

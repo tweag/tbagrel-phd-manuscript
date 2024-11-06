@@ -288,9 +288,6 @@ mapAccumBFS (ˢλ st ω∞ ⟼ ˢλ un ¹ν ⟼ un ; ˢ(ˢᴇ ω∞ (succ st), s
 
 \section{Type system}\label{sec:syntax-type-system}
 
-\newcommand{\grammsep}{\hspace*{2ex}|\hspace*{2ex}}
-\newcommand{\grammdef}{:\hspace*{-0.3ex}:\hspace*{-0.3ex}=}
-
 \begin{codefig}{\caption{Grammar of \destcalculus{}}\label{fig:grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
 [[t]], [[u]] &::=& [[x]] \grammsep [[t' t]] \grammsep [[t ; t']] \\

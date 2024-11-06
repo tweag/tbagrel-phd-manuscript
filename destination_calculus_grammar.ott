@@ -157,6 +157,8 @@ term, t, u :: 'term_' ::= {{ com Term }}
   | let x ≔ t in b sp u :: S :: SugarLetSp2 {{ coq (term_App (sterm_Fun [[x]] (Some (pair Lin (Fin 0))) [[u]]) ([[t]])) }} {{ tex \ottkw{let}~[[x]]\assigneq[[t]]~\ottkw{in}[[b]][[sp]][[u]] }}
   | ༼ t ༽ :: S :: InvisParen {{ coq [[t]] }} {{ tex [[t]] }}
   | ul< t > :: S :: Underline {{ coq [[t]] }} {{ tex \uwave{[[t]]} }}
+  | ᴇ t :: S :: SugarExpSimpl {{ coq (term_Val val_Unit) }} {{ tex \expcons{}[[t]] }}
+  | λ x ⟼ u :: S :: SugarFunSimpl {{ coq (term_Val val_Unit) }} {{ tex \lamnt{[[x]]}{}{[[u]]} }} % (+ bind x in u +)
 
 sterm, s {{ tex \ottnt{\tilde{t} } }} :: 'sterm_' ::= {{ com Syntactic sugar for terms }}
   | from⧔' t :: M :: SugarFromA' {{ com Extract left side of ampar when right side is unit }}  {{ coq (sterm_FromA' [[t]]) }}
@@ -239,6 +241,9 @@ type, T, U, S :: 'type_' ::= {{ com Type }} {{ tex \ottstype{[[type]]} }} {{ coq
   | X :: S :: SugarTypeVar {{ tex \ottmv{X} }} {{ coq type_Unit }}
   | E :: S :: SugarEffect {{ tex \ottstype{E} }} {{ coq type_Unit }}
   | Token :: S :: SugarToken {{ tex \ottstype{Token} }} {{ coq type_Unit }}
+  | T ⊸ U :: S :: SugarLinFun {{ tex [[T]]\,\ottstype{\multimap}\,[[U]] }} {{ coq type_Unit }}
+  | ! T :: S :: SugarLinBang {{ tex \ottstype{!}[[T]] }} {{ coq type_Unit }}
+  | ? T :: S :: SugarLinQ {{ tex \ottstype{?}[[T]] }} {{ coq type_Unit }}
 
 mode, m, n :: 'mode_' ::= {{ tex \ottsmode{[[mode]]} }} {{ com Mode (Semiring) }} {{ coq option (mul * age) }}
   | p a :: :: Pair {{ com Pair of a multiplicity and age }} {{ tex [[p]]\hspace{-0.15ex}[[a]] }} {{ coq (Some (pair [[p]] [[a]])) }}
@@ -300,7 +305,7 @@ Defined.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 grammar
 
-ctx, O {{ tex \Omega }}, G {{ tex \Theta }}, D {{ tex \Delta }}, P {{ tex \Gamma }} :: 'ctx_' ::= {{ com Typing context }} {{ coq Finitely.T name binding_type_of }}
+ctx, O {{ tex \Omega }}, G {{ tex \Theta }}, D {{ tex \Delta }}, P {{ tex \Gamma }}, Ur {{ tex \mho }} :: 'ctx_' ::= {{ com Typing context }} {{ coq Finitely.T name binding_type_of }}
   % | ⦅ mvar mdest mhole ⦆ :: :: Maps {{ com Actual representation of contexts for Coq proofs (cannot hide) }} {{ tex \llparenthesis\,[[mvar]]~[[mdest]]~[[mhole]]\,\rrparenthesis }}
   | { } :: S :: Empty {{ coq ctx_empty }} {{ tex \smallbullet }}
   | { x : m T } :: :: VarSing {{ coq (ctx_singleton (name_Var [[x]]) (binding_Var [[m]] [[T]])) }} {{ tex [[x]]:\!_{\![[m]]}[[T]] }} {{ com Variable typing binding }}
@@ -313,6 +318,8 @@ ctx, O {{ tex \Omega }}, G {{ tex \Theta }}, D {{ tex \Delta }}, P {{ tex \Gamma
   | - G :: S :: Hminus {{ coq (hminus [[G]]) }} {{ com Transforms hole bindings into dest bindings }} {{ tex \ottshname{\destminus}[[G]] }}
   | O [ H ⩲ h' ] :: M :: Cshift {{ com Shift hole/dest names by $[[h']]$ if they belong to $[[H]]$ }} {{ coq (ctx_cshift [[O]] [[H]] [[h']]) }} {{ tex [[O]]\ottshname{[}[[H]][[⩲]][[h']]\ottshname{]} }}
   | ( O ) :: S :: Paren {{ coq [[O]] }} {{ tex ([[O]]) }}
+  | O1 ∪ O2 :: M :: NonDisjointUnion {{ coq (union [[O1]] [[O2]]) }} {{ com Union of contexts }} {{ tex [[O1]]\cup[[O2]] }}
+  | { x ⫶ T } :: S :: VarSingSimpl {{ tex [[x]]:[[T]] }} {{ com Variable typing binding with linear mode }}
 
 embed
 {{ coq

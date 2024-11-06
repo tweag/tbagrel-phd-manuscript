@@ -1,0 +1,16 @@
+ 
+\chapter{Preliminaries}\label{chap:preli}
+
+\section{Linear $\lambda$-calculus}
+
+\begin{codefig}{\caption{Grammar of linear $\lambda$-calculus}\label{fig:grammar}}{\setlength{\arraycolsep}{1ex}
+\!\!\!\begin{array}{rrl}
+       [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[ᴇ v]] \grammsep [[( v1 , v2 )]] \\
+[[t]], [[u]] &::=& [[x]] \grammsep [[t t']] \grammsep [[t ; t']] \grammsep [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case ¹ν ᴇ x ⟼ u]] \\
+&&\\
+[[T]], [[U]] &::=& [[T ⊸ U]] \grammsep [[①]] \grammsep [[T1 ⨁ T2]] \grammsep [[T1 ⨂ T2]] \grammsep [[! T]] \\
+&&\\
+[[P]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[P1 , P2]] \\
+[[Ur]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[Ur1 ∪ Ur2]]
+\end{array}
+}\end{codefig}

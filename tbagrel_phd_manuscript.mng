@@ -330,6 +330,9 @@
 \font\sixly=lasy6 % does not re-load if already loaded, so no memory problem.
 \makeatother
 
+\newcommand{\grammsep}{\hspace*{2ex}|\hspace*{2ex}}
+\newcommand{\grammdef}{:\hspace*{-0.3ex}:\hspace*{-0.3ex}=}
+
 % =========================================================================== %
 
 \title{A Formal Approach of Safe Destination-Passing Style Programming for Functional Languages}
@@ -353,11 +356,12 @@
 \tableofcontents
 
 \include{chapters/01_introduction}
-\include{chapters/02_destination_calculus}
-\include{chapters/03_dps_haskell}
-\include{chapters/04_ext_linear_nonlinear}
-\include{chapters/05_related_work}
-\include{chapters/06_conclusion}
+\include{chapters/02_preliminaries}
+\include{chapters/03_destination_calculus}
+\include{chapters/04_dps_haskell}
+\include{chapters/05_ext_linear_nonlinear}
+\include{chapters/06_related_work}
+\include{chapters/07_conclusion}
 
 
 \clearpage
