@@ -3,6 +3,16 @@
 
 \section{Linear $\lambda$-calculus}
 
+At the end of the 30s, Church introduced the untyped $\lambda$-calculus as a formal mathematical model of computation. Untyped $\lambda$-calculus is based on the concept of function abstraction and application, and is Turing-complete: in other terms, it has the same expressive power as the empirical model of computation that Turing machines represent.
+
+In 1940, Church defined a typed variant of its original calculus, the simply typed $\lambda$-calculus, or STLC, that give up Turing-completeness but become strongly-normalizing: every well-typed term eventually reduces to a normal form. STLC assign types to terms, and restricts the application of functions to terms of the right type. This restriction is enforced by the typing rules of the calculus.
+
+It has been observed by Howard in 1969 that the intuitionistic variant of natural deduction proof system is isomorphic to the simply typed $\lambda$-calculus. This observation relates to prior work by Curry where the former observed that the typed fragment of combinatory logic, another model of computation with similar power, is isomorphic to proof systems like implicational logic and Hilbert deduction systems. These observations led to the Curry-Howard isomorphism, which states that types in a typed $\lambda$-calculus correspond to propositions in a proof system, and terms correspond to proofs of these propositions. The Curry-Howard isomorphism has been later extended to other logics and calculi, and has been a fruitful source of inspiration for research on both the logical and computational side.
+
+In that sense, Girard first introduced Linear Logic, in 1987, and only later studied the corresponding calculus, aka. linear $\lambda$-calculus. Linear logic is a substructural logic that follows from the observation that in classical sequent calculus, hypotheses must be explicitly duplicated or discarded, using contraction and weakening structural rules. Linear logic deliberately restrict the use of these rules, so hypotheses can be viewed as resources whose usage must be controlled (in particular, a proof cannot reuse the same hypothesis several time, or discard an hypothesis). Linear logic also introduces a new modality, \emph{of course} or \emph{bang} $\ottstype{!}$, for specific hypotheses that can be used an arbitrary number of times.
+
+Consequently, linear $\lambda$-calculus differs from simply typed $\lambda$-calculus by a new type for functions, $[[T ⊸ U]]$, where the result of type $[[U]]$ has to use the argument of type $[[T]]$ no more and no less than once. It must also manage typing contexts quite differently to take into account that most variable bindings are now linear and must be used exactly once to form a valid program: this mirrors the fact that contraction and weakening are restricted in linear logic.
+
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus}\label{fig:grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
        [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[ᴇ v]] \grammsep [[( v1 , v2 )]] \\
