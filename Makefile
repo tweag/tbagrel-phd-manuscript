@@ -37,11 +37,11 @@ clean:
 destination_calculus_rules_mod.ott: patch_rules.py destination_calculus_rules.ott
 	python patch_rules.py destination_calculus_rules.ott destination_calculus_rules_mod.ott
 
-destination_calculus_ott.tex: destination_calculus_grammar.ott destination_calculus_rules_mod.ott
+destination_calculus_ott.tex: destination_calculus_grammar.ott destination_calculus_rules_mod.ott lin_calculus_rules.ott
 	ott $(OTT_OPTS) -o $@ $^
 
-%.tex: %.mng destination_calculus_grammar.ott destination_calculus_rules_mod.ott
-	ott $(OTT_OPTS) -tex_filter $< $@ destination_calculus_grammar.ott destination_calculus_rules_mod.ott
+%.tex: %.mng destination_calculus_grammar.ott destination_calculus_rules_mod.ott lin_calculus_rules.ott
+	ott $(OTT_OPTS) -tex_filter $< $@ destination_calculus_grammar.ott destination_calculus_rules_mod.ott lin_calculus_rules.ott
 
 tbagrel_phd_manuscript.pdf tbagrel_phd_manuscript.bbl: tbagrel_phd_manuscript.tex destination_calculus_ott.tex $(CHAPTERS_TEX) $(PDF_ARXIV_DEPENDENCIES) $(PDF_OTHER_DEPENDENCIES)
 	latexmk tbagrel_phd_manuscript.tex

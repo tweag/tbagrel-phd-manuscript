@@ -250,6 +250,8 @@ mode, m, n :: 'mode_' ::= {{ tex \ottsmode{[[mode]]} }} {{ com Mode (Semiring) }
   | ☠ :: :: Err {{ tex \ottsmode{\skull} }} {{ coq None }} {{ com Error case (incompatible types, multiplicities, or ages) }}
   | m1 · ... · mk :: S :: Times {{ com Semiring product }} {{ coq (mode_times' [[m1...mk]]) }}
   | ( m ) :: S :: Paren {{ tex \ottsmode{(}[[m]]\ottsmode{)} }} {{ coq [[m]] }}
+  | ɷ :: S :: Urr {{ tex \ottsmode{\omega} }} {{ coq (Some (pair Ur (Fin 0))) }}
+  | ˥ :: S :: Linn {{ tex \ottsmode{1} }} {{ coq (Some (pair Lin (Fin 0))) }}
 
 mul, p :: 'mul_' ::= {{ tex \ottsmode{[[mul]]} }} {{ com Multiplicity (Semiring, first component of mode) }} {{ coq _mul }}
   | ¹ :: :: Lin {{ tex \ottsmode{1} }} {{ com Linear use }} {{ coq Lin }}
@@ -959,7 +961,10 @@ terminals :: 'terminals_' ::=
   | ˢ⊢ :: :: svdash {{ tex \,\pmb{\vdash}\, }}
   | ⊣ :: :: dashv {{ tex \,\pmb{\dashv}\, }}
   | ⫦ :: :: dvdash {{ tex \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\, }}
+  | ⊫ :: :: lindash1 {{ tex \,\pmb{\vdash}\, }}
+  | ⫢ :: :: lindash2 {{ tex \,\pmb{\vdash}\, }}
   | : :: :: colon {{ tex \pmb{:} }}
+  | ; :: :: semicolon {{ tex ~\pmb{;}~ }}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

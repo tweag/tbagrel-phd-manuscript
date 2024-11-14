@@ -13,14 +13,39 @@ In that sense, Girard first introduced Linear Logic, in 1987, and only later stu
 
 Consequently, linear $\lambda$-calculus differs from simply typed $\lambda$-calculus by a new type for functions, $[[T ⊸ U]]$, where the result of type $[[U]]$ has to use the argument of type $[[T]]$ no more and no less than once. It must also manage typing contexts quite differently to take into account that most variable bindings are now linear and must be used exactly once to form a valid program: this mirrors the fact that contraction and weakening are restricted in linear logic.
 
-\begin{codefig}{\caption{Grammar of linear $\lambda$-calculus}\label{fig:grammar}}{\setlength{\arraycolsep}{1ex}
+Syntax of linear lambda calculus is given in \cref{fig:lin1-grammar} and associated typing rules in \cref{fig:lin1ty-term}.
+
+\begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in bi-context presentation}\label{fig:lin1-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
        [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[ᴇ v]] \grammsep [[( v1 , v2 )]] \\
-[[t]], [[u]] &::=& [[x]] \grammsep [[t t']] \grammsep [[t ; t']] \grammsep [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case ¹ν ᴇ x ⟼ u]] \\
+[[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ᴇ t]] \grammsep [[ˢ( t1 , t2 )]]  \grammsep [[t t']] \grammsep [[t ; t']] \\
+&|\,& [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case ¹ν ᴇ x ⟼ u]] \\
 &&\\
 [[T]], [[U]] &::=& [[T ⊸ U]] \grammsep [[①]] \grammsep [[T1 ⨁ T2]] \grammsep [[T1 ⨂ T2]] \grammsep [[! T]] \\
 &&\\
 [[P]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[P1 , P2]] \\
-[[Ur]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[Ur1 ∪ Ur2]]
+[[Ur]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[Ur1 , Ur2]]
 \end{array}
 }\end{codefig}
+
+\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in bi-context presentation}\label{fig:lin1ty-term}}
+\ottdefnLinOneTyXXterm{}
+\end{ottfig}
+
+
+\begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in modal, mono-context presentation}\label{fig:lin2-grammar}}{\setlength{\arraycolsep}{1ex}
+\!\!\!\begin{array}{rrl}
+       [[v]] &::=& [[ˢλ x m ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[ᴇ v]] \grammsep [[( v1 , v2 )]] \\
+[[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ˢᴇ n t]] \grammsep [[ˢ( t1 , t2 )]]  \grammsep [[t t']] \grammsep [[t ; t']] \\
+&|\,& [[ t ►case m { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case m ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case m ᴇ x ⟼ u]] \\
+&&\\
+[[T]], [[U]] &::=& [[T m → U]] \grammsep [[①]] \grammsep [[T1 ⨁ T2]] \grammsep [[T1 ⨂ T2]] \grammsep [[! n T]] \\
+[[m]], [[n]] &::=& [[˥]] \grammsep [[ɷ]] \grammsep [[m · n]] \\
+&&\\
+[[P]] &::=& [[{ }]] \grammsep [[{ x : m T }]] \grammsep [[P1 , P2]] \grammsep [[P1 + P2]] \grammsep [[m·P]] \\
+\end{array}
+}\end{codefig}
+
+\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in modal, mono-context presentation}\label{fig:lin2ty-term}}
+\ottdefnLinTwoTyXXterm{}
+\end{ottfig}
