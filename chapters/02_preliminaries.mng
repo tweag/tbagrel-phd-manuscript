@@ -9,11 +9,16 @@ In 1940, Church defined a typed variant of its original calculus, the simply typ
 
 It has been observed by Howard in 1969 that the intuitionistic variant of natural deduction proof system is isomorphic to the simply typed $\lambda$-calculus. This observation relates to prior work by Curry where the former observed that the typed fragment of combinatory logic, another model of computation with similar power, is isomorphic to proof systems like implicational logic and Hilbert deduction systems. These observations led to the Curry-Howard isomorphism, which states that types in a typed $\lambda$-calculus correspond to propositions in a proof system, and terms correspond to proofs of these propositions. The Curry-Howard isomorphism has been later extended to other logics and calculi, and has been a fruitful source of inspiration for research on both the logical and computational side.
 
-In that sense, Girard first introduced Linear Logic, in 1987, and only later studied the corresponding calculus, aka. linear $\lambda$-calculus. Linear logic is a substructural logic that follows from the observation that in classical sequent calculus, hypotheses must be explicitly duplicated or discarded, using contraction and weakening structural rules. Linear logic deliberately restrict the use of these rules, so hypotheses can be viewed as resources whose usage must be controlled (in particular, a proof cannot reuse the same hypothesis several time, or discard an hypothesis). Linear logic also introduces a new modality, \emph{of course} or \emph{bang} $\ottstype{!}$, for specific hypotheses that can be used an arbitrary number of times.
+In that sense, Girard first introduced Linear Logic, in 1987, and only later studied the corresponding calculus, aka. linear $\lambda$-calculus. Linear logic is a substructural logic that follows from the observation that in usual sequent calculus, hypotheses are duplicated or discarded using contraction and weakening structural rules. As a result, it is possible to track the number of times an hypothesis is used by counting the use of these structural rules. Linear logic deliberately restrict contraction and weakening, so by default, any hypothesis must be used exactly once. Consequently, logical implication $[[T]]\,\ottstype{\Leftrightarrow}\,[[U]]$ is replaced by linear implication $[[T ⊸ U]]$, where $[[T]]$ must be used exactly once to prove $[[U]]$. Linear logic also introduces a new modality, \emph{of course} or \emph{bang} $[[!T]]$, for specific hypotheses $[[T]]$ that can be used an arbitrary number of times (we say they are \emph{unrestricted}).
 
-Consequently, linear $\lambda$-calculus differs from simply typed $\lambda$-calculus by a new type for functions, $[[T ⊸ U]]$, where the result of type $[[U]]$ has to use the argument of type $[[T]]$ no more and no less than once. It must also manage typing contexts quite differently to take into account that most variable bindings are now linear and must be used exactly once to form a valid program: this mirrors the fact that contraction and weakening are restricted in linear logic.
-
-Syntax of linear lambda calculus is given in \cref{fig:lin1-grammar} and associated typing rules in \cref{fig:lin1ty-term}.
+There exists several competing interpretation of linear logic as a linear $\lambda$-calculus. These equivalent variants borrow most if not all of simply typed lambda calculus syntax (as weakening and contraction, that are absent from linear $\lambda$-calculus, are usually not explicit in STLC), and differ on the way unrestricted hypotheses are handled:
+\begin{itemize}
+  \item Following linear logic the more closely, we get a language with new operators for explicit contraction, weakening and dereliction of \emph{bang}ed hypotheses $[[!T]]$ (see \cite{abramsky_interpretation_lin_1993}, Section 3).
+  \item
+  A perhaps more popular presentation is to use two typing contexts, instead of one, to track separately linear and unrestricted hypotheses, as in \cite{pfenning_linear_2001}.
+  Hypotheses $[[!T]]$ in the linear typing context can be projected into hypotheses $[[T]]$ in the unrestricted typing context. However, there is no need for explicit contraction and weakening rules: they are implicit thanks to the way the unrestricted typing context is managed in typing rules (mostly in the same way as the single typing context is managed in STLC). Syntax and typing rules for this presentation of linear $\lambda$-calculus are given in \cref{fig:lin1-grammar} and \cref{fig:lin1ty-term}.
+  \item Finally, a newer presentation of linear $\lambda$-calculus is to use a single typing context, and to track linearity or non-linearity of hypothesis with a mode system on variable bindings, as in \cite{bernardy_linear_2018,bernardy_modality_2020}. This presentation has the advantage of being more uniform wrt. typing context in typing rules (as there is only one context), with low syntactic overhead (no need for syntactically-explicit contraction and weakening for unrestricted hypotheses) and to be more easily extensible with new modes. Syntax and typing rules for this presentation of linear $\lambda$-calculus are given in \cref{fig:lin2-grammar} and \cref{fig:lin2ty-term}.
+\end{itemize}
 
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in bi-context presentation}\label{fig:lin1-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
@@ -49,3 +54,13 @@ Syntax of linear lambda calculus is given in \cref{fig:lin1-grammar} and associa
 \begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in modal, mono-context presentation}\label{fig:lin2ty-term}}
 \ottdefnLinTwoTyXXterm{}
 \end{ottfig}
+
+- Presentation of linear lambda calculus in bi context
+
+- What if we unify the two contexts and track of linearity with mode?
+
+- Presentation of linear lambda calculus in mono context
+
+- Incomplete structures as weak, linear functions (minamide)
+
+- Full intuitionistic linear calculus?
