@@ -159,6 +159,9 @@ term, t, u :: 'term_' ::= {{ com Term }}
   | ul< t > :: S :: Underline {{ coq [[t]] }} {{ tex \uwave{[[t]]} }}
   | ᴇ t :: S :: SugarExpSimpl {{ coq (term_Val val_Unit) }} {{ tex \expcons{}[[t]] }}
   | λ x ⟼ u :: S :: SugarFunSimpl {{ coq (term_Val val_Unit) }} {{ tex \lamnt{[[x]]}{}{[[u]]} }} % (+ bind x in u +)
+  | dup t as x , y in t' :: S :: SugarDup {{ coq (term_Val val_Unit) }} {{ tex \ottkw{dup}~[[t]]~\ottkw{as}~[[x]]\,,~[[y]]~\ottkw{in}~[[t']] }}
+  | drop t in t' :: S :: SugarDrop {{ coq (term_Val val_Unit) }} {{ tex \ottkw{drop}~[[t]]~\ottkw{in}~[[t']] }}
+  | derelict t as x in u :: S :: SugarDerelict {{ coq (term_Val val_Unit) }} {{ tex \ottkw{derelict}~[[t]]~\ottkw{as}~[[x]]~\ottkw{in}~[[u]] }}
 
 sterm, s {{ tex \ottnt{\tilde{t} } }} :: 'sterm_' ::= {{ com Syntactic sugar for terms }}
   | from⧔' t :: M :: SugarFromA' {{ com Extract left side of ampar when right side is unit }}  {{ coq (sterm_FromA' [[t]]) }}
@@ -322,6 +325,7 @@ ctx, O {{ tex \Omega }}, G {{ tex \Theta }}, D {{ tex \Delta }}, P {{ tex \Gamma
   | ( O ) :: S :: Paren {{ coq [[O]] }} {{ tex ([[O]]) }}
   | O1 ∪ O2 :: M :: NonDisjointUnion {{ coq (union [[O1]] [[O2]]) }} {{ com Union of contexts }} {{ tex [[O1]]\cup[[O2]] }}
   | { x ⫶ T } :: S :: VarSingSimpl {{ tex [[x]]:[[T]] }} {{ com Variable typing binding with linear mode }}
+  | ! P :: S :: Bang {{ tex ![[P]] }} {{ com Unrestricted context }}
 
 embed
 {{ coq
@@ -963,6 +967,7 @@ terminals :: 'terminals_' ::=
   | ⫦ :: :: dvdash {{ tex \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\, }}
   | ⊫ :: :: lindash1 {{ tex \,\pmb{\vdash}\, }}
   | ⫢ :: :: lindash2 {{ tex \,\pmb{\vdash}\, }}
+  | ⊪ :: :: lindash3 {{ tex \,\pmb{\vdash}\, }}
   | : :: :: colon {{ tex \pmb{:} }}
   | ; :: :: semicolon {{ tex ~\pmb{;}~ }}
 

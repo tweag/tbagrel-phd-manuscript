@@ -2,121 +2,184 @@ defns
 LinTy :: '' ::=
 
 defn
-P ; Ur ⊫ t : T :: :: Lin1Ty_term :: 'LinBi_' {{ com Typing judgment for terms }} by
+P ⊪ t : T :: :: LinMon_Ty_term :: 'LinMon_Ty_term_' {{ com Typing judgment for terms }} by
 
------------------------ :: VarLin
+----------------------- :: Var {{ com Id }}
+{ x ⫶ T } ⊪ x : T
+
+P , { x ⫶ T } ⊪ u : U [[:Tyu]]
+----------------- :: Fun {{ com $\ottstype{\multimap}$I }}
+P ⊪ λ x ⟼ u : T ⊸ U
+
+--------------------- :: Unit {{ com $\ottstype{1}$I }}
+{} ⊪ () : ①
+
+P ⊪ t1 : T1 [[:Tyt1]]
+--------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{L} }}
+P ⊪ ˢInl t1 : T1 ⨁ T2
+
+P ⊪ t2 : T2 [[:Tyt2]]
+--------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{R} }}
+P ⊪ ˢInr t2 : T1 ⨁ T2
+
+P1 ⊪ t1 : T1 [[:Tyt1]]
+P2 ⊪ t2 : T2 [[:Tyt2]]
+------------------------- :: Prod {{ com $\ottstype{\otimes}$I }}
+P1, P2 ⊪ ˢ(t1, t2) : T1 ⨂ T2
+
+!P ⊪ t : T [[:Tyt]]
+--------------------- :: Exp {{ com $\ottstype{!}$I }}
+!P ⊪ ᴇ t : !T
+
+P1 ⊪ t' : T ⊸ U [[:Tytp]]
+P2 ⊪ t : T [[:Tyt]]
+----------------- :: App {{ com $\ottstype{\multimap}$E }}
+P1, P2 ⊪ t' t : U
+
+P1 ⊪ t : ① [[:Tyt]]
+P2 ⊪ u : U [[:Tyu]]
+----------------- :: PatU {{ com $\ottstype{1}$E }}
+P1 , P2 ⊪ t ; u : U
+
+P1 ⊪ t : T1 ⨁ T2 [[:Tyt]]
+P2, { x1 ⫶ T1 } ⊪ u1 : U [[:Tyu1]]
+P2, { x2 ⫶ T2 } ⊪ u2 : U [[:Tyu2]]
+----------------- :: PatS {{ com $\ottstype{\oplus}$E }}
+P1, P2 ⊪ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } : U
+
+P1 ⊪ t : T1 ⨂ T2 [[:Tyt]]
+P2, { x1 ⫶ T1 }, { x2 ⫶ T2 } ⊪ u : U [[:Tyu]]
+----------------- :: PatP {{ com $\ottstype{\otimes}$E }}
+P1, P2 ⊪ t ►case ¹ν (x1 , x2) ⟼ u : U
+
+P, { x1 ⫶ !T }, { x2 ⫶ !T } ⊪ u : U [[:Tyu]]
+----------------- :: Dup {{ com $\ottstype{!}$C }}
+P, { x ⫶ !T } ⊪ dup x as x1, x2 in u : U
+
+P ⊪ u : U [[:Tyu]]
+------------------- :: Drop {{ com $\ottstype{!}$W }}
+P, { x ⫶ !T } ⊪ drop x in u : U
+
+P, { x' ⫶ T } ⊪ u : U [[:Tyt]]
+----------------- :: Derelict {{ com $\ottstype{!}$D }}
+P, { x ⫶ !T } ⊪ derelict x as x' in u : U
+
+defn
+P ; Ur ⊫ t : T :: :: LinDya_Ty_term :: 'LinDya_Ty_term_' {{ com Typing judgment for terms }} by
+
+----------------------- :: VarLin {{ com Id\textsubscript{Lin} }}
 { x ⫶ T } ; Ur ⊫ x : T
 
------------------------ :: VarUr
+----------------------- :: VarUr {{ com Id\textsubscript{Ur} }}
 {} ; Ur , { x ⫶ T } ⊫ x : T
 
---------------------- :: Unit
-{} ; Ur ⊫ () : ①
-
 P , { x ⫶ T } ; Ur ⊫ u : U [[:Tyu]]
------------------ :: Fun
+----------------- :: Fun {{ com $\ottstype{\multimap}$I }}
 P ; Ur ⊫ λ x ⟼ u : T ⊸ U
 
+--------------------- :: Unit {{ com $\ottstype{1}$I }}
+{} ; Ur ⊫ () : ①
+
 P ; Ur ⊫ t1 : T1 [[:Tyt1]]
---------------------- :: Left
+--------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{L} }}
 P ; Ur ⊫ ˢInl t1 : T1 ⨁ T2
 
 P ; Ur ⊫ t2 : T2 [[:Tyt2]]
---------------------- :: Right
+--------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{R} }}
 P ; Ur ⊫ ˢInr t2 : T1 ⨁ T2
 
 P1 ; Ur ⊫ t1 : T1 [[:Tyt1]]
 P2 ; Ur ⊫ t2 : T2 [[:Tyt2]]
-------------------------- :: Prod
+------------------------- :: Prod {{ com $\ottstype{\otimes}$I }}
 P1, P2 ; Ur ⊫ ˢ(t1, t2) : T1 ⨂ T2
 
 % we should augment age of holes which are below an exponential
 {} ; Ur ⊫ t : T [[:Tyt]]
---------------------- :: Exp
+--------------------- :: Exp {{ com $\ottstype{!}$I }}
 {} ; Ur ⊫ ᴇ t : !T
 
-P1 ; Ur ⊫ t : T [[:Tyt]]
-P2 ; Ur ⊫ t' : T ⊸ U [[:Tytp]]
------------------ :: App
+P1 ; Ur ⊫ t' : T ⊸ U [[:Tytp]]
+P2 ; Ur ⊫ t : T [[:Tyt]]
+----------------- :: App {{ com $\ottstype{\multimap}$E }}
 P1, P2 ; Ur ⊫ t' t : U
 
 P1 ; Ur ⊫ t : ① [[:Tyt]]
 P2 ; Ur ⊫ u : U [[:Tyu]]
------------------ :: PatU
+----------------- :: PatU {{ com $\ottstype{1}$E }}
 P1 , P2 ; Ur ⊫ t ; u : U
 
 P1 ; Ur ⊫ t : T1 ⨁ T2 [[:Tyt]]
 P2, { x1 ⫶ T1 } ; Ur ⊫ u1 : U [[:Tyu1]]
 P2, { x2 ⫶ T2 } ; Ur ⊫ u2 : U [[:Tyu2]]
------------------ :: PatS
+----------------- :: PatS {{ com $\ottstype{\oplus}$E }}
 P1, P2 ; Ur ⊫ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } : U
 
 P1 ; Ur ⊫ t : T1 ⨂ T2 [[:Tyt]]
 P2, { x1 ⫶ T1 }, { x2 ⫶ T2 } ; Ur ⊫ u : U [[:Tyu]]
------------------ :: PatP
+----------------- :: PatP {{ com $\ottstype{\otimes}$E }}
 P1, P2 ; Ur ⊫ t ►case ¹ν (x1 , x2) ⟼ u : U
 
 % No shadowing allowed?
 P1 ; Ur ⊫ t : ! T [[:Tyt]]
 P2 ; Ur, { x ⫶ T } ⊫ u : U [[:Tyu]]
------------------ :: PatE
+----------------- :: PatE {{ com $\ottstype{!}$E }}
 P1, P2 ; Ur ⊫ t ►case ¹ν ᴇ x ⟼ u : U
 
 defn
-P ⫢ t : T :: :: Lin2Ty_term :: 'LinMod_' {{ com Typing judgment for terms }} by
+P ⫢ t : T :: :: LinMod_Ty_term :: 'LinMod_Ty_term_' {{ com Typing judgment for terms }} by
 
------------------------ :: Var
+----------------------- :: Var {{ com Id }}
 ɷ·P, { x : m T } ⫢ x : T
 
---------------------- :: Unit
-ɷ·P ⫢ () : ①
-
 P , { x : m T } ⫢ u : U [[:Tyu]]
------------------ :: Fun
+----------------- :: Fun {{ com $\ottstype{\to}$I }}
 P ⫢ ˢλ x m ⟼ u : T m → U
 
+--------------------- :: Unit {{ com $\ottstype{1}$I }}
+ɷ·P ⫢ () : ①
+
 P ⫢ t1 : T1 [[:Tyt1]]
---------------------- :: Left
+--------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{L} }}
 P ⫢ ˢInl t1 : T1 ⨁ T2
 
 P ⫢ t2 : T2 [[:Tyt2]]
---------------------- :: Right
+--------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{R} }}
 P ⫢ ˢInr t2 : T1 ⨁ T2
 
 P1 ⫢ t1 : T1 [[:Tyt1]]
 P2 ⫢ t2 : T2 [[:Tyt2]]
-------------------------- :: Prod
+------------------------- :: Prod {{ com $\ottstype{\otimes}$I }}
 P1 + P2 ⫢ ˢ(t1, t2) : T1 ⨂ T2
 
 % we should augment age of holes which are below an exponential
 P ⫢ t : T [[:Tyt]]
---------------------- :: Exp
+--------------------- :: Exp {{ com $\ottstype{!}$I }}
 n·P ⫢ ˢᴇ n t : ! n T
 
-P1 ⫢ t : T [[:Tyt]]
-P2 ⫢ t' : T m → U [[:Tytp]]
------------------ :: App
-m·P1 + P2 ⫢ t' t : U
+P1 ⫢ t' : T m → U [[:Tytp]]
+P2 ⫢ t : T [[:Tyt]]
+----------------- :: App {{ com $\ottstype{\to}$E }}
+P1 + m·P2 ⫢ t' t : U
 
 P1 ⫢ t : ① [[:Tyt]]
 P2 ⫢ u : U [[:Tyu]]
------------------ :: PatU
+----------------- :: PatU {{ com $\ottstype{1}$E }}
 P1 + P2 ⫢ t ; u : U
 
 P1 ⫢ t : T1 ⨁ T2 [[:Tyt]]
 P2, { x1 : m T1 } ⫢ u1 : U [[:Tyu1]]
 P2, { x2 : m T2 } ⫢ u2 : U [[:Tyu2]]
------------------ :: PatS
+----------------- :: PatS {{ com $\ottstype{\oplus}$E }}
 m·P1 + P2 ⫢ t ►case m { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } : U
 
 P1 ⫢ t : T1 ⨂ T2 [[:Tyt]]
 P2, { x1 : m T1 }, { x2 : m T2 } ⫢ u : U [[:Tyu]]
------------------ :: PatP
+----------------- :: PatP {{ com $\ottstype{\otimes}$E }}
 m·P1 + P2 ⫢ t ►case m (x1 , x2) ⟼ u : U
 
 P1 ⫢ t : !n T [[:Tyt]]
 P2, { x : m·n T } ⫢ u : U [[:Tyu]]
------------------ :: PatE
+----------------- :: PatE {{ com $\ottstype{!}$E }}
 m·P1 + P2 ⫢ t ►case m ᴇ n x ⟼ u : U
 
 % defns

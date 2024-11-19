@@ -73,6 +73,7 @@ P + D ⊢ v : T
 -------------------- :: Var
 P + { x : m T } ⊢ x : T
 
+% TODO: change order
 {{ IsValid [[m]] }} [[:Validm]]
 P1 ⊢ t : T [[:Tyt]]
 P2 ⊢ t' : T m → U [[:Tytp]]
