@@ -161,7 +161,7 @@ term, t, u :: 'term_' ::= {{ com Term }}
   | λ x ⟼ u :: S :: SugarFunSimpl {{ coq (term_Val val_Unit) }} {{ tex \lamnt{[[x]]}{}{[[u]]} }} % (+ bind x in u +)
   | dup t as x , y in t' :: S :: SugarDup {{ coq (term_Val val_Unit) }} {{ tex \ottkw{dup}~[[t]]~\ottkw{as}~[[x]]\,,~[[y]]~\ottkw{in}~[[t']] }}
   | drop t in t' :: S :: SugarDrop {{ coq (term_Val val_Unit) }} {{ tex \ottkw{drop}~[[t]]~\ottkw{in}~[[t']] }}
-  | derelict t as x in u :: S :: SugarDerelict {{ coq (term_Val val_Unit) }} {{ tex \ottkw{derelict}~[[t]]~\ottkw{as}~[[x]]~\ottkw{in}~[[u]] }}
+  | derelict t :: S :: SugarDerelict {{ coq (term_Val val_Unit) }} {{ tex \ottkw{derelict}~[[t]] }}
 
 sterm, s {{ tex \ottnt{\tilde{t} } }} :: 'sterm_' ::= {{ com Syntactic sugar for terms }}
   | from⧔' t :: M :: SugarFromA' {{ com Extract left side of ampar when right side is unit }}  {{ coq (sterm_FromA' [[t]]) }}

@@ -30,7 +30,7 @@ There exists several competing interpretation of linear logic as a linear $\lamb
 \!\!\!\begin{array}{rrl}
        [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[ᴇ v]] \grammsep [[( v1 , v2 )]] \\
 [[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ᴇ t]] \grammsep [[ˢ( t1 , t2 )]]  \grammsep [[t t']] \grammsep [[t ; t']] \\
-&|\,& [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \\ &|\,& [[dup x as x1, x2 in u]] \grammsep [[drop x in u]] \grammsep [[derelict x as x' in u]] \\
+&|\,& [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \\ &|\,& [[dup t as x1, x2 in u]] \grammsep [[drop t in u]] \grammsep [[derelict t]] \\
 &&\\
 [[T]], [[U]] &::=& [[T ⊸ U]] \grammsep [[①]] \grammsep [[T1 ⨁ T2]] \grammsep [[T1 ⨂ T2]] \grammsep [[! T]] \\
 &&\\
