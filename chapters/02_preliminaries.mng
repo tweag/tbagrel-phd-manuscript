@@ -7,18 +7,11 @@ At the end of the 30s, Church introduced the untyped $\lambda$-calculus as a for
 
 In 1940, Church defined a typed variant of its original calculus, the simply typed $\lambda$-calculus, or STLC, that give up Turing-completeness but become strongly-normalizing: every well-typed term eventually reduces to a normal form. STLC assign types to terms, and restricts the application of functions to terms of the right type. This restriction is enforced by the typing rules of the calculus.
 
-It has been observed by Howard in 1969 that the intuitionistic variant of natural deduction proof system is isomorphic to the simply typed $\lambda$-calculus. This observation relates to prior work by Curry where the former observed that the typed fragment of combinatory logic, another model of computation with similar power, is isomorphic to proof systems like implicational logic and Hilbert deduction systems. These observations led to the Curry-Howard isomorphism, which states that types in a typed $\lambda$-calculus correspond to propositions in a proof system, and terms correspond to proofs of these propositions. The Curry-Howard isomorphism has been later extended to other logics and calculi, and has been a fruitful source of inspiration for research on both the logical and computational side.
+It has been observed by Howard in 1969 that the intuitionistic variant of natural deduction proof system is isomorphic to the simply typed $\lambda$-calculus. This observation relates to prior work by Curry where the former observed that the typed fragment of combinatory logic, another model of computation with similar power, is isomorphic to proof systems like implicational logic and Hilbert deduction systems. These observations led to the Curry-Howard isomorphism, which states that types in a typed $\lambda$-calculus correspond to formulas in a proof system, and terms correspond to proofs of these formulas. The Curry-Howard isomorphism has been later extended to other logics and calculi, and has been a fruitful source of inspiration for research on both the logical and computational side.
 
-In that sense, Girard first introduced Linear Logic, in 1987, and only later studied the corresponding calculus, aka. linear $\lambda$-calculus. Linear logic is a substructural logic that follows from the observation that in usual sequent calculus, hypotheses are duplicated or discarded using contraction and weakening structural rules. As a result, it is possible to track the number of times an hypothesis is used by counting the use of these structural rules. Linear logic deliberately restrict contraction and weakening, so by default, any hypothesis must be used exactly once. Consequently, logical implication $[[T]]\,\ottstype{\Leftrightarrow}\,[[U]]$ is replaced by linear implication $[[T ⊸ U]]$, where $[[T]]$ must be used exactly once to prove $[[U]]$. Linear logic also introduces a new modality, \emph{of course} or \emph{bang} $[[!T]]$, for specific hypotheses $[[T]]$ that can be used an arbitrary number of times (we say they are \emph{unrestricted}).
+In that sense, Girard first introduced Linear Logic, in 1987, and only later studied the corresponding calculus, aka. linear $\lambda$-calculus. Linear logic follows from the observation that in sequent calculus\footnote{a very popular deduction system that is an alternative to natural deduction and that has also been introduced by Gentzen in the 30s}, hypotheses are duplicated or discarded using explicit rules of the system, named \emph{contraction} and \emph{weakening}, in contrast to natural deduction where all that happens implicitly, as it is part of the meta-theory. As a result, it is possible to track the number of times a formula is used by counting the use of these structural rules. Linear logic take this idea further, and deliberately restrict contraction and weakening, so by default, every hypothesis must be used exactly once. Consequently, logical implication $[[T ¹ν → U]]$ is not part of linear logic, but is replaced by linear implication $[[T ⊸ U]]$, where $[[T]]$ must be used exactly once to prove $[[U]]$. Linear logic also introduces a modality $\ottstype{!}$, pronounced \emph{of course} or \emph{bang}, to allow weakening and contraction on specific formulas: $[[!T]]$ denotes that $[[T]]$ can be used an arbitrary number of times (we say it is \emph{unrestricted}).
 
-There exists several competing interpretation of linear logic as a linear $\lambda$-calculus. These equivalent\unsure{not equivalent because the modal presentation adds the equivalence $[[!(T ⨂ U)]] \simeq [[!T ⨂ !U]]$} variants borrow most if not all of simply typed lambda calculus syntax (as weakening and contraction, that are absent from linear $\lambda$-calculus, are usually not explicit in STLC), and differ on the way unrestricted hypotheses are handled:
-\begin{itemize}
-  \item Following linear logic the more closely, we get a language with new operators for explicit contraction, weakening and dereliction of \emph{bang}ed hypotheses $[[!T]]$ (see \cite{abramsky_interpretation_lin_1993}, Section 3). This is the monadic presentation, whose syntax and typing rules are given in \cref{fig:linmon-grammar,fig:linmon-ty-term}.
-  \item
-  A perhaps more popular presentation is to use two typing contexts, instead of one, to track separately linear and unrestricted hypotheses, as in \cite{pfenning_linear_2001}.
-  Hypotheses $[[!T]]$ in the linear typing context can be projected into hypotheses $[[T]]$ in the unrestricted typing context. However, there is no need for explicit contraction and weakening rules: they are implicit thanks to the way the unrestricted typing context is managed in typing rules (mostly in the same way as the single typing context is managed in STLC). This is the dyadic presentation, whose syntax and typing rules are given in \cref{fig:lindya-grammar,fig:lindya-ty-term}.
-  \item Finally, a newer presentation of linear $\lambda$-calculus is to use a single typing context, and to track linearity or non-linearity of hypothesis with a mode system on variable bindings, as in \cite{bernardy_linear_2018,bernardy_modality_2020}. This presentation has the advantage of being more uniform wrt. typing context in typing rules (as there is only one context), with low syntactic overhead (no need for syntactically-explicit contraction and weakening for unrestricted hypotheses) and to be more easily extensible with new modes. This is the modal presentation, whose syntax and typing rules are given in \cref{fig:linmod-grammar,fig:linmod-ty-term}.
-\end{itemize}
+We present in \cref{fig:linlog} the natural deduction formulation of intuitionistic linear logic (ILL), as it lends itself well to a computational interpretation as a linear $\lambda$-calculus with usual syntax. We borrow the \emph{sequent style} notation of sequent calculus for easier transition into typing rules of terms later. However, as we are in an intuitionistic setting, rules only derive a single conclusion from a multiset of formulas.
 
 \bgroup
 \renewcommand\ottaltinferrule[4]{
@@ -26,16 +19,31 @@ There exists several competing interpretation of linear logic as a linear $\lamb
     {#3}
     {#4}
 }
+
+All the rules of ILL, except the ones related to the $\ottstype{!}$ modality, are directly taken (and slightly adapted) from natural deduction. $\ottstype{\oplus}$ denotes (additive) disjunction, and $\ottstype{\otimes}$ denotes (multiplicative) conjunction.  Hypotheses are represented by multisets $[[P]]$. These multisets keep track of how many times each formula appear in them. The comma operator in $[[P1,P2]]$ is multiset union, so it sums the number of occurrences of each formula in $[[P1]]$ and $[[P2]]$.
+
+Let's focus on the four rules for the $\ottstype{!}$ modality now. The promotion rule ILL\,/\,$\ottstype{!}$P states that a formula $[[T]]$ can become an unrestricted formula $[[!T]]$ if it only depends on formulas that are themselves unrestricted. This is denoted by the (potentially empty) multiset $[[!P]]$. The dereliction rule ILL\,/\,$\ottstype{!}$D states that an unrestricted formula $[[!T]]$ can be used in a place expecting a normal i.e. linear formula $[[T]]$. The contraction rule ILL\,/\,$\ottstype{!}$C and  weakening rule ILL\,/\,$\ottstype{!}$W states respectively that an unrestricted formula $[[!T]]$ can be cloned or discarded at any time.
+
+The linear logic system might appear very restrictive, but we can always\unsure{We might need other connectives for that, such as \emph{with} $\ottstype{\&}$} simulate the usual non-linear natural deduction in ILL. Girard gives precise rules for such a translation in Section 2.2.6 of~\cite{REFNEEDED}, whose main idea is to prefix most formulas with $\ottstype{!}$ and encode the non-linear implication $[[T ¹ν → U]]$ as $[[!T ⊸ U]]$.
+
+\begin{ottfig}{\caption{Natural deduction formulation of intuitionistic linear logic (sequent-style)}\label{fig:linlog}}
+\bgroup\renewcommand{\ottdrulename}[1]{ILL\,/\,}
+\ottdefnLinMonXXLog{}\egroup
+\end{ottfig}
+
+\emph{Computational interpretations of linear logic}
+
+There exists several possible interpretations of linear logic as a linear $\lambda$-calculus. The first one, named \emph{monadic} presentation of linear $\lambda$-calculus in~\cite{abramsky_interpretation_lin_1993}, and denoted $\lambda_{L_1}$ in this document, is a direct term assignment of the natural deduction rules of ILL given in \cref{fig:linlog}. The syntax and typing rules of this presentation are given in \cref{fig:linmon-grammar,fig:linmon-ty-term}.
+
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in monadic presentation}\label{fig:linmon-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
-       [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[ᴇ v]] \grammsep [[( v1 , v2 )]] \\
-[[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ᴇ t]] \grammsep [[ˢ( t1 , t2 )]]  \grammsep [[t t']] \grammsep [[t ; t']] \\
+       [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[( v1 , v2 )]] \grammsep [[ᴇ v]] \\
+[[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ˢ( t1 , t2 )]] \grammsep [[ᴇ t]] \grammsep [[t t']] \grammsep [[t ; t']] \\
 &|\,& [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \\ &|\,& [[dup t as x1, x2 in u]] \grammsep [[drop t in u]] \grammsep [[derelict t]] \\
 &&\\
 [[T]], [[U]] &::=& [[T ⊸ U]] \grammsep [[①]] \grammsep [[T1 ⨁ T2]] \grammsep [[T1 ⨂ T2]] \grammsep [[! T]] \\
 &&\\
 [[P]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[P1 , P2]] \\
-[[Ur]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[Ur1 , Ur2]]
 \end{array}
 }\end{codefig}
 
@@ -44,10 +52,14 @@ There exists several competing interpretation of linear logic as a linear $\lamb
 \ottdefnLinMonXXTyXXterm{}\egroup
 \end{ottfig}
 
+Term grammar borrows most of simply typed lambda calculus grammar. The language has a data constructor/wrapper for unrestricted terms and values, denoted by\footnote{The notation $\expcons{}$ is reminiscent of the fact that $\ottstype{!}$ is a (positive) \emph{exponential} modality in linear logic} $[[ᴇ t]]$ and $[[ᴇ v]]$. Elimination of unit type $[[①]]$ is made with $\patu$ operator. Pattern-matching on sum and product types is made with the $\ottkw{case}$ keyword. Finally, we have new operators $\ottkw{dup}$, $\ottkw{drop}$ and $\ottkw{derelict}$ for respective contraction, weakening and dereliction of unrestricted terms of type $[[!T]]$. Promotion of a term to an unrestricted form is made by direct application of constructor $\expcons{}$.
+
+In the monadic presentation $\lambda_{L_1}$, the use of unrestricted terms can become very verbose and unhandy because of the need for explicit contraction, weakening and dereliction. A second and equivalent presentation of our linear $\lambda$-calculus, named \emph{dyadic} presentation or $\lambda_{L_2}$, tend to alleviate this issue by using two typing contexts on each judgment, one for linear variables and one for unrestricted variables. The syntax and typing rules of $\lambda_{L_2}$ are given in \cref{fig:lindya-grammar,fig:lindya-ty-term}.
+
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in dyadic presentation}\label{fig:lindya-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
-       [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[ᴇ v]] \grammsep [[( v1 , v2 )]] \\
-[[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ᴇ t]] \grammsep [[ˢ( t1 , t2 )]]  \grammsep [[t t']] \grammsep [[t ; t']] \\
+       [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[( v1 , v2 )]] \grammsep [[ᴇ v]] \\
+[[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ˢ( t1 , t2 )]] \grammsep [[ᴇ t]] \grammsep [[t t']] \grammsep [[t ; t']] \\
 &|\,& [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case ¹ν ᴇ x ⟼ u]] \\
 &&\\
 [[T]], [[U]] &::=& [[T ⊸ U]] \grammsep [[①]] \grammsep [[T1 ⨁ T2]] \grammsep [[T1 ⨂ T2]] \grammsep [[! T]] \\
@@ -62,12 +74,25 @@ There exists several competing interpretation of linear logic as a linear $\lamb
 \ottdefnLinDyaXXTyXXterm{}\egroup
 \end{ottfig}
 
+\hrule{}
+
+These equivalent\unsure{not equivalent because the modal presentation adds the equivalence $[[!(T ⨂ U)]] \simeq [[!T ⨂ !U]]$} variants borrow most if not all of simply typed lambda calculus syntax (as weakening and contraction, that are absent from linear $\lambda$-calculus, are usually not explicit in STLC), and differ on the way unrestricted hypotheses are handled:
+\begin{itemize}
+  \item Following linear logic the more closely, we get a language with new operators for explicit contraction, weakening and dereliction of \emph{bang}ed hypotheses $[[!T]]$ (see \cite{abramsky_interpretation_lin_1993}, Section 3). This is the monadic presentation, whose syntax and typing rules are given in \cref{fig:linmon-grammar,fig:linmon-ty-term}.
+  \item
+  A perhaps more popular presentation is to use two typing contexts, instead of one, to track separately linear and unrestricted hypotheses, as in \cite{pfenning_linear_2001}.
+  Hypotheses $[[!T]]$ in the linear typing context can be projected into hypotheses $[[T]]$ in the unrestricted typing context. However, there is no need for explicit contraction and weakening rules: they are implicit thanks to the way the unrestricted typing context is managed in typing rules (mostly in the same way as the single typing context is managed in STLC). This is the dyadic presentation, whose syntax and typing rules are given in \cref{fig:lindya-grammar,fig:lindya-ty-term}.
+  \item Finally, a newer presentation of linear $\lambda$-calculus is to use a single typing context, and to track linearity or non-linearity of hypothesis with a mode system on variable bindings, as in \cite{bernardy_linear_2018,bernardy_modality_2020}. This presentation has the advantage of being more uniform wrt. typing context in typing rules (as there is only one context), with low syntactic overhead (no need for syntactically-explicit contraction and weakening for unrestricted hypotheses) and to be more easily extensible with new modes. This is the modal presentation, whose syntax and typing rules are given in \cref{fig:linmod-grammar,fig:linmod-ty-term}.
+\end{itemize}
+
+
+
 
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in modal presentation}\label{fig:linmod-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
-       [[v]] &::=& [[ˢλ x m ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[ᴇ v]] \grammsep [[( v1 , v2 )]] \\
-[[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ˢᴇ n t]] \grammsep [[ˢ( t1 , t2 )]] \grammsep [[t t']] \grammsep [[t ; t']] \\
-&|\,& [[ t ►case m { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case m ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case m ᴇ x ⟼ u]] \\
+       [[v]] &::=& [[ˢλ x m ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[( v1 , v2 )]] \grammsep [[ᴇ v]] \\
+[[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ˢ( t1 , t2 )]] \grammsep [[ˢᴇ n t]] \grammsep [[t t']] \grammsep [[t ; t']] \\
+&|\,& [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case ¹ν ᴇ x ⟼ u]] \\
 &&\\
 [[T]], [[U]] &::=& [[T m → U]] \grammsep [[①]] \grammsep [[T1 ⨁ T2]] \grammsep [[T1 ⨂ T2]] \grammsep [[! n T]] \\
 [[m]], [[n]] &::=& [[˥]] \grammsep [[ɷ]] \grammsep [[m · n]] \\

@@ -2,6 +2,71 @@ defns
 LinTy :: '' ::=
 
 defn
+P ╟ T :: :: LinMon_Log :: 'LinMon_Log' {{ com Deduction rules }} by
+
+----------------------- :: Var {{ com Id }}
+_T ╟ T
+
+P , _T ╟ U [[:Tyu]]
+----------------- :: Fun {{ com $\ottstype{\multimap}$I }}
+P ╟ T ⊸ U
+
+--------------------- :: Unit {{ com $\ottstype{1}$I }}
+{} ╟ ①
+
+P ╟ T1 [[:Tyt1]]
+--------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{L} }}
+P ╟ T1 ⨁ T2
+
+P ╟ T2 [[:Tyt2]]
+--------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{R} }}
+P ╟ T1 ⨁ T2
+
+P1 ╟ T1 [[:Tyt1]]
+P2 ╟ T2 [[:Tyt2]]
+------------------------- :: Prod {{ com $\ottstype{\otimes}$I }}
+P1, P2 ╟ T1 ⨂ T2
+
+P1 ╟ T [[:Tyt]]
+P2 ╟ T ⊸ U [[:Tytp]]
+----------------- :: App {{ com $\ottstype{\multimap}$E }}
+P1, P2 ╟ U
+
+P1 ╟ ① [[:Tyt]]
+P2 ╟ U [[:Tyu]]
+----------------- :: PatU {{ com $\ottstype{1}$E }}
+P1 , P2 ╟ U
+
+P1 ╟ T1 ⨁ T2 [[:Tyt]]
+P2, _T1 ╟ U [[:Tyu1]]
+P2, _T2 ╟ U [[:Tyu2]]
+----------------- :: PatS {{ com $\ottstype{\oplus}$E }}
+P1, P2 ╟ U
+
+P1 ╟ T1 ⨂ T2 [[:Tyt]]
+P2, _T1, _T2 ╟ U [[:Tyu]]
+----------------- :: PatP {{ com $\ottstype{\otimes}$E }}
+P1, P2 ╟ U
+
+!P ╟ T [[:Tyt]]
+--------------------- :: Exp {{ com $\ottstype{!}$P }}
+!P ╟ !T
+
+P ╟ !T [[:Tyt]]
+----------------- :: Derelict {{ com $\ottstype{!}$D }}
+P ╟ T
+
+P1 ╟ !T [[:Tyt]]
+P2, _!T, _!T ╟ U [[:Tyu]]
+----------------- :: Dup {{ com $\ottstype{!}$C }}
+P1, P2 ╟ U
+
+P1 ╟ !T [[:Tyt]]
+P2 ╟ U [[:Tyu]]
+------------------- :: Drop {{ com $\ottstype{!}$W }}
+P1, P2 ╟ U
+
+defn
 P ⊪ t : T :: :: LinMon_Ty_term :: 'LinMon_Ty_term_' {{ com Typing judgment for terms }} by
 
 ----------------------- :: Var {{ com Id }}
@@ -169,20 +234,20 @@ P2 ⫢ u : U [[:Tyu]]
 P1 + P2 ⫢ t ; u : U
 
 P1 ⫢ t : T1 ⨁ T2 [[:Tyt]]
-P2, { x1 : m T1 } ⫢ u1 : U [[:Tyu1]]
-P2, { x2 : m T2 } ⫢ u2 : U [[:Tyu2]]
+P2, { x1 : ¹ν T1 } ⫢ u1 : U [[:Tyu1]]
+P2, { x2 : ¹ν T2 } ⫢ u2 : U [[:Tyu2]]
 ----------------- :: PatS {{ com $\ottstype{\oplus}$E }}
-m·P1 + P2 ⫢ t ►case m { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } : U
+m·P1 + P2 ⫢ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } : U
 
 P1 ⫢ t : T1 ⨂ T2 [[:Tyt]]
-P2, { x1 : m T1 }, { x2 : m T2 } ⫢ u : U [[:Tyu]]
+P2, { x1 : ¹ν T1 }, { x2 : m T2 } ⫢ u : U [[:Tyu]]
 ----------------- :: PatP {{ com $\ottstype{\otimes}$E }}
-m·P1 + P2 ⫢ t ►case m (x1 , x2) ⟼ u : U
+m·P1 + P2 ⫢ t ►case ¹ν (x1 , x2) ⟼ u : U
 
 P1 ⫢ t : !n T [[:Tyt]]
-P2, { x : m·n T } ⫢ u : U [[:Tyu]]
+P2, { x : n T } ⫢ u : U [[:Tyu]]
 ----------------- :: PatE {{ com $\ottstype{!}$E }}
-m·P1 + P2 ⫢ t ►case m ᴇ n x ⟼ u : U
+m·P1 + P2 ⫢ t ►case ¹ν ᴇ n x ⟼ u : U
 
 % defns
 % Sem :: '' ::=

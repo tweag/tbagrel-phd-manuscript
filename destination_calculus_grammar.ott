@@ -326,6 +326,7 @@ ctx, O {{ tex \Omega }}, G {{ tex \Theta }}, D {{ tex \Delta }}, P {{ tex \Gamma
   | O1 ∪ O2 :: M :: NonDisjointUnion {{ coq (union [[O1]] [[O2]]) }} {{ com Union of contexts }} {{ tex [[O1]]\cup[[O2]] }}
   | { x ⫶ T } :: S :: VarSingSimpl {{ tex [[x]]:[[T]] }} {{ com Variable typing binding with linear mode }}
   | ! P :: S :: Bang {{ tex ![[P]] }} {{ com Unrestricted context }}
+  | _ T :: S :: TypeAsHyp {{ tex [[T]] }}
 
 embed
 {{ coq
@@ -968,6 +969,7 @@ terminals :: 'terminals_' ::=
   | ⊫ :: :: lindash1 {{ tex \,\pmb{\vdash}\, }}
   | ⫢ :: :: lindash2 {{ tex \,\pmb{\vdash}\, }}
   | ⊪ :: :: lindash3 {{ tex \,\pmb{\vdash}\, }}
+  | ╟ :: :: lindash4 {{ tex \,\pmb{\vdash}\, }}
   | : :: :: colon {{ tex \pmb{:} }}
   | ; :: :: semicolon {{ tex ~\pmb{;}~ }}
 
