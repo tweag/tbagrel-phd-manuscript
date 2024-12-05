@@ -231,7 +231,7 @@ type, T, U, S :: 'type_' ::= {{ com Type }} {{ tex \ottstype{[[type]]} }} {{ coq
   | T1 ⨂ T2 :: :: Prod {{ tex [[T1]]\ottstype{\otimes}[[T2]] }} {{ com Product }}
   | ! m T :: :: Exp {{ tex \ottstype{!}_{[[m]]}[[T]] }} {{ com Exponential }}
   | U ⧔ T :: :: Ampar {{ tex [[U]]\,\ottstype{\ltimes}\,[[T]] }} {{ com Ampar }}
-  | T m → U :: :: Fun {{ tex [[T]]\,_{\myfuntm{[[m]]} }\!\ottstype{\to}\,[[U]] }} {{ com Function }}
+  | T m → U :: :: Fun {{ tex [[T]]\,_{\myfuntm{[[m]]} }\!\ottstype{\multimap}\,[[U]] }} {{ com Function }}
   | ⌊ T ⌋ m :: :: Dest {{ tex \ottstype{\lfloor}\,\!_{\mydestm{[[m]]} }[[T]]\ottstype{\rfloor} }} {{ com Destination }}
   | ( T ) :: S :: Paren {{ tex \ottstype{(}[[T]]\ottstype{)} }} {{ coq [[T]]}}
 

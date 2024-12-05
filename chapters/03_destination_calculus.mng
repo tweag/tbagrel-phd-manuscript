@@ -1,4 +1,4 @@
-\chapter{Formal functional language with first-class destinations: $\lambda$-calculus}
+\chapter{Formal functional language with first-class destinations: \destcalculus{}}
 
 \section{Introduction}\label{sec:intro}
 
@@ -410,7 +410,7 @@ Transforming the hole abstraction from its original implication form to a \emph{
 
 \paragraph{From par $\ottstype{\parr}$ to ampar $\ottstype{\ltimes}$}
 
-In CLL, thanks to the cut rule, any of the sides $[[S]]$ or $[[T]]$ of a par $\ottstype{[[S]]~\parr~[[T]]}$ can be eliminated, by interaction with the opposite type $\ottstype{\smallbullet^{\perp}}$, which then frees up the other side. But in \destcalculus{}, we have two types of interaction to consider: interaction between $[[T]]$ and $\ottstype{\lfloor[[T]]\rfloor}$, and interaction between $[[T]]$ and $[[T]]\ottstype{\to\smallbullet}$. The structure containing holes, $[[S]]$, can safely interact with $\ottstype{\lfloor[[S]]\rfloor}$ (merge it into another structure with holes), but not with $[[T]]\ottstype{\to\smallbullet}$, as it would let us read an incomplete structure!
+In CLL, thanks to the cut rule, any of the sides $[[S]]$ or $[[T]]$ of a par $\ottstype{[[S]]~\parr~[[T]]}$ can be eliminated, by interaction with the opposite type $\ottstype{\smallbullet^{\perp}}$, which then frees up the other side. But in \destcalculus{}, we have two types of interaction to consider: interaction between $[[T]]$ and $\ottstype{\lfloor[[T]]\rfloor}$, and interaction between $[[T]]$ and $[[T]]\ottstype{\multimap\smallbullet}$. The structure containing holes, $[[S]]$, can safely interact with $\ottstype{\lfloor[[S]]\rfloor}$ (merge it into another structure with holes), but not with $[[T]]\ottstype{\multimap\smallbullet}$, as it would let us read an incomplete structure!
 
 On the other hand, a complete value of type $[[T]] = \ottstype{(\ldots\lfloor[[T']]\rfloor\ldots)}$ containing destinations (but no holes) can safely interact with a function $[[T ¹ν → ①]]$: in particular, the function can pattern-match on the value of type $[[T]]$ to access destination $\ottstype{\lfloor[[T']]\rfloor}$. However, it might not be safe to fill the $[[T]] = \ottstype{(\ldots\lfloor[[T']]\rfloor\ldots)}$ into a $\ottstype{\lfloor[[T]]\rfloor}$ as that might allow scope escape of the destination $\ottstype{\lfloor[[T']]\rfloor}$ as we've just seen in~\cref{sec:scope-escape-dests}.
 

@@ -199,7 +199,7 @@ P ⫢ t : T :: :: LinMod_Ty_term :: 'LinMod_Ty_term_' {{ com Typing judgment for
 ɷ·P, { x : m T } ⫢ x : T
 
 P , { x : m T } ⫢ u : U [[:Tyu]]
------------------ :: Fun {{ com $\ottstype{\to}$I }}
+----------------- :: Fun {{ com $\ottstype{\multimap}$I }}
 P ⫢ ˢλ x m ⟼ u : T m → U
 
 --------------------- :: Unit {{ com $\ottstype{1}$I }}
@@ -225,7 +225,7 @@ n·P ⫢ ˢᴇ n t : ! n T
 
 P1 ⫢ t : T [[:Tyt]]
 P2 ⫢ t' : T m → U [[:Tytp]]
------------------ :: App {{ com $\ottstype{\to}$E }}
+----------------- :: App {{ com $\ottstype{\multimap}$E }}
 m·P1 + P2 ⫢ t' t : U
 
 P1 ⫢ t : ① [[:Tyt]]
@@ -234,20 +234,20 @@ P2 ⫢ u : U [[:Tyu]]
 P1 + P2 ⫢ t ; u : U
 
 P1 ⫢ t : T1 ⨁ T2 [[:Tyt]]
-P2, { x1 : ¹ν T1 } ⫢ u1 : U [[:Tyu1]]
-P2, { x2 : ¹ν T2 } ⫢ u2 : U [[:Tyu2]]
+P2, { x1 : ˥ T1 } ⫢ u1 : U [[:Tyu1]]
+P2, { x2 : ˥ T2 } ⫢ u2 : U [[:Tyu2]]
 ----------------- :: PatS {{ com $\ottstype{\oplus}$E }}
-m·P1 + P2 ⫢ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } : U
+P1 + P2 ⫢ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } : U
 
 P1 ⫢ t : T1 ⨂ T2 [[:Tyt]]
-P2, { x1 : ¹ν T1 }, { x2 : m T2 } ⫢ u : U [[:Tyu]]
+P2, { x1 : ˥ T1 }, { x2 : ˥ T2 } ⫢ u : U [[:Tyu]]
 ----------------- :: PatP {{ com $\ottstype{\otimes}$E }}
-m·P1 + P2 ⫢ t ►case ¹ν (x1 , x2) ⟼ u : U
+P1 + P2 ⫢ t ►case ¹ν (x1 , x2) ⟼ u : U
 
 P1 ⫢ t : !n T [[:Tyt]]
 P2, { x : n T } ⫢ u : U [[:Tyu]]
 ----------------- :: PatE {{ com $\ottstype{!}$E }}
-m·P1 + P2 ⫢ t ►case ¹ν ᴇ n x ⟼ u : U
+P1 + P2 ⫢ t ►case ¹ν ᴇ n x ⟼ u : U
 
 % defns
 % Sem :: '' ::=
