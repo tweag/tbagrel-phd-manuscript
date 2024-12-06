@@ -195,6 +195,7 @@ P1, P2 ; Ur ⊫ t ►case ¹ν ᴇ x ⟼ u : U
 defn
 P ⫢ t : T :: :: LinMod_Ty_term :: 'LinMod_Ty_term_' {{ com Typing judgment for terms }} by
 
+{{ [[˥]] <: [[m]] }} [[:Subtypem]]
 ----------------------- :: Var {{ com Id }}
 ɷ·P, { x : m T } ⫢ x : T
 
