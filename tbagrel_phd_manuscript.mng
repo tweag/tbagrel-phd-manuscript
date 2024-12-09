@@ -355,6 +355,8 @@
 \clearpage
 \tableofcontents
 
+\activespaces
+
 \include{chapters/01_introduction}
 \include{chapters/02_preliminaries}
 \include{chapters/03_destination_calculus}

@@ -33,7 +33,7 @@ The linear logic system might appear very restrictive, but we can always\unsure{
 
 \emph{Computational interpretations of linear logic}
 
-There exists several possible interpretations of linear logic as a linear $\lambda$-calculus. The first one, named \emph{monadic} presentation of linear $\lambda$-calculus in~\cite{andreoli_linlog_1992}, and denoted $\lambda_{L_1}$ in this document, is a direct term assignment of the natural deduction rules of ILL given in \cref{fig:linlog}, inspired greatly from the work of~\cite{bierman_linlog_phd_1994}. The syntax and typing rules of this presentation are given in \cref{fig:linmon-grammar,fig:linmon-ty-term}.
+There exists several possible interpretations of linear logic as a linear $\lambda$-calculus. The first one, named \emph{monadic} presentation of linear $\lambda$-calculus in~\cite{andreoli_linlog_1992}, and denoted $\lambda_{L_1}$ in this document, is a direct term assignment of the natural deduction rules of ILL given in \cref{fig:linlog}. The syntax and typing rules of this presentation, inspired greatly from the work of~\cite{bierman_linlog_phd_1994}, are given in \cref{fig:linmon-grammar,fig:linmon-ty-term}.
 
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in monadic presentation ($\lambda_{L_1}$)}\label{fig:linmon-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
@@ -134,20 +134,62 @@ Equipped with those, we can move to the grammar and typing rules of $\lambda_{L_
 \bgroup\renewcommand{\ottdrulename}[1]{$\lambda_{L_m}$\,/\,}
 \ottdefnLinModXXTyXXterm{}\egroup
 \end{ottfig}
-\egroup
 
-In $\lambda_{L_m}$ we're back to a single identity rule $\lambda_{L_m}$\,/\,Id, that asks for $[[x]]$ to be in the typing context with a mode $[[m]]$ that must be \emph{compatible with a single linear use} (we note $[[˥ <: m]]$). In our ringoid, with only two elements, we have both $[[˥ <: ˥]]$ and $[[˥ <: ɷ]]$, so $[[x]]$ can actually have any mode (either linear or unrestricted, so encompassing both $\lambda_{L_2}$\,/\,Id\textsubscript{Lin} and $\lambda_{L_2}$\,/\,Id\textsubscript{Ur}), but in more complex modal systems, not all modes have to be compatible with the unit for $[[·]]$\footnote{Actually, in the type system for \destcalculus{} detailed in \cref{sec:sec:syntax-type-system}, mode $[[¹↑]]$ is not compatible with unit $[[¹ν]]$.}. Rules $\lambda_{L_m}$\,/\,Id and $\lambda_{L_m}$\,/\,$[[①]]$I also allows to discard any context composed only of unrestricted bindings, denoted by $[[ɷ·P]]$ (equivalent to notation $[[!P]]$ in $\lambda_{L_1}$), so they are performing implicit weakening as in $\lambda_{L_2}$.
+In $\lambda_{L_m}$ we're back to a single identity rule $\lambda_{L_m}$\,/\,Id, that asks for $[[x]]$ to be in the typing context with a mode $[[m]]$ that must be \emph{compatible with a single linear use} (we note $[[˥ <: m]]$). In our ringoid, with only two elements, we have both $[[˥ <: ˥]]$ and $[[˥ <: ɷ]]$, so $[[x]]$ can actually have any mode (either linear or unrestricted, so encompassing both $\lambda_{L_2}$\,/\,Id\textsubscript{Lin} and $\lambda_{L_2}$\,/\,Id\textsubscript{Ur}), but in more complex modal systems, not all modes have to be compatible with the unit of the ringoid\footnote{Actually, in the type system for \destcalculus{} detailed in \cref{sec:sec:syntax-type-system}, mode $[[¹↑]]$ is not compatible with unit $[[¹ν]]$.}. Rules $\lambda_{L_m}$\,/\,Id and $\lambda_{L_m}$\,/\,$[[①]]$I also allows to discard any context composed only of unrestricted bindings, denoted by $[[ɷ·P]]$ (equivalent to notation $[[!P]]$ in $\lambda_{L_1}$), so they are performing implicit weakening as in $\lambda_{L_2}$.
 
-Every rule of $\lambda_{L_m}$ that mentions two subterms uses the newly defined $+$ operator on typing contexts in the conclusion of the rule. If a same variable $[[x]]$ is required in both $[[P1]]$ and $[[P2]]$ (either with mode $[[˥]]$ or $[[ɷ]]$, it doesn't matter), then $[[P1+P2]]$ will contain binding $[[{x : ɷ T}]]$. Said differently, the parent term will automatically deduce wether $[[x]]$ needs to be linear or unrestricted based on how (many) subterms use $[[x]]$, thanks to the $+$ operator. It's a vastly different approach than the linear context split for subterms in $\lambda_{L_\{1,2\}}$ and unrestricted context duplication for subterms in $\lambda_{L_2}$. I would argue that it makes the system smoother, and allows for easy extension without changing the typing rules much (compared to the monadic / dyadic presentation that are very specialized to handle linearity/unrestrictedness, and that alone).
+Every rule of $\lambda_{L_m}$ that mentions two subterms uses the newly defined $+$ operator on typing contexts in the conclusion of the rule. If a same variable $[[x]]$ is required in both $[[P1]]$ and $[[P2]]$ (either with mode $[[˥]]$ or $[[ɷ]]$, it doesn't matter), then $[[P1+P2]]$ will contain binding $[[{x : ɷ T}]]$. Said differently, the parent term will automatically deduce wether $[[x]]$ needs to be linear or unrestricted based on how (many) subterms use $[[x]]$, thanks to the $+$ operator. It's a vastly different approach than the linear context split for subterms in $\lambda_{L_{\{1,2\}}}$ and unrestricted context duplication for subterms in $\lambda_{L_2}$. I would argue that it makes the system smoother, and allows for easy extension without changing the typing rules much (compared to the monadic / dyadic presentation that are very specialized to handle linearity/unrestrictedness, and that alone).
 
 Much as in $\lambda_{L_2}$, the exponential modality $\ottstype{!}_{[[n]]}$ is eliminated by a $\ottkw{case}$ expression, that binds the payload to a new variable $[[x]]$ with modality $[[n]]$. The original boxed value can be recreated if needed with $[[ˢᴇ n x]]$; indeed, as in $\lambda_{L_2}$, elimination for $\ottstype{!}_{[[n]]}$ is \emph{not} dereliction.
 
 The last specificity of this system is that the function arrow $\ottstype{\multimap}$ now has a mode $[[m]]$ to which it consumes its argument. Actually that doesn't change the expressivity of the system compared to previous presentations; we would have been just fine with only a purely linear arrow, but because we have to assign a mode to any variable binding in this presentation, then it makes sense to allow this mode $[[m]]$ to be whatever the programmer wants, and not just default to $[[˥]]$. In application rule $\lambda_{L_m}$\,/\,$\ottstype{\multimap}$E, the typing context $[[P1]]$ required to type the argument is scaled in the conclusion of the rule by the mode $[[m]]$ that represent the "number" of use of the argument by the function.
 
-\paragraph{Projecting modes through fields of data structures}
+\paragraph{Deep modes: projecting modes through fields of data structures}
 
 In original linear logic from Girard (see ILL and presentation $\lambda_{L_1}$ above), there is only a one-way morphism between $[[!T ⨂ !U]]$ and $[[!(T⨂U)]]$; we cannot go from $[[!(T⨂U)]]$ to $[[!T ⨂ !U]]$. In other terms, an unrestricted pair $[[!(T⨂U)]]$ doesn't allow for unrestricted use of its components. The pair can be duplicated or discarded at will, but to be used, it needs to be derelicted first, to become $[[T⨂U]]$, that no longer allow to duplicate or discard any of $[[T]]$ or $[[U]]$. As a result, $[[T]]$ and $[[U]]$ will have to be used exactly the same number of times, even though they are part of an unrestricted pair!
 
-Situation is no different in $\lambda_{L_2}$ (resp. $\lambda_{L_m}$): although the pair of type $[[!(T⨂U)]]$ can be bound to an unrestricted binding $[[{x ⫶ T⨂U}]] \in [[Ur]]$ (resp. $[[{x : ɷ T⨂U}]]$) and be used as this without need for dereliction, when it will be pattern-matched on with $\lambda_{L_\{2,m\}}$\,/\,$\ottstype{\otimes}$E, implicit dereliction will still happen, and linear-only bindings will be made for its components: $[[{x1 ⫶ T},{x2 ⫶ U}]]$ in the linear typing context (resp. $[[{x1 : ˥ T},{x2 : ˥ U}]]$).
+Situation is no different in $\lambda_{L_2}$ (resp. $\lambda_{L_m}$): although the pair of type $[[!(T⨂U)]]$ can be bound in an unrestricted binding $[[{x ⫶ T⨂U}]] \in [[Ur]]$ (resp. $[[{x : ɷ T⨂U}]]$) and be used as this without need for dereliction, when it will be pattern-matched on with $\lambda_{L_{\{2,m\}}}$\,/\,$\ottstype{\otimes}$E, implicit dereliction will still happen, and linear-only bindings will be made for its components: $[[{x1 ⫶ T},{x2 ⫶ U}]]$ in the linear typing context (resp. $[[{x1 : ˥ T},{x2 : ˥ U}]]$).
 
-It's in fact useful to lift this limitation. One motivation for \emph{deep modes} (in the sense that they propagate throughout a data structure) is that they make it more convenient to write non-linear programs in a linear language. Indeed, with deep modes, functions of type $[[T ɷ → U]]$ have exactly the same expressive power has ones with type $[[T]]\,\ottstype{\to}\,[[U]]$ in STLC. Without deep modes, the function $\ottkw{fst} \pmb{\triangleq} [[ˢλ x ɷ ⟼ x ►case ɷ (x1, x2) ⟼ x1]]$ would be a member of STLC's $[[T⨂U]]\,\ottstype{\to}\,[[T]]$ but not of $\lambda_{L_m}$'s $[[T⨂U ɷ → T]]$ (instead, it would have to be rewritten to fit within type $[[T⨂ (!ɷ U) ˥ → T]]$ or $[[(!ɷ T)⨂ (!ɷ U) ˥ → T]]$ in $\lambda_{L_m}$).
+It's in fact useful to lift this limitation. One motivation for \emph{deep modes} (in the sense that they propagate throughout a data structure) is that they make it more convenient to write non-linear programs in a linear language. Indeed, in a modal linear $\lambda$-calculus with deep modes ($\lambda_{L_{dm}}$), functions of type $[[T ɷ → U]]$ have exactly the same expressive power has ones with type $[[T]]\,\ottstype{\to}\,[[U]]$ in STLC. In other terms, any program that is valid in STLC but doesn't abide by linearity can still type in $\lambda_{L_{dm}}$ without any restructuration needed!
+
+Let's take the $\ottkw{fst}$ function as an example, that extracts the first component of a pair. With deep modes in $\lambda_{L_{dm}}$ we are able to write
+
+\codehere{
+\newoperator
+  {\ottkw{fst}_{\ottkw{dm}}}{[[T⨂U ɷ → T]]}
+  {\ottkw{fst}_{\ottkw{dm}}}{[[ˢλ x ɷ ⟼ x ►case ɷ (x1, x2) ⟼ x1]]}
+}
+
+as we would do in a non-linear language, like STLC, in which $\ottkw{fst}$ would have type $[[T⨂U]]\,\ottstype{\to}\,[[T]]$. On the other hand, in $\lambda_{L_m}$ as presented in \cref{fig:linmod-grammar,fig:linmod-ty-term}, we need to indicate individually for each component of the pair that we want them unrestricted (at least for the second one that we intent on discarding), and add extra elimination for the $\ottstype{!}$ modality:
+
+\codehere{
+\newoperator
+  {\ottkw{fst}_{\ottkw{m}}}{[[T⨂(!ɷ U) ˥ → T]]}
+  {\ottkw{fst}_{\ottkw{m}}}{\!\!\!\begin{array}[t]{l}[[
+ˢλ x ˥ ⟼ x ►case ¹ν (x1, ux2) ⟼⮒
+‥‥༼ux2 ►case ¹ν ᴇ ɷ x2 ⟼ x1༽
+]]\end{array}}
+}
+
+Adding deep modes to a practical linear language is not a very original take; it has been done in Linear Haskell~\cite{bernardy_linear_2018} and \cite{REFNEEDED}.
+With deep modes, we get the following equivalences:
+
+\codehere{\!\!\!\begin{array}[t]{rcl}
+[[!m (T⨂U)]] &\simeq& [[(!m T) ⨂ (!m U)]] \\
+[[!m (T⨁U)]] &\simeq& [[(!m T) ⨁ (!m U)]] \\
+[[!m (!n T)]] &\simeq& [[!(m·n) T]]
+\end{array}}
+
+The only change needed on the grammar is that $\ottkw{case}$ constructs now take a mode $[[m]]$ to which they consume the scrutinee, that is propagated to the field(s) of the scrutinee in the body of the $\ottkw{case}$. The new typing rules for $\ottkw{case}$ are presented in \cref{fig:lindeepmod-ty-term}, all the other rules of linear $\lambda$-calculus with deep modes, $\lambda_{L_{dm}}$, are supposed identical to \cref{fig:linmod-ty-term}.
+
+\begin{ottfig}{\caption{Altered typing rules for deep modes in linear $\lambda$-calculus in modal presentation ($\lambda_{L_{dm}}$)}\label{fig:lindeepmod-ty-term}}
+\bgroup\renewcommand{\ottdrulename}[1]{$\lambda_{L_{dm}}$\,/\,}
+\ottdefnLinDeepModXXTyXXterm{}\egroup
+\end{ottfig}
+
+We observe that the typing context $[[P1]]$ in which the scrutinee types is scaled by $[[m]]$ in the conclusion of all the $\ottkw{case}$ rules. This is very analog to the application rule $\lambda_{L_{m}}$\,/\,$\ottstype{\multimap}$E: it makes sure that the resources required to type $[[t]]$ are consumed $[[m]]$ times if we want to use $[[t]]$ at mode $[[m]]$. Given that $[[{ y : ˥ T1 } ⊢ ˢ(y, ()) : T1 ⨂ ①]]$ ($[[t]]$ uses $[[y]]$ once), if we want to extract the pair components with mode $[[ɷ]]$ to drop $[[y]]$, then $[[ˢ(y, ()) ►case ɷ (x1, x2) ⟼ x2]]$ will require context $[[ɷ·({ y : ˥ T1 })]]$ i.e. $[[{ y : ɷ T1 }]]$. In other terms, we cannot use parts of a structure made using linear resources in an unrestricted way (as that would break linearity).
+
+The linear $\lambda$-calculus with deep modes, $\lambda_{L_{dm}}$, will be the basis for our core contribution that follows in next chapter: the destination calculus \destcalculus{}.
+
+\TODO{Sémantique}
+
+\egroup

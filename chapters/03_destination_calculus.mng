@@ -32,8 +32,6 @@ Let's introduce and get familiar with \destcalculus{}, our simply typed $\lambda
 
 \subsection{Building up a vocabulary}\label{ssec:build-up-vocab}
 
-\activespaces
-
 In its simplest form, destination passing, much like continuation passing, is using a location, received as an argument, to return a value. Instead of a function with signature $[[T ¹ν → U]]$, in \destcalculus{} you would have $[[T ¹ν → ⌊ U ⌋ ¹ν ¹ν → ①]]$, where $[[⌊ U ⌋ ¹ν]]$ is read “destination for type $[[U]]$”. For instance, here is a destination-passing version of the identity function:
 
 \codehere{\newoperator

@@ -250,6 +250,25 @@ P2, { x : n T } ⫢ u : U [[:Tyu]]
 ----------------- :: PatE {{ com $\ottstype{!}$E }}
 P1 + P2 ⫢ t ►case ¹ν ᴇ n x ⟼ u : U
 
+defn
+P ⟚ t : T :: :: LinDeepMod_Ty_term :: 'LinDeepMod_Ty_term_' {{ com Typing judgment for terms }} by
+
+P1 ⟚ t : T1 ⨁ T2 [[:Tyt]]
+P2, { x1 : m T1 } ⟚ u1 : U [[:Tyu1]]
+P2, { x2 : m T2 } ⟚ u2 : U [[:Tyu2]]
+----------------- :: PatS {{ com $\ottstype{\oplus}$E }}
+m·P1 + P2 ⟚ t ►case m { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } : U
+
+P1 ⟚ t : T1 ⨂ T2 [[:Tyt]]
+P2, { x1 : m T1 }, { x2 : m T2 } ⟚ u : U [[:Tyu]]
+----------------- :: PatP {{ com $\ottstype{\otimes}$E }}
+m·P1 + P2 ⟚ t ►case m (x1 , x2) ⟼ u : U
+
+P1 ⟚ t : !n T [[:Tyt]]
+P2, { x : m·n T } ⟚ u : U [[:Tyu]]
+----------------- :: PatE {{ com $\ottstype{!}$E }}
+m·P1 + P2 ⟚ t ►case m ᴇ n x ⟼ u : U
+
 % defns
 % Sem :: '' ::=
 

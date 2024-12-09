@@ -46,7 +46,7 @@ Defined.
 % NAMES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-metavar var, x, y, d, dd, un, xs, ys, ex, st, tree, tl, tr, dtree, f, dh, dt, dx, dy, dxs, dys, dv, dtlr, dtl, dtr, q, tok, z, front, back ::= {{ com Variable names }}
+metavar var, x, y, d, dd, un, ux, xs, ys, ex, st, tree, tl, tr, dtree, f, dh, dt, dx, dy, dxs, dys, dv, dtlr, dtl, dtr, q, tok, z, front, back ::= {{ com Variable names }}
  {{ tex \ottmv{[[var]]} }} {{ coq nat }}
 
 indexvar k ::= {{ coq nat }} {{ com Index for ranges }}
@@ -970,6 +970,7 @@ terminals :: 'terminals_' ::=
   | ⫢ :: :: lindash2 {{ tex \,\pmb{\vdash}\, }}
   | ⊪ :: :: lindash3 {{ tex \,\pmb{\vdash}\, }}
   | ╟ :: :: lindash4 {{ tex \,\pmb{\vdash}\, }}
+  | ⟚ :: :: lindash5 {{ tex \,\pmb{\vdash}\, }}
   | : :: :: colon {{ tex \pmb{:} }}
   | ; :: :: semicolon {{ tex ~\pmb{;}~ }}
 
