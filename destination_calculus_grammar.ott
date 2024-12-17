@@ -157,7 +157,7 @@ term, t, u :: 'term_' ::= {{ com Term }}
   | let x ≔ t in b sp u :: S :: SugarLetSp2 {{ coq (term_App (sterm_Fun [[x]] (Some (pair Lin (Fin 0))) [[u]]) ([[t]])) }} {{ tex \ottkw{let}~[[x]]\assigneq[[t]]~\ottkw{in}[[b]][[sp]][[u]] }}
   | ༼ t ༽ :: S :: InvisParen {{ coq [[t]] }} {{ tex [[t]] }}
   | ul< t > :: S :: Underline {{ coq [[t]] }} {{ tex \uwave{[[t]]} }}
-  | ᴇ t :: S :: SugarExpSimpl {{ coq (term_Val val_Unit) }} {{ tex \expcons{}[[t]] }}
+  | ᴇ t :: S :: SugarExpSimpl {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{Many}\,[[t]] }}
   | λ x ⟼ u :: S :: SugarFunSimpl {{ coq (term_Val val_Unit) }} {{ tex \lamnt{[[x]]}{}{[[u]]} }} % (+ bind x in u +)
   | dup t as x , y in t' :: S :: SugarDup {{ coq (term_Val val_Unit) }} {{ tex \ottkw{dup}~[[t]]~\ottkw{as}~[[x]]\,,~[[y]]~\ottkw{in}~[[t']] }}
   | drop t in t' :: S :: SugarDrop {{ coq (term_Val val_Unit) }} {{ tex \ottkw{drop}~[[t]]~\ottkw{in}~[[t']] }}
@@ -190,14 +190,14 @@ val, v :: 'val_' ::= {{ com Value }}
 % DYNAMIC SYNTAX
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-ectxs, C :: 'ectxs_' ::= {{ com Evaluation context stack }} {{ coq (list ectx) }}
+ectxs, C {{ tex \ottnt{E} }} :: 'ectxs_' ::= {{ com Evaluation context stack }} {{ coq (list ectx) }}
   | ⬜ :: :: Nil {{ coq nil }} {{ com Represent the empty stack / "identity" evaluation context }}
 %  | c :: S :: S {{ coq (cons [[c]] nil) }}
   | C ∘ c :: :: Comp {{ coq (cons [[c]] [[C]]) }} {{ tex [[C]]\hspace*{0.4em}\circ\hspace*{0.4em}[[c]] }} {{ com Push $[[c]]$ on top of $[[C]]$ }}
   | C [ h ≔ H v ] :: M :: Fill {{ tex [[C]]\hspace*{0.11em}\llparenthesis [[h]]\assigneq_{[[H]]}\,[[v]]\hspace*{0.11em}\rrparenthesis }} {{ com Fill $[[h]]$ in $[[C]]$ with value $[[v]]$ (that may contain holes) }} {{ coq (ectxs_fill [[C]] [[h]] [[H]] [[v]]) }}
   | ( C ) :: S :: Paren {{ coq [[C]] }} {{ tex \biggerparenl[[C]]\biggerparenr }}
 
-ectx, c :: 'ectx_' ::= {{ com Evaluation context component }}
+ectx, c {{ tex \ottnt{\scriptstyle E} }} :: 'ectx_' ::= {{ com Evaluation context component }}
   | t' ⬜ :: :: App1 {{ tex [[t']]~[[⬜]] }}
   | ⬜ v :: :: App2  {{ tex [[⬜]]~[[v]] }}
   | ⬜ ; u :: :: PatU {{ tex [[⬜]]\patu[[u]] }}
@@ -220,6 +220,11 @@ ectx, c :: 'ectx_' ::= {{ com Evaluation context component }}
   | v ◀ ⬜ :: :: FillLeaf2 {{ tex [[v]]\blacktriangleleft[[⬜]] }}
   | H ᵒᵖ⟨ v2 ❟ ⬜ ⟩ :: :: OpenAmpar {{ tex ^{\text{op}\!}_{[[H]]\!}\ottsctor{\langle}[[v2]]\,\ottsctor{\bbcomma}~[[⬜]]\ottsctor{\rangle} }} {{ com Open ampar, binding hole names in the next components }}
   | ( c ) :: S :: Paren {{ coq [[c]] }} {{ tex [[c]] }} % {{ tex \biggerparenl[[c]]\biggerparenr }}
+  | ˢInl ⬜ :: S :: SugarLeft {{ tex \ottsctor{Inl}\,[[⬜]] }}
+  | ˢInr ⬜ :: S :: SugarRight {{ tex \ottsctor{Inr}\,[[⬜]] }}
+  | ˢ( ⬜ , t2 ) :: S :: SugarProd1 {{ tex \ottsctor{(}[[⬜]]\,\ottsctor{,}~[[t2]]\ottsctor{)} }}
+  | ˢ( v1 , ⬜ ) :: S :: SugarProd2 {{ tex \ottsctor{(}[[v1]]\,\ottsctor{,}~[[⬜]]\ottsctor{)} }}
+  | ˢᴇ m ⬜ :: S :: SugarExp {{ tex \expcons{[[m]]}[[⬜]] }}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TYPING SYNTAX
@@ -242,7 +247,7 @@ type, T, U, S :: 'type_' ::= {{ com Type }} {{ tex \ottstype{[[type]]} }} {{ coq
   | Queue T :: S :: SugarQueue {{ tex \ottstype{Queue}~[[T]] }} {{ coq type_Unit }}
   | Tree T :: S :: SugarTree {{ tex \ottstype{Tree}~[[T]] }} {{ coq type_Unit }}
   | X :: S :: SugarTypeVar {{ tex \ottmv{X} }} {{ coq type_Unit }}
-  | E :: S :: SugarEffect {{ tex \ottstype{E} }} {{ coq type_Unit }}
+  % | E :: S :: SugarEffect {{ tex \ottstype{E} }} {{ coq type_Unit }}
   | Token :: S :: SugarToken {{ tex \ottstype{Token} }} {{ coq type_Unit }}
   | T ⊸ U :: S :: SugarLinFun {{ tex [[T]]\,\ottstype{\multimap}\,[[U]] }} {{ coq type_Unit }}
   | ! T :: S :: SugarLinBang {{ tex \ottstype{!}[[T]] }} {{ coq type_Unit }}
@@ -316,7 +321,7 @@ ctx, O {{ tex \Omega }}, G {{ tex \Theta }}, D {{ tex \Delta }}, P {{ tex \Gamma
   | { x : m T } :: :: VarSing {{ coq (ctx_singleton (name_Var [[x]]) (binding_Var [[m]] [[T]])) }} {{ tex [[x]]:\!_{\![[m]]}[[T]] }} {{ com Variable typing binding }}
   | { + h : T n } :: :: HoleSing {{ coq (ctx_singleton (name_DH [[h]]) (binding_Hole [[T]] [[n]])) }} {{ tex \ottshname{\hboxed{[[h]]} }:\!_{\![[n]]}[[T]] }} {{ com Hole typing binding }}
   | { - h : m ⌊ T ⌋ n } :: :: DestSing {{ coq (ctx_singleton (name_DH [[h]]) (binding_Dest [[m]] [[T]] [[n]])) }} {{ tex \ottshname{\destminus}[[h]]:\!_{\![[m]]}\ottstype{\lfloor}\,\!_{[[n]]}[[T]]\ottstype{\rfloor} }} {{ com Destination typing binding }}
-  | m · O :: M :: Stimes {{ com Multiply the leftmost mode of each binding by $[[m]]$ }} {{ coq (stimes [[m]] [[O]]) }}
+  | m · O :: M :: Stimes {{ com Multiply the leftmost mode of each binding by $[[m]]$ }} {{ coq (stimes [[m]] [[O]]) }} {{ tex [[m]]\hspace{-0.3ex}\cdot\hspace{-0.3ex}[[O]] }}
   | O1 + O2 :: M :: Union {{ coq (union [[O1]] [[O2]]) }} {{ com Sum (incompatible bindings get tagged with $\ottsmode{\skull}$) }}
   | O1 , O2 :: M :: DisjointUnion {{ coq (union [[O1]] [[O2]]) }} {{ com Disjoint sum }} {{ tex [[O1]],~[[O2]] }}
   | -⁻¹ D :: M :: HminusInv {{ coq (hminus_inv [[D]]) }} {{ tex \ottshname{\destminus^{\scriptscriptstyle\text{-}1} }[[D]] }} {{ com Transforms dest bindings into a hole bindings }}
@@ -686,7 +691,7 @@ Proof.
   - left. exact (ModeSubtypeProofNone None).
 Defined.
 
-Notation "n '<:' m" := (ModeSubtype m n) (at level 50, no associativity).
+Notation "n '⥶' m" := (ModeSubtype m n) (at level 50, no associativity).
 
 (******************************************************************************
  * BINDERS
@@ -945,7 +950,7 @@ line_break, b :: 'b_' ::= {{ tex \ottssp{[[line_break]]} }}
 terminals :: 'terminals_' ::=
 
 % === Term syntax ===
-  | ⬜ :: :: idectx {{ tex [] }}
+  | ⬜ :: :: idectx {{ tex \vrectangle }}
   | ⟼ :: :: mapsto {{ tex \mapsto }}
   | () :: :: unit {{ tex \ottsctor{()} }}
   | Inl :: :: inl {{ tex \ottsctor{Inl} }}
@@ -994,7 +999,7 @@ pred :: '_' ::= {{ com Serves for the .mng file. Isn't used in the actual rules 
   | G1 # G2 :: :: Disjoint {{ tex [[G1]]\texttt{\#}[[G2]] }}
   | H1 ## H2 :: :: HDisjoint {{ tex [[H1]]\texttt{\#\#}[[H2]] }}
   | IsValid m :: :: IsValid {{ tex \texttt{IsValid}~[[m]] }}
-  | m1 <: m2 :: :: ModeSubtype {{ tex [[m1]]~\mathtt{<:}~[[m2]] }}
+  | m1 ⥶ m2 :: :: ModeSubtype {{ tex [[m1]]~\texttt{⥶}~[[m2]] }}
   | NotVal t :: :: NotVal {{ tex \texttt{NotVal}~[[t]] }}
   | h1 = h2 :: :: hname_eq {{ tex [[h1]] \texttt{=} [[h2]] }}
 
@@ -1003,7 +1008,7 @@ pred :: '_' ::= {{ com Serves for the .mng file. Isn't used in the actual rules 
   | P ˢ⊢ t : T :: :: Ty_sterm
   | D ⊣ C : T1 ↣ T2 :: :: Ty_ectxs {{ com Typing of evaluation contexts }} {{ tex [[D]][[⊣]][[C]][[:]][[T1]]\ottstype{\rightarrowtail}[[T2]] }}
   | ⊢ C [ t ] : T :: :: Ty {{ tex [[⊢]][[C]]\biggerbrackl [[t]] \biggerbrackr[[:]][[T]] }}
-  | C [ t ] ⟶ C' [ t' ] :: :: Sem {{ tex [[C]]\biggerbrackl [[t]] \biggerbrackr[[⟶]][[C']]\biggerbrackl [[t']] \biggerbrackr }}
+  | C [ t ] ⟶ C' [ t' ] :: :: Sem {{ tex [[C]]~\big|~ [[t]]~[[⟶]]~[[C']]~\big|~[[t']] }}
   | C [ t ] :: :: Cmd {{ tex [[C]]\biggerbrackl [[t]] \biggerbrackr }}
   | Z | t ⟶ Z' | t' :: :: HeapSem
   | Z | t :: :: HeapCmd

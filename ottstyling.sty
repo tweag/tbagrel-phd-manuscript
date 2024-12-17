@@ -126,7 +126,7 @@
 \newcommand{\munt}[2]{\ottsctor{\mu}{#1}\,\mapsto#2}
 
 % Constructor for exponential
-\newcommand{\expcons}[1]{\ottsctor{\scriptstyle E}_{#1}\,}
+\newcommand{\expcons}[1]{\ottsctor{Mod}_{#1}\,}
 
 % Raised and scaled bullet for fillCompomp
 \newlength{\mylen}
@@ -188,3 +188,18 @@
 \newcommand{\holesq}{\textcolor{hnamecolor}{\square}}
 \setlength{\fboxsep}{.3\fboxsep}
 \newcommand{\hboxed}[1]{\boxed{\hspace*{0.3ex}#1\hspace*{0.3ex}}}
+\makeatletter
+\providecommand{\vrectangle}{\mkern1mu\mathpalette\v@rectangle\relax\mkern1mu}
+\newcommand{\v@rectangle}[2]{%
+  \raisebox{-0.1ex}{\hbox{%begingroup
+  \fboxrule=0.5\fontdimen 8
+    \ifx#1\displaystyle\textfont\else
+    \ifx#1\textstyle\textfont\else
+    \ifx#1\scriptstyle\scriptfont\else
+    \scriptscriptfont\fi\fi\fi 3
+  \fboxsep=-\fboxrule
+  \fbox{$\m@th#1\phantom{l}$}%
+  }%\endgroup
+  }
+}
+\makeatother

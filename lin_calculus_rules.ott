@@ -15,11 +15,11 @@ P ╟ T ⊸ U
 {} ╟ ①
 
 P ╟ T1 [[:Tyt1]]
---------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{L} }}
+--------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{1} }}
 P ╟ T1 ⨁ T2
 
 P ╟ T2 [[:Tyt2]]
---------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{R} }}
+--------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{2} }}
 P ╟ T1 ⨁ T2
 
 P1 ╟ T1 [[:Tyt1]]
@@ -80,11 +80,11 @@ P ⊪ λ x ⟼ u : T ⊸ U
 {} ⊪ () : ①
 
 P ⊪ t1 : T1 [[:Tyt1]]
---------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{L} }}
+--------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{1} }}
 P ⊪ ˢInl t1 : T1 ⨁ T2
 
 P ⊪ t2 : T2 [[:Tyt2]]
---------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{R} }}
+--------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{2} }}
 P ⊪ ˢInr t2 : T1 ⨁ T2
 
 P1 ⊪ t1 : T1 [[:Tyt1]]
@@ -148,11 +148,11 @@ P ; Ur ⊫ λ x ⟼ u : T ⊸ U
 {} ; Ur ⊫ () : ①
 
 P ; Ur ⊫ t1 : T1 [[:Tyt1]]
---------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{L} }}
+--------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{1} }}
 P ; Ur ⊫ ˢInl t1 : T1 ⨁ T2
 
 P ; Ur ⊫ t2 : T2 [[:Tyt2]]
---------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{R} }}
+--------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{2} }}
 P ; Ur ⊫ ˢInr t2 : T1 ⨁ T2
 
 P1 ; Ur ⊫ t1 : T1 [[:Tyt1]]
@@ -195,7 +195,7 @@ P1, P2 ; Ur ⊫ t ►case ¹ν ᴇ x ⟼ u : U
 defn
 P ⫢ t : T :: :: LinMod_Ty_term :: 'LinMod_Ty_term_' {{ com Typing judgment for terms }} by
 
-{{ [[˥]] <: [[m]] }} [[:Subtypem]]
+{{ [[˥]] ⥶ [[m]] }} [[:Subtypem]]
 ----------------------- :: Var {{ com Id }}
 ɷ·P, { x : m T } ⫢ x : T
 
@@ -207,11 +207,11 @@ P ⫢ ˢλ x m ⟼ u : T m → U
 ɷ·P ⫢ () : ①
 
 P ⫢ t1 : T1 [[:Tyt1]]
---------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{L} }}
+--------------------- :: Left {{ com $\ottstype{\oplus}$I\textsubscript{1} }}
 P ⫢ ˢInl t1 : T1 ⨁ T2
 
 P ⫢ t2 : T2 [[:Tyt2]]
---------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{R} }}
+--------------------- :: Right {{ com $\ottstype{\oplus}$I\textsubscript{2} }}
 P ⫢ ˢInr t2 : T1 ⨁ T2
 
 P1 ⫢ t1 : T1 [[:Tyt1]]
@@ -269,213 +269,180 @@ P2, { x : m·n T } ⟚ u : U [[:Tyu]]
 ----------------- :: PatE {{ com $\ottstype{!}$E }}
 m·P1 + P2 ⟚ t ►case m ᴇ n x ⟼ u : U
 
-% defns
-% Sem :: '' ::=
+defns
+LinSem :: '' ::=
 
-% % If ectx composition is not a meta instruction but a syntactic rule for context formation, then all unfoc rules can be merged as a single "pop & reform term" instruction ?
-% % Not really for Close_Ampar because it is transformed back to a closed ampar instead of just being ectx substitution.
+% If ectx composition is not a meta instruction but a syntactic rule for context formation, then all unfoc rules can be merged as a single "pop & reform term" instruction ?
+% Not really for Close_Ampar because it is transformed back to a closed ampar instead of just being ectx substitution.
 
-% % We want theorem that C[t] -->* C[v] where englobing context doesn't change?
+% We want theorem that C[t] -->* C[v] where englobing context doesn't change?
 
-% defn
-% C [ t ] ⟶ C' [ t' ] :: :: Sem :: '' {{ com Small-step evaluation of commands }} {{ tex [[C]]\biggerbrackl [[t]] \biggerbrackr[[⟶]][[C']]\biggerbrackl [[t']] \biggerbrackr }} by
+defn
+C [ t ] ⟶ C' [ t' ] :: :: LinDeepMod_Sem :: '' {{ com Small-step evaluation }} {{ tex [[C]]~\big|~ [[t]]~[[⟶]]~[[C']]~\big|~[[t']] }} by
+
+{{ NotVal [[t]] }} [[:NotValt]]
+-------------------------------- :: LinFocus_Left {{ com $\ottstype{\oplus}$I\textsubscript{1}F }}
+C[ˢInl t] ⟶ (C ∘ ( ˢInl ⬜ ))[t]
+
+-------------------------------- :: LinUnfocus_Left {{ com $\ottstype{\oplus}$I\textsubscript{1}U }}
+(C ∘ ( ˢInl ⬜ ))[v] ⟶ C[ˢInl v]
+
+{{ NotVal [[t]] }} [[:NotValt]]
+-------------------------------- :: LinFocus_Right {{ com $\ottstype{\oplus}$I\textsubscript{2}F }}
+C[ˢInr t] ⟶ (C ∘ ( ˢInr ⬜ ))[t]
+
+-------------------------------- :: LinUnfocus_Right {{ com $\ottstype{\oplus}$I\textsubscript{2}U }}
+(C ∘ ( ˢInr ⬜ ))[v] ⟶ C[ˢInr v]
+
+{{ NotVal [[t1]] }} [[:NotValt1]]
+-------------------------------- :: LinFocus_Prod1 {{ com $\ottstype{\otimes}$IF\textsubscript{1} }}
+C[ˢ(t1, t2)] ⟶ (C ∘ ˢ(⬜, t2))[t1]
+
+-------------------------------- :: LinUnfocus_Prod1 {{ com $\ottstype{\otimes}$IU\textsubscript{1} }}
+(C ∘ ˢ(⬜, t2))[v1] ⟶ C[ˢ(v1, t2)]
+
+{{ NotVal [[t2]] }} [[:NotValt2]]
+-------------------------------- :: LinFocus_Prod2 {{ com $\ottstype{\otimes}$IF\textsubscript{2} }}
+C[ˢ(v1, t2)] ⟶ (C ∘ ˢ(v1, ⬜))[t2]
+
+-------------------------------- :: LinUnfocus_Prod2 {{ com $\ottstype{\otimes}$IU\textsubscript{2} }}
+(C ∘ ˢ(v1, ⬜))[v2] ⟶ C[ˢ(v1, v2)]
+
+{{ NotVal [[t]] }} [[:NotValt]]
+-------------------------------- :: LinFocus_Exp {{ com $\ottstype{!}$IF }}
+C[ˢᴇ n t] ⟶ (C ∘ ( ˢᴇ n ⬜))[t]
+
+-------------------------------- :: LinUnfocus_Exp {{ com $\ottstype{!}$IU }}
+(C ∘ ( ˢᴇ n ⬜))[v] ⟶ C[ˢᴇ n v]
+
+----------------------------- :: LinFocus_App1 {{ com $\ottstype{\multimap}$EF\textsubscript{1} }}
+C[t' t] ⟶ (C ∘ (t' ⬜))[t]
+
+----------------------------- :: LinFocus_App2 {{ com $\ottstype{\multimap}$EF\textsubscript{2} }}
+(C ∘ (t' ⬜))[v] ⟶ (C ∘ (⬜ v))[t']
+
+----------------------------- :: LinRed_App {{ com $\ottstype{\multimap}$ER }}
+(C ∘ (⬜ v))[ˢλ x m ⟼ u] ⟶ C[u[x ≔ v] ]
+
+----------------------- :: LinFocus_PatU {{ com $\ottstype{1}$EF }}
+C[t ; u] ⟶ (C ∘ (⬜ ; u))[t]
+
+----------------------- :: LinRed_PatU {{ com $\ottstype{1}$ER }}
+C[() ; u] ⟶ C[u]
+
+----------------------- :: LinFocus_PatS {{ com $\ottstype{\oplus}$EF }}
+C[t ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }] ⟶ (C ∘ (⬜ ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }))[t]
+
+----------------------- :: LinRed_PatL {{ com $\ottstype{\oplus}$ER\textsubscript{1} }}
+(C ∘ (⬜ ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }))[Inl v1] ⟶ C[u1[x1 ≔ v1] ]
+
+----------------------- :: LinRed_PatR {{ com $\ottstype{\oplus}$ER\textsubscript{2} }}
+(C ∘ (⬜ ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }))[Inl v2] ⟶ C[u2[x2 ≔ v2] ]
+
+----------------------- :: LinFocus_PatP {{ com $\ottstype{\otimes}$EF }}
+C[t ►case m (x1,x2) ⟼ u] ⟶ (C ∘ (⬜ ►case m (x1,x2) ⟼ u))[t]
+
+----------------------- :: LinRed_PatP {{ com $\ottstype{\otimes}$ER }}
+(C ∘ (⬜ ►case m (x1,x2) ⟼ u))[(v1, v2)] ⟶ C[u[x1 ≔ v1][x2 ≔ v2] ]
+
+----------------------- :: LinFocus_PatE {{ com $\ottstype{!}$EF }}
+C[t ►case m ᴇ n x ⟼ u] ⟶ (C ∘ (⬜ ►case m ᴇ n x ⟼ u))[t]
+
+----------------------- :: LinRed_PatE {{ com $\ottstype{!}$ER }}
+(C ∘ (⬜ ►case m ᴇ n x ⟼ u))[ᴇ n v] ⟶ C[u[x ≔ v] ]
+
 
 % {{ NotVal [[t]] }} [[:NotValt]]
-% ----------------------------- :: Focus_App1
+% -------------------------------- :: LinFocus_Left {{ com $\ottstype{\oplus}$I\textsubscript{1}F }}
+% C[ˢInl t] ⟶ (C ∘ ( ˢInl ⬜ ))[t]
+
+% -------------------------------- :: LinUnfocus_Left {{ com $\ottstype{\oplus}$I\textsubscript{1}U }}
+% (C ∘ ( ˢInl ⬜ ))[v] ⟶ C[ˢInl v]
+
+% {{ NotVal [[t]] }} [[:NotValt]]
+% -------------------------------- :: LinFocus_Right {{ com $\ottstype{\oplus}$I\textsubscript{2}F }}
+% C[ˢInr t] ⟶ (C ∘ ( ˢInr ⬜ ))[t]
+
+% -------------------------------- :: LinUnfocus_Right {{ com $\ottstype{\oplus}$I\textsubscript{2}U }}
+% (C ∘ ( ˢInr ⬜ ))[v] ⟶ C[ˢInr v]
+
+% {{ NotVal [[t1]] }} [[:NotValt1]]
+% -------------------------------- :: LinFocus_Prod1 {{ com $\ottstype{\otimes}$IF\textsubscript{1} }}
+% C[ˢ(t1, t2)] ⟶ (C ∘ ˢ(⬜, t2))[t1]
+
+% -------------------------------- :: LinUnfocus_Prod1 {{ com $\ottstype{\otimes}$IU\textsubscript{1} }}
+% (C ∘ ˢ(⬜, t2))[v1] ⟶ C[ˢ(v1, t2)]
+
+% {{ NotVal [[t2]] }} [[:NotValt2]]
+% -------------------------------- :: LinFocus_Prod2 {{ com $\ottstype{\otimes}$IF\textsubscript{2} }}
+% C[ˢ(v1, t2)] ⟶ (C ∘ ˢ(v1, ⬜))[t2]
+
+% -------------------------------- :: LinUnfocus_Prod2 {{ com $\ottstype{\otimes}$IU\textsubscript{2} }}
+% (C ∘ ˢ(v1, ⬜))[v2] ⟶ C[ˢ(v1, v2)]
+
+% {{ NotVal [[t]] }} [[:NotValt]]
+% -------------------------------- :: LinFocus_Exp {{ com $\ottstype{!}$IF }}
+% C[ˢᴇ n t] ⟶ (C ∘ ( ˢᴇ n ⬜))[t]
+
+% -------------------------------- :: LinUnfocus_Exp {{ com $\ottstype{!}$IU }}
+% (C ∘ ( ˢᴇ n ⬜))[v] ⟶ C[ˢᴇ n v]
+
+% {{ NotVal [[t]] }} [[:NotValt]]
+% ----------------------------- :: LinFocus_App1 {{ com $\ottstype{\multimap}$EF\textsubscript{1} }}
 % C[t' t] ⟶ (C ∘ (t' ⬜))[t]
 
-% ----------------------------- :: Unfocus_App1
+% ----------------------------- :: LinUnfocus_App1 {{ com $\ottstype{\multimap}$EU\textsubscript{1} }}
 % (C ∘ (t' ⬜))[v] ⟶ C[t' v]
 
 % {{ NotVal [[t']] }} [[:NotValtp]]
-% ----------------------------- :: Focus_App2
+% ----------------------------- :: LinFocus_App2 {{ com $\ottstype{\multimap}$EF\textsubscript{2} }}
 % C[t' v] ⟶ (C ∘ (⬜ v))[t']
 
-% ----------------------------- :: Unfocus_App2
+% ----------------------------- :: LinUnfocus_App2 {{ com $\ottstype{\multimap}$EU\textsubscript{2} }}
 % (C ∘ (⬜ v))[v'] ⟶ C[v' v]
 
-% ------------------ :: Red_App
-% C[(ᵛλ x m ⟼ u) v] ⟶ C[u[x ≔ v] ]
+% ------------------ :: LinRed_App {{ com $\ottstype{\multimap}$ER }}
+% C[(ˢλ x m ⟼ u) v] ⟶ C[u[x ≔ v] ]
 
 % {{ NotVal [[t]] }} [[:NotValt]]
-% ----------------------- :: Focus_PatU
+% ----------------------- :: LinFocus_PatU {{ com $\ottstype{1}$EF }}
 % C[t ; u] ⟶ (C ∘ (⬜ ; u))[t]
 
-% ----------------------- :: Unfocus_PatU
+% ----------------------- :: LinUnfocus_PatU {{ com $\ottstype{1}$EU }}
 % (C ∘ (⬜ ; u))[v] ⟶ C[v ; u]
 
-% ----------------------- :: Red_PatU
+% ----------------------- :: LinRed_PatU {{ com $\ottstype{1}$ER }}
 % C[() ; u] ⟶ C[u]
 
 % {{ NotVal [[t]] }} [[:NotValt]]
-% ----------------------- :: Focus_PatS
+% ----------------------- :: LinFocus_PatS {{ com $\ottstype{\oplus}$EF }}
 % C[t ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }] ⟶ (C ∘ (⬜ ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }))[t]
 
-% ----------------------- :: Unfocus_PatS
+% ----------------------- :: LinUnfocus_PatS {{ com $\ottstype{\oplus}$EU }}
 % (C ∘ (⬜ ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }))[v] ⟶ C[v ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }]
 
-% ----------------------- :: Red_PatL
+% ----------------------- :: LinRed_PatL {{ com $\ottstype{\oplus}$ER\textsubscript{1} }}
 % C[(Inl v1) ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }] ⟶ C[u1[x1 ≔ v1] ]
 
-% ----------------------- :: Red_PatR
+% ----------------------- :: LinRed_PatR {{ com $\ottstype{\oplus}$ER\textsubscript{2} }}
 % C[(Inr v2) ►case m { Inl x1 ⟼ u1, Inr x2 ⟼ u2 }] ⟶ C[u2[x2 ≔ v2] ]
 
 % {{ NotVal [[t]] }} [[:NotValt]]
-% ----------------------- :: Focus_PatP
+% ----------------------- :: LinFocus_PatP {{ com $\ottstype{\otimes}$EF }}
 % C[t ►case m (x1,x2) ⟼ u] ⟶ (C ∘ (⬜ ►case m (x1,x2) ⟼ u))[t]
 
-% ----------------------- :: Unfocus_PatP
+% ----------------------- :: LinUnfocus_PatP {{ com $\ottstype{\otimes}$EU }}
 % (C ∘ (⬜ ►case m (x1,x2) ⟼ u))[v] ⟶ C[v ►case m (x1,x2) ⟼ u]
 
-% ----------------------- :: Red_PatP
+% ----------------------- :: LinRed_PatP {{ com $\ottstype{\otimes}$ER }}
 % C[(v1, v2) ►case m (x1,x2) ⟼ u] ⟶ C[u[x1 ≔ v1][x2 ≔ v2] ]
 
 % {{ NotVal [[t]] }} [[:NotValt]]
-% ----------------------- :: Focus_PatE
+% ----------------------- :: LinFocus_PatE {{ com $\ottstype{!}$EF }}
 % C[t ►case m ᴇ n x ⟼ u] ⟶ (C ∘ (⬜ ►case m ᴇ n x ⟼ u))[t]
 
-% ----------------------- :: Unfocus_PatE
+% ----------------------- :: LinUnfocus_PatE {{ com $\ottstype{!}$EU }}
 % (C ∘ (⬜ ►case m ᴇ n x ⟼ u))[v] ⟶ C[v ►case m ᴇ n x ⟼ u]
 
-% ----------------------- :: Red_PatE
-% C[ᴇ n v' ►case m ᴇ n x ⟼ u] ⟶ C[u[x ≔ v'] ]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% ----------------------- :: Focus_Map
-% C[t ►map x ⟼ t'] ⟶ (C ∘ (⬜ ►map x ⟼ t'))[t]
-
-% ----------------------- :: Unfocus_Map
-% (C ∘ (⬜ ►map x ⟼ t'))[v] ⟶ C[v ►map x ⟼ t']
-
-% {{ [[h''']] = [[max(H ∪ hnames(C)) + 1]] }} [[:hpMaxC]]
-% ---------------------------------- :: Open_Ampar
-% C[ H ⟨ v2 ❟ v1 ⟩ ►map x ⟼ t'] ⟶ (C ∘ (H⩲h''' ᵒᵖ⟨ v2[H⩲h'''] ❟ ⬜⟩))[ t'[x ≔ v1[H⩲h'''] ] ]
-
-% ---------------------------------- :: Close_Ampar
-% (C ∘ H ᵒᵖ⟨ v2 ❟ ⬜⟩)[v1] ⟶ C[ H ⟨ v2 ❟ v1 ⟩ ]
-
-% % -------------------------- :: Red_Alloc
-% % C[alloc] ⟶ C[{1} ⟨ +1 ❟ -1 ⟩]
-
-% {{ NotVal [[u]] }} [[:NotValu]]
-% -------------------------- :: Focus_ToA
-% C[to⧔ u] ⟶ (C ∘ (to⧔ ⬜))[u]
-
-% % No shape control here, so could be totally merged with Red_ToA
-% -------------------------- :: Unfocus_ToA
-% (C ∘ (to⧔ ⬜))[v2] ⟶ C[to⧔ v2]
-
-% ----------------------------------------- :: Red_ToA
-% C[to⧔ v2] ⟶ C[{} ⟨ v2 ❟ () ⟩]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% -------------------------- :: Focus_FromA
-% C[from⧔ t] ⟶ (C ∘ (from⧔ ⬜))[t]
-
-% -------------------------- :: Unfocus_FromA
-% (C ∘ (from⧔ ⬜))[v] ⟶ C[from⧔ v]
-
-% -------------------------------------- :: Red_FromA
-% C[from⧔ {} ⟨ v2 ❟ ᴇ ¹∞ v1 ⟩] ⟶ C[(v2, ᴇ ¹∞ v1)]
-
-% -------------------------------------- :: Red_Alloc
-% C[alloc] ⟶ C[{1} ⟨ +1 ❟ -1 ⟩]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% -------------------------- :: Focus_FillU
-% C[t ⨞ ()] ⟶ (C ∘ (⬜ ⨞ () ))[t]
-
-% -------------------------- :: Unfocus_FillU
-% (C ∘ (⬜ ⨞ () ))[v] ⟶ C[v ⨞ ()]
-
-% ------------------------------------- :: Red_FillU
-% C[-h ⨞ ()] ⟶ C[h ≔ {} ()][()]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% ------------------------------------- :: Focus_FillL
-% C[t ⨞ Inl] ⟶ (C ∘ (⬜ ⨞ Inl))[t]
-
-% ------------------------------------- :: Unfocus_FillL
-% (C ∘ (⬜ ⨞ Inl))[v] ⟶ C[v ⨞ Inl]
-
-% {{ [[h']] = [[max(hnames(C) ∪ {h}) + 1]] }} [[:hpMaxCh]]
-% --------------------------------------- :: Red_FillL
-% C[-h ⨞ Inl] ⟶ C[h ≔ {h'+1} Inl  +(h'+1)][-(h'+1)]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% ------------------------------------- :: Focus_FillR
-% C[t ⨞ Inr] ⟶ (C ∘ (⬜ ⨞ Inr))[t]
-
-% ------------------------------------- :: Unfocus_FillR
-% (C ∘ (⬜ ⨞ Inr))[v] ⟶ C[v ⨞ Inr]
-
-% {{ [[h']] = [[max(hnames(C) ∪ {h}) + 1]] }} [[:hpMaxCh]]
-% --------------------------------------- :: Red_FillR
-% C[-h ⨞ Inr] ⟶ C[h ≔ {h'+1} Inr  +(h'+1)][-(h'+1)]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% ------------------------------------- :: Focus_FillE
-% C[t ⨞ ᴇ m] ⟶ (C ∘ (⬜ ⨞ ᴇ m))[t]
-
-% ------------------------------------- :: Unfocus_FillE
-% (C ∘ (⬜ ⨞ ᴇ m))[v] ⟶ C[v ⨞ ᴇ m]
-
-% {{ [[h']] = [[max(hnames(C) ∪ {h}) + 1]] }} [[:hpMaxCh]]
-% --------------------------------------- :: Red_FillE
-% C[-h ⨞ ᴇ m] ⟶ C[h ≔ {h'+1} ᴇ m  +(h'+1)][-(h'+1)]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% ------------------------------------- :: Focus_FillP
-% C[t ⨞ (,)] ⟶ (C ∘ (⬜ ⨞ (,)))[t]
-
-% ------------------------------------- :: Unfocus_FillP
-% (C ∘ (⬜ ⨞ (,)))[v] ⟶ C[v ⨞ (,)]
-
-% {{ [[h']] = [[max(hnames(C) ∪ {h}) + 1]] }} [[:hpMaxCh]]
-% --------------------------------------- :: Red_FillP
-% C[-h ⨞ (,)] ⟶ C[h ≔ {h'+1,h'+2} ( +(h'+1), +(h'+2))][( -(h'+1), -(h'+2) )]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% ------------------------------------- :: Focus_FillF
-% C[t ⨞(λ x m ⟼ u)] ⟶ (C ∘ (⬜ ⨞(λ x m ⟼ u)))[t]
-
-% ------------------------------------- :: Unfocus_FillF
-% (C ∘ (⬜ ⨞(λ x m ⟼ u)))[v] ⟶ C[v ⨞(λ x m ⟼ u)]
-
-% ------------------------------------- :: Red_FillF
-% C[-h ⨞ (λ x m ⟼ u)] ⟶ C[h ≔ {} ᵛλ x m ⟼ u][()]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% ------------------------------------- :: Focus_FillComp1
-% C[t ⨞· t'] ⟶ (C ∘ (⬜ ⨞· t'))[t]
-
-% ------------------------------------- :: Unfocus_FillComp1
-% (C ∘ (⬜ ⨞· t'))[v] ⟶ C[v ⨞· t']
-
-% {{ NotVal [[t']] }} [[:NotValtp]]
-% ------------------------------------- :: Focus_FillComp2
-% C[v ⨞· t'] ⟶ (C ∘ (v ⨞· ⬜))[t']
-
-% ------------------------------------- :: Unfocus_FillComp2
-% (C ∘ (v ⨞· ⬜))[v'] ⟶ C[v ⨞· v']
-
-% {{ [[h'']] = [[max(H ∪ (hnames(C) ∪ {h})) + 1]] }} [[:hpMaxCh]]
-% ---------------------------------------- :: Red_FillComp
-% C[-h ⨞· H ⟨ v2 ❟ v1 ⟩] ⟶ C[h ≔ (H⩲h'') v2[H⩲h''] ][v1[H⩲h''] ]
-
-% {{ NotVal [[t]] }} [[:NotValt]]
-% ------------------------------------- :: Focus_FillLeaf1
-% C[t ◀ t'] ⟶ (C ∘ (⬜ ◀ t'))[t]
-
-% ------------------------------------- :: Unfocus_FillLeaf1
-% (C ∘ (⬜ ◀ t'))[v] ⟶ C[v ◀ t']
-
-% {{ NotVal [[t']] }} [[:NotValtp]]
-% ------------------------------------- :: Focus_FillLeaf2
-% C[v ◀ t'] ⟶ (C ∘ (v ◀ ⬜))[t']
-
-% ------------------------------------- :: Unfocus_FillLeaf2
-% (C ∘ (v ◀ ⬜))[v'] ⟶ C[v ◀ v']
-
-% ---------------------------------------- :: Red_FillLeaf
-% C[-h ◀ v] ⟶ C[h ≔ {} v ][ () ]
+% ----------------------- :: LinRed_PatE {{ com $\ottstype{!}$ER }}
+% C[ᴇ n v ►case m ᴇ n x ⟼ u] ⟶ C[u[x ≔ v] ]

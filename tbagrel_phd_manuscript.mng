@@ -62,6 +62,7 @@
 \newcommand{\sciii}[1]{\textcolor{sciiicolor}{#1}}
 
 %% For OTT rendering
+\newunicodechar{⥶}{\ensuremath{\raisebox{0.2em}{$\scriptstyle<$}\hspace*{-0.7em}\raisebox{-0.12em}{$\scriptscriptstyle\leftarrow$}}}
 \usepackage[supertabular]{ottalt}
 \inputott{destination_calculus_ott.tex}
 \usepackage{ottstyling}
@@ -91,14 +92,22 @@
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
   Scale=0.92]
-\setmonofont{Iosevka-Term-SS07}[
+\setmonofont{iosevka-quasi-proportional-ss07}[
   Path=fonts/,
   Extension=.ttf,
-  UprightFont=*-Regular,
-  BoldFont=*-Semibold,
-  ItalicFont=*-Italic,
-  BoldItalicFont=*-SemiboldItalic,
+  UprightFont=*-regular,
+  BoldFont=*-semibold,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-semibolditalic,
   Scale=0.92]
+% \setmonofont{Iosevka-Term-SS07}[
+%   Path=fonts/,
+%   Extension=.ttf,
+%   UprightFont=*-Regular,
+%   BoldFont=*-Semibold,
+%   ItalicFont=*-Italic,
+%   BoldItalicFont=*-SemiboldItalic,
+%   Scale=0.92]
 \setmathrm{iosevka-quasi-proportional-ss07}[
   Path=fonts/,
   Extension=.ttf,

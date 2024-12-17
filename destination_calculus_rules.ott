@@ -8,7 +8,7 @@ G ⫦ v : T :: :: Ty_val :: Ty_val_ {{ com Typing judgment for values }} by
 --------------------- :: Hole
 { +h : T ¹ν } ⫦ +h : T
 
-{{ [[¹ν]] <: [[m]] }} [[:Subtypem]]
+{{ [[¹ν]] ⥶ [[m]] }} [[:Subtypem]]
 ---------------- :: Dest
 { -h : m ⌊T⌋n } ⫦ -h : ⌊T⌋n
 
@@ -69,7 +69,7 @@ P + D ⊢ v : T
 
 {{ DisposableOnly [[P]] }} [[:DisposP]]
 {{ [[P]] # [[{ x : m T }]] }} [[:DisjointPx]]
-{{ [[¹ν]] <: [[m]] }} [[:Subtypem]]
+{{ [[¹ν]] ⥶ [[m]] }} [[:Subtypem]]
 -------------------- :: Var
 P + { x : m T } ⊢ x : T
 
@@ -423,7 +423,7 @@ Sem :: '' ::=
 % We want theorem that C[t] -->* C[v] where englobing context doesn't change?
 
 defn
-C [ t ] ⟶ C' [ t' ] :: :: Sem :: '' {{ com Small-step evaluation of commands }} {{ tex [[C]]\biggerbrackl [[t]] \biggerbrackr[[⟶]][[C']]\biggerbrackl [[t']] \biggerbrackr }} by
+C [ t ] ⟶ C' [ t' ] :: :: Sem :: '' {{ com Small-step evaluation of commands }} {{ tex [[C]]~\big|~ [[t]]~[[⟶]]~[[C']]~\big|~[[t']] }} by
 
 {{ NotVal [[t]] }} [[:NotValt]]
 ----------------------------- :: Focus_App1

@@ -54,7 +54,7 @@ There exists several possible interpretations of linear logic as a linear $\lamb
 
 In $\lambda_{L_1}$, $[[P]]$ is now a finite map of variables to types, that can be represented as a set of variable bindings $[[{x ⫶ T}]]$. As usual, duplicated variable names are not allowed in a context $[[P]]$. The comma operator denotes disjoint union for finite maps.
 
-Term grammar for $\lambda_{L_1}$ borrows most of simply typed lambda calculus grammar. In addition, the language has a data constructor/wrapper for unrestricted terms and values, denoted by\footnote{The notation $\expcons{}$ is reminiscent of the fact that $\ottstype{!}$ is a (positive) \emph{exponential} modality in linear logic} $[[ᴇ t]]$ and $[[ᴇ v]]$. Elimination of unit type $[[①]]$ is made with $\patu$ operator. Pattern-matching on sum and product types is made with the $\ottkw{case}$ keyword. Finally, we have new operators $\ottkw{dup}$, $\ottkw{drop}$ and $\ottkw{derelict}$ for respective contraction, weakening and dereliction of unrestricted terms of type $[[!T]]$. Promotion of a term to an unrestricted form is made by direct application of constructor $\expcons{}$. For easier presentation, we also introduce syntactic sugar $[[let x ≔ t in u]]$ and encode it as $[[(λ x ⟼ u)(t)]]$.
+Term grammar for $\lambda_{L_1}$ borrows most of simply typed lambda calculus grammar. In addition, the language has a data constructor/wrapper for unrestricted terms and values, denoted by $[[ᴇ t]]$ and $[[ᴇ v]]$. Elimination of unit type $[[①]]$ is made with $\patu$ operator. Pattern-matching on sum and product types is made with the $\ottkw{case}$ keyword. Finally, we have new operators $\ottkw{dup}$, $\ottkw{drop}$ and $\ottkw{derelict}$ for respective contraction, weakening and dereliction of unrestricted terms of type $[[!T]]$. Promotion of a term to an unrestricted form is made by direct application of constructor $\expcons{}$. For easier presentation, we also introduce syntactic sugar $[[let x ≔ t in u]]$ and encode it as $[[(λ x ⟼ u)(t)]]$.
 
 \paragraph{Implicit structural rules for unrestricted resources}
 
@@ -111,7 +111,7 @@ $[[ω]]$        & $[[∞]]$ & $[[∞]]$ \\\hline
 \end{tabular}
 \end{center}
 
-We lift \emph{times} $\ottstype{[[·]]}$ so that it can scale a variable binding by a mode $[[n]]$: we pose $[[n·({ x : m T })]] \btriangleq [[{ x : n · m T }]]$. We then extend this operator point-wise to act on whole typing contexts as in $[[n·P]]$, not just single bindings.
+We lift \emph{times} so that it can scale a variable binding by a mode $[[n]]$: we pose $[[n·({ x : m T })]] \btriangleq [[{ x : n · m T }]]$. We then extend this operator point-wise to act on whole typing contexts as in $[[n·P]]$, not just single bindings.
 
 We also define typing context \emph{plus} as a partial operation where $[[({ x : m T }) + ({ x : m' T })]] = [[x]]:\!_{\![[m]]\ottsmode{+}[[m']]}[[T]]$ and  $[[({ x : m T }) + P]] = [[{ x : m T },P]]$\hspace*{0.6em}if $[[x]] \notin [[P]]$.
 
@@ -119,12 +119,12 @@ Equipped with those, we can move to the grammar and typing rules of $\lambda_{L_
 
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in modal presentation ($\lambda_{L_m}$)}\label{fig:linmod-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
-       [[v]] &::=& [[ˢλ x m ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[( v1 , v2 )]] \grammsep [[ᴇ v]] \\
+       [[v]] &::=& [[ˢλ x m ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[( v1 , v2 )]] \grammsep [[ᴇ n v]] \\
 [[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ˢ( t1 , t2 )]] \grammsep [[ˢᴇ n t]] \grammsep [[t t']] \grammsep [[t ; t']] \\
-&|\,& [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case ¹ν ᴇ x ⟼ u]] \\
+&|\,& [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case ¹ν ᴇ n x ⟼ u]] \\
 &&\\
 [[T]], [[U]] &::=& [[T m → U]] \grammsep [[①]] \grammsep [[T1 ⨁ T2]] \grammsep [[T1 ⨂ T2]] \grammsep [[! n T]] \\
-[[m]], [[n]] &::=& [[˥]] \grammsep [[ɷ]] \grammsep [[m · n]] \grammsep [[m]] · [[n]] \\
+[[m]], [[n]] &::=& [[˥]] \grammsep [[ɷ]] \grammsep [[m · n]] \\
 &&\\
 [[P]] &::=& [[{ }]] \grammsep [[{ x : m T }]] \grammsep [[P1 , P2]] \grammsep [[P1 + P2]] \grammsep [[m·P]] \\
 \end{array}
@@ -135,11 +135,11 @@ Equipped with those, we can move to the grammar and typing rules of $\lambda_{L_
 \ottdefnLinModXXTyXXterm{}\egroup
 \end{ottfig}
 
-In $\lambda_{L_m}$ we're back to a single identity rule $\lambda_{L_m}$\,/\,Id, that asks for $[[x]]$ to be in the typing context with a mode $[[m]]$ that must be \emph{compatible with a single linear use} (we note $[[˥ <: m]]$). In our ringoid, with only two elements, we have both $[[˥ <: ˥]]$ and $[[˥ <: ɷ]]$, so $[[x]]$ can actually have any mode (either linear or unrestricted, so encompassing both $\lambda_{L_2}$\,/\,Id\textsubscript{Lin} and $\lambda_{L_2}$\,/\,Id\textsubscript{Ur}), but in more complex modal systems, not all modes have to be compatible with the unit of the ringoid\footnote{Actually, in the type system for \destcalculus{} detailed in \cref{sec:sec:syntax-type-system}, mode $[[¹↑]]$ is not compatible with unit $[[¹ν]]$.}. Rules $\lambda_{L_m}$\,/\,Id and $\lambda_{L_m}$\,/\,$[[①]]$I also allows to discard any context composed only of unrestricted bindings, denoted by $[[ɷ·P]]$ (equivalent to notation $[[!P]]$ in $\lambda_{L_1}$), so they are performing implicit weakening as in $\lambda_{L_2}$.
+In $\lambda_{L_m}$ we're back to a single identity rule $\lambda_{L_m}$\,/\,Id, that asks for $[[x]]$ to be in the typing context with a mode $[[m]]$ that must be \emph{compatible with a single linear use} (we note $[[˥ ⥶ m]]$). In our ringoid, with only two elements, we have both $[[˥ ⥶ ˥]]$ and $[[˥ ⥶ ɷ]]$, so $[[x]]$ can actually have any mode (either linear or unrestricted, so encompassing both $\lambda_{L_2}$\,/\,Id\textsubscript{Lin} and $\lambda_{L_2}$\,/\,Id\textsubscript{Ur}), but in more complex modal systems, not all modes have to be compatible with the unit of the ringoid\footnote{Actually, in the type system for \destcalculus{} detailed in \cref{sec:sec:syntax-type-system}, mode $[[¹↑]]$ is not compatible with unit $[[¹ν]]$.}. Rules $\lambda_{L_m}$\,/\,Id and $\lambda_{L_m}$\,/\,$[[①]]$I also allows to discard any context composed only of unrestricted bindings, denoted by $[[ɷ·P]]$ (equivalent to notation $[[!P]]$ in $\lambda_{L_1}$), so they are performing implicit weakening as in $\lambda_{L_2}$.
 
 Every rule of $\lambda_{L_m}$ that mentions two subterms uses the newly defined $+$ operator on typing contexts in the conclusion of the rule. If a same variable $[[x]]$ is required in both $[[P1]]$ and $[[P2]]$ (either with mode $[[˥]]$ or $[[ɷ]]$, it doesn't matter), then $[[P1+P2]]$ will contain binding $[[{x : ɷ T}]]$. Said differently, the parent term will automatically deduce wether $[[x]]$ needs to be linear or unrestricted based on how (many) subterms use $[[x]]$, thanks to the $+$ operator. It's a vastly different approach than the linear context split for subterms in $\lambda_{L_{\{1,2\}}}$ and unrestricted context duplication for subterms in $\lambda_{L_2}$. I would argue that it makes the system smoother, and allows for easy extension without changing the typing rules much (compared to the monadic / dyadic presentation that are very specialized to handle linearity/unrestrictedness, and that alone).
 
-Much as in $\lambda_{L_2}$, the exponential modality $\ottstype{!}_{[[n]]}$ is eliminated by a $\ottkw{case}$ expression, that binds the payload to a new variable $[[x]]$ with modality $[[n]]$. The original boxed value can be recreated if needed with $[[ˢᴇ n x]]$; indeed, as in $\lambda_{L_2}$, elimination for $\ottstype{!}_{[[n]]}$ is \emph{not} dereliction.
+Much as in $\lambda_{L_2}$, the exponential modality $\ottstype{!}_{[[n]]}$ is eliminated by a $[[t ►case ¹ν ᴇ n x ⟼ u]]$ expression, that binds the payload to a new variable $[[x]]$ with modality $[[n]]$. The original boxed value can be recreated if needed with $[[ˢᴇ n x]]$; indeed, as in $\lambda_{L_2}$, elimination for $\ottstype{!}_{[[n]]}$ is \emph{not} dereliction.
 
 The last specificity of this system is that the function arrow $\ottstype{\multimap}$ now has a mode $[[m]]$ to which it consumes its argument. Actually that doesn't change the expressivity of the system compared to previous presentations; we would have been just fine with only a purely linear arrow, but because we have to assign a mode to any variable binding in this presentation, then it makes sense to allow this mode $[[m]]$ to be whatever the programmer wants, and not just default to $[[˥]]$. In application rule $\lambda_{L_m}$\,/\,$\ottstype{\multimap}$E, the typing context $[[P1]]$ required to type the argument is scaled in the conclusion of the rule by the mode $[[m]]$ that represent the "number" of use of the argument by the function.
 
@@ -186,10 +186,61 @@ The only change needed on the grammar is that $\ottkw{case}$ constructs now take
 \ottdefnLinDeepModXXTyXXterm{}\egroup
 \end{ottfig}
 
-We observe that the typing context $[[P1]]$ in which the scrutinee types is scaled by $[[m]]$ in the conclusion of all the $\ottkw{case}$ rules. This is very analog to the application rule $\lambda_{L_{m}}$\,/\,$\ottstype{\multimap}$E: it makes sure that the resources required to type $[[t]]$ are consumed $[[m]]$ times if we want to use $[[t]]$ at mode $[[m]]$. Given that $[[{ y : ˥ T1 } ⊢ ˢ(y, ()) : T1 ⨂ ①]]$ ($[[t]]$ uses $[[y]]$ once), if we want to extract the pair components with mode $[[ɷ]]$ to drop $[[y]]$, then $[[ˢ(y, ()) ►case ɷ (x1, x2) ⟼ x2]]$ will require context $[[ɷ·({ y : ˥ T1 })]]$ i.e. $[[{ y : ɷ T1 }]]$. In other terms, we cannot use parts of a structure made using linear resources in an unrestricted way (as that would break linearity).
+We observe that the typing context $[[P1]]$ in which the scrutinee types is scaled by $[[m]]$ in the conclusion of all the $\ottkw{case}$ rules. This is very analog to the application rule $\lambda_{L_{m}}$\,/\,$\ottstype{\multimap}$E: it makes sure that the resources required to type $[[t]]$ are consumed $[[m]]$ times if we want to use $[[t]]$ at mode $[[m]]$. Given that $[[{ x2 : ˥ T2 } ⊢ ˢ((), x2) : ① ⨂ T2]]$ (the pair uses $[[x2]]$ exactly once), if we want to extract the pair components with mode $[[ɷ]]$ to drop $[[x2]]$ (as in $\ottkw{fst}_{\ottkw{dm}}$), then $[[ˢ((), x2) ►case ɷ (x1, x2) ⟼ x2]]$ will require context $[[ɷ·({ x2 : ˥ T2 })]]$ i.e. $[[{ x2 : ɷ T2 }]]$. In other terms, we cannot use parts of a structure made using linear resources in an unrestricted way (as that would break linearity).
 
 The linear $\lambda$-calculus with deep modes, $\lambda_{L_{dm}}$, will be the basis for our core contribution that follows in next chapter: the destination calculus \destcalculus{}.
 
-\TODO{Sémantique}
+\paragraph{Semantics}
+
+Many semantics presentations exist for lambda calculus. Here I present a small-step system, in reduction semantics style, inspired from~\cite{felleisen_calculi_1987} and subsequent~\cite{danvy_refocusing_2004,biernacka_syntactic_2007}, where the evaluation context is manipulated syntactically as a stack.
+
+\begin{ottfig}{\caption{Small-step semantics}\label{fig:linsem}}
+\bgroup
+\renewcommand{\ottdrulename}[1]{$\lambda_{L_{dm}}$\,/\,}
+\renewcommand\arraystretch{1.5}
+\renewcommand\ottaltinferrule[4]{
+  % #4 is conclusion
+  % #3 is premise
+  % #1 is rule name
+  %  & \text{#1}
+  \ensuremath{#4} & \text{#1} \\
+}
+\makeatletter
+\renewenvironment{drulepar}[3][\relax]
+  {\ifx#1\relax\else\def\ottalt@rulesection@prefix{#1-}\fi
+  \drulesectionhead{#2}{#3}$\!\!\!\array{ll}}
+  {\endarray$}
+\makeatother
+\drules{$[[C [ t ] ⟶ C' [ t' ] ]]$}{Small-step evaluation}{%
+LinFocus-Left,
+LinUnfocus-Left,
+LinFocus-Right,
+LinUnfocus-Right,
+LinFocus-ProdOne,
+LinUnfocus-ProdOne,
+LinFocus-ProdTwo,
+LinUnfocus-ProdTwo,
+LinFocus-Exp,
+LinUnfocus-Exp,
+LinFocus-AppOne,
+% LinUnfocus-AppOne,
+LinFocus-AppTwo,
+%LinUnfocus-AppTwo,
+LinRed-App,
+LinFocus-PatU,
+%LinUnfocus-PatU,
+LinRed-PatU,
+LinFocus-PatS,
+%LinUnfocus-PatS,
+LinRed-PatL,
+LinRed-PatR,
+LinFocus-PatP,
+%LinUnfocus-PatP,
+LinRed-PatP,
+LinFocus-PatE,
+%LinUnfocus-PatE,
+LinRed-PatE}
+\egroup
+\end{ottfig}
 
 \egroup

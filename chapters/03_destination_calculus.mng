@@ -445,10 +445,10 @@ The typing rules for \destcalculus{} are highly inspired from\cite{bernardy_moda
 
 The predicate $\mathtt{DisposableOnly}~[[P]]$ in rules \rref*{Ty-term-Var}, \rref*{Ty-term-Alloc} and \rref*{Ty-sterm-Unit} says that $[[P]]$ can only contain bindings with multiplicity $[[ω]]$, for which weakening is allowed in linear logic. It is enough to allow weakening at the leaves of the typing tree, \emph{i.e.} in the three aforementioned rules.
 
-\newcommand{\pleq}{\mathop{\mathtt{<:}^{\scriptscriptstyle{\pmb{\mathsf{p}}}}}}
-\newcommand{\aleq}{\mathop{\mathtt{<:}^{\scriptscriptstyle{\pmb{\mathsf{a}}}}}}
+\newcommand{\pleq}{\mathop{\mathtt{⥶}^{\scriptscriptstyle{\pmb{\mathsf{p}}}}}}
+\newcommand{\aleq}{\mathop{\mathtt{⥶}^{\scriptscriptstyle{\pmb{\mathsf{a}}}}}}
 
-Rule \rref*{Ty-term-Var}, in addition to weakening, allows for dereliction of the mode for the variable used, with subtyping constraint $[[¹ν <: m]]$ defined as~~$[[p a <: p' a']] \Longleftrightarrow [[p]] \pleq [[p']] \land~[[a]] \aleq [[a']]$ where:\improvement{All the bit about mode ordering should move in the section about modes}
+Rule \rref*{Ty-term-Var}, in addition to weakening, allows for dereliction of the mode for the variable used, with subtyping constraint $[[¹ν ⥶ m]]$ defined as~~$[[p a ⥶ p' a']] \Longleftrightarrow [[p]] \pleq [[p']] \land~[[a]] \aleq [[a']]$ where:\improvement{All the bit about mode ordering should move in the section about modes}
 
 {\setlength{\arraycolsep}{\widthof{\,}}
 \begin{minipage}{0.2\linewidth}
@@ -662,7 +662,7 @@ We equip \destcalculus{} with small-step semantics. There are three sorts of sem
 }
 
 \bgroup
-\renewcommand\arraystretch{1.4}
+\renewcommand\arraystretch{1.5}
 \renewcommand\ottaltinferrule[4]{
   % #4 is conclusion
   % #3 is premise
@@ -681,7 +681,7 @@ Rules are triggered in a purely deterministic fashion; once a subterm is a value
 
 \begin{ottfig}{\caption{Small-step semantics}\label{fig:sem}}
 \bgroup
-\renewcommand\arraystretch{1.4}
+\renewcommand\arraystretch{1.5}
 \renewcommand\ottaltinferrule[4]{
   % #4 is conclusion
   % #3 is premise
