@@ -192,7 +192,7 @@ The linear $\lambda$-calculus with deep modes, $\lambda_{L_{dm}}$, will be the b
 
 \paragraph{Semantics}
 
-Many semantics presentations exist for lambda calculus. Here I present a small-step system, in reduction semantics style, inspired from~\cite{felleisen_calculi_1987} and subsequent~\cite{danvy_refocusing_2004,biernacka_syntactic_2007}, where the evaluation context is manipulated syntactically as a stack.
+Many semantics presentations exist for lambda calculus. Here I present a small-step system, in \emph{reduction semantics} style inspired from~\cite{felleisen_calculi_1987} and subsequent~\cite{danvy_refocusing_2004,biernacka_syntactic_2007}, that is, a semantics in which the evaluation context is manipulated explicitly and syntactically as a stack.
 
 \begin{ottfig}{\caption{Small-step semantics}\label{fig:linsem}}
 \bgroup
