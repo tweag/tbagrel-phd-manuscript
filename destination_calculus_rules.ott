@@ -423,7 +423,7 @@ Sem :: '' ::=
 % We want theorem that C[t] -->* C[v] where englobing context doesn't change?
 
 defn
-C [ t ] ⟶ C' [ t' ] :: :: Sem :: '' {{ com Small-step evaluation of commands }} {{ tex [[C]]~\big|~ [[t]]~[[⟶]]~[[C']]~\big|~[[t']] }} by
+C [ t ] ⟶ C' [ t' ] :: :: Sem :: '' {{ com Small-step evaluation of commands }} {{ tex [[C]]~\big[\,[[t]]\,\big]~[[⟶]]~[[C']]~\big[\,[[t']]\,\big] }} by
 
 {{ NotVal [[t]] }} [[:NotValt]]
 ----------------------------- :: Focus_App1

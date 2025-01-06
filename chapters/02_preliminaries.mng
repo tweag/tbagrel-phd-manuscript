@@ -1,7 +1,7 @@
  
-\chapter{Preliminaries}\label{chap:preli}
+\chapter{Linear $\lambda$-calculus}\label{chap:preli}
 
-\section{Linear $\lambda$-calculus}
+\section{From $\lambda$-calculus to linear $\lambda$-calculus}
 
 At the end of the 30s, Church introduced the untyped $\lambda$-calculus as a formal mathematical model of computation. Untyped $\lambda$-calculus is based on the concept of function abstraction and application, and is Turing-complete: in other terms, it has the same expressive power as the empirical model of computation that Turing machines represent.
 
@@ -31,7 +31,7 @@ The linear logic system might appear very restrictive, but we can always\unsure{
 \ottdefnLinMonXXLog{}\egroup
 \end{ottfig}
 
-\emph{Computational interpretations of linear logic}
+\section{Linear $\lambda$-calculus: a computational interpretation of linear logic}
 
 There exists several possible interpretations of linear logic as a linear $\lambda$-calculus. The first one, named \emph{monadic} presentation of linear $\lambda$-calculus in~\cite{andreoli_linlog_1992}, and denoted $\lambda_{L_1}$ in this document, is a direct term assignment of the natural deduction rules of ILL given in \cref{fig:linlog}. The syntax and typing rules of this presentation, inspired greatly from the work of~\cite{bierman_linlog_phd_1994}, are given in \cref{fig:linmon-grammar,fig:linmon-ty-term}.
 
@@ -56,7 +56,7 @@ In $\lambda_{L_1}$, $[[P]]$ is now a finite map of variables to types, that can 
 
 Term grammar for $\lambda_{L_1}$ borrows most of simply typed lambda calculus grammar. In addition, the language has a data constructor/wrapper for unrestricted terms and values, denoted by $[[ᴇ t]]$ and $[[ᴇ v]]$. Elimination of unit type $[[①]]$ is made with $\patu$ operator. Pattern-matching on sum and product types is made with the $\ottkw{case}$ keyword. Finally, we have new operators $\ottkw{dup}$, $\ottkw{drop}$ and $\ottkw{derelict}$ for respective contraction, weakening and dereliction of unrestricted terms of type $[[!T]]$. Promotion of a term to an unrestricted form is made by direct application of constructor $\expcons{}$. For easier presentation, we also introduce syntactic sugar $[[let x ≔ t in u]]$ and encode it as $[[(λ x ⟼ u)(t)]]$.
 
-\paragraph{Implicit structural rules for unrestricted resources}
+\section{Implicit structural rules for unrestricted resources}
 
 In the monadic presentation $\lambda_{L_1}$, the use of unrestricted terms can become very verbose and unhandy because of the need for explicit contraction, weakening and dereliction. A second and equivalent presentation of our linear $\lambda$-calculus, named \emph{dyadic} presentation or $\lambda_{L_2}$, tend to alleviate this issue by using two typing contexts on each judgment, one for linear variables and one for unrestricted variables. The syntax and typing rules of $\lambda_{L_2}$ are given in \cref{fig:lindya-grammar,fig:lindya-ty-term}.
 
@@ -84,7 +84,7 @@ In $\lambda_{L_2}$, contraction for unrestricted resources happens implicitly ev
 
 \cite{andreoli_linlog_1992} has a detailed proof that both $\lambda_{L_1}$ and $\lambda_{L_2}$ are equivalent, in other terms, that a program $[[t]]$ types in the pair of contexts $[[P]] ; [[Ur]]$ in $\lambda_{L_2}$ if and only if it types in context $[[P,!Ur]]$ in $\lambda_{L_1}$.
 
-\paragraph{Back to a single context with the graded modal approach}
+\section{Back to a single context with the graded modal approach}
 
 In~\cite{girard_bounded_1992}, Girard introduced a \emph{bounded} version of linear logic, where the $\ottstype{!}$ modality is accompanied by an index $[[m]]$ that specifies how many times an hypothesis can be used. This \emph{graded} modality $\ottstype{!}_{[[m]]}$ gives more flexibility than the binary choice we had before, where resources could either be strictly linear or fully unrestricted. The index $[[m]]$ --- that we will call \emph{mode} from now on --- takes its values in an arbitrary set equipped with a semiring or ringoid structure (it can be integers for precise use count; extended integers to take unrestricted use into account; or even intervals to represent minimum and maximum uses).
 
@@ -115,7 +115,7 @@ We lift \emph{times} so that it can scale a variable binding by a mode $[[n]]$: 
 
 We also define typing context \emph{plus} as a partial operation where $[[({ x : m T }) + ({ x : m' T })]] = [[x]]:\!_{\![[m]]\ottsmode{+}[[m']]}[[T]]$ and  $[[({ x : m T }) + P]] = [[{ x : m T },P]]$\hspace*{0.6em}if $[[x]] \notin [[P]]$.
 
-Equipped with those, we can move to the grammar and typing rules of $\lambda_{L_m}$, given in \cref{fig:linmod-grammar,fig:linmod-ty-term}.
+Equipped with those, we can move to the grammar and typing rules of $\lambda_{L_m}$, given in \cref{fig:linmod-grammar,fig:linmod-ty-term}. Constructor for $[[! m T]]$ is now $[[ˢᴇ n t]]$ (instead of $[[ᴇ t]]$ for $[[! T]]$).
 
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in modal presentation ($\lambda_{L_m}$)}\label{fig:linmod-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
@@ -143,7 +143,7 @@ Much as in $\lambda_{L_2}$, the exponential modality $\ottstype{!}_{[[n]]}$ is e
 
 The last specificity of this system is that the function arrow $\ottstype{\multimap}$ now has a mode $[[m]]$ to which it consumes its argument. Actually that doesn't change the expressivity of the system compared to previous presentations; we would have been just fine with only a purely linear arrow, but because we have to assign a mode to any variable binding in this presentation, then it makes sense to allow this mode $[[m]]$ to be whatever the programmer wants, and not just default to $[[˥]]$. In application rule $\lambda_{L_m}$\,/\,$\ottstype{\multimap}$E, the typing context $[[P1]]$ required to type the argument is scaled in the conclusion of the rule by the mode $[[m]]$ that represent the "number" of use of the argument by the function.
 
-\paragraph{Deep modes: projecting modes through fields of data structures}
+\section{Deep modes: projecting modes through fields of data structures}
 
 In original linear logic from Girard (see ILL and presentation $\lambda_{L_1}$ above), there is only a one-way morphism between $[[!T ⨂ !U]]$ and $[[!(T⨂U)]]$; we cannot go from $[[!(T⨂U)]]$ to $[[!T ⨂ !U]]$. In other terms, an unrestricted pair $[[!(T⨂U)]]$ doesn't allow for unrestricted use of its components. The pair can be duplicated or discarded at will, but to be used, it needs to be derelicted first, to become $[[T⨂U]]$, that no longer allow to duplicate or discard any of $[[T]]$ or $[[U]]$. As a result, $[[T]]$ and $[[U]]$ will have to be used exactly the same number of times, even though they are part of an unrestricted pair!
 
@@ -170,7 +170,7 @@ as we would do in a non-linear language, like STLC, in which $\ottkw{fst}$ would
 ]]\end{array}}
 }
 
-Adding deep modes to a practical linear language is not a very original take; it has been done in Linear Haskell~\cite{bernardy_linear_2018} and \cite{REFNEEDED}.
+Adding deep modes to a practical linear language is not a very original take; it has been done in Linear Haskell~\cite{bernardy_linear_2018} and \cite{lorenzen_oxidizing_2024}.
 With deep modes, we get the following equivalences:
 
 \codehere{\!\!\!\begin{array}[t]{rcl}
@@ -190,11 +190,25 @@ We observe that the typing context $[[P1]]$ in which the scrutinee types is scal
 
 The linear $\lambda$-calculus with deep modes, $\lambda_{L_{dm}}$, will be the basis for our core contribution that follows in next chapter: the destination calculus \destcalculus{}.
 
-\paragraph{Semantics}
+\section{Semantics of linear $\lambda$-calculus (with deep modes)}
 
-Many semantics presentations exist for lambda calculus. Here I present a small-step system, in \emph{reduction semantics} style inspired from~\cite{felleisen_calculi_1987} and subsequent~\cite{danvy_refocusing_2004,biernacka_syntactic_2007}, that is, a semantics in which the evaluation context is manipulated explicitly and syntactically as a stack.
+Many semantics presentations exist for lambda calculus. In \cref{fig:linsem} I present a small-step reduction system for $\lambda_{L_{dm}}$, in \emph{reduction semantics} style inspired from~\cite{felleisen_calculi_1987} and subsequent~\cite{danvy_refocusing_2004,biernacka_syntactic_2007}, that is, a semantics in which the evaluation context $[[C]]$ is manipulated explicitly and syntactically as a stack.
 
-\begin{ottfig}{\caption{Small-step semantics}\label{fig:linsem}}
+\def\foreverunspace{%
+  \ifnum\lastnodetype=11
+    \unskip\foreverunspace
+  \else
+    \ifnum\lastnodetype=12
+      \unkern\foreverunspace
+    \else
+      \ifnum\lastnodetype=13
+        \unpenalty\foreverunspace
+      \fi
+    \fi
+  \fi
+}
+
+\begin{ottfig}{\caption{Small-step semantics for $\lambda_{L_{dm}}$}\label{fig:linsem}}
 \bgroup
 \renewcommand{\ottdrulename}[1]{$\lambda_{L_{dm}}$\,/\,}
 \renewcommand\arraystretch{1.5}
@@ -203,12 +217,12 @@ Many semantics presentations exist for lambda calculus. Here I present a small-s
   % #3 is premise
   % #1 is rule name
   %  & \text{#1}
-  \ensuremath{#4} & \text{#1} \\
+  \ensuremath{#4} & \setbox0=\hbox{\ensuremath{#3}\foreverunspace}\ifdim\wd0=0pt ~ \else$\star$\fi & \text{#1} \\
 }
 \makeatletter
 \renewenvironment{drulepar}[3][\relax]
   {\ifx#1\relax\else\def\ottalt@rulesection@prefix{#1-}\fi
-  \drulesectionhead{#2}{#3}$\!\!\!\array{ll}}
+  \drulesectionhead{#2}{#3}$\!\!\!\array{lll}}
   {\endarray$}
 \makeatother
 \drules{$[[C [ t ] ⟶ C' [ t' ] ]]$}{Small-step evaluation}{%
@@ -223,24 +237,46 @@ LinUnfocus-ProdTwo,
 LinFocus-Exp,
 LinUnfocus-Exp,
 LinFocus-AppOne,
-% LinUnfocus-AppOne,
+LinUnfocus-AppOne,
 LinFocus-AppTwo,
-%LinUnfocus-AppTwo,
+LinUnfocus-AppTwo,
 LinRed-App,
 LinFocus-PatU,
-%LinUnfocus-PatU,
+LinUnfocus-PatU,
 LinRed-PatU,
 LinFocus-PatS,
-%LinUnfocus-PatS,
+LinUnfocus-PatS,
 LinRed-PatL,
 LinRed-PatR,
 LinFocus-PatP,
-%LinUnfocus-PatP,
+LinUnfocus-PatP,
 LinRed-PatP,
 LinFocus-PatE,
-%LinUnfocus-PatE,
+LinUnfocus-PatE,
 LinRed-PatE}
 \egroup
+
+\vspace{-0.5cm}
+
+\begin{center}
+$\star$~:~only allowed if $[[t]]$ is not already a value
+\end{center}
+
 \end{ottfig}
 
 \egroup
+
+Small-step evaluation rules are of three kinds:
+\begin{itemize}
+\item focusing rules (F) that split the current term under focus in two parts: an evaluation context component that is pushed on the stack $[[C]]$ for later use, and a subterm that is put under focus;
+\item unfocusing rules (U) that recreate a larger term once the term under focus is a value, by popping the most recent evaluation component from the stack and merging it with the value;
+\item contraction rules (C) that do not operate on the stack $[[C]]$ but just transform the term under focus when it's a redex.
+\end{itemize}
+
+To have a fully deterministic and and straightforward reduction system, focusing rules can only trigger when the subterm in question is not already a value (denoted by $\star$ in \cref{fig:linsem}).
+
+Data constructors only have focusing and unfocusing rules, as they do not describe computations that can be reduced. In that regard, $[[ˢᴇ n t]]$ is treated as an unary data constructor. Once a data constructor is focused, it is evaluated fully to a value form.
+
+In most cases, unfocusing and contraction rules could be merged into a single step. For example, a contraction could be triggered as soon as we have $[[(C ∘ (⬜ ►case m (x1,x2) ⟼ u))[(v1, v2)] ]]$, without needing recreate the term $[[(v1, v2) ►case m (x1,x2) ⟼ u]]$. However, I prefer the presentation in three distinct steps, that despite being more verbose, clear shows that contraction rules do not modify the evaluation context.
+
+The rest of the system is very standard. In particular, contraction rules of $\lambda_{L_{dm}}$ --- that capture the essence of the calculus --- are very similar to those of strict lambda-calculi with sum and product types.

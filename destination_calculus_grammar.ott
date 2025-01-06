@@ -1008,7 +1008,7 @@ pred :: '_' ::= {{ com Serves for the .mng file. Isn't used in the actual rules 
   | P ˢ⊢ t : T :: :: Ty_sterm
   | D ⊣ C : T1 ↣ T2 :: :: Ty_ectxs {{ com Typing of evaluation contexts }} {{ tex [[D]][[⊣]][[C]][[:]][[T1]]\ottstype{\rightarrowtail}[[T2]] }}
   | ⊢ C [ t ] : T :: :: Ty {{ tex [[⊢]][[C]]\biggerbrackl [[t]] \biggerbrackr[[:]][[T]] }}
-  | C [ t ] ⟶ C' [ t' ] :: :: Sem {{ tex [[C]]~\big|~ [[t]]~[[⟶]]~[[C']]~\big|~[[t']] }}
+  | C [ t ] ⟶ C' [ t' ] :: :: Sem {{ tex [[C]]~\big[\,[[t]]\,\big]~[[⟶]]~[[C']]~\big[\,[[t']]\,\big] }}
   | C [ t ] :: :: Cmd {{ tex [[C]]\biggerbrackl [[t]] \biggerbrackr }}
   | Z | t ⟶ Z' | t' :: :: HeapSem
   | Z | t :: :: HeapCmd
