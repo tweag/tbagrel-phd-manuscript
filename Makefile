@@ -26,10 +26,9 @@ arxiv-nix:
 	nix-shell --pure --run "make arxiv"
 
 clean:
-	rm -f *.aux *.bbl *.ptb *.toc *.out *.run.xml
-	rm -f *.log *.bcf *.fdb_latexmk *.fls *.blg
-	rm -f tbagrel_phd_manuscript.tex
-	rm -f destination_calculus_ott.tex
+	rm -f destination_calculus_rules_mod.ott
+	rm -f ./{*.aux,*.bbl,*.ptb,*.toc,*.out,*.run.xml,*.log,*.bcf,*.bcf-SAVE-ERROR,*.fdb_latexmk,*.fls,*.blg,*.toc,*.ind,*.idx,*.gls,*.glo,*.flg,*.ilg,*.lof,*.lop,*.tex}
+	rm -f chapters/{*.aux,*.bbl,*.ptb,*.toc,*.out,*.run.xml,*.log,*.bcf,*.bcf-SAVE-ERROR,*.fdb_latexmk,*.fls,*.blg,*.toc,*.ind,*.idx,*.gls,*.glo,*.flg,*.ilg,*.lof,*.lop,*.tex}
 	rm -f tbagrel_phd_manuscript.pdf
 	rm -f tbagrel_phd_manuscript.tar.gz
 	rm -rf _minted-tbagrel_phd_manuscript

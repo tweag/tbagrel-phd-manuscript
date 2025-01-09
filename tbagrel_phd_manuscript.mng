@@ -1,4 +1,4 @@
-\documentclass[english, 10pt]{memoir}
+\documentclass[nofrench, 11pt]{thesul}
 
 \usepackage{etoolbox}
 \usepackage{calc}
@@ -22,12 +22,17 @@
 \usepackage[svgnames]{xcolor}
 \usepackage{graphicx}
 \usepackage{polyglossia}
-
+\setmainlanguage{english}
+\setotherlanguage{french}
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{hyperref}
 \usepackage{refcount}
+\makeatletter
+\providecommand\english@loaded{}
+\providecommand\frensh@loaded{}
+\makeatother
 \usepackage[capitalize, noabbrev]{cleveref}
 \usepackage{url}
 \usepackage{lastpage}
@@ -131,11 +136,6 @@
 %   Scale=0.89]
 
 \setlength{\parskip}{0.25\baselineskip}
-\indentafterchapter
-\setbeforesecskip{\parindent}
-\setbeforesubsecskip{\parindent}
-\setbeforesubsubsecskip{\parindent}
-\setbeforeparaskip{\parindent}
 \setlist[itemize]{topsep=0ex,itemsep=-0.5ex}
 
 \definecolor{mintedframe}{RGB}{100,100,100}
@@ -344,36 +344,183 @@
 
 % =========================================================================== %
 
-\title{A Formal Approach of Safe Destination-Passing Style Programming for Functional Languages}
-\author{Thomas Bagrel}
-\date{April, 2025}
+%-------------------------------------------------------------------
+%                             Marges
+%-------------------------------------------------------------------
+
+% pour positionner les vraies marges:
+%\SetRealMargins{1mm}{1mm}
+
+%-------------------------------------------------------------------
+%                             En-têtes
+%-------------------------------------------------------------------
+
+% Les en-têtes: quelques exemples
+%\UppercaseHeadings 
+%\UnderlineHeadings
+%\newcommand\bfheadings[1]{{\bf #1}}
+%\FormatHeadingsWith{\bfheadings}
+%\FormatHeadingsWith{\uppercase}
+%\FormatHeadingsWith{\underline}
+% \newcommand\upun[1]{\uppercase{\underline{\underline{#1}}}}
+% \FormatHeadingsWith\upun
+
+% \newcommand\itheadings[1]{\textit{#1}}
+% \FormatHeadingsWith{\itheadings}
+
+% pour avoir un trait sous l'en-tete:
+% \setlength{\HeadRuleWidth}{0.4pt}
+
+%-------------------------------------------------------------------
+%                         Les références
+%-------------------------------------------------------------------
+
+% \NoChapterNumberInRef
+% \NoChapterPrefix
+
+%-------------------------------------------------------------------
+%                           Brouillons
+%-------------------------------------------------------------------
+
+% ceci ajoute une marque « brouillon » et la date
+% \ThesisDraft
+
+%-------------------------------------------------------------------
+%                   Pour collecter un glossaire et un index
+%-------------------------------------------------------------------
+
+\makeglossary
+\makeindex
 
 \begin{document}
-
-\pagestyle{empty}
-\maketitle\clearpage
-
-%\aliaspagestyle{cleared}{headings}
-\aliaspagestyle{chapter}{headings}
-\pagestyle{headings}
-
-\input{chapters/00_abstract}
-
-\include{chapters/00_acknowledgements}
-
-\clearpage
-\tableofcontents
-
 \activespaces
 
-\include{chapters/01_introduction}
-\include{chapters/02_preliminaries}
-\include{chapters/03_destination_calculus}
-\include{chapters/04_dps_haskell}
-\include{chapters/05_ext_linear_nonlinear}
-\include{chapters/06_related_work}
-\include{chapters/07_conclusion}
+\OddHead={{\leftmark\rightmark}{\hfil\slshape\rightmark}}
+\EvenHead={{\leftmark}{{\slshape\leftmark}\hfil}}
+\OddFoot={\hfil\thepage}
+\EvenFoot={\thepage\hfil}
+\pagestyle{ThesisHeadingsII}
 
+%-------------------------------------------------------------------
+%                          Encadrements
+%-------------------------------------------------------------------
+
+% encadre les chapitres dans la table des matières:
+% (ces commandes doivent figurer apres \begin{document}
+
+% \FrameChaptersInToc
+%\FramePartsInToc
+
+
+%-------------------------------------------------------------------
+%            Réinitialisation de la numérotation des chapitres
+%-------------------------------------------------------------------
+
+% Si la commande suivante est présente,
+% elle doit figurer APRÈS \begin{document}
+% et avant la première commande \part
+% \ResetChaptersAtParts
+
+%-------------------------------------------------------------------
+%               mini-tables des matières par chapitre
+%-------------------------------------------------------------------
+
+% préparer les mini-tables des matières par chapitre.
+% (commande de minitoc.sty)
+% \dominitoc
+
+%-------------------------------------------------------------------
+%                         Page de titre:
+%-------------------------------------------------------------------
+
+\ThesisTitle{A Safe, Formally-proven Approach of Destination-Passing Style Programming for Functional Languages}
+\ThesisDate{April 2025}
+\ThesisAuthor{Thomas Bagrel}
+
+% Type de la these
+\ThesisUL
+
+% Jury:
+
+% (ne pas mettre de \\ apres la dernière entree)
+
+% Exemple de création d'une nouvelle catégorie dans le jury:
+
+% \NewJuryCategory{family}{\it Membre de la famille :}
+%                         {\it Membres de la famille :}
+
+% \family={Mon frère\\Ma sœur}
+
+\President    = {Le pr\'esident}
+\Rapporteurs  = {Le rapporteur 1&de Paris\\
+                 Le rapporteur 2\\
+                 Le rapporteur 3}
+\Examinateurs = {L'examinateur 1&d'ici\\
+                 L'examinateur 2}
+%\Invites=       {}
+
+% Création de la page de titre:
+\MakeThesisTitlePage
+
+%-------------------------------------------------------------------
+
+%-------------------------------------------------------------------
+%                          Les résumés
+%-------------------------------------------------------------------
+% (si le résumé apparaît sur une colonne étroite, avec la
+% bibliographie à gauche, c'est sans doute parce que vous avez
+% oublié de générer les fichiers d'index et de glossaire...)
+
+\NumberAbstractPages
+\begin{ThesisAbstract}
+  \begin{FrenchAbstract}
+    TBD.
+    % \KeyWords{chat, chien, puces.}
+  \end{FrenchAbstract}
+  \begin{EnglishAbstract}
+    Destination-passing style programming introduces destinations, which represent the address of a write-once memory cell. Those destinations can be passed as function parameters, and thus enable the caller of a function to keep control over memory management: the body of the called function will just be responsible of filling that memory cell. This is especially useful in functional programming languages, in which the body of a function is typically responsible for allocation of the result value.
+
+Programming with destination in Haskell is an interesting way to improve performance of critical parts of some programs, without sacrificing memory guarantees. Indeed, thanks to a linearly-typed API I present, a write-once memory cell cannot be left uninitialized before being read, and is still disposed of by the garbage collector when it is not in use anymore, eliminating the risk of uninitialized read, memory leak, or double-free errors that can arise when memory is managed manually.
+
+In this article, I present an implementation of destinations for Haskell, which relies on so-called compact regions. I demonstrate, in particular, a simple parser example for which the destination-based version uses 35\% less memory and time than its naive counterpart for large inputs.
+
+\hrule
+
+Destination passing ---aka. out parameters--- is taking a parameter to fill rather than returning a result from a function. Due to its apparent imperative nature, destination passing has struggled to find its way to pure functional programming. In this paper, we present a pure core calculus with destinations. Our calculus subsumes all the existing systems, and can be used to reason about their correctness or extension. In addition, our calculus can express programs that were previously not known to be expressible in a pure language. This is guaranteed by a modal type system where modes are used to represent both linear types and a system of ages to manage scopes. Type safety of our core calculus was largely proved formally with the Coq proof assistant.
+  \end{EnglishAbstract}
+\end{ThesisAbstract}
+
+%-------------------------------------------------------------------
+%                          remerciements
+%-------------------------------------------------------------------
+
+%\DontFrameThisInToc
+\begin{ThesisAcknowledgments}
+Les remerciements.
+\end{ThesisAcknowledgments}
+
+%-------------------------------------------------------------------
+%                            dédicace
+%-------------------------------------------------------------------
+
+\begin{ThesisDedication}
+Je dédie cette thèse à TBD.
+\end{ThesisDedication}
+
+
+%-------------------------------------------------------------------
+%                  écriture de `Chapitre' et `Partie' 
+%                      dans la table des matières
+%-------------------------------------------------------------------
+
+\WritePartLabelInToc
+\WriteChapterLabelInToc
+
+%-------------------------------------------------------------------
+%                        table des matières
+%-------------------------------------------------------------------
+
+\tableofcontents
 
 \clearpage
 \listoffigures
@@ -381,14 +528,51 @@
 
 \listof{listing}{List of Listings}
 \addcontentsline{toc}{chapter}{List of Listings}
-\markboth{List of Listings}{LIST OF LISTINGS}
+% \markboth{List of Listings}{LIST OF LISTINGS}
 \clearpage
+
+\include{chapters/00_introduction}
+
+% \aliaspagestyle{chapter}{headings}
+% \pagestyle{headings}
+
+% La commande \mainmatter permet de passer
+% à la numérotation arabe (ce que fait \pagenumbering{arabic}) 
+% et de faire commencer la nouvelle page 1 sur une page impaire.
+% On évitera donc d'utiliser directement \pagenumbering{arabic}.
+\mainmatter
+
+\include{chapters/01_lin_lambda}
+\include{chapters/02_destination_calculus}
+\include{chapters/03_dps_haskell}
+\include{chapters/04_ext_linear_nonlinear}
+\include{chapters/90_conclusion}
+
+%-------------------------------------------------------------------
+%                         Le glossaire
+%-------------------------------------------------------------------
+\BeginGloWith{Voici un glossaire tout-à-fait fictif,
+              introduit par un texte sur toute la largeur
+              des deux colonnes.}
+\twocolumn
+\PrintGlossary
+
+%-------------------------------------------------------------------
+%              L'index (toujours sur deux colonnes)
+%-------------------------------------------------------------------
+\BeginIndWith{Voici un index}
+\PrintIndex
+
+\onecolumn
+
+%-------------------------------------------------------------------
+%                       La bibliographie
+%-------------------------------------------------------------------
 
 % Bibliography doesn't count in the page limit
 \printbibliography
-\clearpage
 
 \appendix
-\include{chapters/99_appendix}
+\include{chapters/91_full_red_destcalculus}
 
 \end{document}
