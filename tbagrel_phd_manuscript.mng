@@ -17,13 +17,14 @@
 \usepackage{fontspec}
 % \usepackage{unicode-math}
 
-\usepackage[margin=1in, bindingoffset=1cm, twoside]{geometry}
 \usepackage[activate={true, nocompatibility}, stretch=10, shrink=10]{microtype}
 \usepackage[svgnames]{xcolor}
 \usepackage{graphicx}
 \usepackage{polyglossia}
 \setmainlanguage{english}
 \setotherlanguage{french}
+\PolyglossiaSetup{english}{indentfirst=true}
+\PolyglossiaSetup{french}{indentfirst=true}
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -47,6 +48,8 @@
 % \usepackage{tipa}
 \usepackage{minted}\usemintedstyle{tango}
 \usepackage{stmaryrd}
+\usepackage{hhline}
+\usepackage[tikz]{bclogo}
 \usepackage[normalem]{ulem}
 \usepackage{newunicodechar}
 
@@ -58,37 +61,86 @@
 \newcommand{\smallspc}{\hspace{-0.5em}}
 \def\figscale{1.2}
 \definecolor{sczcolor}{RGB}{0,0,0}
-\definecolor{scicolor}{RGB}{60, 103, 163}
-\definecolor{sciicolor}{RGB}{199, 22, 6}
+\definecolor{sczfcolor}{RGB}{128, 128, 128}
+\definecolor{scicolor}{RGB}{199, 22, 6}
+\definecolor{scifcolor}{RGB}{251, 164, 157}
+\definecolor{sciicolor}{RGB}{60, 103, 163}
 \definecolor{sciiicolor}{RGB}{97, 5, 94}
 \newcommand{\scz}[1]{\textcolor{sczcolor}{#1}}
+\newcommand{\sczf}[1]{\textcolor{sczfcolor}{#1}}
 \newcommand{\sci}[1]{\textcolor{scicolor}{#1}}
+\newcommand{\scif}[1]{\textcolor{scifcolor}{#1}}
 \newcommand{\scii}[1]{\textcolor{sciicolor}{#1}}
 \newcommand{\sciii}[1]{\textcolor{sciiicolor}{#1}}
 
 %% For OTT rendering
-\newunicodechar{⥶}{\ensuremath{\raisebox{0.2em}{$\scriptstyle<$}\hspace*{-0.7em}\raisebox{-0.12em}{$\scriptscriptstyle\leftarrow$}}}
+\newunicodechar{⥶}{\ensuremath{\raisebox{0.2em}{$\scriptstyle<$}\hspace*{-0.55em}\raisebox{-0.12em}{$\scriptscriptstyle\leftarrow$}}}
 \usepackage[supertabular]{ottalt}
 \inputott{destination_calculus_ott.tex}
 \usepackage{ottstyling}
+% Hide "Index for ranges" from the metavars displayed tabular
+\patchcmd{\ottmetavars}{$ \ottmv{k} $ & \ottcom{Index for ranges} \\}{}{}{}
+
+\patchcmd{\ottdruleTyXXectxsXXOpenAmpar}{%
+\ottpremise{  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{2}}}  \,\pmb{\dashv}\, \ottnt{C} \pmb{:}  \ottstype{(}  \ottstype{U} \,\ottstype{\ltimes}\, \ottstype{T'}  \ottstype{)}  \ottstype{\rightarrowtail} \ottstype{U_{{\mathrm{0}}}} }%
+\ottpremise{ \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+}{\ottpremise{  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{2}}}  \,\pmb{\dashv}\, \ottnt{C} \pmb{:}  \ottstype{(}  \ottstype{U} \,\ottstype{\ltimes}\, \ottstype{T'}  \ottstype{)}  \ottstype{\rightarrowtail} \ottstype{U_{{\mathrm{0}}}}
+\qquad
+\Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
+}{}{}
+
+\patchcmd{\ottdruleTyXXvalXXAmpar}{%
+\ottpremise{   \ottsmode{1}  \hspace{-0.15ex}  \ottsmode{\uparrow}    \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{3}}}   \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{1}}}}  \pmb{:}  \ottstype{T}}%
+\ottpremise{ \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+}{
+\ottpremise{   \ottsmode{1}  \hspace{-0.15ex}  \ottsmode{\uparrow}    \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{3}}}   \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{1}}}}  \pmb{:}  \ottstype{T}
+\qquad
+\Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+}{}{}
+
+\patchcmd{\ottdruleTyXXtermXXPatS}{%
+\ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}}%
+\ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+}{\ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}%
+\qquad
+\Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
+}{}{}
+
+\patchcmd{\ottdruleTyXXectxsXXPatS}{%
+\ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}}%
+\ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+}{
+  \ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}
+\qquad
+  \Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
+}{}{}
 
 %% Bibliography settings
 \usepackage[
   backend=biber,
+  natbib=true,
   style=alphabetic,
   sorting=ynt]{biblatex}
 \addbibresource{bibliography.bib}
 
 %% General document setup
 \setmainlanguage{english}
-\setmainfont{Tinos}[
+% \setmainfont{Tinos}[
+%   Path=./fonts/,
+%   Extension=.ttf,
+%   UprightFont=*-Regular,
+%   BoldFont=*-Bold,
+%   ItalicFont=*-Italic,
+%   BoldItalicFont=*-BoldItalic,
+%   Scale=1.033]
+\setmainfont{lmroman10}[
   Path=./fonts/,
-  Extension=.ttf,
-  UprightFont=*-Regular,
-  BoldFont=*-Bold,
-  ItalicFont=*-Italic,
-  BoldItalicFont=*-BoldItalic,
-  Scale=1.00]
+  Extension=.otf,
+  UprightFont=*-regular,
+  BoldFont=*-bold,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-bolditalic,
+  Scale=1.0]
 \setsansfont{iosevka-quasi-proportional-ss07}[
   Path=fonts/,
   Extension=.ttf,
@@ -96,7 +148,7 @@
   BoldFont=*-semibold,
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
-  Scale=0.92]
+  Scale=0.905]
 \setmonofont{iosevka-quasi-proportional-ss07}[
   Path=fonts/,
   Extension=.ttf,
@@ -104,7 +156,7 @@
   BoldFont=*-semibold,
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
-  Scale=0.92]
+  Scale=0.905]
 % \setmonofont{Iosevka-Term-SS07}[
 %   Path=fonts/,
 %   Extension=.ttf,
@@ -120,15 +172,23 @@
   BoldFont=*-semibold,
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
-  Scale=0.92]
-\setmathsf{Tinos}[
-  Path=fonts/,
-  Extension=.ttf,
-  UprightFont=*-Italic,
-  BoldFont=*-BoldItalic,
-  ItalicFont=*-Italic,
-  BoldItalicFont=*-BoldItalic,
-  Scale=1.00]
+  Scale=0.905]
+% \setmathsf{Tinos}[
+%   Path=fonts/,
+%   Extension=.ttf,
+%   UprightFont=*-Italic,
+%   BoldFont=*-BoldItalic,
+%   ItalicFont=*-Italic,
+%   BoldItalicFont=*-BoldItalic,
+%   Scale=1.033]
+\setmathsf{lmroman10}[
+  Path=./fonts/,
+  Extension=.otf,
+  UprightFont=*-italic,
+  BoldFont=*-bolditalic,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-bolditalic,
+  Scale=1.0]
 % \setmonofont{Fira-Code-Nerd-Font-Complete}[
 %   Extension=.otf,
 %   UprightFont=*-Regular,
@@ -254,8 +314,8 @@
 \let\figtextsize\normalsize
 \newcommand{\destcalculus}{\ensuremath{\lambda_d}}
 \newcommand{\destcalculusinplace}{\ensuremath{\lambda_{d\,\ottkw{ip}}}}
-\newtheorem{lem}{Lemma}
-\newtheorem{thm}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
 \newcommand\btriangleq{\pmb{\triangleq}}
 \newcommand\btriangleqrec{\oset{\mathsf{rec}}{\pmb{\triangleq}}}
 \newlength{\interdefskip}
@@ -270,7 +330,7 @@
 #4 ~\ifthenelse{\equal{#1}{}}{\btriangleq}{\btriangleqrec}~\\\myspace{1}#5
 \end{array}\\[\interdefskip]}
 \newcommand{\figureratio}{0.9}
-\newcommand{\codehere}[2][t]{\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}{\figtextsize$#2$}\end{minipage}\end{center}}
+\newcommand{\codehere}[2][t]{\vspace{-0.05cm}\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}{\figtextsize\ensuremath{#2}}\end{minipage}\end{center}\vspace{-0.05cm}}
 \NewEnviron{codefig}[2][t]{\begin{figure}[#1]
 \codehere{\BODY}#2
 \end{figure}}
@@ -278,11 +338,11 @@
 \figtextsize\BODY\activespaces #2
 \end{figure}}
 \newcommand{\sidebysidecodehere}[4]{\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}
-\noindent\begin{minipage}[#1]{#2\linewidth-0.03\linewidth}{\figtextsize$#3$}\end{minipage}
+\noindent\begin{minipage}[#1]{#2\linewidth-0.02\linewidth}{\figtextsize\ensuremath{#3}}\end{minipage}
 \hfill
 \vrule width 0.5pt % Vertical rule of 1pt width
 \hfill
-\begin{minipage}[#1]{\linewidth-#2\linewidth-0.03\linewidth}{\figtextsize$#4$}\end{minipage}
+\begin{minipage}[#1]{\linewidth-#2\linewidth-0.02\linewidth}{\figtextsize\ensuremath{#4}}\end{minipage}
 \end{minipage}\end{center}
 }
 
@@ -312,12 +372,22 @@
 \newunicodechar{;}{\ensuremath{\fatsemi}}
 \newunicodechar{∀}{\ensuremath{\pmb{\forall}}}
 \newunicodechar{⩴}{\hspace{-0.2ex}:\hspace{-0.4ex}:\hspace{-0.2ex}}
+
+
+\newlength{\widthaugment}
+\NewEnviron{augmentwidth}[1]
+  {\setlength{\widthaugment}{#1}
+   \pgfmathsetmacro{\myratio}{\linewidth / (\widthaugment + \linewidth)}
+   \scalebox{\myratio}{\begin{minipage}{\linewidth+\widthaugment}\BODY
+   \end{minipage}}}
+
 \makeatletter
 \AtBeginEnvironment{minted}{\dontdofcolorbox}
 \def\dontdofcolorbox{\renewcommand\fcolorbox[4][]{##4}}
 \xpatchcmd{\inputminted}{\minted@fvset}{\minted@fvset\dontdofcolorbox}{}{}
 \xpatchcmd{\mintinline}{\minted@fvset}{\minted@fvset\dontdofcolorbox}{}{} % see https://tex.stackexchange.com/a/401250/
 \makeatother
+
 \renewcommand{\MintedPygmentize}{./pygmentize_local}
 \newlength{\currentparskip}
 \newenvironment{unbreakable}
@@ -334,13 +404,126 @@
   \par\vspace{0.5\baselineskip}% Add possible vertical separation
 }
 
+
+\newcommand{\IfFancyRuleNames}[2]{#1}
+
+\newcommand{\SetPrefix}[1]{\IfFancyRuleNames{\renewcommand{\ottdrulename}[1]{#1}}{}}
+
+\makeatletter
+
+\IfFancyRuleNames{
+  \def\CSep{/}
+  \def\CHole{id\textsubscript{h}}
+  \def\CDest{id\textsubscript{d}}
+  \def\CUnit{$\ottstype{1}$I}
+  \def\CFun{$\ottstype{\multimap}$I}
+  \def\CLeft{$\ottstype{\oplus}$I\textsubscript{1}}
+  \def\CRight{$\ottstype{\oplus}$I\textsubscript{2}}
+  \def\CProd{$\ottstype{\otimes}$I}
+  \def\CExp{$\ottstype{!}$I}
+  \def\CBangProm{$\ottstype{!}$P}
+  \def\CBangDerel{$\ottstype{!}$D}
+  \def\CBangWeak{$\ottstype{!}$W}
+  \def\CBangContr{$\ottstype{!}$C}
+  \def\CAmpar{$\ottstype{\ltimes}$I}
+  \def\CVal{fromVal}
+  \def\CVar{id\textsubscript{v}}
+  \def\CApp{$\ottstype{\multimap}$E}
+  \def\CPatU{$\ottstype{1}$E}
+  \def\CPatS{$\ottstype{\oplus}$E}
+  \def\CPatP{$\ottstype{\otimes}$E}
+  \def\CPatE{$\ottstype{!}$E}
+  \def\CUpdA{$\ottstype{\ltimes}$upd}
+  \def\CToA{$\ottstype{\ltimes}$I\textsubscript{t}}
+  \def\CFromA{$\ottstype{\ltimes}$E}
+  \def\CNewA{$\ottstype{\ltimes}$I\textsubscript{n}}
+  \def\CFillU{$\ottstype{\lfloor 1\rfloor}$E}
+  \def\CFillL{$\ottstype{\lfloor \oplus\rfloor}$E\textsubscript{1}}
+  \def\CFillR{$\ottstype{\lfloor \oplus\rfloor}$E\textsubscript{2}}
+  \def\CFillP{$\ottstype{\lfloor \otimes\rfloor}$E}
+  \def\CFillE{$\ottstype{\lfloor !\rfloor}$E}
+  \def\CFillF{$\ottstype{\lfloor \multimap\rfloor}$E}
+  \def\CFillComp{$\ottstype{\lfloor\smallbullet\rfloor}$E\textsubscript{c}}
+  \def\CFillLeaf{$\ottstype{\lfloor\smallbullet\rfloor}$E\textsubscript{l}}
+  \def\CId{id}
+  \def\COpenAmpar{$\ottstype{\ltimes}$op}
+  \def\COpen{op}
+  \def\CClose{cl}
+  \def\CFocus{F}
+  \def\CUnfocus{U}
+  \def\CRed{C}
+  \def\CTyTerm{ty-$[[t]]$}
+  \def\CTySTerm{ty-$[[t]]{\scriptstyle^{s}}$}
+  \def\CTyVal{ty-$[[v]]$}
+  \def\CTyEctxs{ty-$[[C]]$}
+  \def\CTyCmd{ty-cmd}
+  \def\CLOne{$\lambda_{L_1}$}
+  \def\CLTwo{$\lambda_{L_2}$}
+  \def\CLm{$\lambda_{L_m}$}
+  \def\CLdm{$\lambda_{L_{dm}}$}
+  \def\CLOneOrTwo{$\lambda_{L_{1,2}}$}
+  \def\CLTwoOrm{$\lambda_{L_{2,m}}$}
+  \def\CSem{-sem}
+  \def\CTy{-ty}
+  \def\CILL{ILL}
+  \def\rref*#1{\textsc{#1}}
+}{
+  \renewcommand{\ottdrulename}[1]{\ottalt@replace@cs\ranchor\_-{}#1\\}\renewcommand{\maybecomm}[1]{\bgroup\def\text##1{}#1\egroup}
+  \def\CSep{-}
+  \def\CHole{Hole}
+  \def\CDest{Dest}
+  \def\CUnit{Unit}
+  \def\CFun{Fun}
+  \def\CLeft{Left}
+  \def\CRight{Right}
+  \def\CProd{Prod}
+  \def\CExp{Exp}
+  \def\CBangProm{Prom}
+  \def\CBangDerel{Derel}
+  \def\CBangWeak{Weak}
+  \def\CBangContr{Contra}
+  \def\CAmpar{Ampar}
+  \def\CVal{Val}
+  \def\CVar{Var}
+  \def\CApp{App}
+  \def\CPatU{PatU}
+  \def\CPatS{PatS}
+  \def\CPatP{PatP}
+  \def\CPatE{PatE}
+  \def\CUpdA{UpdA}
+  \def\CToA{ToA}
+  \def\CFromA{FromA}
+  \def\CNewA{NewA}
+  \def\CFillU{FillU}
+  \def\CFillL{FillL}
+  \def\CFillR{FillR}
+  \def\CFillP{FillP}
+  \def\CFillE{FillE}
+  \def\CFillF{FillF}
+  \def\CFillComp{FillComp}
+  \def\CFillLeaf{FillLeaf}
+  \def\CId{Id}
+  \def\COpenAmpar{OpenAmpar}
+  \def\COpen{Open}
+  \def\CClose{Close}
+  \def\CFocus{Focus}
+  \def\CUnfocus{Unfocus}
+  \def\CRed{Red}
+  \def\CTyTerm{Ty-term}
+  \def\CTySTerm{Ty-sterm}
+  \def\CTyVal{Ty-val}
+  \def\CTyEctxs{Ty-ectxs}
+  \def\CTyCmd{Ty-cmd}
+}
+\makeatother
+
 \makeatletter
 \def\uwave{\bgroup \markoverwith{\lower3.5\p@\hbox{\sixly \textcolor{red}{\char58}}}\ULon}
 \font\sixly=lasy6 % does not re-load if already loaded, so no memory problem.
 \makeatother
 
-\newcommand{\grammsep}{\hspace*{2ex}|\hspace*{2ex}}
-\newcommand{\grammdef}{:\hspace*{-0.3ex}:\hspace*{-0.3ex}=}
+\newcommand{\grammsep}{\hspace*{1.8ex}|\hspace*{1.8ex}}
+\newcommand{\grammdef}{\mathrel{\raisebox{0.09ex}{$\mathop{:}$\hspace*{-0.1ex}$\mathop{:}$\hspace*{-0.1ex}}\shorteq}}
 
 % =========================================================================== %
 
@@ -433,7 +616,7 @@
 %                         Page de titre:
 %-------------------------------------------------------------------
 
-\ThesisTitle{A Safe, Formally-proven Approach of Destination-Passing Style Programming for Functional Languages}
+\ThesisTitle{Formalization and Implementation of Safe Destination Passing in Functional Programming Languages}
 \ThesisDate{April 2025}
 \ThesisAuthor{Thomas Bagrel}
 
@@ -527,8 +710,8 @@ Je dédie cette thèse à TBD.
 \clearpage
 
 \listof{listing}{List of Listings}
-\addcontentsline{toc}{chapter}{List of Listings}
-% \markboth{List of Listings}{LIST OF LISTINGS}
+% \addcontentsline{toc}{chapter}{List of Listings}
+% \markboth{List of Listings}{}
 \clearpage
 
 \include{chapters/00_introduction}

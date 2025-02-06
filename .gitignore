@@ -60,6 +60,7 @@ flycheck_*.el
 *.log
 *.lot
 *.fls
+*.flg
 *.out
 *.toc
 *.fmt

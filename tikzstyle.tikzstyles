@@ -42,4 +42,5 @@
 \tikzstyle{a1}=[draw=scicolor, ->]
 \tikzstyle{a2}=[draw=sciicolor, ->]
 \tikzstyle{a3}=[draw=sciiicolor, ->]
+\tikzstyle{red}=[densely dotted, draw={rgb,255: red,0; green,0; blue,0}, ->]
 \tikzstyle{dashedred}=[densely dotted, draw={rgb,255: red,0; green,0; blue,0}, ->]

@@ -97,6 +97,12 @@ pkgs.mkShell
           xkeyval
           xpatch
           xstring
+
+          bclogo
+          # for bclogo
+          mdframed
+          zref
+          needspace
           ;
       })
 

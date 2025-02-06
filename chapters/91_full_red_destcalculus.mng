@@ -1,12 +1,5 @@
 \chapter{Full reduction rules for \destcalculus{}}\label{apx:full-reduction-rules}
 
-\newlength{\widthaugment}
-\NewEnviron{augmentwidth}[1]
-  {\setlength{\widthaugment}{#1}
-   \pgfmathsetmacro{\myratio}{\linewidth / (\widthaugment + \linewidth)}
-   \scalebox{\myratio}{\begin{minipage}{\linewidth+\widthaugment}\BODY
-   \end{minipage}}}
-
 \renewenvironment{rulesection}[3][\relax]
   {\trivlist\item
    \ifx#1\relax\else\def\ottalt@rulesection@prefix{#1-}\fi
@@ -19,97 +12,85 @@
     {#3}
     {#4}
 }
-
-\begin{ottfig}[h]{\caption{Full reduction rules for \destcalculus{} (part 1)}\label{fig:sem-full1}}\begin{augmentwidth}{1.7cm}
+\bgroup\SetPrefix{\CRed\CSep}
+\begin{ottfig}[h]{\caption{Full reduction rules for \destcalculus{} (part 1)}\label{fig:sem-full1}}\begin{augmentwidth}{3cm}
 \drules{$[[C [ t ] ⟶ C' [ t' ] ]]$}{Small-step evaluation of commands}{%
-Focus-AppOne,
-Unfocus-AppOne,
-Focus-AppTwo,
-Unfocus-AppTwo,
-Red-App,
+App-FocusOne,
+App-UnfocusOne,
+App-FocusTwo,
+App-UnfocusTwo,
+App-Red,
 %
-Focus-PatU,
-Unfocus-PatU,
-Red-PatU,
+PatU-Focus,
+PatU-Unfocus,
+PatU-Red,
 %
-Focus-PatS,
-Unfocus-PatS,
-Red-PatL,
-Red-PatR,
+PatS-Focus,
+PatS-Unfocus,
+PatL-Red,
+PatR-Red,
 %
-Focus-PatP,
-Unfocus-PatP,
-Red-PatP,
+PatP-Focus,
+PatP-Unfocus,
+PatP-Red,
 %
-Focus-PatE,
-Unfocus-PatE,
-Red-PatE,
+PatE-Focus,
+PatE-Unfocus,
+PatE-Red,
 %
-Focus-Map,
-Unfocus-Map,
-Open-Ampar,
-Close-Ampar
+UpdA-Focus,
+UpdA-Unfocus,
+Ampar-Open,
+Ampar-Close,
+%
+ToA-Focus,
+ToA-Unfocus,
+ToA-Red
 }
 \end{augmentwidth}\end{ottfig}
 
-\TODO{Fix overflowing figure}
-
-\begin{ottfig}[h]{\caption{Full reduction rules for \destcalculus{} (part 2)}\label{fig:sem-full2}}\begin{augmentwidth}{1.7cm}
+\begin{ottfig}[h]{\caption{Full reduction rules for \destcalculus{} (part 2)}\label{fig:sem-full2}}\begin{augmentwidth}{3cm}
 \drules{}{}{%
-Focus-ToA,
-Unfocus-ToA,
-Red-ToA,
+FromA-Focus,
+FromA-Unfocus,
+FromA-Red,
+NewA-Red,
 %
-Focus-FromA,
-Unfocus-FromA,
-Red-FromA,
+FillU-Focus,
+FillU-Unfocus,
+FillU-Red,
 %
-Red-Alloc,
+FillL-Focus,
+FillL-Unfocus,
+FillL-Red,
 %
-Focus-FillU,
-Unfocus-FillU,
-Red-FillU,
+FillR-Focus,
+FillR-Unfocus,
+FillR-Red,
 %
-Focus-FillL,
-Unfocus-FillL,
-Red-FillL,
+FillE-Focus,
+FillE-Unfocus,
+FillE-Red,
 %
-Focus-FillR,
-Unfocus-FillR,
-Red-FillR,
+FillP-Focus,
+FillP-Unfocus,
+FillP-Red,
 %
-Focus-FillE,
-Unfocus-FillE,
-Red-FillE,
+FillF-Focus,
+FillF-Unfocus,
+FillF-Red,
 %
-Focus-FillP,
-Unfocus-FillP,
-Red-FillP,
+FillComp-FocusOne,
+FillComp-UnfocusOne,
+FillComp-FocusTwo,
+FillComp-UnfocusTwo,
+FillComp-Red,
 %
-Focus-FillF,
-Unfocus-FillF,
-Red-FillF,
-%
-Focus-FillCompOne,
-Unfocus-FillCompOne,
-Focus-FillCompTwo,
-Unfocus-FillCompTwo,
-Red-FillComp,
-%
-Focus-FillLeafOne,
-Unfocus-FillLeafOne,
-Focus-FillLeafTwo,
-Unfocus-FillLeafTwo,
-Red-FillLeaf
+FillLeaf-FocusOne,
+FillLeaf-UnfocusOne,
+FillLeaf-FocusTwo,
+FillLeaf-UnfocusTwo,
+FillLeaf-Red
 }
 \end{augmentwidth}\end{ottfig}
-
-% Local Variables:
-% eval: (auto-fill-mode 0)
-% eval: (visual-line-mode 1)
-% ispell-local-dictionary: "en_US"
-% End:
-% LocalWords:  ampar combinators combinator Gentzen sequent semirings
-% LocalWords:  involutive dualization autocompletion Ott backends Coq
-% LocalWords:  extensionality semiring setoid allocator pointwise
-% LocalWords:  denotational unevaluated exponentials
+\egroup
