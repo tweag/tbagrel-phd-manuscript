@@ -403,7 +403,7 @@ defns
 Sem :: '' ::=
 
 defn
-C [ t ] ⟶ C' [ t' ] :: :: Sem :: '' {{ com Small-step evaluation of commands }} {{ tex [[C]]~\big[\,[[t]]\,\big]~[[⟶]]~[[C']]~\big[\,[[t']]\,\big] }} by
+C [ t ] ⟶ C' [ t' ] :: :: Sem :: '' {{ com Small-step evaluation of commands }} {{ tex [[C]]\,\big[\,[[t]]\,\big][[⟶]][[C']]\,\big[\,[[t']]\,\big] }} by
 
 {{ NotVal [[t]] }} [[:NotValt]]
 ----------------------------- :: App_Focus1 {{ com \CApp{}F\textsubscript{1} }}

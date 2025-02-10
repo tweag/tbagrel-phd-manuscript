@@ -86,34 +86,38 @@ In \CLTwo, contraction for unrestricted resources happens implicitly every time 
 
 \section{Back to a single context with the graded modal approach}
 
-In~\cite{girard_bounded_1992}, Girard introduced a \emph{bounded} version of linear logic, where the $\ottstype{!}$ modality is accompanied by an index $[[m]]$ that specifies how many times an hypothesis can be used. This \emph{graded} modality $\ottstype{!}_{[[m]]}$ gives more flexibility than the binary choice we had before, where resources could either be strictly linear or fully unrestricted. The index $[[m]]$ --- that we will call \emph{mode} from now on --- takes its values in an arbitrary set equipped with a semiring or ringoid structure (it can be integers for precise use count; extended integers to take unrestricted use into account; or even intervals to represent minimum and maximum uses).
+So far, we only considered type systems that are linear, but that are otherwise fairly standard with relation to usual simply-typed $\lambda$-calculus. Anticipating on our future needs, further in this document we'll need to encode more information and ensure more invariants throughout the type system than just linearity alone.
 
-Having an arbitrary number of graded modalities $\left(\ottstype{!}_{[[m]]}\right)_{[[m]] \in \ottsmode{M}}$ instead of the single $\ottstype{!}$ modality of original linear logic means that we cannot really have a distinct context for each of them as in the dyadic presentation.
+Naively, we could just multiply the typing contexts, for each new modality or control axis that we need (linearity being one of them, with two values, either \emph{linear} or \emph{unrestricted}). The problem is, that approach is not really scalable: as we increase the number of axes, in the end, we need one context per combination of value on each axis, so it grows really quickly.
 
-Since \cite{girard_bounded_1992}, the line of work of graded modalities has been fruitfully developed, but most bounded/graded linear calculi kept a presentation close to the monadic presentation \CLOne, in which there is a clear distinction between linear resources and modality-annotated ones, and modality-annotated resources are kept "boxed" with their modality $\ottstype{!}_{[[m]]}$ inside the typing context $[[P]]$, and are only "deboxed" at the latest, through an explicit use of the dereliction rule.
+Even without multiple axis, we already have a problem if we want a finer control over linearity. What if we want to allow variables to be used a fixed number of times that isn't just 1 or unlimited? In~\cite{girard_bounded_1992}, Girard considers that \emph{bounded} extension of linear logic, where the number of uses of hypotheses can be restricted to any value aka. multiplicity $[[m]]$ instead of being just linear or unrestricted. For that he extends the $\ottstype{!}$ modality with an index $[[m]]$ that specifies how many times an hypothesis should be used. We say that $\ottstype{!}_{[[m]]}$ is a \emph{graded modality}.
 
-However, that changed in 2014, when both \cite{ghica_bounded_2014} and \cite{petricek_coeffects_2014} introduced calculi where judgments have a single typing context, in which \emph{all} variable bindings carry a mode $[[m]]$ representing how they must be used. For instance, linear bindings $[[{x ⫶ T}]]$ are replaced by modal binding requiring \textcolor{modecolor}{one} use $[[{x : ˥ T}]]$. As a result, thanks to the variable bindings enriched with modes, modality-annotated resources $[[t]]\pmb{:}[[! m T]]$ can be deboxed very early --- as in the dyadic presentation --- in the form of a binding $[[{x : m T}]]$, without loosing any information and flexibility. We recover a system in which contraction, weakening, and dereliction can be made conveniently implicit, without loosing any control power over resource use! For that, we just have to define a few operators on \emph{modes}, that we will then lift to variable bindings, and then to typing contexts themselves.
+Having a family of modalities $\left(\ottstype{!}_{[[m]]}\right)_{[[m]] \in \ottsmode{M}}$ with an arbitrary number of elements instead of the single $\ottstype{!}$ modality of original linear logic means that we cannot really have a distinct context for each of them as in the dyadic presentation. One solution is to go back to the monadic presentation, where variables carry their modality on their type until the very end where they get used. We would need a new operator to go from $\ottstype{!}_{[[m]]} [[T]]$ to a pair $\ottstype{!}_{[[m]]\ottsmode{-1}} [[T]], [[T]]$ so that we can extract a single use from a value wrapped in a modality allowing several uses. Actually, it gets hairy and unpractical very fast.
 
-In the spirit of \cite{ghica_bounded_2014} and subsequent \cite{bernardy_linear_2018,bernardy_modality_2020}, we'll now show what the concrete \emph{modal} presentation for intuitionistic $\lambda$-calculus or \CLm looks like. We will take a very simple ringoid for modes, that is enough to model linearity equivalently as the previous presentations \CLOne and \CLTwo{}: $[[˥]]$ for variables that must be managed in strict linear fashion, and $[[ɷ]]$ for unrestricted ones. We give the following operation tables:
+Fortunately, there's a way out of this. Instead of having $[[m]]$ be part of the modality and thus of the type of terms, we can bake it in as an annotation on variable bindings. In place of $[[x]]:[[S]],[[y]]:[[! m T]],[[z]]:[[! n U]] \pmb{\vdash} \ldots$, we can have $[[x]]:_{\ottsmode{1}} [[S]], [[y]]:_{[[m]]} [[T]], [[z]]:_{[[n]]} [[U]] \pmb{\vdash} \ldots$ without adding or losing any information. We'll call the new annotations on bindings \emph{modes}. Note that every binding is equipped with a mode $[[m]]$, even linear bindings that previously didn't have modalities on their types\footnote{This uniform approach where every binding receive a mode seems to originate from \cite{ghica_bounded_2014} and \cite{petricek_coeffects_2014}.}. Now, we can completely encode the restrictions and rules of our system by defining operations on modes and by extension, on typing contexts, and use these operations in typing rules, instead of needing extra operators such as $\ottkw{derelict}$ or $\ottkw{dup}$ that need their own typing rules and have to be used explicitly by the user. With that modal approach, we recover a system, like the dyadic one, in which contraction, weakening, and dereliction can be made conveniently implicit, without loosing any control power over resource use, and with no explosion of the number of contexts!
+
+Moreover, we build on the key insight, which seem to originate with~\cite{ghica_bounded_2014}, that equipping the set of modes with a semiring structure is sufficient to express, algebraically, all the typing context manipulation that we need. The idea is to have two operations on modes: \emph{times} $\ottsmode{\cdot}$ that represents what happens to modes when there is composition (e.g. for linearity, if function $[[f]]$ uses its argument $\ottsmode{2}$ times and $[[g]]$ too, then $[[f (g x)]]$ uses $[[x]]$ $\ottsmode{2\cdot 2}$ times), while \emph{plus} $\ottsmode{+}$ describes what happens to modes when a same variable is used in two (or more) subterms (if subterm $[[t]]$ uses $[[x]]$ $\ottsmode{2}$ times and $[[u]]$ uses $[[x]]$ $\ottsmode{3}$ times, then $[[t ; u]]$ uses $[[x]]$ $\ottsmode{2+3}$ times).
+
+We then lift these operations to variable bindings, and then to typing contexts themselves in the following way. We lift \emph{times} so that it can scale a variable binding by a mode $[[n]]$: we pose $[[n·({ x : m T })]] \btriangleq [[{ x : n · m T }]]$. We then extend this operator point-wise to act on whole typing contexts as in $[[n·P]]$, not just single bindings.
+
+We also define typing context \emph{plus} as a partial operation where $[[({ x : m T }) + ({ x : m' T })]] = [[x]]:\!_{\![[m]]\ottsmode{+}[[m']]}[[T]]$ and  $[[({ x : m T }) + P]] = [[{ x : m T },P]]$\hspace*{0.6em}if $[[x]] \notin [[P]]$.
+
+We'll now show what the concrete \emph{modal} presentation for intuitionistic $\lambda$-calculus or \CLm looks like. We will go back to a very simple ringoid\footnote{We still get all the algebraic benefits of \cite{ghica_bounded_2014} even without a zero for our structure.} for modes, that just models linearity equivalently as the previous presentations \CLOne and \CLTwo{}: $[[˥]]$ for variables that must be managed in strict linear fashion, and $[[ɷ]]$ for unrestricted ones. We give the following operation tables:
 
 %\begin{figure}[t]
 \begin{center}
-\begin{tabular}{|c|c|c|}\hline
-$\ottsmode{+}$ & $[[¹]]$ & $[[ω]]$ \\\hline
+\begin{tabular}{|c||c|c|}\hline
+$\ottsmode{+}$ & $[[¹]]$ & $[[ω]]$ \\\hhline{|=#=|=|}
 $[[¹]]$        & $[[ω]]$ & $[[ω]]$ \\\hline
 $[[ω]]$        & $[[ω]]$ & $[[ω]]$ \\\hline
 \end{tabular}
 \hspace{1cm}
-\begin{tabular}{|c|c|c|}\hline
-$[[·]]$        & $[[¹]]$ & $[[ω]]$ \\\hline
-$[[¹]]$        & $[[¹]]$ & $[[∞]]$ \\\hline
-$[[ω]]$        & $[[∞]]$ & $[[∞]]$ \\\hline
+\begin{tabular}{|c||c|c|}\hline
+$[[·]]$        & $[[¹]]$ & $[[ω]]$ \\\hhline{|=#=|=|}
+$[[¹]]$        & $[[¹]]$ & $[[ω]]$ \\\hline
+$[[ω]]$        & $[[ω]]$ & $[[ω]]$ \\\hline
 \end{tabular}
 \end{center}
-
-We lift \emph{times} so that it can scale a variable binding by a mode $[[n]]$: we pose $[[n·({ x : m T })]] \btriangleq [[{ x : n · m T }]]$. We then extend this operator point-wise to act on whole typing contexts as in $[[n·P]]$, not just single bindings.
-
-We also define typing context \emph{plus} as a partial operation where $[[({ x : m T }) + ({ x : m' T })]] = [[x]]:\!_{\![[m]]\ottsmode{+}[[m']]}[[T]]$ and  $[[({ x : m T }) + P]] = [[{ x : m T },P]]$\hspace*{0.6em}if $[[x]] \notin [[P]]$.
 
 Equipped with those, we can move to the grammar and typing rules of \CLm, given in \cref{fig:linmod-grammar,fig:linmod-ty-term}. Constructor for $[[! m T]]$ is now $[[ˢᴇ n t]]$ (instead of $[[ᴇ t]]$ for $[[! T]]$).
 
@@ -209,6 +213,7 @@ Many semantics presentations exist for lambda calculus. In \cref{fig:linsem} I p
 }
 
 \begin{ottfig}{\caption{Small-step semantics for \CLdm}\label{fig:linsem}}
+\begin{augmentwidth}{2cm}
 \bgroup
 \renewcommand{\ottdrulename}[1]{\CLdm\CSem\CSep}
 \renewcommand\arraystretch{1.5}
@@ -217,7 +222,7 @@ Many semantics presentations exist for lambda calculus. In \cref{fig:linsem} I p
   % #3 is premise
   % #1 is rule name
   %  & \text{#1}
-  \ensuremath{#4} & \setbox0=\hbox{\ensuremath{#3}\foreverunspace}\ifdim\wd0=0pt ~ \else$\star$\fi & \text{#1} \\
+  \ensuremath{#4} & \setbox0=\hbox{\ensuremath{#3}\foreverunspace}\ifdim\wd0=0pt ~ \else$\star$\fi & \text{\textsc{#1}} \\
 }
 \makeatletter
 \renewenvironment{drulepar}[3][\relax]
@@ -261,7 +266,7 @@ LinRed-PatE}
 \begin{center}
 $\star$~:~only allowed if $[[t]]$ is not already a value
 \end{center}
-
+\end{augmentwidth}
 \end{ottfig}
 
 \egroup

@@ -278,7 +278,7 @@ LinSem :: '' ::=
 % We want theorem that C[t] -->* C[v] where englobing context doesn't change?
 
 defn
-C [ t ] ⟶ C' [ t' ] :: :: LinDeepMod_Sem :: '' {{ com Small-step evaluation }} {{ tex [[C]]~\big[\,[[t]]\,\big]~[[⟶]]~[[C']]~\big[\,[[t']]\,\big] }} by
+C [ t ] ⟶ C' [ t' ] :: :: LinDeepMod_Sem :: '' {{ com Small-step evaluation }} {{ tex [[C]]\,\big[\,[[t]]\,\big][[⟶]][[C']]\,\big[\,[[t']]\,\big] }} by
 
 % {{ NotVal [[t]] }} [[:NotValt]]
 % -------------------------------- :: LinFocus_Left {{ com \CLeft\CFocus }}

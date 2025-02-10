@@ -74,7 +74,7 @@
 \newcommand{\sciii}[1]{\textcolor{sciiicolor}{#1}}
 
 %% For OTT rendering
-\newunicodechar{⥶}{\ensuremath{\raisebox{0.2em}{$\scriptstyle<$}\hspace*{-0.55em}\raisebox{-0.12em}{$\scriptscriptstyle\leftarrow$}}}
+\newunicodechar{⥶}{\ensuremath{\raisebox{0.2em}{$\scriptstyle<$}\hspace*{-0.65em}\raisebox{-0.12em}{$\scriptscriptstyle\leftarrow$}}}
 \usepackage[supertabular]{ottalt}
 \inputott{destination_calculus_ott.tex}
 \usepackage{ottstyling}
@@ -133,13 +133,13 @@
 %   ItalicFont=*-Italic,
 %   BoldItalicFont=*-BoldItalic,
 %   Scale=1.033]
-\setmainfont{lmroman10}[
+\setmainfont{CMUSerif}[
   Path=./fonts/,
   Extension=.otf,
-  UprightFont=*-regular,
-  BoldFont=*-bold,
-  ItalicFont=*-italic,
-  BoldItalicFont=*-bolditalic,
+  UprightFont=*-Roman,
+  BoldFont=*-Bold,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic,
   Scale=1.0]
 \setsansfont{iosevka-quasi-proportional-ss07}[
   Path=fonts/,
@@ -148,7 +148,7 @@
   BoldFont=*-semibold,
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
-  Scale=0.905]
+  Scale=0.887]
 \setmonofont{iosevka-quasi-proportional-ss07}[
   Path=fonts/,
   Extension=.ttf,
@@ -156,7 +156,7 @@
   BoldFont=*-semibold,
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
-  Scale=0.905]
+  Scale=0.887]
 % \setmonofont{Iosevka-Term-SS07}[
 %   Path=fonts/,
 %   Extension=.ttf,
@@ -172,7 +172,7 @@
   BoldFont=*-semibold,
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
-  Scale=0.905]
+  Scale=0.887]
 % \setmathsf{Tinos}[
 %   Path=fonts/,
 %   Extension=.ttf,
@@ -181,19 +181,19 @@
 %   ItalicFont=*-Italic,
 %   BoldItalicFont=*-BoldItalic,
 %   Scale=1.033]
-\setmathsf{lmroman10}[
+\setmathsf{CMUSerif}[
   Path=./fonts/,
   Extension=.otf,
-  UprightFont=*-italic,
-  BoldFont=*-bolditalic,
-  ItalicFont=*-italic,
-  BoldItalicFont=*-bolditalic,
+  UprightFont=*-Italic,
+  BoldFont=*-BoldItalic,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic,
   Scale=1.0]
 % \setmonofont{Fira-Code-Nerd-Font-Complete}[
 %   Extension=.otf,
 %   UprightFont=*-Regular,
 %   BoldFont=*-Medium,
-%   Scale=0.89]
+%   Scale=0.887]
 
 \setlength{\parskip}{0.25\baselineskip}
 \setlist[itemize]{topsep=0ex,itemsep=-0.5ex}
@@ -313,7 +313,7 @@
 
 \let\figtextsize\normalsize
 \newcommand{\destcalculus}{\ensuremath{\lambda_d}}
-\newcommand{\destcalculusinplace}{\ensuremath{\lambda_{d\,\ottkw{ip}}}}
+\newcommand{\destcalculusinplace}{\ensuremath{\lambda_{d\,\textsc{ip}}}}
 \newtheorem{lemma}{Lemma}
 \newtheorem{theorem}{Theorem}
 \newcommand\btriangleq{\pmb{\triangleq}}
@@ -329,7 +329,7 @@
 #2 ~\pmb{:}~ #3 \\
 #4 ~\ifthenelse{\equal{#1}{}}{\btriangleq}{\btriangleqrec}~\\\myspace{1}#5
 \end{array}\\[\interdefskip]}
-\newcommand{\figureratio}{0.9}
+\newcommand{\figureratio}{1}
 \newcommand{\codehere}[2][t]{\vspace{-0.05cm}\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}{\figtextsize\ensuremath{#2}}\end{minipage}\end{center}\vspace{-0.05cm}}
 \NewEnviron{codefig}[2][t]{\begin{figure}[#1]
 \codehere{\BODY}#2
@@ -457,14 +457,14 @@
   \def\CTyVal{ty-$[[v]]$}
   \def\CTyEctxs{ty-$[[C]]$}
   \def\CTyCmd{ty-cmd}
-  \def\CLOne{$\lambda_{L_1}$}
-  \def\CLTwo{$\lambda_{L_2}$}
-  \def\CLm{$\lambda_{L_m}$}
-  \def\CLdm{$\lambda_{L_{dm}}$}
-  \def\CLOneOrTwo{$\lambda_{L_{1,2}}$}
-  \def\CLTwoOrm{$\lambda_{L_{2,m}}$}
-  \def\CSem{-sem}
-  \def\CTy{-ty}
+  \def\CLOne{$\lambda_{L1}$}
+  \def\CLTwo{$\lambda_{L2}$}
+  \def\CLm{$\lambda_{Lm}$}
+  \def\CLdm{$\lambda_{Ldm}$}
+  \def\CLOneOrTwo{$\lambda_{L1,2}$}
+  \def\CLTwoOrm{$\lambda_{L2,m}$}
+  \def\CSem{\hspace*{-0.2ex}--sem}
+  \def\CTy{\hspace*{-0.2ex}--ty}
   \def\CILL{ILL}
   \def\rref*#1{\textsc{#1}}
 }{

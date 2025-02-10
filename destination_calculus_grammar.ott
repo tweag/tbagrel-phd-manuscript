@@ -46,7 +46,7 @@ Defined.
 % NAMES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-metavar var, x, y, d, dd, un, ux, xs, ys, ex, st, tree, tl, tr, dtree, f, dh, dt, dx, dy, dxs, dys, dv, dtlr, dtl, dtr, q, tok, z, front, back ::= {{ com Variable names }}
+metavar var, x, y, d, dd, un, ux, xs, ys, ex, st, tree, tl, tr, dtree, f, g, dh, dt, dx, dy, dxs, dys, dv, dtlr, dtl, dtr, q, tok, z, front, back, l, dl ::= {{ com Variable names }}
  {{ tex \ottmv{[[var]]} }} {{ coq nat }}
 
 indexvar k ::= {{ coq nat }} {{ com Index for ranges }}
@@ -953,7 +953,7 @@ line_break, b :: 'b_' ::= {{ tex \ottssp{[[line_break]]} }}
 terminals :: 'terminals_' ::=
 
 % === Term syntax ===
-  | ⬜ :: :: idectx {{ tex \raisebox{0.075em}{$\scriptstyle []$} }}
+  | ⬜ :: :: idectx {{ tex \raisebox{0.075em}{$\scriptstyle [\hspace*{0.5ex}]$} }}
   | ⟼ :: :: mapsto {{ tex \pmb{\mapsto} }}
   | () :: :: unit {{ tex \ottsctor{()} }}
   | Inl :: :: inl {{ tex \ottsctor{Inl} }}
@@ -1012,7 +1012,7 @@ pred :: '_' ::= {{ com Serves for the .mng file. Isn't used in the actual rules 
   | P ˢ⊢ t : T :: :: Ty_sterm
   | D ⊣ C : T1 ↣ T2 :: :: Ty_ectxs {{ com Typing of evaluation contexts }} {{ tex [[D]][[⊣]][[C]][[:]][[T1]]\ottstype{\rightarrowtail}[[T2]] }}
   | ⊢ C [ t ] : T :: :: Ty {{ tex [[⊢]][[C]]\big[\,[[t]]\,\big][[:]][[T]] }}
-  | C [ t ] ⟶ C' [ t' ] :: :: Sem {{ tex [[C]]~\big[\,[[t]]\,\big]~[[⟶]]~[[C']]~\big[\,[[t']]\,\big] }}
+  | C [ t ] ⟶ C' [ t' ] :: :: Sem {{ tex [[C]]\,\big[\,[[t]]\,\big][[⟶]][[C']]\,\big[\,[[t']]\,\big] }}
   | C [ t ] :: :: Cmd {{ tex [[C]]\biggerbrackl [[t]] \biggerbrackr }}
   | Z | t ⟶ Z' | t' :: :: HeapSem
   | Z | t :: :: HeapCmd
