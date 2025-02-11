@@ -452,11 +452,11 @@
   \def\CFocus{F}
   \def\CUnfocus{U}
   \def\CRed{C}
-  \def\CTyTerm{ty-$[[t]]$}
-  \def\CTySTerm{ty-$[[t]]{\scriptstyle^{s}}$}
-  \def\CTyVal{ty-$[[v]]$}
-  \def\CTyEctxs{ty-$[[C]]$}
-  \def\CTyCmd{ty-cmd}
+  \def\CTyTerm{\destcalculus{}--ty}
+  \def\CTySTerm{\destcalculus{}--ty\textsubscript{s}}
+  \def\CTyVal{\destcalculus{}--ty\textsubscript{v}}
+  \def\CTyEctxs{\destcalculus{}--ty\textsubscript{E}}
+  \def\CTyCmd{\destcalculus{}--ty/cmd}
   \def\CLOne{$\lambda_{L1}$}
   \def\CLTwo{$\lambda_{L2}$}
   \def\CLm{$\lambda_{Lm}$}

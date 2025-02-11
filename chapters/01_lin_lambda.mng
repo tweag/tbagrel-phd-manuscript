@@ -128,9 +128,9 @@ Equipped with those, we can move to the grammar and typing rules of \CLm, given 
 &|\,& [[ t ►case ¹ν { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case ¹ν ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case ¹ν ᴇ n x ⟼ u]] \\
 &&\\
 [[T]], [[U]] &::=& [[T m → U]] \grammsep [[①]] \grammsep [[T1 ⨁ T2]] \grammsep [[T1 ⨂ T2]] \grammsep [[! n T]] \\
-[[m]], [[n]] &::=& [[˥]] \grammsep [[ɷ]] \grammsep [[m · n]] \\
+[[m]], [[n]] &::=& [[˥]] \grammsep [[ɷ]] \\
 &&\\
-[[P]] &::=& [[{ }]] \grammsep [[{ x : m T }]] \grammsep [[P1 , P2]] \grammsep [[P1 + P2]] \grammsep [[m·P]] \\
+[[P]] &::=& [[{ }]] \grammsep [[{ x : m T }]] \grammsep [[P1 , P2]]\\
 \end{array}
 }\end{codefig}
 
