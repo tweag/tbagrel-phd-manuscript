@@ -64,7 +64,7 @@ It is crucial to note that while a destination is used to build a structure, the
 Thus, we still need a type to tie the structure under construction --- left implicit by destination-filling primitives --- with the destinations representing its holes. To represent this, \destcalculus{} introduces a type $[[S ⧔ ⌊ T ⌋ ¹ν]]$ for a structure of type $[[S]]$ missing a value of type $[[T]]$ to be complete. There can be several holes in $[[S]]$ --- resulting in several destinations on the right hand side --- and as long as there remains holes in $[[S]]$, it cannot be read. For instance, $[[S ⧔ (⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν)]]$ represents a $[[S]]$ that misses both a $[[T]]$ and a $[[U]]$ to be complete (thus to be readable). The right hand side of $\ottstype{\ltimes}$ is not restricted to pair and destination types only; it can be of arbitrarily complex type.
 
 The general form $[[S ⧔ T ]]$ is read “$[[S]]$ ampar $[[T]]$”. The name “ampar” stands for “asymmetric memory par”. The “par” $\ottstype{\parr}$ operator originally comes from (classical) linear logic, and is an associative and commutative operator that can be used in place of linear implication and is slightly more flexible: $[[T ⊸ S]]$ is equivalent to $\ottstype{T^\perp \parr S}$ or $\ottstype{S \parr T^\perp}$. Similarly, $[[T1 ⊸ T2 ⊸ S]]$ is equivalent to $\ottstype{T1^\perp \parr T2^\perp \parr S}$. Function input's types ---which are in negative position--- are wrapped in the dualizing operator $\ottstype{\smallbullet^\perp}$ when a function is put into ``par'' form.
-Here we take sort of the same approach: \cite{minamide_functional_1998} first observed that structures with holes are akin to linear functions $[[T ⊸ S]]$, where $[[T]]$ represents the missing part; so we decide to represent them in a more flexible fashion under the form $[[S ⧔ ⌊ T ⌋ ¹ν]]$, so that destinations are made into a first-class type $[[⌊ T ⌋ ¹ν]]$. The asymmetric nature of our memory par is a bit disappointing, but it comes from limitations that we are in an intuitionistic setting, not a classical one like $\ottstype{\parr}$ needs.
+Here we take sort of the same approach: \citet{minamide_functional_1998} first observed that structures with holes are akin to linear functions $[[T ⊸ S]]$, where $[[T]]$ represents the missing part; so we decide to represent them in a more flexible fashion under the form $[[S ⧔ ⌊ T ⌋ ¹ν]]$, so that destinations are made into a first-class type $[[⌊ T ⌋ ¹ν]]$. The asymmetric nature of our memory par is a bit disappointing, but it comes from limitations that we are in an intuitionistic setting, not a classical one like $\ottstype{\parr}$ needs.
 
 Destinations, albeit being first-class, always exist within the context of a structure with holes. A destination is both a witness of a hole present in the structure, and a handle to write to it. Crucially, destinations are otherwise ordinary values. To access the destinations of an ampar, \destcalculus{} provides a $\ottkw{upd}_{\ottkw{\ltimes} }$ construction, which lets us apply a function to the right-hand side of the ampar. It is in the body of $\ottkw{upd}_{\ottkw{\ltimes} }$ that functions operating on destinations can be called to update the structure:
 
@@ -90,17 +90,18 @@ Equipped with these, we can, for instance, derive traditional constructors from 
 
 
 \paragraph{Memory safety and purity}
-At this point, the reader may be forgiven for feeling distressed at all the talk of mutations and uninitialized memory. How is it consistent with our claim to be building a pure and memory-safe language? The answer is that it wouldn't be if we'd allow unrestricted use of destinations. Instead \destcalculus{} uses a linear type system to ensure that:
+
+We must reassure the reader here. Of course, using destinations in an unrestricted fashion is not memory safe. We need a linear discipline on destinations for them to be safe. Otherwise, we can encounter two sorts of issues:
 
 \begin{itemize}
-\item destinations are written at least once, preventing examples like:
+\item if destinations are not written at least once, as in:
 
   \codehere{\newoperator
   {\ottkw{forget}}{[[T]]}
   {\ottkw{forget}}{[[from⧔' ((alloc @ T ⧔ ⌊ T ⌋ ¹ν) ►map d ⟼ ())]]}}
 
-  where reading the result of $\ottkw{forget}$ would result in reading the location pointed to by a destination that we never used, in other words, reading uninitialized memory;
-\item destinations are written at most once, preventing examples like:
+  then the result of $\ottkw{forget}$ would result in reading the location pointed to by a destination that we never used, in other words, reading uninitialized memory. That's clearly the biggest issue we must prevent;
+\item if destinations are written several times, as in:
 
   \codehere{\newoperator
   {\ottkw{ambiguous1}}{[[Bool]]}
@@ -109,16 +110,18 @@ At this point, the reader may be forgiven for feeling distressed at all the talk
   {\ottkw{ambiguous2}}{[[Bool]]}
   {\ottkw{ambiguous2}}{[[from⧔' ((alloc @ Bool ⧔ ⌊ Bool ⌋ ¹ν) ►map d ⟼ let x ≔ (d ◀ false) in d ◀ true; x)]]}}
 
-  where $\ottkw{ambiguous1}$ would return $[[false]]$ and $\ottkw{ambiguous2}$ would return $[[true]]$ due to evaluation order, even though let-expansion should be valid in a pure language.
+  then we have $\ottkw{ambiguous1}$ that returns $[[false]]$ and $\ottkw{ambiguous2}$ that returns $[[true]]$ due to evaluation order, so we break \emph{let expansion} that is supposed to be valid in a functional programming language. We ought to keep that property true for \destcalculus{}.
 \end{itemize}
+
+Actually, we'll see in \cref{sec:scope-escape-dests} that a linear discipline is not even enough to ensure fully safe use of destinations in \destcalculus{}. But before dealing with that, let's get more familiar with \destcalculus{} keywords and operators through more complex examples.
 
 \subsection{Tail-recursive map}\label{ssec:map-tr}
 
-Now that we have an intuition of how destinations work, let's see how they can be used to build usual data structures. For this section, we suppose that \destcalculus{} has equirecursive types and a fixed-point operator. These aren't part of the formal system of \cref{sec:syntax-type-system} but don't add any complication.
+Let's see how destinations can be used to build usual data structures. For these examples, we suppose that \destcalculus{} has equirecursive types and a fixed-point operator. These aren't part of the formal system of \cref{sec:syntax-type-system} but don't add any complication.
 
 \paragraph{Linked lists}
 
-We define lists as a fixpoint, as usual: $[[List T]] \btriangleq [[① ⨁ (T ⨂ (List T))]]$. For convenience, we also define filling operators $\triangleleft\ottsctor{[]}$ and $\triangleleft\ottsctor{(::)}$:
+We define lists as a fixpoint, as usual: $[[List T]] \btriangleq [[① ⨁ (T ⨂ (List T))]]$. For convenience, we also define filling operators $\triangleleft\ottsctor{[]}$ and $\triangleleft\ottsctor{(::)}$, as macros that use the primitive destination-filling operators for sum, product and unit types:
 
 \sidebysidecodehere{b}{0.50}{
 \newoperator
@@ -130,7 +133,7 @@ We define lists as a fixpoint, as usual: $[[List T]] \btriangleq [[① ⨁ (T �
   {[[d ⨞ (::)]]}{[[d ⨞Inr ⨞(,)]]}
 }
 
-Just like we did in~\cref{ssec:build-up-vocab} we can recover traditional constructors from filling operators, e.g.:
+Just like we did in~\cref{ssec:build-up-vocab} we can recover traditional constructors systematically from destination-filling operators, using $[[alloc]]$, $\ottkw{upd}_{\ottkw{\ltimes} }$ and $\ottkw{from}_{\ottkw{\ltimes} }'$:
 
 \codehere{\newoperator
 {\ottsctor{(::)}}{[[T ⨂ (List T) ¹ν → List T]]}
@@ -139,16 +142,16 @@ Just like we did in~\cref{ssec:build-up-vocab} we can recover traditional constr
 
 \paragraph{A tail-recursive map function}
 
-List being ubiquitous in functional programming, the fact that the most natural way to write a map function on lists isn't tail recursive (hence consumes unbounded stack space), is unpleasant. Map can be made tail-recursive in two passes: first build the result list in reverse, then reverse it. But destinations let us avoid this two-pass process altogether, as they let us extend the tail of the result list directly.
-We give a complete implementation in \cref{fig:impl-map-tr}.
+List being ubiquitous in functional programming, the fact that the most natural way to write a $\ottkw{map}$ function on lists isn't tail recursive (hence consumes unbounded stack space), is unpleasant. Map can be made tail-recursive in two passes: first build the result list in reverse, then reverse it. But thanks to destinations, we'll be able to avoid this two-pass process altogether, as they let us extend the tail of the result list directly.
+We give the complete implementation in \cref{fig:impl-map-tr}.
 
-The main function is $\ottkw{map'}$, it has type $
+The tail-recursive function is $\ottkw{map'}$, it has type $
 [[(T ¹ν → U) ω∞ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]
 $. That is, instead of returning a resulting list, it takes a destination as an input and fills it with the result. At each recursive call, $\ottkw{map'}$ creates a new hollow cons cell to fill the destination. A destination pointing to the tail of the new cons cell is also created, on which $\ottkw{map'}$ is called (tail) recursively. This is really the same algorithm that you could write to implement map on a mutable list in an imperative language. Nevertheless \destcalculus{} is a pure language with only immutable types.
 
 To obtain the regular $\ottkw{map}$ function, all is left to do is to call $[[alloc]]$ to create an initial destination, and $\ottkw{from}_{\ottkw{\ltimes} }'$, much like when we make constructors out of filling operators, like $\ottsctor{(::)}$ above.
 
-\begin{codefig}{\caption{Tail-recursive map function on lists}\label{fig:impl-map-tr}}
+\begin{codefig}{\caption{Tail-recursive $\ottkw{map}$ function on lists}\label{fig:impl-map-tr}}
 \newtype{[[List T]]}{[[① ⨁ (T ⨂ (List T))]]}
 \newoperatorb
   {\ottkw{map'}}{[[(T ¹ν → U) ω∞ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
