@@ -75,6 +75,8 @@
 
 %% For OTT rendering
 \newunicodechar{⥶}{\ensuremath{\raisebox{0.2em}{$\scriptstyle<$}\hspace*{-0.65em}\raisebox{-0.12em}{$\scriptscriptstyle\leftarrow$}}}
+\newcommand{\pleq}{[[⥶]]^{\scriptscriptstyle{\pmb{\mathsf{p}}}}}
+\newcommand{\aleq}{[[⥶]]^{\scriptscriptstyle{\pmb{\mathsf{a}}}}}
 \usepackage[supertabular]{ottalt}
 \inputott{destination_calculus_ott.tex}
 \usepackage{ottstyling}

@@ -149,7 +149,7 @@ The tail-recursive function is $\ottkw{map'}$, it has type $
 [[(T ¹ν → U) ω∞ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]
 $. That is, instead of returning a resulting list, it takes a destination as an input and fills it with the result. At each recursive call, $\ottkw{map'}$ creates a new hollow cons cell to fill the destination. A destination pointing to the tail of the new cons cell is also created, on which $\ottkw{map'}$ is called (tail) recursively. This is really the same algorithm that you could write to implement map on a mutable list in an imperative language. Nevertheless \destcalculus{} is a pure language with only immutable types.
 
-To obtain the regular $\ottkw{map}$ function, all is left to do is to call $[[alloc]]$ to create an initial destination, and $\ottkw{from}_{\ottkw{\ltimes} }'$, much like when we make constructors out of filling operators, like $\ottsctor{(::)}$ above.
+To obtain the regular $\ottkw{map}$ function, all is left to do is to call $[[alloc]]$ to create an initial destination, and $\ottkw{from}_{\ottkw{\ltimes} }'$ when all destinations have been filled to extract the completed list; much like when we make constructors out of filling operators, like $\ottsctor{(::)}$ above.
 
 \begin{codefig}{\caption{Tail-recursive $\ottkw{map}$ function on lists}\label{fig:impl-map-tr}}
 \newtype{[[List T]]}{[[① ⨁ (T ⨂ (List T))]]}
@@ -167,15 +167,15 @@ l ►case ¹ν {⮒
 
 \subsection{Functional queues, with destinations}\label{ssec:efficient-queue}
 
-Implementations for a tail-recursive map are present in most previous work, from~\cite{minamide_functional_1998}, to recent work~\cite{bour_tmc_2021,leijen_trmc_2023,bagrel_destination-passing_2024}. Tail-recursive map doesn't need the full power of \destcalculus{}'s first-class destinations: it just needs a notion of structures with a (single) hole. In \cref{sec:bft}, we will build an example which fully uses first-class destinations, but first, we will need some more material.
+Implementations for a tail-recursive map are present in most previous work, from~\cite{minamide_functional_1998}, to recent work~\cite{bour_tmc_2021,leijen_trmc_2023}. Tail-recursive map doesn't need the full power of \destcalculus{}'s first-class destinations: it just needs a notion of structures with a (single) hole. In \cref{sec:bft}, we will build an example which fully uses first-class destinations, but first, we will need some more material.
 
 \paragraph{Difference lists}
 \newcommand{\lstcat}{\mathop{+\!+}}
-Just like in any language, iterated concatenation of lists
+Just like in any language, iterated concatenation of linked lists
 $(([[xs1]] \lstcat [[xs2]])\lstcat \ldots)\lstcat [[xs]]_n$
-is quadratic in \destcalculus{}. The usual solution to this is difference lists. The name difference lists covers many related implementations, but in pure functional languages, a difference list is usually represented as a function~\cite{hughes_dlist_1986}. A singleton difference list is $\lamnt{[[ys]]}{[[¹ν]]}{[[x ˢ:: ys]]}$, and concatenation of difference lists is function composition. A difference list is turned into a list by applying it to the empty list. The consequence is that no matter how many compositions we have, each cons cell will be allocated a single time, making the iterated concatenation linear indeed.
+is quadratic in \destcalculus{}. The usual solution to improve that complexity is \emph{difference lists}. The name \emph{difference lists} covers many related implementations for the concept of a ``linked list missing a queue''. The idea is that a difference list carries the same elements as a list would, but can be easily extended by the back in constant time as we retain a way to set a value for its queue later. In pure functional languages, a difference list is usually represented as a function instead~\cite{hughes_dlist_1986}, as we usually don't have write pointers. A singleton difference list is then $\lamnt{[[ys]]}{[[¹ν]]}{[[x ˢ:: ys]]}$, and concatenation of difference lists is function composition. A difference is turned into a list by setting its queue to be the empty list, or in the functional case, by applying it to the empty list. The consequence is that no matter how many compositions we have, each cons cell will be allocated a single time, making the iterated concatenation linear indeed.
 
-However, each concatenation allocates a closure. If we're building a difference list from singletons and composition, there's roughly one composition per cons cell, so iterated composition effectively performs two traversals of the list. In \destcalculus{}, we can do better by representing a difference list as a list with a hole. A singleton difference list is $[[x]] \ottsctor{::} \holesq$. Concatenation is filling the hole with another difference list, using operator $\mathop{\triangleleft\mycirc}$. The details are on the left of~\cref{fig:impl-dlist-queue}. The \destcalculus{} encoding for difference lists makes no superfluous traversal: concatenation is just an $O(1)$ in-place update.
+The problem is that in the functional implementation, each concatenation still allocates a closure. If we're building a difference list from singletons and composition, there's roughly one composition per cons cell, so iterated composition effectively performs two traversals of the list. In \destcalculus{}, we actually have write pointers, in the form of \emph{destinations}, so we can do better by representing a difference list as a list with a hole, much like in an imperative setting. A singleton difference list becomes $[[x]] \ottsctor{::} \holesq$, and concatenation is filling the hole with another difference list, using composition operator $\mathop{\triangleleft\mycirc}$. The detailed implementation is given on the left of~\cref{fig:impl-dlist-queue}. This encoding for difference lists makes no superfluous traversal: concatenation is just an $O(1)$ in-place update.
 
 \sidebysidecodefig{\caption{Difference list and queue implementation in equirecursive \destcalculus{}}\label{fig:impl-dlist-queue}}{t}{0.49}{
 \newtype{[[DList T]]}{[[(List T) ⧔ ⌊ List T ⌋ ¹ν]]}
@@ -255,32 +255,30 @@ However, when $[[vd]]$'s scope is parent to $[[v]]$'s, we can write a linearly t
 \end{array}}\egroup
 \noindent{}Here the expression $[[dd ◀ d]]$ results in $[[d]]$ escaping its scope for the parent one, so $[[v]]$ is just uninitialized memory (the hole $[[+h]]$) when we dereference it. This example must be rejected by our type system.
 
-Again, using purely a linear type system, we can only reject this example if we also reject the first, sound example, as in~\cite{bagrel_destination-passing_2024}. In this case, the type $[[⌊ ⌊ T⌋ ¹ν⌋ ¹ν]]$ becomes practically useless: such destinations can never be filled.
-
-This isn't the direction we want to take: we really want to be able to store destinations in data structures with holes. So we want $[[t]]$ in $[[d ◀ t]]$ to be allowed to be linear. Without further restrictions, it wouldn't be sound, so to address this, \destcalculus{} uses a system of ages to represent scopes. Ages are described in \cref{sec:syntax-type-system}.
+Again, the problem is, using purely a linear type system, we can only reject this example if we also reject the first, sound example. In this case, the type $[[⌊ ⌊ T⌋ ¹ν⌋ ¹ν]]$ would become practically useless: such destinations can never be filled. This isn't the direction we want to take: we really want to be able to store destinations in data structures with holes. So we want $[[t]]$ in $[[d ◀ t]]$ to be allowed to be linear. Without further restrictions, it wouldn't be sound, so to address this, we need an extra control system to prevent scope escape; it can't be just linearity. For \destcalculus{}, we decided to use a system of \emph{ages} to represent which scope a resource originates from. Ages are described in detail in \cref{sec:syntax-type-system}; but first, let's see an exemple where storing destinations in data structures really matters.
 
 \section{Breadth-first tree traversal}\label{sec:bft}
 
-As a full-fledged example, which uses the full expressive power of \destcalculus{}, we borrow and improve on an example from~\citet{bagrel_destination-passing_2024}, breadth-first tree relabeling:
+As a full-fledged example, which uses the full expressive power of \destcalculus{}, we focus breadth-first tree relabeling:
 % \begin{quote}
 \emph{``
 Given a tree, create a new one of the same shape, but with the values at the nodes replaced by the numbers $1\ldots|T|$ in breadth-first order.
 ''}
 % \end{quote}
 
-This isn't a very natural problem in functional programming, as breadth-first traversal implies that the order in which the structure must be built (left-to-right, top-to-bottom) is not the same as the structural order of a functional tree --- building the leaves first and going up to the root. So it usually requires fancy functional workarounds~\cite{okasaki_bfs_2000,jones_gibbons_linearbfs_93,gibbons_phases_2023}.
+This isn't a very natural problem for functional programming, as breadth-first traversal implies that the order in which the structure must be built (left-to-right, top-to-bottom) is not the same as the structural order of a functional tree --- building the leaves first and going up to the root. So it usually requires fancy functional workarounds~\cite{okasaki_bfs_2000,jones_gibbons_linearbfs_93,gibbons_phases_2023}.
 
-It's very tempting to implement this example in an efficient imperative-like fashion, where a queue drives the processing order, thanks to the power of destinations. For that, \citet{minamide_functional_1998}'s system where structures with holes are represented as linear functions is not enough. Destinations as first-class values are very much required.
+It's very tempting to solve this exercise in an efficient imperative-like fashion, where a queue drives the processing order. That's the standard algorithm taught at university, where the next node to process is dequeued from the front of the queue, and its children nodes are enqueued at the back of the queue for later processing, achieving breadth-first traversal. For that, \citet{minamide_functional_1998}'s system where structures with holes are represented as linear functions cannot help. We really need destinations as first-class values to borrow from this imperative power.
 
-\Cref{fig:impl-bfs} presents the \destcalculus{} implementation of the breadth-first tree traversal. The core idea is that we hold a queue of pairs, storing each input subtree with (a destination to) its corresponding output subtree. When the element $[[ˢ(tree, dtree)]]$ at the front of the queue has been processed, the children nodes of $[[tree]]$ and children destinations of $[[dtree]]$ are enqueued to be processed later. There, $[[Tree T]]$ is defined unsurprisingly as $[[Tree T]]\btriangleq [[① ⨁ (T ⨂ ((Tree T) ⨂ (Tree T)))]]$; we refer to the constructors of $[[Tree T]]$ as $\ottsctor{Nil}$ and $\ottsctor{Node}$, defined in the obvious way. We also assume some encoding of the type $[[Nat]]$ of natural number. $[[Queue T]]$ is the efficient queue type from \cref{ssec:efficient-queue}.
+\Cref{fig:impl-bfs} presents how we can implement this breadth-first tree traversal in \destcalculus{}, thanks to first-class destinations. We assume the data type $[[Tree T]]$ as been defined, unsurprisingly, as $[[Tree T]]\btriangleq [[① ⨁ (T ⨂ ((Tree T) ⨂ (Tree T)))]]$; and we refer to the constructors of $[[Tree T]]$ as $\ottsctor{Nil}$ and $\ottsctor{Node}$, defined in the obvious way. We also assume some encoding of the type $[[Nat]]$ of natural number. Remember that $[[Queue T]]$ is the efficient queue type from \cref{ssec:efficient-queue}.
 
-We implement the actual breadth-first relabeling $\ottkw{relabelDPS}$ as an instance of a more general breadth-first traversal function $\ottkw{mapAccumBFS}$, which applies any state-passing style transformation of labels in breadth-first order.
+The core idea of our algorithm is that we hold a queue of pairs, storing each an input subtree and (a destination to) its corresponding output subtree. When the element $[[ˢ(tree, dtree)]]$ at the front of the queue has been processed, the children nodes of $[[tree]]$ and children destinations of $[[dtree]]$ are enqueued to be processed later, much as the original imperative algorithm.
 
-In $\ottkw{mapAccumBFS}$, we create a new destination $[[dtree]]$ into which we will write the result of the traversal, then call $\ottkw{go}$. The $\ottkw{go}$ function is in destination-passing style, but what's remarkable is that $\ottkw{go}$ takes an unbounded number of destinations as arguments, since there are as many destinations as items in the queue. This is where we use the fact that destinations are ordinary values.
+We implement the actual breadth-first relabeling $\ottkw{relabelDPS}$ as an instance of a more general breadth-first traversal function $\ottkw{mapAccumBFS}$, which applies any state-passing style transformation of labels in breadth-first order. In $\ottkw{mapAccumBFS}$, we create a new destination $[[dtree]]$ into which we will write the result of the traversal, then call $\ottkw{go}$. The $\ottkw{go}$ function is in destination-passing style, but what's remarkable is that $\ottkw{go}$ takes an unbounded number of destinations as arguments, since there are as many destinations as items in the queue. This is where we use the fact that destinations are ordinary values.
 
-The implementation of \cref{fig:impl-bfs} is very close to the one found in~\cite{bagrel_destination-passing_2024}. The difference is that, because they can't store destinations in structures with holes (see the discussion in \cref{sec:scope-escape-dests}), their implementation can't use the efficient queue implementation from \cref{ssec:efficient-queue}. So they have to revert to using a Hood-Melville queue for breadth-first traversal.
+% The implementation of \cref{fig:impl-bfs} is very close to the one found in~\cite{bagrel_destination-passing_2024}. The difference is that, because they can't store destinations in structures with holes (see the discussion in \cref{sec:scope-escape-dests}), their implementation can't use the efficient queue implementation from \cref{ssec:efficient-queue}. So they have to revert to using a Hood-Melville queue for breadth-first traversal.
 
-However this improvement comes at a cost: we a introduce \emph{mode} system that combines linearity and age to make the system sound, hence the new \textcolor{modecolor}{fuchsia} annotations in the code. We'll describe modes in detail in \cref{sec:syntax-type-system}. In the meantime, $[[¹]]$ and $[[ω]]$ control linearity: we use $[[ω]]$ to mean that the state and function $[[f]]$ can be used many times. On the other hand, $[[∞]]$ is an \emph{age} annotation; in particular, the associated argument cannot carry destinations. Arguments with no modes are otherwise linear and can capture destinations. We introduce the exponential modality $[[! m T]]$ to reify mode $[[m]]$ in a type; this is useful to return several values having different modes from a function, like in $[[f]]$. An exponential is rarely needed in an argument position, as we have $[[(! m T) ¹ν → U]]\simeq[[T m → U]]$.
+This freshly gained expressivity has a cost though: we need a type system that combines linearity control \emph{and} age control to make the system sound, as exemplified in the previous section. We'll combine both linearity and the aforementioned ages in the same \emph{mode} system\footnote{We said earlier that the modal approach would allow us to combine several control axes efficiently in the same mode system.}. You already know the linearity annotations $[[¹]]$ and $[[ω]]$; here we also introduce the new age annotation $[[∞]]$, that indicates that the associated argument cannot carry destinations.Arguments with no modes displayed on them, or function arrows with no modes, default to the unit of the semiring/ringoid; in particular they are linear, and can capture destinations.
 
 \begin{codefig}{\caption{Breadth-first tree traversal in destination-passing style}\label{fig:impl-bfs}}
 \newoperator[~\mathbf{rec}]
@@ -309,12 +307,10 @@ mapAccumBFS (ˢλ st ω∞ ⟼ ˢλ un ¹ν ⟼ un ; ˢ(ˢᴇ ω∞ (succ st), s
 ]]\end{array}}
 \end{codefig}
 
+%------------------------------------------------------------------------------
+
+
 \section{Type system}\label{sec:syntax-type-system}
-
-\improvement{Rename rules for map and alloc into onR and new ?}
-
-\newcommand{\pleq}{[[⥶]]^{\scriptscriptstyle{\pmb{\mathsf{p}}}}}
-\newcommand{\aleq}{[[⥶]]^{\scriptscriptstyle{\pmb{\mathsf{a}}}}}
 
 \begin{figure}[t]
 
@@ -495,61 +491,30 @@ $[[(p a) + (p' a')]] \btriangleq [[(p + p') (a + a')]]$
 \caption{Terms, types and modes of \destcalculus{}}\label{fig:grammar}\label{fig:sterm}\label{fig:mul-age-tables}
 \end{figure}
 
-\destcalculus{} is a simply typed $\lambda$-calculus with unit ($[[①]]$), product ($\ottstype{\otimes}$) and sum ($\ottstype{\oplus}$) types. Its most salient features are the destination $[[⌊ T ⌋ m]]$ and ampar $[[S ⧔ T]]$ types which we've introduced in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}.
+\destcalculus{} is a simply typed $\lambda$-calculus with unit ($[[①]]$), product ($\ottstype{\otimes}$) and sum ($\ottstype{\oplus}$) types, inspired from \CLdm{} from \cref{chap:preli}. Its most distinctive features are the destination $[[⌊ T ⌋ m]]$ and ampar $[[S ⧔ T]]$ types which we've introduced in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}.
 
-To ensure that destinations are used soundly, we need both to enforce the linearity of destination but also to prevent destinations from escaping their scope, as discussed in \cref{sec:scope-escape-dests}. To that effect, \destcalculus{} tracks the \emph{age} of destinations, that is how many nested scope have been open between the current expression and the scope from which a destination originates. We'll see in \cref{ssec:ty-term-val} that scopes are introduced by $[[t ►map x ⟼ t']]$. For instance, we have a term $[[t1 ►map x1 ⟼ t2 ►map x2 ⟼ t3 ►map x3 ⟼ x1]]$, then wil will say that the innermost occurrence of $[[x1]]$ has age $[[↑]]^{\ottsmodee{2}}$ because two nested $\ottkw{upd}_{\ottkw{\ltimes} }$ separate the definition and use site of $[[x1]]$.
+To ensure that destinations are used soundly, we need both to enforce the linearity of destination but also to prevent destinations from escaping their scope, as discussed in \cref{sec:scope-escape-dests}. To that effect, \destcalculus{} tracks the \emph{age} of destinations, that is how many nested scope have been open between the current expression and the scope from which a destination originates. We'll see in \cref{ssec:ty-term-val} that scopes are introduced by the $[[t ►map x ⟼ t']]$ construct. For instance, we have a term $[[t1 ►map x1 ⟼ t2 ►map x2 ⟼ t3 ►map x3 ⟼ x1]]$, then wil will say that the innermost occurrence of $[[x1]]$ has age $[[↑]]^{\ottsmodee{2}}$ because two nested $\ottkw{upd}_{\ottkw{\ltimes} }$ separate the definition and use site of $[[x1]]$.
 
-A natural idea, to track ages, is to introduce a modality $\ottstype{\uparrow}[[T]]$ to mean ``a $[[T]]$ in the previous scope''. Let's explore why this isn't quite going to work for us, hence why we need something more general.
+For \destcalculus{}, we take the same modal approach as for \CLdm{}, but we enrich our mode ringoid to have an \emph{age} axis. Thanks to the algebraic nature of the modal approach, for most typing rules, we'll be able to reuse those of \CLdm{} without any modification as just the elements of the ringoid change, not the properties nor the structure of the ringoid.
 
-A typical presentation of modal type theories is with a pair of context $[[P]]_{\uparrow}$~;~$[[P]]$ of bindings from the previous scope and the current scope respectively~\cite{pfenning_modal_1995}, and rules such as
-
-\vspace*{-0.3cm}
-
-$$
-\begin{array}{cc}
-  \begin{minipage}{0.3\linewidth}
-    \begin{equation}
-      \label{eq:1}
-      \inferrule
-      {\phantom{a}}
-      {[[P]]_{\uparrow}~;~[[P]],[[x]]:[[T]] \pmb{\vdash} [[x]]\pmb{:}[[T]]}
-    \end{equation}
-  \end{minipage}
-  &
-    \begin{minipage}{0.3\linewidth}
-      \begin{equation}
-        \label{eq:2}
-        \inferrule
-        {[[{ }]]~;~ [[P]]_{\uparrow} \pmb{\vdash} [[t]]\pmb{:}[[T]]}
-        {[[P]]_{\uparrow}~;~[[P]] \pmb{\vdash} [[t]]\pmb{:}\ottstype{\uparrow}[[T]]}
-      \end{equation}
-    \end{minipage}
-\end{array}
-$$
-
-The idea is that only variables from the current scope can be used to make a term for the current scope~\eqref{eq:1}, and to make a term at the previous scope, you need to make it only with variables from $[[P]]_{\uparrow}$~\eqref{eq:2}. But this can't be the whole story here. Indeed, there's no way to refer to variables from two scopes ago, and it would be unsound for \destcalculus{}, in the manner described in \cref{sec:scope-escape-dests}, to mash all the older scope together in $[[P]]_{\uparrow}$. So, following this route, we'd need infinitely many contexts (and as many modalities, or more realistically a single graded modality), sequents would look like $\ldots~;~[[P]]_2~;~[[P]]_1~;~[[P]]_0 \pmb{\vdash} [[t]]\pmb{:}[[T]]$. Finicky, but manageable perhaps. But it's not all! We need yet another context: one for bindings which are ageless because they don't contain destinations, so that we can fill destinations with harmless values like $[[ˢ( ˢ1 , ˢ2 )]]$ that have been bound two or more scopes ago. More even: linear logic, famously, is also a modal logic (the modality is the exponential $\ottstype{!}[[T]]$), so we'd need to double each of these contexts. This would be quite messy.
-
-Fortunately, there's a way to simplify all this. First observe that having several contexts is the same as having a single context but with annotation on the bindings: instead of $[[x]]:[[S]]~;~[[y]]:[[T]]~;~[[z]]:[[U]] \pmb{\vdash} \ldots$, we can have $[[x]]:_2 [[S]], [[y]]:_1 [[T]], [[z]]:_0 [[U]] \pmb{\vdash} \ldots$ without adding or losing any information (note how the semicolons separating contexts are replaced by commas separating bindings). We'll call these annotations \emph{modes}. We build on the key insight, which seem to originate with~\cite{ghica_bounded_2014}, that equipping the set of modes with a particular algebraic structure is sufficient to express, algebraically, all the context manipulation that we need. They use a rig structure; for \destcalculus{} we don't need a $\ottsmode{0}$ element, but we'll need a partial order on modes. The motivation for this structure in~\cite{ghica_bounded_2014} is generating electronic circuits, the same approach has since been used, for instance, for Linear Haskell~\cite{bernardy_linear_2018} where it is used to support mode polymorphism. In both of those cases, this algebraic mode style is used in the context of linear types, but~\citet{bernardy_modality_2020} show that it can generalize to a variety of modalities.
-
-For \destcalculus{}, we're following this approach: \destcalculus{} has a single modality $\ottstype{!}_{[[m]]}$ indexed by a mode. This will greatly simplify our context management (especially in the computer-mechanized proofs), but, just as interestingly, we can define the set of modes as being the Cartesian product of the set of multiplicities (which keep track of linearity) and of the set of ages. The algebraic structure carries over by a generic theorem on products. This means that we can define multiplicities and ages independently, and the combination is taken care of for free.
-%
 The syntax of \destcalculus{} terms is presented in~\cref{fig:grammar}, including the syntactic sugar that we've been using in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}.
 
 \subsection{Modes and the age semiring}\label{ssec:age-control}
 
-The precise algebraic structure that we'll be needing on modes is both a commutative additive semigroup $\ottsmode{+}$ and a multiplicative monoid $(\ottsmode{[[·]]}\,, \ottsmode{1})$, with the usual distributivity law $[[n·(m1+m2)]] = [[n·m1 + n·m2]]$. In addition we require a partial order $⥶$, such that $\ottsmode{+}$ and $\ottsmode{[[·]]}$ are order-preserving. In other words, we'll be dealing with ordered semirings\footnote{There terminology dispute where some prefer to use the term ``semiring'' when the additive semigroup has a zero. This terminology is arguably more popular, but leaves no term for the version without a zero. We'll follow the convention, in this article, that semirings with a zero are called ``rigs''.}. In the rest of the article, we'll just say ``semiring''. In practice, all our semirings will be commutative, and we won't be paying attention to the order of factors in mode multiplication.
+% The precise algebraic structure that we'll be needing on modes is both a commutative additive semigroup $\ottsmode{+}$ and a multiplicative monoid $(\ottsmode{[[·]]}\,, \ottsmode{1})$, with the usual distributivity law $[[n·(m1+m2)]] = [[n·m1 + n·m2]]$. In addition we require a partial order $⥶$, such that $\ottsmode{+}$ and $\ottsmode{[[·]]}$ are order-preserving. In other words, we'll be dealing with ordered semirings\footnote{There terminology dispute where some prefer to use the term ``semiring'' when the additive semigroup has a zero. This terminology is arguably more popular, but leaves no term for the version without a zero. We'll follow the convention, in this article, that semirings with a zero are called ``rigs''.}. In the rest of the article, we'll just say ``semiring''. In practice, all our semirings will be commutative, and we won't be paying attention to the order of factors in mode multiplication.
 
-Our mode semiring is, as promised, the product of a multiplicity semiring, to track linearity, and an age semiring, to prevent scope escape. The multiplicity semiring has elements $[[¹]]$ (linear) and $[[ω]]$ (unrestricted), it's the same semiring as in~\cite{qtt_2018} or~\cite{bernardy_linear_2018}. It's mostly unsurprising, the key is that that $[[¹+¹]]=[[ω]]$ will enforce that a linear variable can only be used once, the full description of the multiplicity semiring is given in~\cref{fig:mul-age-tables}.
+Our mode ringoid (more precisely, a commutative additive semigroup $\ottsmode{+}$ and a multiplicative monoid $(\ottsmode{[[·]]}\,, \ottsmode{1})$, with the usual distributivity law $[[n·(m1+m2)]] = [[n·m1 + n·m2]]$, and equipped with a partial order $⥶$, such that $\ottsmode{+}$ and $\ottsmode{[[·]]}$ are order-preserving) is, as promised, the product of a multiplicity ringoid, to track linearity, and an age ringoid, to prevent scope escape. This compound structure is also a ringoid.
+
+The multiplicity ringoid has elements $[[¹]]$ (linear) and $[[ω]]$ (unrestricted), it's the same ringoid as in~\cite{qtt_2018} or~\cite{bernardy_linear_2018}, and the same as described in detail in \cref{chap:preli}. The full description of the multiplicity ringoid is given again in~\cref{fig:mul-age-tables}.
 
 Ages are more interesting. We write ages as $[[↑^ka]]$ (with $[[ka]]$ a natural number), for ``defined $[[ka]]$ scopes ago''.
-We also have an age $[[∞]]$ for variables that don't originate from a $[[t ►map x ⟼ t']]$ i.e. that aren't destinations, and can be freely used in and returned by any scope. The main role of age $[[∞]]$ is thus to act as a guarantee that a value doesn't contain destinations. Finally, we will write $[[ν]] \btriangleq [[↑^0]]$  (``now'') for the age of destinations that originate from the current scope; and $[[↑]] \btriangleq [[↑^1]]$.
+We also have an age $[[∞]]$ for variables that don't originate from a $[[t ►map x ⟼ t']]$ construct i.e. that aren't destinations, and can be freely used in and returned by any scope. The main role of age $[[∞]]$ is thus to act as a guarantee that a value doesn't contain destinations. Finally, we will write $[[ν]] \btriangleq [[↑^0]]$  (``now'') for the age of destinations that originate from the current scope; and $[[↑]] \btriangleq [[↑^1]]$.
 
-The operations or order aren't the usual ones on natural numbers though. It is crucial that \destcalculus{} tracks the precise age of variables. Variables from $2$ scopes ago cannot be used as if they were from $1$ scope ago, or vice-versa. The ordering reflects this with finite ages being arranged in a flat order, with $[[∞]]$ being bigger than all of them. Multiplication of ages will reflect nesting of scope, as such, (finite) ages are multiplied by adding their numerical exponents $[[↑^ka · ↑^ja]] = [[↑^ka + ja]]$. In the typing rules, the most common form of scope nesting is opening a scope, which is represented by multiplying by $[[↑]]$ (that is, adding $1$ to the ages seen as a natural numbers). Finally $\ottsmode{+}$ is used to share a variable between two subterms, it's given by the least upper bound (for the age order above). The intuition here, is still precise age tracking: a variable must be at the same age in both subterms, or it can be $[[∞]]$, and assume whichever age it needs, including different ones in different subterms.
+The operations or order on ages aren't the usual ones on natural numbers though. It is crucial that \destcalculus{} tracks the precise age of variables. Variables from $2$ scopes ago cannot be used as if they were from $1$ scope ago, or vice-versa. The ordering reflects this with finite ages being arranged in a flat order, with $[[∞]]$ being bigger than all of them. Multiplication of ages will reflect nesting of scope, as such, (finite) ages are multiplied by adding their numerical exponents $[[↑^ka · ↑^ja]] = [[↑^ka + ja]]$. In the typing rules, the most common form of scope nesting is opening a scope, which is represented by multiplying by $[[↑]]$ (that is, adding $1$ to the ages seen as a natural numbers). Finally $\ottsmode{+}$ is used to share a variable between two subterms, it's given by the least upper bound (for the age order above). The intuition here, is still precise age tracking: a variable must be at the same age in both subterms, or it can be $[[∞]]$, and assume whichever age it needs, including different ones in different subterms.
 
-Bindings in the context are annotated by a mode. The insight of~\cite{ghica_bounded_2014}, is that mode addition and multiplication by a mode (aka \emph{scaling}) lift to contexts pointwise, we have all the tools we need to define a modal type system, including a sub-structural one like linear logic.
+The unit of the new mode ringoid is the pair of the units from the multiplicity and age ringoids, ie. $[[¹ν]]$. We will usually omit the mode annotations when the mode is that unit.
 
-The operations and preorders on mode, contexts, etc. are presented in~\cref{fig:mul-age-tables}.
-We will usually omit mode annotations when the mode is the multiplicative unit $[[¹ν]]$ of the semiring.
+Finally, as in \CLm{} and \CLdm{} from \cref{chap:preli}, operations and modes are lifted to typing contexts, still following the insights from \cite{ghica_bounded_2014}.
 
 \subsection{Typing rules}\label{ssec:ty-term-val}
 
