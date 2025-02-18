@@ -56,16 +56,14 @@ P ⊢ t : T :: :: Ty_term :: Ty_term_ {{ com Typing judgment for terms }} by
 
 {{ DestOnly [[D]] }} [[:DestOnlyD]] % Functionnally equivalent as ctx_NoHole P as values cannot syntactically contains free variables
 {{ [[P]] # [[D]] }} [[:DisjointPD]]
-{{ DisposableOnly [[P]] }} [[:DisposP]]
 D ⫦ v : T [[:Tyv]]
 -------------------- :: Val {{ com \CVal }}
-P + D ⊢ v : T
+ων·P + D ⊢ v : T
 
-{{ DisposableOnly [[P]] }} [[:DisposP]]
 {{ [[P]] # [[{ x : m T }]] }} [[:DisjointPx]]
 {{ [[¹ν]] ⥶ [[m]] }} [[:Subtypem]]
 -------------------- :: Var {{ com \CVar }}
-P + { x : m T } ⊢ x : T
+ων·P + { x : m T } ⊢ x : T
 
 {{ IsValid [[m]] }} [[:Validm]]
 P1 ⊢ t : T [[:Tyt]]
@@ -118,9 +116,8 @@ P ⊢ t : U ⧔ (! ¹∞ T) [[:Tyt]]
 ------------------------------- :: FromA {{ com \CFromA }}
 P ⊢ from⧔ t : U ⨂ (! ¹∞ T)
 
-{{ DisposableOnly [[P]] }} [[:DisposP]]
 -------------------- :: NewA {{ com \CNewA }}
-P ⊢ alloc : T ⧔ ⌊ T ⌋ ¹ν
+ων·P ⊢ alloc : T ⧔ ⌊ T ⌋ ¹ν
 
 {{ IsValid [[n]] }} [[:Validn]]
 P ⊢ t : ⌊①⌋n [[:Tyt]]
@@ -175,9 +172,8 @@ P ⊢ t : T ⧔ ① [[:Tyt]]
 P ˢ⊢ from⧔' t : T
 
 {{ UserDefined [[P]] }} [[:UserDefinedP]]
-{{ DisposableOnly [[P]] }} [[:DisposP]]
 ---------------- :: Unit {{ com \CUnit }}
-P ˢ⊢ ˢ() : ①
+ων·P ˢ⊢ ˢ() : ①
 
 {{ UserDefined [[P2]] }} [[:UserDefinedP2]]
 {{ IsValid [[m]] }} [[:Validm]]
