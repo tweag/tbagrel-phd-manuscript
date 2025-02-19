@@ -575,7 +575,9 @@ The remaining operators $[[⨞]][[()]], [[⨞]][[Inl]], [[⨞]][[Inr]], [[⨞]]\
 
 \section{Operational semantics}\label{sec:ectxs-sem}
 
-Before we define the operational semantics of \destcalculus{} we need to introduce a few more concepts. We'll need commands $[[ C[t] ]]$, they're described in \cref{ssec:ty-ectxs-cmd}; and we'll need runtime values (we'll often just say \emph{values}), described in \cref{fig:grammar-val}. Indeed, the terms of \destcalculus{} lack any way to represent destinations or holes, or really any kind of value (for instance $[[Inl ()]]$ has been, so far, just syntactic sugar for a term $[[from⧔' (alloc ►map d ⟼ …)]]$). It's a peculiarity of \destcalculus{} that values (in particular, data constructors) only exist during the reduction; usually they are part of the term syntax of functional languages. We also extend the type system to cover commands and values, so as to be able to state and prove type safety theorems.
+We give the operational semantics of \destcalculus{} in the \emph{reduction semantics} style that we used in \cref{chap:preli}, that's to say with explicit syntactic manipulation of evaluation contexts. However in this section we'll be more thorough. In particular, we'll grammar of evaluation contexts properly, and we'll also define typing rules for evaluation contexts, so as to prove that typing is preserved throughout the reduction.
+
+For that, we'll need a few ingredients. Commands $[[ C[t] ]]$ are used to represent a running program; they're described in \cref{ssec:ty-ectxs-cmd}. We'll also need a class of runtime values (we'll often just say \emph{values}), as \destcalculus{} currently lacks any way to represent destinations or holes, or really any kind of value (for instance $[[Inl ()]]$ has been, so far, just syntactic sugar for a term $[[from⧔' (alloc ►map d ⟼ …)]]$). It's a peculiarity of \destcalculus{} that values (in particular, data constructors) only exist during the reduction; usually they are part of the term syntax of functional languages as in \CLdm{}. Our runtime values are described in described in \cref{ssec:runtime-values}. As announced, we'll also extend the type system to cover evaluation contexts, values and commands, so as to be able to state and prove type safety theorems.
 
 \subsection{Runtime values and new typing context forms}\label{ssec:runtime-values}
 
@@ -688,7 +690,7 @@ Destinations and holes are two faces of the same coin, as seen in~\cref{ssec:bui
 
 We extend our previous context operations $+$ and $\cdot$ to act on the new binding forms, as described in \cref{fig:grammar-val}. Context addition is still very partial; for instance, $[[({ + h : T n }) + ({ - h : m ⌊ T ⌋ n' })]]$ is not defined, as $[[h]]$ is present on both sides but with different binding forms.
 
-One of the main goals of \destcalculus{} is to ensure that a hole value is never read. The type system (\cref{fig:ty-val}) maintains this invariant by simply not allowing any hole bindings in the context when typing terms (see \cref{fig:grammar-val} for the different type of contexts used in the typing judgment). In fact, the only place where holes are introduced, is the left-hand side $[[v2]]$ in an ampar $[[H ⟨ v2 ❟ v1 ⟩]]$, in \rref*{\CTyVal\CSep\CAmpar}.
+One of the main goals of \destcalculus{} is to ensure that a hole value is never read. The type system maintains this invariant by simply not allowing any hole bindings in the context when typing terms (see \cref{fig:grammar-val} for the different type of contexts used in the typing judgment). In fact, the only place where holes are introduced, is the left-hand side $[[v2]]$ in an ampar $[[H ⟨ v2 ❟ v1 ⟩]]$, in \rref*{\CTyVal\CSep\CAmpar}.
 
 Specifically, holes come from the operator $\ottshname{\destminus^{\scriptscriptstyle\text{-}1} }$, which represents the matching hole bindings for a set of destination bindings. It's a partial, pointwise operation on typing contexts $[[D]]$, as defined in \cref{fig:grammar-val}.
 Note that $[[-⁻¹D]]$ is undefined if any destination binding in $[[D]]$ has a mode other than $[[¹ν]]$.
@@ -710,9 +712,9 @@ One might wonder how we can represent a curried function $[[ˢλ x ¹ν ⟼ ˢλ
 
 The semantics of \destcalculus{} is given using small-step reductions on a pair $[[ C[t] ]]$ of an evaluation context $[[C]]$, and an (extended) term $[[t]]$ under focus. We call such a pair $[[ C[t] ]]$ a \emph{command}, borrowing the terminology from~\citet{herbelin_curien_2000}.
 
-The grammar of evaluation contexts is given in~\cref{fig:grammar-ty-ectxs}. An evaluation context $[[C]]$ is the composition of an arbitrary number of focusing components $[[c]]$. We chose to represent evaluation contexts syntactically, taking inspiration from \citet{felleisen_calculi_1987} and subsequent \cite{danvy_refocusing_2004,biernacka_syntactic_2007}. The intuition here is that destination filling only require a very tame notion of state. So tame, in fact, that we can simply represent writing to a hole by a substitution in the evaluation context, instead of using more heavy store semantics. With this choice, focusing and defocusing steps are made explicit in the semantics, resulting in a verbose but simpler proof. It is also easier to derive an abstract machine for the language, should one want to do that.
+The grammar of evaluation contexts is given in~\cref{fig:grammar-ty-ectxs}. As in \CLdm{}, an evaluation context $[[C]]$ is the composition of an arbitrary number of focusing components $[[c]]$. It might seem surprising that we don't need a notion of store or state in our semantics to represent the mutation induced by filling destinations. In fact, that destination filling only require a very tame notion of state --- so tame that we can simply represent writing to a hole by a substitution \emph{on the evaluation context}, instead of using more heavy store semantics.
 
-Consequently, $[[ C[t] ]]$ is formally a pair (although we use the notation usually reserved for one-hole contexts, to make rules look more familiar). It's important to keep in mind that won't always have a corresponding term (for instance, when $[[ C]]$ contains open ampar focusing components).
+It's important to remember that the command $[[ C[t] ]]$ is formally a pair, so it won't always have a corresponding term. The reason is that focusing components are all directly derived from the term syntax, except for the \emph{open ampar} focusing component $[[H ᵒᵖ⟨ v2 ❟ ⬜ ⟩]]$ that doesn't have a corresponding term construct. This focusing component indicates that an ampar is currently being processed by $\ottkw{upd}_{\ottkw{\ltimes} }$, with its left-hand side $[[v2]]$ (the structure being built) being attached to the open ampar focusing component, while its right-hand side (containing destinations) is either in subsequent focusing components, or in the term under focus. Ampars being open during the evaluation of $\ottkw{upd}_{\ottkw{\ltimes} }$'s body and closed back afterwards is counterpart to the notion of scopes in typing rules.
 
 \begin{ottfig}[p]{\caption{Evaluation contexts and their typing rules}\label{fig:grammar-ty-ectxs}}{\setlength{\arraycolsep}{1ex}
 \hspace*{-0.05\linewidth}\begin{minipage}{\linewidth}\codehere{\hspace*{-0.3cm}\begin{minipage}{\linewidth}
@@ -740,8 +742,6 @@ $\!\begin{array}{rrl}
 
 }\end{ottfig}
 
-Focusing components are all directly derived from the term syntax, except for the \emph{open ampar} component $[[H ᵒᵖ⟨ v2 ❟ ⬜ ⟩]]$. This focusing component indicates that an ampar is currently being processed by $\ottkw{upd}_{\ottkw{\ltimes} }$, with its left-hand side $[[v2]]$ (the structure being built) being attached to the open ampar focusing component, while its right-hand side (containing destinations) is either in subsequent focusing components, or in the term under focus. Ampars being open during the evaluation of $\ottkw{upd}_{\ottkw{\ltimes} }$'s body and closed back afterwards is counterpart to the notion of scopes in typing rules.
-
 Evaluation contexts are typed in a context $[[D]]$ that can only contains destination bindings. As we will later see in rule \rref*{\CTyCmd} of \cref{fig:sem}, $[[D]]$ is exactly the typing context that the term $[[t]]$ has to use to form a valid $[[ C[t] ]]$. In other words, while $[[P ⊢ t : T]]$ \emph{requires} the bindings of $[[P]]$, judgment $[[D ⊣ C : T ↣ U0]]$ \emph{provides} the bindings of $[[D]]$. Typing rules for evaluation contexts are given in~\cref{fig:grammar-ty-ectxs}.
 
 An evaluation context has a context type $[[T]]\ottstype{\rightarrowtail}[[U0]]$. The meaning of $[[C]][[:]] [[T]]\ottstype{\rightarrowtail}[[U0]]$ is that given $[[t]][[:]][[T]]$, $[[ C[t] ]]$ returns a value of type $[[U0]]$. Composing an evaluation context $[[C]][[:]][[T]]\ottstype{\rightarrowtail}[[U0]]$ with a new focusing component never affects the type $[[U0]]$ of the future command; only the type $[[T]]$ of the focus is altered.
@@ -750,30 +750,25 @@ All typing rules for evaluation contexts can be derived systematically from the 
 
 \medskip
 
-\sidebysidecodehere{t}{0.45}{
-\drule{Ty-term-PatP}
+\sidebysidecodehere{t}{0.55}{
+\bgroup\SetPrefix{\CTyEctxs\CSep}
+\drule{Ty-ectxs-PatP}\egroup
 }{
-\drule{Ty-ectxs-PatP}
+\bgroup\SetPrefix{\CTyTerm\CSep}
+\drule{Ty-term-PatP}\egroup
 }
 
 \medskip
 
 \begin{itemize}
-  \item the typing context $[[m·D1,D2]]$ in the premise for $[[C]]$ corresponds to $[[m·P1 + P2]]$ in the conclusion of \rref*{\CTyTerm\CSep\CPatP};
-  \item the typing context $[[D2,{ x1 : m T1 },{ x2 : m T2 }]]$ in the premise for term $[[u]]$ corresponds to the typing context $[[P2,{ x1 : m T1 },{ x2 : m T2 }]]$ for the same term in \rref*{\CTyTerm\CSep\CPatP};
-  \item the typing context $[[D1]]$ in the conclusion for $[[C ∘ (⬜ ►case m (x1 , x2) ⟼ u) ]]$ corresponds to the typing context $[[P1]]$ in the premise for $[[t]]$ in \rref*{\CTyTerm\CSep\CPatP} (the term $[[t]]$ is located where the focus $[[ ⬜]]$ is in \rref*{\CTyEctxs\CSep\COpenAmpar}).
+  \item the typing context $[[m·D1,D2]]$ in the premise for $[[C]]$ in \rref*{\CTyEctxs\CSep\CPatP} corresponds to $[[m·P1 + P2]]$ in the conclusion of \rref*{\CTyTerm\CSep\CPatP};
+  \item the typing context $[[D2,{ x1 : m T1 },{ x2 : m T2 }]]$ in the premise for term $[[u]]$ in \rref*{\CTyEctxs\CSep\CPatP} corresponds to the typing context $[[P2,{ x1 : m T1 },{ x2 : m T2 }]]$ for the same term in \rref*{\CTyTerm\CSep\CPatP};
+  \item the typing context $[[D1]]$ in the conclusion for $[[C ∘ (⬜ ►case m (x1 , x2) ⟼ u) ]]$ in \rref*{\CTyEctxs\CSep\CPatP} corresponds to the typing context $[[P1]]$ in the premise for $[[t]]$ in \rref*{\CTyTerm\CSep\CPatP} (the term $[[t]]$ is located where the focus $[[ ⬜]]$ is in \rref*{\CTyEctxs\CSep\CPatP}).
 \end{itemize}
 
 We think of the typing rule for an evaluation context as a rotation of the typing rule for the associated term, where the typing contexts of one subterm and the conclusion are swapped, and the typing contexts of the other potential subterms are kept unchanged (with the difference that typing contexts for evaluation contexts are of shape $[[D]]$ instead of $[[P]]$).
 
-\subsection{Small-step semantics}\label{ssec:sem}
-
-We equip \destcalculus{} with small-step semantics. There are three sorts of semantic rules:
-\begin{itemize}
-  \item focus rules, where we focus on a subterm of a term, by pushing a corresponding focusing component on the stack $[[C]]$;
-  \item unfocus rules, where the term under focus is in fact a value, and thus we pop a focusing component from the stack $[[C]]$ and transform it back to the corresponding term so that a redex appears (or so that another focus/unfocus rule can be triggered);
-  \item reduction rules, where the actual computation logic takes place.
-\end{itemize}
+\subsection{Reduction semantics}\label{ssec:sem}
 
 % \ExplSyntaxOn
 % \NewDocumentCommand{\transformsemname}{m}
@@ -811,9 +806,26 @@ Here the focus, unfocus, and reduction rules for \textsc{PatP}:
 \end{array}\]}
 \egroup\egroup
 
-Rules are triggered in a purely deterministic fashion; once a subterm is a value, it cannot be focused on again. As focusing and defocusing rules are entirely mechanical (they are just a matter of pushing and popping a focusing component on the stack), we only present the set of reduction rules for the system in~\cref{fig:sem}, but the whole system is included in the annex (\cref{fig:sem-full1,fig:sem-full2}).
+Focus, unfocus and contraction rules of the semantics of \destcalculus{} (see \cref{fig:sem-full1,fig:sem-full2}) are triggered in a purely deterministic fashion. Once a subterm is a value, it cannot be focused on again.
 
-\begin{ottfig}{\caption{Small-step semantics}\label{fig:sem}}
+\begin{ottfig}[h]{\caption{Small-step reduction of commands for \destcalculus{} (part 1)}\label{fig:sem-full1}}\begin{augmentwidth}{2.5cm}
+
+\begin{minipage}{\linewidth}\sidebysidecodehere{t}{0.6}{\begin{minipage}{\linewidth}
+\bgroup\SetPrefix{}
+\ottdefnTy{}\egroup
+\end{minipage}}{\begin{minipage}{\linewidth}
+\begin{minipage}{\linewidth}\small\textit{Name set shift and conditional name shift:}\end{minipage}
+
+\bigskip\bigskip
+
+$\!\begin{array}{rcl}
+[[H ⩲ h']] &\btriangleq& \{ [[h+h']]~|~[[h]]\in [[H]] \}\\
+[[h [H ⩲ h'] ]] &\btriangleq& \left\{\begin{array}{ll}[[h+h']] & \text{if}~[[h]]\in[[H]]\\[[h]] & \text{otherwise}\end{array}\right.\end{array}$
+\end{minipage}}\end{minipage}
+
+\bigskip
+\hrule
+\bigskip
 
 \begin{minipage}{\linewidth}\small\textit{Special substitution for open ampars:}\end{minipage}
 
@@ -828,68 +840,128 @@ Rules are triggered in a purely deterministic fashion; once a subterm is a value
 \hrule
 \bigskip
 
-\hspace*{-0.1\linewidth}\begin{minipage}{\linewidth}\sidebysidecodehere{t}{0.48}{\begin{minipage}{\linewidth}
-\begin{minipage}{\linewidth}\small\textit{Name set shift and conditional name shift:}\end{minipage}
-
-\bigskip\bigskip
-
-$\!\begin{array}{rcl}
-[[H ⩲ h']] &\btriangleq& \{ [[h+h']]~|~[[h]]\in [[H]] \}\\
-[[h [H ⩲ h'] ]] &\btriangleq& \left\{\begin{array}{ll}[[h+h']] & \text{if}~[[h]]\in[[H]]\\[[h]] & \text{otherwise}\end{array}\right.\end{array}$
-\end{minipage}}{\hspace*{0.5cm}\begin{minipage}{1.135\linewidth}
-\bgroup\SetPrefix{\CTyCmd}
-\ottdefnTy{}\egroup
-\end{minipage}}\end{minipage}
-
-\bigskip
-\hrule
-\bigskip
-
 \bgroup
-\renewcommand\arraystretch{1.4}
+\renewcommand{\ottdrulename}[1]{\CSem\CSep}
+\renewcommand\arraystretch{1.5}
 \renewcommand\ottaltinferrule[4]{
   % #4 is conclusion
   % #3 is premise
   % #1 is rule name
   %  & \text{#1}
-  \ensuremath{#4} & \text{\textsc{#1}} \\
+  \ensuremath{#4} & \setbox0=\hbox{\ensuremath{#3}\foreverunspace}\ifdim\wd0=0pt ~ \else$\star$\fi & \text{\textsc{#1}} \\
 }
 \makeatletter
 \renewenvironment{drulepar}[3][\relax]
   {\ifx#1\relax\else\def\ottalt@rulesection@prefix{#1-}\fi
-  \drulesectionhead{#2}{#3}$\!\!\!\array{ll}}
+  \drulesectionhead{#2}{#3}$\!\!\!\array{lll}}
   {\endarray$}
 \makeatother
-\bgroup\SetPrefix{\CRed\CSep}
 \drules{$[[C [ t ] ⟶ C' [ t' ] ]]$}{Small-step evaluation of commands}{%
+App-FocusOne,
+App-UnfocusOne,
+App-FocusTwo,
+App-UnfocusTwo,
 App-Red,
+%
+PatU-Focus,
+PatU-Unfocus,
 PatU-Red,
+%
+PatS-Focus,
+PatS-Unfocus,
 PatL-Red,
 PatR-Red,
+%
+PatP-Focus,
+PatP-Unfocus,
 PatP-Red,
+%
+PatE-Focus,
+PatE-Unfocus,
 PatE-Red,
+%
+ToA-Focus,
+ToA-Unfocus,
 ToA-Red,
+%
+FromA-Focus,
+FromA-Unfocus,
 FromA-Red,
-NewA-Red,
-FillU-Red,
-FillF-Red,
-FillL-Red,
-FillR-Red,
-FillE-Red,
-FillP-Red,
-FillComp-Red,
-FillLeaf-Red,
+NewA-Red
+}
+\egroup
+\begin{center}$\star$~:~only allowed if the term under focus is not already a value\end{center}
+
+\end{augmentwidth}\end{ottfig}
+
+\begin{ottfig}[h]{\caption{Small-step reduction of commands for \destcalculus{} (part 2)}\label{fig:sem-full2}}\begin{augmentwidth}{2.5cm}\bgroup\renewcommand{\drulesectionhead}[2]{}
+\renewcommand{\ottdrulename}[1]{\CSem\CSep}
+\renewcommand\arraystretch{1.5}
+\renewcommand\ottaltinferrule[4]{
+  % #4 is conclusion
+  % #3 is premise
+  % #1 is rule name
+  %  & \text{#1}
+  \ensuremath{#4} & \setbox0=\hbox{\ensuremath{#3}\foreverunspace}\ifdim\wd0=0pt ~ \else$\star$\fi & \text{\textsc{#1}} \\
+}
+\makeatletter
+\renewenvironment{drulepar}[3][\relax]
+  {\ifx#1\relax\else\def\ottalt@rulesection@prefix{#1-}\fi
+  \drulesectionhead{#2}{#3}$\!\!\!\array{lll}}
+  {\endarray$}
+\makeatother
+\drules{}{}{%
+UpdA-Focus,
+UpdA-Unfocus,
 Ampar-Open,
-Ampar-Close}
-\egroup\egroup
+Ampar-Close,
+%
+FillU-Focus,
+FillU-Unfocus,
+FillU-Red,
+%
+FillL-Focus,
+FillL-Unfocus,
+FillL-Red,
+%
+FillR-Focus,
+FillR-Unfocus,
+FillR-Red,
+%
+FillE-Focus,
+FillE-Unfocus,
+FillE-Red,
+%
+FillP-Focus,
+FillP-Unfocus,
+FillP-Red,
+%
+FillF-Focus,
+FillF-Unfocus,
+FillF-Red,
+%
+FillComp-FocusOne,
+FillComp-UnfocusOne,
+FillComp-FocusTwo,
+FillComp-UnfocusTwo,
+FillComp-Red,
+%
+FillLeaf-FocusOne,
+FillLeaf-UnfocusOne,
+FillLeaf-FocusTwo,
+FillLeaf-UnfocusTwo,
+FillLeaf-Red
+}\egroup
 \vspace*{-0.5cm}
 \[
-\text{\textit{where}}\quad\left\{\begin{array}{rcl}
+\text{where}\quad\left\{\begin{array}{rcl}
 [[h']] &=& [[max(hnames(C) ∪ {h}) + 1]]\\
 [[h'']] &=& [[max(H ∪ (hnames(C) ∪ {h})) + 1]] \\
 [[h''']] &=& [[max(H ∪ hnames(C)) + 1]]
 \end{array}\right.\]
-\end{ottfig}
+
+\begin{center}$\star$~:~only allowed if the term under focus is not already a value\end{center}
+\end{augmentwidth}\end{ottfig}
 
 Reduction rules for function application, pattern-matching, $\ottkw{to}_{\ottkw{\ltimes} }$ and $\ottkw{from}_{\ottkw{\ltimes} }$ are straightforward.
 

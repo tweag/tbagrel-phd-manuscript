@@ -406,6 +406,19 @@
   \par\vspace{0.5\baselineskip}% Add possible vertical separation
 }
 
+\def\foreverunspace{%
+  \ifnum\lastnodetype=11
+    \unskip\foreverunspace
+  \else
+    \ifnum\lastnodetype=12
+      \unkern\foreverunspace
+    \else
+      \ifnum\lastnodetype=13
+        \unpenalty\foreverunspace
+      \fi
+    \fi
+  \fi
+}
 
 \newcommand{\IfFancyRuleNames}[2]{#1}
 
@@ -459,13 +472,14 @@
   \def\CTyVal{\destcalculus{}--ty\textsubscript{v}}
   \def\CTyEctxs{\destcalculus{}--ty\textsubscript{E}}
   \def\CTyCmd{\destcalculus{}--ty/cmd}
+  \def\CSem{\destcalculus{}--sem}
   \def\CLOne{$\lambda_{L1}$}
   \def\CLTwo{$\lambda_{L2}$}
   \def\CLm{$\lambda_{Lm}$}
   \def\CLdm{$\lambda_{Ldm}$}
   \def\CLOneOrTwo{$\lambda_{L1,2}$}
   \def\CLTwoOrm{$\lambda_{L2,m}$}
-  \def\CSem{\hspace*{-0.2ex}--sem}
+  \def\CSemSuff{\hspace*{-0.2ex}--sem}
   \def\CTy{\hspace*{-0.2ex}--ty}
   \def\CILL{ILL}
   \def\rref*#1{\textsc{#1}}
@@ -758,6 +772,5 @@ Je dédie cette thèse à TBD.
 \printbibliography
 
 \appendix
-\include{chapters/91_full_red_destcalculus}
 
 \end{document}

@@ -198,24 +198,10 @@ The linear $\lambda$-calculus with deep modes, \CLdm, will be the basis for our 
 
 Many semantics presentations exist for lambda calculus. In \cref{fig:linsem} I present a small-step reduction system for \CLdm, in \emph{reduction semantics} style inspired from~\cite{felleisen_calculi_1987} and subsequent~\cite{danvy_refocusing_2004,biernacka_syntactic_2007}, that is, a semantics in which the evaluation context $[[C]]$ is manipulated explicitly and syntactically as a stack.
 
-\def\foreverunspace{%
-  \ifnum\lastnodetype=11
-    \unskip\foreverunspace
-  \else
-    \ifnum\lastnodetype=12
-      \unkern\foreverunspace
-    \else
-      \ifnum\lastnodetype=13
-        \unpenalty\foreverunspace
-      \fi
-    \fi
-  \fi
-}
-
 \begin{ottfig}{\caption{Small-step semantics for \CLdm}\label{fig:linsem}}
 \begin{augmentwidth}{2cm}
 \bgroup
-\renewcommand{\ottdrulename}[1]{\CLdm\CSem\CSep}
+\renewcommand{\ottdrulename}[1]{\CLdm\CSemSuff\CSep}
 \renewcommand\arraystretch{1.5}
 \renewcommand\ottaltinferrule[4]{
   % #4 is conclusion
@@ -264,7 +250,7 @@ LinRed-PatE}
 \vspace{-0.5cm}
 
 \begin{center}
-$\star$~:~only allowed if $[[t]]$ is not already a value
+$\star$~:~only allowed if the term under focus is not already a value
 \end{center}
 \end{augmentwidth}
 \end{ottfig}
