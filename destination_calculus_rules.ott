@@ -469,10 +469,10 @@ C[t ►map x ⟼ t'] ⟶ (C ∘ (⬜ ►map x ⟼ t'))[t]
 (C ∘ (⬜ ►map x ⟼ t'))[v] ⟶ C[v ►map x ⟼ t']
 
 {{ [[h''']] = [[max(H ∪ hnames(C)) + 1]] }} [[:hpMaxC]]
----------------------------------- :: Ampar_Open {{ com \CAmpar\CSep\COpen }}
+---------------------------------- :: Ampar_Open {{ com \CAmpar\COpen }}
 C[ H ⟨ v2 ❟ v1 ⟩ ►map x ⟼ t'] ⟶ (C ∘ (H⩲h''' ᵒᵖ⟨ v2[H⩲h'''] ❟ ⬜⟩))[ t'[x ≔ v1[H⩲h'''] ] ]
 
----------------------------------- :: Ampar_Close {{ com \CAmpar\CSep\CClose }}
+---------------------------------- :: Ampar_Close {{ com \CAmpar\CClose }}
 (C ∘ H ᵒᵖ⟨ v2 ❟ ⬜⟩)[v1] ⟶ C[ H ⟨ v2 ❟ v1 ⟩ ]
 
 {{ NotVal [[u]] }} [[:NotValu]]

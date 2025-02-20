@@ -1,3 +1,72 @@
+\chapter{Related work}\label{chap:related-work}
+
+\section{Destination-passing style for efficient memory management}\label{ssec:shaikhha-dps}
+
+\citet{shaikhha_destination-passing_2017} present a destination-based intermediate language for a functional array programming language, with destination-specific optimizations, that boasts near-C performance.
+
+This is the most comprehensive evidence to date of the benefits of destination-passing style for performance in functional languages, although their work is on array programming, while this article focuses on linked data structures. They can therefore benefit from optimizations that are perhaps less valuable for us, such as allocating one contiguous memory chunk for several arrays.
+
+The main difference between their work and ours is that their language is solely an intermediate language: it would be unsound to program in it manually. We, on the other hand, are proposing a type system to make it sound for the programmer to program directly with destinations.
+
+We see these two aspects as complementing each other: good compiler optimizations are important to alleviate the burden from the programmer and allow high-level abstraction; having the possibility to use destinations in code affords the programmer more control, should they need it.
+
+\section{Tail modulo constructor}\label{ssec:tmc}
+
+Another example of destinations in a compiler's optimizer is~\cite{bour_tmc_2021}. It's meant to address the perennial problem that the map function on linked lists isn't tail-recursive, hence consumes stack space. The observation is that there's a systematic transformation of functions where the only recursive call is under a constructor to a destination-passing tail-recursive implementation.
+
+Here again, there's no destination in user land, only in the intermediate representation. However, there is a programmatic interface: the programmer annotates a function like
+\begin{verbatim}
+let[@tail_mod_cons] rec map =
+\end{verbatim}
+to ask the compiler to perform the translation. The compiler will then throw an error if it can't. This way, contrary to the optimizations in~\cite{shaikhha_destination-passing_2017}, it is entirely predictable.
+
+This has been available in OCaml since version 4.14. This is the one example we know of of destinations built in a production-grade compiler. Our \destcalculus{} makes it possible to express the result tail-modulo-constructor in a typed language. It can be used to write programs directly in that style,  or it could serve as a typed target language for an automatic transformation. On the flip-side, tail modulo constructor is too weak to handle our difference lists or breadth-first traversal examples.
+
+\section{A functional representation of data structures with a hole}\label{ssec:minamide}\label{ssec:ampar-motivation}
+
+The idea of using linear types as a foundation of a functional calculus in which incomplete data structures can exist and be composed as first class values dates back to~\cite{minamide_functional_1998}. Our system is strongly inspired by theirs. In~\cite{minamide_functional_1998}, a first-class structure with a hole is called a \emph{hole abstraction}. Hole abstractions are represented by a special kind of linear functions with bespoke restrictions. As with any function, we can't pattern-match on their output (or pass it to another function) until they have been applied; but they also have the restriction that we cannot pattern-match on their argument ---the \emph{hole variable}--- as that one can only be used directly as argument of data constructors, or of other hole abstractions. The type of hole abstractions, $\ottstype{([[T]], [[S]]) hfun}$ is thus a weak form of linear function type $\ottstype{[[T]] \multimap [[S]]}$.
+
+In~\cite{minamide_functional_1998}, it's only ever possible to represent structures with a single hole. But this is a rather superficial restriction. The author doesn't comment on this, but we believe that this restriction only exists for convenience of the exposition: the language is lowered to a language without function abstraction and where composition is performed by combinators. While it's easy to write a combinator for single-argument-function composition, it's cumbersome to write combinators for functions with multiple arguments. But having multiple-hole data structures wouldn't have changed their system in any profound way.
+
+The more important difference is that while their system is based on a type of linear functions, ours is based on the linear logic's ``par'' type. In classical linear logic, linear implication $\ottstype{[[T]] \multimap [[S]]}$ is reinterpreted as $\ottstype{[[S]]\mathop{\parr}[[T]]^{\perp}}$. We, likewise, reinterpret $\ottstype{([[T]], [[S]]) hfun}$ as $[[S ⧔ ⌊ T ⌋ ¹ν]]$ (a sort of weak ``par'').
+
+A key consequence is that destinations ---as first-class representations of holes--- appear naturally in \destcalculus{}, while \cite{minamide_functional_1998} doesn't have them. This means that using~\cite{minamide_functional_1998}, or the more recent but similarly expressive system from~\cite{lorenzen_searchtree_2024}, one can implement the examples with difference lists and queues from~\cref{ssec:efficient-queue}, but couldn't do our breadth-first traversal example from~\cref{sec:bft}, since it requires to be able to store destinations in a structure.
+
+Nevertheless, we still retain the main restrictions that \citet{minamide_functional_1998} places on hole abstractions. For instance, we can't pattern-match on $[[S]]$ in (unapplied) $\ottstype{([[T]], [[S]]) hfun}$; so in \destcalculus{}, we can't act directly on the left-hand side $[[S]]$ of $[[S ⧔ T]]$, only on the right-hand side $[[T]]$. Similarly, hole variables can only be used as arguments of constructors or hole abstractions; it's reflected in \destcalculus{} by the fact that the only way to act on destinations is via fill operations, with either hollow constructors or another ampar.
+
+The ability to manipulate destinations, and in particular, store them, does come at a cost though: the system needs this additional notion of ages to ensure that destinations are used soundly. On the other hand, our system is strictly more general, in \citet{minamide_functional_1998}'s system can be embedded in \destcalculus{}, and if one stays in this fragment, we're never confronted with ages.
+
+\section{Destination-passing style programming: a Haskell implementation}\label{ssec:dps-haskell}
+
+\citet{bagrel_destination-passing_2024} proposes a system much like ours: it has a destination type, and a \emph{par}-like construct (that they call $\ottstype{Incomplete}$), where only the right-hand side can be modified; together these elements give extra expressiveness to the language compared to~\cite{minamide_functional_1998}.
+
+In their system, $[[d ◀ t]]$ requires $[[t]]$ to be unrestricted, while in \destcalculus{}, $[[t]]$ can be linear. The consequence is that in~\cite{bagrel_destination-passing_2024}, destinations can be stored in data structures but not in data structures with holes; so in a breadth-first search algorithm like in~\cref{sec:bft}, they have to build the queue using normal constructors, and cannot use destination-filling primitives. Therefore both normal constructors and DPS primitives must coexist in their work, while in \destcalculus{}, only DPS primitives are required to bootstrap the system, as we later derive normal constructors from them. In exchange, they don't need a system of ages to make their system safe; just linearity is enough.
+
+A more profound difference between their work and ours is that they describe a practical implementation of destination-passing style for an existing functional language, while we present a slightly more general theoretical framework that is meant to justify safety of DPS implementations (such as \cite{bagrel_destination-passing_2024} itself), so goals are quite different.
+
+\section{Semi-axiomatic sequent calculus}\label{ssec:sax}
+
+In~\cite{deyoung_sax_2020} constructors return to a destination rather than allocating memory. It is very unlike the other systems described in this section in that it's completely founded in the Curry-Howard isomorphism. Specifically it gives an interpretation of a sequent calculus which mixes Gentzen-style deduction rules and Hilbert-style axioms. As a consequence, the \emph{par} connective is completely symmetric, and, unlike our $[[⌊ T ⌋ ¹ν]]$ type, their dualization connective is involutive.
+
+The cost of this elegance is that computations may try to pattern-match on a hole, in which case they must wait for the hole to be filled. So the semantics of holes is that of a future or a promise. In turns this requires the semantics of their calculus to be fully concurrent, which is a very different point in the design space.
+
+\section{Rust lifetimes}\label{ssec:rust-lifetimes}
+
+Rust uses a system of lifetimes (see e.g. \cite{pearce_lifetime_2021}) to ensure that borrows don't live longer than what they reference. It plays a similar role as our system of ages.
+
+Rust lifetimes are symbolic. Borrows and moves generate constraints (inequalities of the form $\alpha\leqslant\beta$) on the symbolic lifetimes. For instance, that a the lifetime of a reference is larger than the lifetime of any structure the reference is stored in. Without such constraints, Rust would have similar problems to those of \cref{sec:scope-escape-dests}. The borrow checker then checks that the constraints are solvable. This contrasts with \destcalculus{} where ages are set explicitly, with no analysis needed.
+
+Another difference between the two systems is that \destcalculus{}'s ages (and modes in general) are relative. An explicit modality $\ottstype{!}_{[[¹↑^ka]]}$ must be used when a part has an age different than its parent, and means that the part is $[[ka]]$ scope older than the parent. On the other hand, Rust's lifetimes are absolute, the lifetime of a part is tracked independently of the lifetime of its parent.
+
+\section{Oxidizing OCaml}
+
+\citet{lorenzen_oxidizing_2024} present an extension of the OCaml type system to support modes. Their modes are split along three different ``axes'', among which affinity and locality are comparable to our multiplicities and ages.
+Like our multiplicities, there are two modes for affinity \verb|once| and \verb|many|, though in~\cite{lorenzen_oxidizing_2024}, \verb|once| supports weakening, whereas \destcalculus{}'s $[[¹]]$ multiplicity is properly linear (proper linearity matters for destination lest we end up reading uninitialized memory).
+
+Locality tracks scope. There are two locality modes, \verb|local| (doesn't escape the current scope) and \verb|global| (can escape the current scope). The authors present their locality mode as a drastic simplification of Rust's lifetime system, which nevertheless fits their need.
+
+However, such a simplified system would be a bit too weak to track the scope of destinations. The observation is that if destinations from two nested scopes are given the same mode, then we can't safely do anything with them, as it would be enough to reproduce the counterexamples of \cref{sec:scope-escape-dests}. So in order to type the breadth-first traversal example of \cref{sec:bft}, where destinations are stored in a structure, we need at least $[[ν]]$ (for the current scope), $[[↑]]$ (for the previous scope exactly), plus at least one extra mode for the rest of the scopes (destinations of this generic age cannot be safely used). It turns out that such systems with finitely many ages are incredibly easy to get wrong, and it was in fact much simpler to design a system with infinitely many ages.
+
 \chapter{Conclusion}\label{chap:global-conclusion}
 
 TBD.
