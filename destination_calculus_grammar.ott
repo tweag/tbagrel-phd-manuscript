@@ -975,7 +975,7 @@ terminals :: 'terminals_' ::=
   | ⊢ :: :: vdash {{ tex \,\pmb{\vdash}\, }}
   | ˢ⊢ :: :: svdash {{ tex \,\pmb{\vdash}\, }}
   | ⊣ :: :: dashv {{ tex \,\pmb{\dashv}\, }}
-  | ⫦ :: :: dvdash {{ tex \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\, }}
+  | ⫦ :: :: dvdash {{ tex \,\pmb{\vdash_{\scriptscriptstyle \!\mathrm{v} } }\, }}
   | ⊫ :: :: lindash1 {{ tex \,\pmb{\vdash}\, }}
   | ⫢ :: :: lindash2 {{ tex \,\pmb{\vdash}\, }}
   | ⊪ :: :: lindash3 {{ tex \,\pmb{\vdash}\, }}

@@ -26,6 +26,18 @@
 \PolyglossiaSetup{english}{indentfirst=true}
 \PolyglossiaSetup{french}{indentfirst=true}
 \usepackage{float}
+\renewcommand{\topfraction}{.85}
+\renewcommand{\bottomfraction}{.7}
+\renewcommand{\textfraction}{.15}
+\renewcommand{\floatpagefraction}{.66}
+\renewcommand{\dbltopfraction}{.66}
+\renewcommand{\dblfloatpagefraction}{.66}
+\setcounter{topnumber}{9}
+\setcounter{bottomnumber}{9}
+\setcounter{totalnumber}{20}
+\setcounter{dbltopnumber}{9}
+
+
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{hyperref}
@@ -75,47 +87,47 @@
 
 %% For OTT rendering
 \newunicodechar{⥶}{\ensuremath{\raisebox{0.2em}{$\scriptstyle<$}\hspace*{-0.65em}\raisebox{-0.12em}{$\scriptscriptstyle\leftarrow$}}}
-\newcommand{\pleq}{[[⥶]]^{\scriptscriptstyle{\pmb{\mathsf{p}}}}}
-\newcommand{\aleq}{[[⥶]]^{\scriptscriptstyle{\pmb{\mathsf{a}}}}}
+\newcommand{\pleq}{[[⥶]]_{\scriptscriptstyle{\pmb{\mathtt{p}}}}}
+\newcommand{\aleq}{[[⥶]]_{\scriptscriptstyle{\pmb{\mathtt{a}}}}}
 \usepackage[supertabular]{ottalt}
 \inputott{destination_calculus_ott.tex}
 \usepackage{ottstyling}
 % Hide "Index for ranges" from the metavars displayed tabular
-\patchcmd{\ottmetavars}{$ \ottmv{k} $ & \ottcom{Index for ranges} \\}{}{}{}
+% \patchcmd{\ottmetavars}{$ \ottmv{k} $ & \ottcom{Index for ranges} \\}{}{}{}
 
-\patchcmd{\ottdruleTyXXectxsXXOpenAmpar}{%
-\ottpremise{  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{2}}}  \,\pmb{\dashv}\, \ottnt{C} \pmb{:}  \ottstype{(}  \ottstype{U} \,\ottstype{\ltimes}\, \ottstype{T'}  \ottstype{)}  \ottstype{\rightarrowtail} \ottstype{U_{{\mathrm{0}}}} }%
-\ottpremise{ \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
-}{\ottpremise{  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{2}}}  \,\pmb{\dashv}\, \ottnt{C} \pmb{:}  \ottstype{(}  \ottstype{U} \,\ottstype{\ltimes}\, \ottstype{T'}  \ottstype{)}  \ottstype{\rightarrowtail} \ottstype{U_{{\mathrm{0}}}}
-\qquad
-\Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
-}{}{}
+% \patchcmd{\ottdruleTyXXectxsXXOpenAmpar}{%
+% \ottpremise{  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{2}}}  \,\pmb{\dashv}\, \ottnt{C} \pmb{:}  \ottstype{(}  \ottstype{U} \,\ottstype{\ltimes}\, \ottstype{T'}  \ottstype{)}  \ottstype{\rightarrowtail} \ottstype{U_{{\mathrm{0}}}} }%
+% \ottpremise{ \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{\ottpremise{  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{2}}}  \,\pmb{\dashv}\, \ottnt{C} \pmb{:}  \ottstype{(}  \ottstype{U} \,\ottstype{\ltimes}\, \ottstype{T'}  \ottstype{)}  \ottstype{\rightarrowtail} \ottstype{U_{{\mathrm{0}}}}
+% \qquad
+% \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
+% }{}{}
 
-\patchcmd{\ottdruleTyXXvalXXAmpar}{%
-\ottpremise{   \ottsmode{1}  \hspace{-0.15ex}  \ottsmode{\uparrow}    \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{3}}}   \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{1}}}}  \pmb{:}  \ottstype{T}}%
-\ottpremise{ \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
-}{
-\ottpremise{   \ottsmode{1}  \hspace{-0.15ex}  \ottsmode{\uparrow}    \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{3}}}   \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{1}}}}  \pmb{:}  \ottstype{T}
-\qquad
-\Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
-}{}{}
+% \patchcmd{\ottdruleTyXXvalXXAmpar}{%
+% \ottpremise{   \ottsmode{1}  \hspace{-0.15ex}  \ottsmode{\uparrow}    \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{3}}}   \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{1}}}}  \pmb{:}  \ottstype{T}}%
+% \ottpremise{ \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{
+% \ottpremise{   \ottsmode{1}  \hspace{-0.15ex}  \ottsmode{\uparrow}    \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{3}}}   \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{1}}}}  \pmb{:}  \ottstype{T}
+% \qquad
+% \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{}{}
 
-\patchcmd{\ottdruleTyXXtermXXPatS}{%
-\ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}}%
-\ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
-}{\ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}%
-\qquad
-\Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
-}{}{}
+% \patchcmd{\ottdruleTyXXtermXXPatS}{%
+% \ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}}%
+% \ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{\ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}%
+% \qquad
+% \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
+% }{}{}
 
-\patchcmd{\ottdruleTyXXectxsXXPatS}{%
-\ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}}%
-\ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
-}{
-  \ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}
-\qquad
-  \Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
-}{}{}
+% \patchcmd{\ottdruleTyXXectxsXXPatS}{%
+% \ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}}%
+% \ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{
+%   \ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}
+% \qquad
+%   \Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
+% }{}{}
 
 %% Bibliography settings
 \usepackage[
@@ -333,11 +345,11 @@
 \end{array}\\[\interdefskip]}
 \newcommand{\figureratio}{1}
 \newcommand{\codehere}[2][t]{\vspace{-0.05cm}\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}{\figtextsize\ensuremath{#2}}\end{minipage}\end{center}\vspace{-0.05cm}}
-\NewEnviron{codefig}[2][t]{\begin{figure}[#1]
+\NewEnviron{codefig}[2][tp]{\begin{figure}[#1]
 \codehere{\BODY}#2
 \end{figure}}
-\NewEnviron{ottfig}[2][t]{\begin{figure}[#1]\visiblespaces
-\figtextsize\BODY\activespaces #2
+\NewEnviron{ottfig}[2][tp]{\begin{figure}[#1]
+\figtextsize\BODY#2
 \end{figure}}
 \newcommand{\sidebysidecodehere}[4]{\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}
 \noindent\begin{minipage}[#1]{#2\linewidth-0.02\linewidth}{\figtextsize\ensuremath{#3}}\end{minipage}
@@ -428,8 +440,8 @@
 
 \IfFancyRuleNames{
   \def\CSep{/}
-  \def\CHole{id\textsubscript{h}}
-  \def\CDest{id\textsubscript{d}}
+  \def\CHole{idH}
+  \def\CDest{idD}
   \def\CUnit{$\ottstype{1}$I}
   \def\CFun{$\ottstype{\multimap}$I}
   \def\CLeft{$\ottstype{\oplus}$I\textsubscript{1}}
@@ -442,28 +454,28 @@
   \def\CBangContr{$\ottstype{!}$C}
   \def\CAmpar{$\ottstype{\ltimes}$I}
   \def\CVal{fromVal}
-  \def\CVar{id\textsubscript{v}}
+  \def\CVar{idV}
   \def\CApp{$\ottstype{\multimap}$E}
   \def\CPatU{$\ottstype{1}$E}
   \def\CPatS{$\ottstype{\oplus}$E}
   \def\CPatP{$\ottstype{\otimes}$E}
   \def\CPatE{$\ottstype{!}$E}
   \def\CUpdA{$\ottstype{\ltimes}$upd}
-  \def\CToA{$\ottstype{\ltimes}$I\textsubscript{t}}
-  \def\CFromA{$\ottstype{\ltimes}$E}
-  \def\CNewA{$\ottstype{\ltimes}$I\textsubscript{n}}
+  \def\CToA{$\ottstype{\ltimes}$to}
+  \def\CFromA{$\ottstype{\ltimes}$from}
+  \def\CNewA{$\ottstype{\ltimes}$new}
   \def\CFillU{$\ottstype{\lfloor 1\rfloor}$E}
   \def\CFillL{$\ottstype{\lfloor \oplus\rfloor}$E\textsubscript{1}}
   \def\CFillR{$\ottstype{\lfloor \oplus\rfloor}$E\textsubscript{2}}
   \def\CFillP{$\ottstype{\lfloor \otimes\rfloor}$E}
   \def\CFillE{$\ottstype{\lfloor !\rfloor}$E}
   \def\CFillF{$\ottstype{\lfloor \multimap\rfloor}$E}
-  \def\CFillComp{$\ottstype{\lfloor\smallbullet\rfloor}$E\textsubscript{c}}
-  \def\CFillLeaf{$\ottstype{\lfloor\smallbullet\rfloor}$E\textsubscript{l}}
+  \def\CFillComp{$\ottstype{\lfloor}$c$\ottstype{\rfloor}$E}
+  \def\CFillLeaf{$\ottstype{\lfloor}$l$\ottstype{\rfloor}$E}
   \def\CId{id}
   \def\COpenAmpar{$\ottstype{\ltimes}$op}
-  \def\COpen{op}
-  \def\CClose{cl}
+  \def\CAmparOpen{$\ottstype{\ltimes}$op}
+  \def\CAmparClose{$\ottstype{\ltimes}$cl}
   \def\CFocus{F}
   \def\CUnfocus{U}
   \def\CRed{C}
