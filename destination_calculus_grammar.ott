@@ -1017,6 +1017,12 @@ pred :: '_' ::= {{ com Serves for the .mng file. Isn't used in the actual rules 
   | Z | t ⟶ Z' | t' :: :: HeapSem
   | Z | t :: :: HeapCmd
 
+  | P ╟ T :: :: LinMon_Log
+  | P ⊪ t : T :: :: LinMon_Ty_term
+  | P ; Ur ⊫ t : T :: :: LinDya_Ty_term
+  | P ⫢ t : T :: :: LinMod_Ty_term
+  | P ⟚ t : T :: :: LinDeepMod_Ty_term
+
 parsing
 ctx_Union <= ctx_Stimes
 ctx_DisjointUnion <= ctx_Stimes
