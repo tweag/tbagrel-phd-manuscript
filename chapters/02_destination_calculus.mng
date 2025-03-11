@@ -1,4 +1,4 @@
-\chapter{A formal functional language based on first-class destinations: \destcalculus{}}
+\chapter{A formal functional language based on first-class destinations: \destcalculus{}}\label{chap:dest-calculus}
 
 In the previous chapter we laid out important building blocks for the functional language that we'll develop here, namely \destcalculus{}. But first, let's focus again on destination-passing style programming, and why it matters in a functional setting.
 

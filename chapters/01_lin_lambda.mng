@@ -24,6 +24,20 @@ All the rules of \CILL, except the ones related to the $\ottstype{!}$ modality, 
 
 Let's focus on the four rules for the $\ottstype{!}$ modality now. The promotion rule \CILL\CSep\CBangProm{} states that a formula $[[T]]$ can become an unrestricted formula $[[!T]]$ if it only depends on formulas that are themselves unrestricted. This is denoted by the (potentially empty) multiset $[[!P]]$. The dereliction rule \CILL\CSep\CBangDerel{} states that an unrestricted formula $[[!T]]$ can be used in a place expecting a normal i.e. linear formula $[[T]]$. The contraction rule \CILL\CSep\CBangContr{} and weakening rule \CILL\CSep\CBangWeak{} state respectively that an unrestricted formula $[[!T]]$ can be cloned or discarded at any time.
 
+% mapping a function on a proto-list
+
+% d : 1 + (T x T)
+% f : !(T -o U)
+
+% case d of
+%   Inl u -> drop f in Inl u
+%   Inr x -> case x of (x1, x2) -> dup f as f1, f2 in ((derelict f) x1, (derelict f) x2)
+
+% case f of Many f' ->
+% case d of
+%   Inl u -> Inl u
+%   Inr x -> case x of (x1, x2) -> (f' x1, f' x2)
+
 The linear logic system might appear very restrictive, but we can always\unsure{We might need other connectives for that, such as \emph{with} $\ottstype{\&}$} simulate the usual non-linear natural deduction in \CILL. Girard gives precise rules for such a translation in Section 2.2.6 of~\cite{girard_linear_1995}, whose main idea is to prefix most formulas with $\ottstype{!}$ and encode the non-linear implication $[[T → U]]$ as $[[!T ⊸ U]]$.
 
 \begin{ottfig}{\caption{Natural deduction formulation of intuitionistic linear logic (sequent-style)}\label{fig:linlog}}
