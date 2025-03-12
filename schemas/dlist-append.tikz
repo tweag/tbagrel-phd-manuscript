@@ -27,7 +27,7 @@
 		\node [style=Small] (27) at (0.5, -1.5) {\hspace{0.3ex}\mintinline{haskellc}`⩴[Int]`};
 		\node [style=Normal] (28) at (2.5, -1.5) {};
 		\node [style=Small] (29) at (2.5, -1.5) {\mintinline{haskellc}`d ⩴ Dest [Int]`};
-		\node [style=Medium] (30) at (2, 0.5) {\mintinline{haskellc}`alloc ⩴ Incomplete [Int] (Dest [Int])`};
+		\node [style=Medium] (30) at (2, 0.5) {\mintinline{haskellc}`new ⩴ Incomplete [Int] (Dest [Int])``};
 		\node [style=Normal] (31) at (7, 0) {};
 		\node [style=Normal] (32) at (14, 0) {};
 		\node [style=Normal] (33) at (7, -1) {};
