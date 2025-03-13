@@ -72,6 +72,11 @@ Term grammar for \CLOne{} borrows most of simply typed lambda calculus grammar. 
 
 \section{Implicit structural rules for unrestricted resources}
 
+% Gentzen, avec le calcul des séquents, on met en évidence le fait que la virgule et le and ne sont pas exactement pareil, et que la virgule à droite est une internalisation du and
+% Avec la présentation dyadique, en quelque sorte, on internalise le bang sous la forme du 2e contexte à gauche.
+
+% Les variables sont là pour gérer les règles structurelles, et si les variables ne gèrent plus les règles structurelles, elles ne servent plus à grand chose.
+
 In the monadic presentation \CLOne, the use of unrestricted terms can become very verbose and unhandy because of the need for explicit contraction, weakening and dereliction. A second and equivalent presentation of the linear $\lambda$-calculus, named \emph{dyadic} presentation or \CLTwo, tends to alleviate this issue by using two typing contexts on each judgment, one for linear variables and one for unrestricted variables. The syntax and typing rules of \CLTwo{} are given in \cref{fig:lindya-grammar,fig:lindya-ty-term}.
 
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in dyadic presentation (\CLTwo)}\label{fig:lindya-grammar}}{\setlength{\arraycolsep}{1ex}
