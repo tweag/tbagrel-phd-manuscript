@@ -39,9 +39,29 @@ Some Haskell operators and notations are often used in the rest of this article:
 
 As we've seen in \cref{sec:scope-escape-dests}, linear types are not enough, alone, to make \destcalculus{} safe. We definitely need ages. In this chapter, we will take a radical decision: we will make it so that destinations can only be used to build non-linear (a.k.a. unrestricted) data structures, so that the issue of scope escape disappear completely. In exchange, we won't be able to store destinations inside data structures built using ampars.
 
-In practice, that means that a destination can only be filled with an unrestricted value (which forbids filling a destination with another destination, as destinations are linear resources). We will use the Haskell type \mintinline{haskellc}/data UDest t/ to represent those destinations for unrestricted values.
+In practice, that means that a destination can only be filled with an unrestricted value (which forbids filling a destination with another destination, as destinations are linear resources). We will use the Haskell type \mintinline{haskellc}/data UDest t/ to represent those destinations for unrestricted values, and type \mintinline{haskellc}/data UAmpar s t/ to represent these ampars where the \mintinline{haskellc}/s/ side is unrestricted.
 
-Because there is no difference when creating the spine of a data structures that is linear or unrestricted, our fill functions that adds a new hollow constructor to an existing structure will be exactly the same as before. Only the signature of fill operators acting on the leaves of data structures, that's to say fillLeaf and fillComp, will change in the implementation compared to the formal definition.
+Because there is no difference when creating the spine of a data structures that is linear or unrestricted, our fill functions that adds a new hollow constructor to an existing structure will be exactly the same as in \destcalculus{}. Only the signature of fill operators acting on the leaves of data structures will change in the implementation compared to the formal definition.
+
+The mapping of operators between \destcalculus{} and DPS Haskell is given in \cref{fig:mapping-destcalculus-dpshaskell}
+
+\begin{figure}
+
+\begin{tabular}{|l|lcl|}\hline
+\destcalculus{} & DPS Haskell \\\hline\hline
+$[[d ⨞ ()]]$ & \mintinline{haskellc}/fill @'() d/ &or& \mintinline{haskellc}/d & fill @'()/ \\\hline
+$[[d ⨞ Inl]]$ & \mintinline{haskellc}/fill @'Inl d/ &or& \mintinline{haskellc}/d & fill @'Inl/ \\\hline
+$[[d ⨞ Inr]]$ & \mintinline{haskellc}/fill @'Inr d/ &or& \mintinline{haskellc}/d & fill @'Inr/ \\\hline
+$[[d ⨞ (,)]]$ & \mintinline{haskellc}/fill @'(,) d/ &or& \mintinline{haskellc}/d & fill @'(,)/ \\\hline
+$[[d ⨞ ᴇ ω∞]]$ & \mintinline{haskellc}/fill @'Ur d/ &or& \mintinline{haskellc}/d & fill @'Ur/ \\\hline
+$[[d ⨞ ( λ x m ⟼ term )]]$ & \mintinline{haskellc}/fillLeaf (\x -> term) d/ &or& \mintinline{haskellc}/d & fillLeaf (\x -> term)/ \\\hline
+$[[d ⨞· term]]$ & \mintinline{haskellc}/fillComp term d/ &or& \mintinline{haskellc}/d & fillComp term/ \\\hline
+$[[d ◀ term]]$ & \mintinline{haskellc}/fillLeaf term d/ &or& \mintinline{haskellc}/d & fillLeaf term/ \\\hline
+
+\end{tabular}
+
+\caption{Mapping between \destcalculus{} operators and DPS Haskell ones}\label{fig:mapping-destcalculus-dpshaskell}
+\end{figure}
 
 \section{Motivating examples for DPS programming}\label{sec:motivating-examples}
 
