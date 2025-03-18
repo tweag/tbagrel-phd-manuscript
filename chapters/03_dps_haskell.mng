@@ -43,12 +43,18 @@ In practice, that means that a destination can only be filled with an unrestrict
 
 Because there is no difference when creating the spine of a data structures that is linear or unrestricted, our fill functions that adds a new hollow constructor to an existing structure will be exactly the same as in \destcalculus{}. Only the signature of fill operators acting on the leaves of data structures will change in the implementation compared to the formal definition.
 
-The mapping of operators between \destcalculus{} and DPS Haskell is given in \cref{fig:mapping-destcalculus-dpshaskell}
+
+The mapping of operators and types between \destcalculus{} and DPS Haskell is given in \cref{fig:mapping-destcalculus-dpshaskell}
+
+In \destcalculus{}, destinations always have finite ages. As a result, we use age $[[∞]]$ as a marker that something doesn't contain destinations. That way, can still control linearity independently of scope control. This is particularly visible in rule \rref*{\CTyTerm\CSep\CFromA}, where a linear resource can be extracted from the right of an ampar as long as it has age $[[∞]]$.
+
+In DPS Haskell however, we don't have ages. So we use the fact that destinations are always linear too, and we employ the $[[ω]]$ multiplicity as a marker that something doesn't contain destinations. Of course, that isn't cheap: we don't have a way in that world to control scopes, so we have to be overly conservative to preserve safety, and restrain the possibilities of a few operators. Because there is no construct in our language that can have unrestricted multiplicity with an intrinsically finite age, it makes sense to map the mode $[[ɷ]]$ of Linear Haskell to the pair $[[ω∞]]$ of \destcalculus{}. Consequently, $[[ˢᴇ ω∞ term]]$ corresponds to \mintinline{haskellc}/Ur term/.
+
 
 \begin{figure}
 
 \begin{tabular}{|l|lcl|}\hline
-\destcalculus{} & DPS Haskell \\\hline\hline
+\destcalculus{} & DPS Haskell && \\\hline\hline
 $[[d ⨞ ()]]$ & \mintinline{haskellc}/fill @'() d/ &or& \mintinline{haskellc}/d & fill @'()/ \\\hline
 $[[d ⨞ Inl]]$ & \mintinline{haskellc}/fill @'Inl d/ &or& \mintinline{haskellc}/d & fill @'Inl/ \\\hline
 $[[d ⨞ Inr]]$ & \mintinline{haskellc}/fill @'Inr d/ &or& \mintinline{haskellc}/d & fill @'Inr/ \\\hline
@@ -60,12 +66,20 @@ $[[d ◀ term]]$ & \mintinline{haskellc}/fillLeaf term d/ &or& \mintinline{haske
 
 \end{tabular}
 
-\caption{Mapping between \destcalculus{} operators and DPS Haskell ones}\label{fig:mapping-destcalculus-dpshaskell}
+\begin{tabular}{|l|l|}\hline
+\destcalculus{} & DPS Haskell \\\hline\hline
+$[[⌊ T ⌋ ω∞]]$ & \mintinline{haskellc}/UDest t/ \\\hline
+$[[! ω∞ S ⧔ T]]$ & \mintinline{haskellc}/UAmpar s t/ \\\hline
+\end{tabular}
+
+\caption{Mappings between \destcalculus{} and DPS Haskell}\label{fig:mapping-destcalculus-dpshaskell}
 \end{figure}
 
-\section{Motivating examples for DPS programming}\label{sec:motivating-examples}
+Now, let's see how programs look like in DPS Haskell. We'll start by reimplementing examples from the previous chapter, to see how they take form in a practical setting.
 
-The following subsections present three typical settings in which DPS programming brings expressiveness or performance benefits over a more traditional functional implementation.
+\section{A glimpse of DPS Haskell programming}\label{sec:motivating-examples}
+
+The following subsections present three typical settings in which DPS programming brings expressiveness or performance benefits over a more traditional functional implementation. We'll start by revisiting examples from \label{sec:working-with-dests}.
 
 \subsection{Efficient difference lists}\label{ssec:dlist}
 
