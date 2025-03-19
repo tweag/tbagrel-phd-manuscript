@@ -14,7 +14,7 @@ However, the main challenge is that Haskell, albeit incorporating linear types, 
 
 \section{Linear Types in Haskell}\label{sec:intro-linearity}
 
-Linear Haskell~\cite{bernardy_linear_2018} is a language extension for the Glasgow Haskell Compiler (GHC) that introduces the linear function arrow, \mintinline{haskellc}/t ⊸ u/ and modifies the type checker of GHC so that it can enforce linearity requirement. A linear function of type \mintinline{haskellc}/t ⊸ u/ guarantees that the argument of the function will be consumed exactly once when the result of the function is consumed exactly once. The regular function arrow \mintinline{haskellc}/t → u/ is still available when Linear Haskell is enabled; this one doesn't guarantee how many times its argument will be consumed when its result is consumed once. There is also a multiplicity-polymorphic arrow, \mintinline{haskellc}/t %p → u/, much like $[[T m → U]]$ in \destcalculus{}.
+Linear Haskell~\cite{bernardy_linear_2018} is a language extension for the Glasgow Haskell Compiler (GHC) that introduces the linear function arrow, \mintinline{haskellc}/t ⊸ u/ and modifies the type checker of GHC so that it can enforce linearity requirement. A linear function of type \mintinline{haskellc}/t ⊸ u/ guarantees that the argument of the function will be consumed exactly once when the result of the function is consumed exactly once. The regular function arrow \mintinline{haskellc}/t → u/ is still available when Linear Haskell is enabled; this one doesn't guarantee how many times its argument will be consumed when its result is consumed once. There is also a multiplicity-polymorphic arrow, \mintinline{haskellc}/t %m → u/, much like $[[T m → U]]$ in \destcalculus{}.
 
 A value is said to be \emph{consumed once} (or \emph{consumed linearly}) when it is pattern-matched on and its sub-components are consumed once; or when it is passed as an argument to a linear function whose result is consumed once. A function is said to be \emph{consumed once} when it is applied to an argument and when the result is consumed exactly once. We say that a variable \mintinline{haskellc}/x/ is \emph{used linearly} in an expression \mintinline{haskellc}/u/ when consuming \mintinline{haskellc}/u/ once implies consuming \mintinline{haskellc}/x/ exactly once. Linearity on function arrows thus creates a chain of requirements about consumption of values.
 
@@ -109,6 +109,7 @@ The implementation of destination-backed difference lists is presented in Listin
 %   \label{fig:schema-fillComp}
 % \end{figure}
 
+% TODO check that the section reference in comment is up to date
 \begin{listing}[t]
 \figtextsize
 \begin{minted}{haskellc}
@@ -118,21 +119,23 @@ data [t] = []          -- nil constructor
 
 type DList t = UAmpar [t] (UDest [t])
 
-newUAmpar @[t] ⩴ DList t  -- newUAmpar is roughly equivalent to new⧔,
-                                 -- except the structure being built is non-linear
+newDList ⩴ Token ⊸ DList t
+newDList = newUAmpar @[t]  -- newUAmpar primitive is roughly equivalent to new⧔IP from
+                                   -- Sec. 2.8, except the structure being built is non-linear
 
 append ⩴ DList t ⊸ t → DList t
-append dlist x =
+dlist `append` x =
   dlist `updWith` \d → case (d &fill @'(:)) of
     (dh, dt) → (dh &fillLeaf x) ; dt
 
 concat ⩴ DList t ⊸ DList t ⊸ DList t
-concat dlist1 dlist2 = dlist1 `updWith` \dt1 → (dt1 &fillComp dlist2)
+dlist1 `concat` dlist2 = dlist1 `updWith` \dt1 → (dt1 &fillComp dlist2)
 
 toList ⩴ DList t ⊸ [t]
 toList dlist = unFromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
+               -- unFromUAmpar' is similar to from⧔' from Chap. 2
 \end{minted}
-\caption{Implementation of difference lists with destinations}
+\caption{Implementation of difference lists in DPS Haskell}
 \label{table:impl-dlist}
 \end{listing}
 
@@ -140,12 +143,12 @@ toList dlist = unFromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
 \begin{figure}[t]\centering
   \hspace{-0.5cm}\begin{minipage}{0.3\textwidth}
     \scalebox{\figscale}{\tikzfig{schemas/alloc}}
-    \caption{\mintinline{haskellc}/newUAmpar/}
+    \caption{\mintinline{haskellc}/newUAmpar tok/}
     \label{fig:schema-alloc}
   \end{minipage}\hspace{0cm}%
   \begin{minipage}{0.7\textwidth}
     \scalebox{\figscale}{\tikzfig{schemas/dlist-toList}}
-    \caption{Memory behavior of \mintinline{haskellc}/toList i/}
+    \caption{Memory behavior of \mintinline{haskellc}/toList dlist/}
     \label{fig:schema-dlist-toList}
   \end{minipage}
 \end{figure}
@@ -158,7 +161,7 @@ toList dlist = unFromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
 
 \begin{figure}[t]\centering
   \scalebox{\figscale}{\tikzfig{schemas/dlist-concat}}
-  \caption{Memory behavior of \mintinline{haskellc}/concat i1 i2/ (based on \mintinline{haskellc}/fillComp/)}
+  \caption{Memory behavior of \mintinline{haskellc}/concat dlist1 dlist2/ (based on \mintinline{haskellc}/fillComp/)}
   \label{fig:schema-dlist-concat}
 \end{figure}
 
@@ -167,39 +170,33 @@ toList dlist = unFromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
 % \end{figure}
 
 \begin{itemize}
-  \item \mintinline{haskellc}/newUAmpar/` (Figure~\ref{fig:schema-alloc}) returns a
-    \mintinline{haskellc}/DList t/ which is exactly an
-    \mintinline{haskellc}/UAmpar [t] (UDest [t])/ structure. There is no data
-    there yet and the list that will be fed in \mintinline{haskellc}/UDest [t]/ is exactly the list that the
-    resulting \mintinline{haskellc}/UAmpar/ will hold. This is
-    similar to the function encoding where \mintinline{haskellc}/\x → x/ represents the empty difference list;
-    
+  \item \mintinline{haskellc}/newDList/ uses \mintinline{haskellc}/newUAmpar/ to linearly exchange a token for a new \mintinline{haskellc}/UAmpar [t] (UDest [t])/ ---that is, exactly \mintinline{haskellc}/DList t/. There is no data
+    in this UAmpar yet, it's just a hole and a destination pointing to it, as we see on \cref{fig:schema-alloc};
+
 
   \item \mintinline{haskellc}/append/ (Figure~\ref{fig:schema-dlist-append}) adds an element at the tail
     position of a difference list. For this, it first uses
     \mintinline{haskellc}/fill @'(:)/ to fill the hole at the end of the list represented by
-    \mintinline{haskellc}/d ⩴ UDest [t]/ with a hollow \emph{cons}
-    cell with two newUAmpar holes pointed by \mintinline{haskellc}/dh ⩴ UDest t/ and \mintinline{haskellc}/dt ⩴ UDest [t]/. Then,
+    \mintinline{haskellc}/d ⩴ UDest [t]/ with a hollow \mintinline{haskellc}/(:)/ constructor that has two new holes, pointed to by \mintinline{haskellc}/dh ⩴ UDest t/ and \mintinline{haskellc}/dt ⩴ UDest [t]/. Then,
     \mintinline{haskellc}/fillLeaf/ fills the hole represented by
     \mintinline{haskellc}/dh/ with the value
     of type \mintinline{haskellc}/t/
-    to append. The hole of the resulting difference list is the one pointed by \mintinline{haskellc}/dt ⩴ UDest [t]/ which hasn't been filled yet.
+    to append. The hole at the end of the resulting difference list is the one pointed by \mintinline{haskellc}/dt ⩴ UDest [t]/ which hasn't been filled yet, and stays on the right side of the resulting UAmpar.
 
   \item \mintinline{haskellc}/concat/ (Figure~\ref{fig:schema-dlist-concat}) concatenates two difference lists,
-    \mintinline{haskellc}/i1/ and \mintinline{haskellc}/i2/. It uses \mintinline{haskellc}/fillComp/ to fill the destination \mintinline{haskellc}/dt1/
+    \mintinline{haskellc}/dlist1/ and \mintinline{haskellc}/dlist2/. It uses \mintinline{haskellc}/fillComp/ to fill the destination \mintinline{haskellc}/dt1/
     of the first difference list with the
-    root of the second difference list \mintinline{haskellc}/i2/. The resulting \mintinline{haskellc}/UAmpar/
+    root of the second difference list \mintinline{haskellc}/dlist2/. The resulting \mintinline{haskellc}/UAmpar/
     object hence has the same root as the first list, holds the
     elements of both lists, and inherits the hole of the second list. Memory-wise,
-    \mintinline{haskellc}/concat/ just writes an address into a memory cell; no move is
-    required.
+    \mintinline{haskellc}/concat/ just writes the address of the second list into the hole of the first one.
 
-  \item \mintinline{haskellc}/toList/ (Figure~\ref{fig:schema-dlist-toList}) completes the UAmpar structure by plugging \emph{nil} into its hole with \mintinline{haskellc}/fill @'[]/ (whose individual behavior is presented in Figure~\ref{fig:schema-fillNil}) and removes the \mintinline{haskellc}/UAmpar/ wrapper as the structure is now complete, using \mintinline{haskellc}/unFromUAmpar'/.
+  \item \mintinline{haskellc}/toList/ (Figure~\ref{fig:schema-dlist-toList}) completes the UAmpar structure by plugging a new \emph{nil} \mintinline{haskellc}/[]/ constructor into its hole with \mintinline{haskellc}/fill @'[]/, and then removes the \mintinline{haskellc}/UAmpar/ wrapper as the structure is now complete, using \mintinline{haskellc}/unFromUAmpar'/\footnote{\mintinline{haskellc}/UAmpar/s are wrappers for unrestricted structures under construction in DPS Haskell, so when an \mintinline{haskellc}/UAmpar/ is complete, with \mintinline{haskellc}/fromUAmpar'/ we obtain a data structure wrapped in \mintinline{haskellc}/Ur/, the non-linearity/unrestrictedness modality of Linear Haskell. Here, \mintinline{haskellc}/unFromUAmpar'/ combines the conversion from the complete \mintinline{haskellc}/UAmpar/ to an \mintinline{haskellc}/Ur t/, and then also get rid of the \mintinline{haskellc}/Ur/ wrapper to just get the completed underlying structure.}.
 \end{itemize}
 
-To use this API safely, it is imperative that values of type \mintinline{haskellc}/UAmpar/ are used linearly. Otherwise we could first complete a difference list with \mintinline{haskellc}/l = toList i/, then add a newUAmpar cons cell with a hole to \mintinline{haskellc}/i/ with \mintinline{haskellc}/append i x/ (actually reusing the destination inside \mintinline{haskellc}/i/ for the second time). Doing that creates a hole inside \mintinline{haskellc}/l/, although it is of type \mintinline{haskellc}/[t]/ so we are allowed to pattern-match on it (so we might get a segfault)! The simplified API of Listing~\ref{table:impl-dlist} doesn't actually enforce the required linearity properties, I'll address that in Section~\ref{ssec:api-linearity}.
+To use this API safely, it is imperative that values of type \mintinline{haskellc}/UAmpar/ are used linearly. Otherwise we could first complete a difference list with \mintinline{haskellc}/l = toList dlist/, then add a new cons cell to \mintinline{haskellc}/dlist/ with \mintinline{haskellc}/append dlist x/ (actually reusing the destination inside \mintinline{haskellc}/dlist/ for the second time). Doing that creates a hole inside \mintinline{haskellc}/l/, although it is of type \mintinline{haskellc}/[t]/ so we are allowed to pattern-match on it (so we might get a segfault)! That's why \mintinline{haskellc}/newUAmpar/ consumes a linear token to produce a new UAmpar: it actually infects the UAmpar with linearity, as first described in \cref{sec:implem-destcalculus}.
 
-This implementation of difference list matches closely the intended memory behaviour, we can expect it to be more efficient than the functional encoding. We'll see in Section~\ref{sec:benchmark} that the prototype implementation presented in Section~\ref{sec:implementation} cannot yet demonstrate these performance improvements.
+The implementation of difference list described above matches closely the intended memory behaviour, we can expect it to be more efficient than the functional encoding (where a difference list \mintinline{haskellc}/x :/\,$\holesq$ is represented by the function \mintinline{haskellc}/\ys -> x : ys/). We'll see in Section~\ref{sec:benchmark} that the prototype implementation of DPS Haskell, presented in Section~\ref{sec:implementation}, cannot yet demonstrate these performance improvements.
 
 \subsection{Breadth-first tree traversal}\label{ssec:bf-tree-traversal}
 

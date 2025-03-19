@@ -27,7 +27,7 @@
 		\node [style=Small] (27) at (0.5, -1.5) {\hspace{0.3ex}\mintinline{haskellc}/⩴[Int]/};
 		\node [style=Normal] (28) at (2.5, -1.5) {};
 		\node [style=Small] (29) at (2.5, -1.5) {\mintinline{haskellc}/d ⩴ UDest [Int]/};
-		\node [style=Medium] (30) at (2, 0.5) {\mintinline{haskellc}/newUAmpar ⩴ UAmpar [Int] (UDest [Int])/};
+		\node [style=Medium] (30) at (2, 0.5) {\mintinline{haskellc}/newUAmpar tok ⩴ UAmpar [Int] (UDest [Int])/};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=NormalEdge] (0.center) to (1.center);

@@ -48,7 +48,7 @@ In this example, we're filling a destination for type $[[T ⨁ U]]$ by setting t
 
 Notice that with $\ottkw{fillWithInl}$ we are constructing the structure from the outermost constructor inward: we've written a value of the form $[[Inl]]~\holesq$ into a hole, but we have yet to describe what goes in the new hole $\holesq$. Such data constructors with uninitialized arguments are called \emph{hollow constructors}\footnote{The full triangle $[[◀]]$ is used to fill a destination with a fully-formed value, while the \emph{hollow} triangle $[[⨞]]$ is used to fill a destination with a \emph{hollow constructor}.}. This is opposite to how functional programming usually works, where values are built from the innermost constructors outward: first we make a value $[[v]]$ and only then can we use $[[Inl]]$ to make $[[Inl v]]$. This is one of the two key ingredients in the expressiveness of destination passing that we mentioned earlier.
 
-Yet, everything we've shown so far could have been done with continuations. So it's worth asking: how are destinations different from continuations? Part of the answer lies in our intention to effectively implement destinations as pointers to uninitialized memory (see~\cref{sec:implementation}). But where destinations really differ from continuations is when one has several destinations at hand. Then they have to fill \emph{all} the destinations; whereas when one has multiple continuations, they can only return to one of them. Multiple destination arises when a destination for a pair gets filled with a hollow pair constructor:
+Yet, everything we've shown so far could have been done with continuations. So it's worth asking: how are destinations different from continuations? Part of the answer lies in our intention to effectively implement destinations as pointers to uninitialized memory (see~\cref{sec:implem-destcalculus}). But where destinations really differ from continuations is when one has several destinations at hand. Then they have to fill \emph{all} the destinations; whereas when one has multiple continuations, they can only return to one of them. Multiple destination arises when a destination for a pair gets filled with a hollow pair constructor:
 
 \codehere{\newoperator
 {\ottkw{fillWithPair}}{[[⌊ T ⨂ U ⌋ ¹ν ¹ν → ⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν]]}
@@ -1025,7 +1025,7 @@ Axiom constructive_indefinite_description :
 Together, they let us extract the domain from the proposition. Again this isn't particularly elegant, we could have avoided some of these axioms at the price of more complex development. But we decided to favor expediency over elegance, given how much time the formal development had already consumed from the three years allowed to complete the PhD work.
 
 
-\section{Implementation of \destcalculus{} using in-place memory mutations}\label{sec:implementation}
+\section{Implementation of \destcalculus{} using in-place memory mutations}\label{sec:implem-destcalculus}
 
 The formal language presented in~\cref{sec:syntax-type-system,sec:ectxs-sem} is not meant to be implemented as-is. Practical implementation of most \destcalculus{}'s ideas will be the focus of \cref{chap:dps-haskell,chap:ext-linear-nonlinear}.
 
