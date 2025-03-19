@@ -26,7 +26,7 @@
 		\node [style=Small] (27) at (0.5, -1.5) {\mintinline{haskellc}/⩴ t/};
 		\node [style=Normal] (28) at (2.5, -1.5) {};
 		\node [style=Small] (29) at (2.5, -1.5) {\mintinline{haskellc}/⩴ UDest r t/};
-		\node [style=Medium] (30) at (2, 0.5) {\mintinline{haskellc}/newUAmpar @r token ⩴ UAmpar r s (UDest r s)/`};
+		\node [style=Medium] (30) at (2, 0.5) {\mintinline{haskellc}/newUAmpar @r token ⩴ UAmpar r s (UDest r s)/};
 		\node [style=Normal] (31) at (1, -4) {};
 		\node [style=Normal] (32) at (1, -5) {};
 		\node [style=Normal] (33) at (3, -4) {};

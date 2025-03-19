@@ -35,7 +35,11 @@ Some Haskell operators and notations are often used in the rest of this article:
 
 \mintinline{haskellc}/Class ⇒ .../ is notation for typeclass constraints (resolved implicitly by the compiler).
 
-\section{Restricting \destcalculus{} so that it can be made safe with just linear types}
+\mintinline{haskellc}/@t/ in \mintinline{haskellc}/f @t .../ is a type application; it allows to specify an explicit type for polymorphic functions.
+
+In code excerpts, types are in blue, while terms, variables, and data constructors (sometimes having the same name as the type they belong to, like \mintinline{haskellc}/Ur/ (type) / \mintinline{haskellc}/¤Ur/ (data constructor)) are in black, to stay as consistent as possible with previous chapters.
+
+\section{Restricting \destcalculus{} so that it can be made safe with just linear types}\label{sec:restrict-dps-linhask}
 
 As we've seen in \cref{sec:scope-escape-dests}, linear types are not enough, alone, to make \destcalculus{} safe. We definitely need ages. In this chapter, we will take a radical decision: we will make it so that destinations can only be used to build non-linear (a.k.a. unrestricted) data structures, so that the issue of scope escape disappear completely. In exchange, we won't be able to store destinations inside data structures built using ampars.
 
@@ -55,16 +59,18 @@ In DPS Haskell however, we don't have ages. So we use the fact that destinations
 
 \begin{tabular}{|l|lcl|}\hline
 \destcalculus{} & DPS Haskell && \\\hline\hline
-$[[d ⨞ ()]]$ & \mintinline{haskellc}/fill @'() d/ &or& \mintinline{haskellc}/d & fill @'()/ \\\hline
-$[[d ⨞ Inl]]$ & \mintinline{haskellc}/fill @'Inl d/ &or& \mintinline{haskellc}/d & fill @'Inl/ \\\hline
-$[[d ⨞ Inr]]$ & \mintinline{haskellc}/fill @'Inr d/ &or& \mintinline{haskellc}/d & fill @'Inr/ \\\hline
-$[[d ⨞ (,)]]$ & \mintinline{haskellc}/fill @'(,) d/ &or& \mintinline{haskellc}/d & fill @'(,)/ \\\hline
-$[[d ⨞ ᴇ ω∞]]$ & \mintinline{haskellc}/fill @'Ur d/ &or& \mintinline{haskellc}/d & fill @'Ur/ \\\hline
-$[[d ⨞ ( λ x m ⟼ term )]]$ & \mintinline{haskellc}/fillLeaf (\x -> term) d/ &or& \mintinline{haskellc}/d & fillLeaf (\x -> term)/ \\\hline
-$[[d ⨞· term]]$ & \mintinline{haskellc}/fillComp term d/ &or& \mintinline{haskellc}/d & fillComp term/ \\\hline
-$[[d ◀ term]]$ & \mintinline{haskellc}/fillLeaf term d/ &or& \mintinline{haskellc}/d & fillLeaf term/ \\\hline
+$[[d ⨞ ()]]$ & \mintinline{haskellc}/fill @'() d/ &or& \mintinline{haskellc}/d &fill @'()/ \\\hline
+$[[d ⨞ Inl]]$ & \mintinline{haskellc}/fill @'Inl d/ &or& \mintinline{haskellc}/d &fill @'Inl/ \\\hline
+$[[d ⨞ Inr]]$ & \mintinline{haskellc}/fill @'Inr d/ &or& \mintinline{haskellc}/d &fill @'Inr/ \\\hline
+$[[d ⨞ (,)]]$ & \mintinline{haskellc}/fill @'(,) d/ &or& \mintinline{haskellc}/d &fill @'(,)/ \\\hline
+$[[d ⨞ ᴇ ω∞]]$ & \mintinline{haskellc}/fill @'Ur d/ &or& \mintinline{haskellc}/d &fill @'Ur/ \\\hline
+$[[d ⨞ ( λ x m ⟼ term )]]$ & \mintinline{haskellc}/fillLeaf (\x -> term) d/ &or& \mintinline{haskellc}/d &fillLeaf (\x -> term)/ \\\hline
+$[[d ⨞· term]]$ & \mintinline{haskellc}/fillComp term d/ &or& \mintinline{haskellc}/d &fillComp term/ \\\hline
+$[[d ◀ term]]$ & \mintinline{haskellc}/fillLeaf term d/ &or& \mintinline{haskellc}/d &fillLeaf term/ \\\hline
 
 \end{tabular}
+
+(one can see \mintinline{haskellc}/&fill @'/ as $[[⨞]]$, \mintinline{haskellc}/&fillLeaf/ as $[[◀]]$, and \mintinline{haskellc}/&fillComp/ as $\mathop{\triangleleft\mycirc}$)
 
 \begin{tabular}{|l|l|}\hline
 \destcalculus{} & DPS Haskell \\\hline\hline
@@ -81,21 +87,21 @@ Now, let's see how programs look like in DPS Haskell. We'll start by reimplement
 
 The following subsections present three typical settings in which DPS programming brings expressiveness or performance benefits over a more traditional functional implementation. We'll start by revisiting examples from \label{sec:working-with-dests}.
 
-\subsection{Efficient difference lists}\label{ssec:dlist}
+\subsection{Efficient difference lists}\label{ssec:dpshaskell-dlist}
 
-Linked lists are a staple of functional programming, but they aren't efficient for concatenation, especially when the concatenation calls are nested to the left.
+Linked lists are a staple of functional programming, but they aren't efficient for concatenation, as we've seen in \cref{ssec:efficient-queue}, especially when the concatenation calls are nested to the left.
 
 In an imperative context, it would be quite easy to concatenate linked lists efficiently. One just has to keep both a pointer to the root and to the last \emph{cons} cell of each list. Then, to concatenate two lists, one just has to mutate the last \emph{cons} cell of the first one to point to the root of the second list.
 
-It isn't possible to do so in an immutable functional context though. Instead, \emph{difference lists} can be used: they are very fast to concatenate, and then to convert back into a list. They tend to emulate the idea of having a mutable (here, write-once) last \emph{cons} cell. Usually, a difference list \mintinline{haskellc}/x1 : ... : xn : □/ is encoded by function \mintinline{haskellc}/\ys → x1 : ... : xn : ys/ taking a last element \mintinline{haskellc}/ys ⩴ [t]/ and returning a value of type \mintinline{haskellc}/[t]/ too.
+In a functional setting, \emph{difference lists} are the closest equivalent, offering constant-time concatenation, and constant-time conversion to a normal linked list. Usually, as we've seen previously, functional difference lists are encoded as functions, but thanks to destination-passing style, we can represent them as an actual list with a hole at the end.
 
-With such a representation, concatenation is function composition: \mintinline{haskellc}/f1 <> f2 = f1 . f2/, and we have \mintinline{haskellc}/mempty = id/\footnote{\mintinline{haskellc}/mempty/ and \mintinline{haskellc}/<>/ are the usual notations for neutral element and binary operation of a monoid in Haskell.}, \mintinline{haskellc}/toList f = f []/ and \mintinline{haskellc}/fromList xs = \ys → xs ++ ys/.
+This example will be the opportunity to show how DPS Haskell operates on memory. So far, with \destcalculus{}, we worked on a theoretical memory model with global substitutions and no explicit (de)allocations. Here, with DPS Haskell, we assume that we use a proper heap. We pay no attention right now to garbage collection; as it is a bit tricky; instead we will deal with this topic in \cref{ssec:impl-compact-regions}.
 
-In DPS, instead of encoding the concept of a write-once hole with a function, we can represent the hole of type \mintinline{haskellc}/[t]/ as a first-class object with a \emph{destination} of type \mintinline{haskellc}/UDest [t]/. A difference list now becomes an actual data structure in memory --- not just a pending computation --- that has two handles: one to the root of the list of type \mintinline{haskellc}/[t]/, and one to the yet-to-be-filled hole in the last cons cell, represented by the destination of type \mintinline{haskellc}/UDest [t]/.
+Following the mapping tables of \cref{sec:restrict-dps-linhask}, we know the DPS Haskell representation of difference lists is \mintinline{haskellc}/type DList t = UAmpar [t] (UDest [t])/. As announced previously, because our difference lists are built using UAmpars, they cannot host linear resources. That's the major limitation of this first approach of DPS for Haskell.
 
-With the function encoding, it isn't possible to read the list until a last element of type \mintinline{haskellc}/[t]/ has been supplied to complete it. With the destination representation, this constraint must persist: the actual list \mintinline{haskellc}/[t]/ shouldn't be readable until the accompanying destination is filled, as pattern-matching on the hole would lead to a dreaded \emph{segmentation fault}. This constraint is embodied by the \mintinline{haskellc}/UAmpar s t/ type of our destination API: \mintinline{haskellc}/t/ is what needs to be linearly consumed to make the \mintinline{haskellc}/s/ readable. The right side often carries the destinations of a structure. A difference list is then \mintinline{haskellc}/type DList t = UAmpar [t] (UDest [t])/: the \mintinline{haskellc}/UDest [t]/ must be filled (with a \mintinline{haskellc}/[t]/) to get a readable \mintinline{haskellc}/[t]/.
+As with \destcalculus{}, the left side of the UAmpar carries the structures being built, while the right side carries the destinations of the structure: the \mintinline{haskellc}/UDest [t]/ must be filled (with an unrestricted \mintinline{haskellc}/[t]/) to get a readable \mintinline{haskellc}/[t]/.
 
-The implementation of destination-backed difference lists is presented in Listing~\ref{table:impl-dlist}. More details about the API primitives used by this implementation are given in Section~\ref{sec:api}. For now, it's important to note that \mintinline{haskellc}/fill/ is a function taking a constructor as a type parameter (often used with \mintinline{haskellc}/@/ for type parameter application, and \texttt{\textbf{\textcolor{typcolor}{'}}} to lift a constructor to a type).
+The implementation of destination-backed difference lists is presented in Listing~\ref{table:impl-dlist}.
 % Doesn't bring much more compared to fig:schema-dlist-concat
 % \begin{figure}[t]\centering
 %   \includegraphics[width=10cm]{fillComp.png}
@@ -106,31 +112,35 @@ The implementation of destination-backed difference lists is presented in Listin
 \begin{listing}[t]
 \figtextsize
 \begin{minted}{haskellc}
-data [a] = {- nil constructor -} [] | {- cons constructor -} (:) a [a]
+-- we recall here the definition of list type in Haskell
+data [t] = []          -- nil constructor
+           | (:) t [t]  -- cons constructor
 
-type DList a = UAmpar [a] (UDest [a])
+type DList t = UAmpar [t] (UDest [t])
 
-newUAmparUAmpar ⩴ DList a  -- API primitive (simplified signature w.r.t. Section 4)
+newUAmpar @[t] ⩴ DList t  -- newUAmpar is roughly equivalent to new⧔,
+                                 -- except the structure being built is non-linear
 
-append ⩴ DList a ⊸ a → DList a
-append i x =
-  i `updWith` \d → case fill @'(:) d of
-    (dh, dt) → fillLeaf x dh ; dt
+append ⩴ DList t ⊸ t → DList t
+append dlist x =
+  dlist `updWith` \d → case (d &fill @'(:)) of
+    (dh, dt) → (dh &fillLeaf x) ; dt
 
-concat ⩴ DList a ⊸ DList a ⊸ DList a
-concat i1 i2 = i1 `updWith` \dt1 → fillComp i2 dt1
+concat ⩴ DList t ⊸ DList t ⊸ DList t
+concat dlist1 dlist2 = dlist1 `updWith` \dt1 → (dt1 &fillComp dlist2)
 
-toList ⩴ DList a ⊸ [a]
-toList i = unFromUAmpar' (i `updWith` \dt → fill @'[] dt)
+toList ⩴ DList t ⊸ [t]
+toList dlist = unFromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
 \end{minted}
 \caption{Implementation of difference lists with destinations}
 \label{table:impl-dlist}
 \end{listing}
 
+% TODO: update syntax
 \begin{figure}[t]\centering
   \hspace{-0.5cm}\begin{minipage}{0.3\textwidth}
     \scalebox{\figscale}{\tikzfig{schemas/alloc}}
-    \caption{\mintinline{haskellc}/newUAmpar/`}
+    \caption{\mintinline{haskellc}/newUAmpar/}
     \label{fig:schema-alloc}
   \end{minipage}\hspace{0cm}%
   \begin{minipage}{0.7\textwidth}
@@ -142,7 +152,7 @@ toList i = unFromUAmpar' (i `updWith` \dt → fill @'[] dt)
 
 \begin{figure}[t]\centering
   \scalebox{\figscale}{\tikzfig{schemas/dlist-append}}
-  \caption{Memory behavior of \mintinline{haskellc}/append newUAmpar 1/`}
+  \caption{Memory behavior of \mintinline{haskellc}/append newUAmpar 1/}
   \label{fig:schema-dlist-append}
 \end{figure}
 
@@ -839,4 +849,4 @@ Finally, both \cite{shaikhha_destination-passing_2017} and \cite{bour_tmc_2021} 
 
 Programming with destinations definitely has a place in the realm of functional programming, as the recent adoption of \emph{Tail Modulo Cons}~\cite{bour_tmc_2021} in the OCaml compiler shows. In this paper, we have shown how destination-passing style programming can be used in user-land in Haskell safely, thanks to a linear type discipline. Adopting DPS programming opens the way for more natural and efficient programs in a variety of contexts, where the major points are being able to build structures in a top-down fashion, manipulating and composing UAmpar structures, and managing holes in these structures through first-class objects (destinations). Our DPS implementation relies only on a few alterations to the compiler, thanks to \emph{compact regions} that are already available as part of GHC. Simultaneously, it allows to build structures in those regions without copying, which wasn't possible before.
 
-There are two limitations that we would like to lift in the future. First, DPS programming could be useful outside of compact regions: destinations could probably be used to manipulate the garbage-collected heap (with proper read barriers in place), or other forms of secluded memory areas that aren't traveled by the GC (RDMA, network serialized buffers, etc.). Secondly, at the moment, the type of \mintinline{haskellc}/fillLeaf/ implies that we can't store destinations (which are always linear) in a difference list implemented as in Section~\ref{ssec:dlist}, whereas we can store them in a regular list or queue (like we do, for instance, in Section~\ref{ssec:bf-tree-traversal}). This unwelcome restriction ensures memory safety but it's quite coarse grain. In the future we'll be trying to have a more fine-grained approach that would still ensure safety.
+There are two limitations that we would like to lift in the future. First, DPS programming could be useful outside of compact regions: destinations could probably be used to manipulate the garbage-collected heap (with proper read barriers in place), or other forms of secluded memory areas that aren't traveled by the GC (RDMA, network serialized buffers, etc.). Secondly, at the moment, the type of \mintinline{haskellc}/fillLeaf/ implies that we can't store destinations (which are always linear) in a difference list implemented as in Section~\ref{ssec:dpshaskell-dlist}, whereas we can store them in a regular list or queue (like we do, for instance, in Section~\ref{ssec:bf-tree-traversal}). This unwelcome restriction ensures memory safety but it's quite coarse grain. In the future we'll be trying to have a more fine-grained approach that would still ensure safety.
