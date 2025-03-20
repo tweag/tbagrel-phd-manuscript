@@ -22,7 +22,7 @@
 		\node [style=Small] (122) at (0.5, -1.5) {\hspace{0.3ex}\mintinline{haskellc}/⩴[Int]/};
 		\node [style=Normal] (123) at (2.5, -1.5) {};
 		\node [style=Small] (124) at (2.5, -1.5) {\mintinline{haskellc}/dt1 ⩴ UDest [Int]/};
-		\node [style=Medium] (125) at (2, 0.5) {\mintinline{haskellc}/i1 ⩴ UAmpar [Int] (UDest [Int])/};
+		\node [style=Medium] (125) at (2, 0.5) {\mintinline{haskellc}/dlist1 ⩴ UAmpar [Int] (UDest [Int])/};
 		\node [style=Normal] (126) at (1, -3.5) {};
 		\node [style=Normal] (127) at (2, -3.5) {};
 		\node [style=Normal] (128) at (3, -3.5) {};
@@ -69,7 +69,7 @@
 		\node [style=Small] (174) at (6.5, -2.5) {\hspace{0.3ex}\mintinline{haskellc}/⩴[Int]/};
 		\node [style=Normal] (175) at (8.5, -2.5) {};
 		\node [style=Small] (176) at (8.5, -2.5) {\mintinline{haskellc}/dt2 ⩴ UDest [Int]/};
-		\node [style=Medium] (177) at (8, -0.5) {\mintinline{haskellc}/i2 ⩴ UAmpar [Int] (UDest [Int])/};
+		\node [style=Medium] (177) at (8, -0.5) {\mintinline{haskellc}/dlist2 ⩴ UAmpar [Int] (UDest [Int])/};
 		\node [style=Normal] (178) at (7, -4.5) {};
 		\node [style=Normal] (179) at (8, -4.5) {};
 		\node [style=Normal] (180) at (9, -4.5) {};
@@ -104,7 +104,7 @@
 		\node [style=Normal] (210) at (11.75, 0.5) {};
 		\node [style=Normal] (211) at (11.25, 1) {};
 		\node [style=Normal] (212) at (14.75, -3) {};
-		\node [style=Medium] (213) at (13.5, -2.5) {\mintinline{haskellc}/fillComp i2 dt1/};
+		\node [style=Medium] (213) at (13.5, -2.5) {\mintinline{haskellc}/dt1 &fillComp dlist2/};
 		\node [style=Normal] (214) at (15.5, 0) {};
 		\node [style=Normal] (215) at (19.5, 0) {};
 		\node [style=Normal] (216) at (15.5, -1) {};

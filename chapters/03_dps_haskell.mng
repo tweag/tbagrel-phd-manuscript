@@ -218,31 +218,54 @@ is provided in Listing~\ref{table:impl-bfs-tree-traversal}.
 
 % TODO: add implem of hood melville queue, and revisit code snippet
 
-\begin{listing}[t]
+\begin{listing}[p]
 \figtextsize
 \begin{minted}{haskellc}
-data Tree a = ¤Nil | ¤Node a (Tree a) (Tree a)
+data HMQueue t = ¤HMQueue [t] [t]
 
-relabelDPS ⩴ Tree a → Tree Int
+newHMQueue :: HMQueue t
+newHMQueue = ¤HMQueue [] []
+
+singleton :: t ⊸ HMQueue t
+singleton x = ¤HMQueue [x] []
+
+toList :: HMQueue t ⊸ [t]
+toList (¤HMQueue front backRev) = front ++ reverse backRev
+
+enqueue :: HMQueue t ⊸ t ⊸ HMQueue t
+enqueue (¤HMQueue front backRev) x = ¤HMQueue front (x : backRev)
+
+dequeue :: HMQueue t ⊸ Maybe (t, HMQueue t)
+dequeue (¤HMQueue front backRev) = case front of
+  [] -> case reverse backRev of
+    [] -> Nothing
+    (x : front') -> Just (x, ¤HMQueue front' [])
+  (x : front') -> Just (x, ¤HMQueue front' backRev)
+
+-------------------------------------------------------------------------------
+
+data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)
+
+relabelDPS ⩴ Tree t → Tree Int
 relabelDPS tree = fst (mapAccumBFS (\st _ → (st + 1, st)) 1 tree)
 
-mapAccumBFS ⩴ ∀ a b s. (s → a → (s, b)) → s → Tree a → (Tree b, s)
+mapAccumBFS ⩴ ∀ s t u. (s → t → (s, u)) → s → Tree t → (Tree u, s)
 mapAccumBFS f s0 tree =
-  unFromUAmpar (    -- simplified newUAmparUAmpar signature w.r.t. Section 4
-    newUAmparUAmpar `updWith` \dtree → go s0 (singleton (¤Ur tree, dtree)))
+  unFromUAmpar (
+    newUAmpar @(Tree u) `updWith` \dtree → go s0 (singleton (¤Ur tree, dtree)))
   where
-    go ⩴ s → Queue (Ur (Tree a), UDest (Tree b)) ⊸ Ur s
+    go ⩴ s → Queue (Ur (Tree t), UDest (Tree u)) ⊸ Ur s
     go st q = case dequeue q of
       ¤Nothing → ¤Ur st
       ¤Just ((utree, dtree), q') → case utree of
-        ¤Ur ¤Nil → fill @'Nil dtree ; go st q'
-        ¤Ur (¤Node x tl tr) → case fill @'Node dtree of
+        ¤Ur ¤Nil → dtree &fill @'Nil ; go st q'
+        ¤Ur (¤Node x tl tr) → case (dtree &fill @'Node) of
           (dy, dtl, dtr) →
             let q'' = q' `enqueue` (¤Ur tl, dtl) `enqueue` (¤Ur tr, dtr)
                 (st', y) = f st x
-              in fillLeaf y dy ; go st' q''
+              in dy &fillLeaf y ; go st' q''
 \end{minted}
-\caption{Implementation of breadth-first tree traversal with destinations}
+\caption{Implementation of breadth-first tree traversal in DPS Haskell}
 \label{table:impl-bfs-tree-traversal}
 \end{listing}
 

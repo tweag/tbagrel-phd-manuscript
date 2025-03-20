@@ -27,7 +27,7 @@
 		\node [style=Small] (27) at (0.5, -1.5) {\hspace{0.3ex}\mintinline{haskellc}/⩴[Int]/};
 		\node [style=Normal] (28) at (2.5, -1.5) {};
 		\node [style=Small] (29) at (2.5, -1.5) {\mintinline{haskellc}/d ⩴ UDest [Int]/};
-		\node [style=Medium] (30) at (2, 0.5) {\mintinline{haskellc}/newUAmpar ⩴ UAmpar [Int] (UDest [Int])/};
+		\node [style=Medium] (30) at (2, 0.5) {\mintinline{haskellc}/newUAmpar tok ⩴ UAmpar [Int] (UDest [Int])/};
 		\node [style=Normal] (31) at (7, 0) {};
 		\node [style=Normal] (32) at (14, 0) {};
 		\node [style=Normal] (33) at (7, -1) {};
@@ -89,7 +89,7 @@
 		\node [style=Normal] (94) at (4.5, -1.5) {};
 		\node [style=Normal] (95) at (6.5, -1.5) {};
 		\node [style=Normal] (96) at (6.5, -1.5) {};
-		\node [style=Medium] (97) at (5.5, -1) {\mintinline{haskellc}/fill @'(:) d/};
+		\node [style=Medium] (97) at (5.5, -1) {\mintinline{haskellc}/d &fill @'(:)/};
 		\node [style=Normal] (98) at (17, 0) {};
 		\node [style=Normal] (99) at (21, 0) {};
 		\node [style=Normal] (100) at (17, -1) {};
@@ -140,7 +140,7 @@
 		\node [style=Normal] (155) at (14.5, -1.5) {};
 		\node [style=Normal] (156) at (16.5, -1.5) {};
 		\node [style=Normal] (157) at (16.5, -1.5) {};
-		\node [style=Medium] (158) at (15.5, -1) {\mintinline{haskellc}/fillLeaf 1 dh/};
+		\node [style=Medium] (158) at (15.5, -1) {\mintinline{haskellc}/d &fillLeaf 1/};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=NormalEdge] (0.center) to (1.center);

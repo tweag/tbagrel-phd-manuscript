@@ -53,7 +53,7 @@
 		\node [style=Bullet] (206) at (9.5, -3) {};
 		\node [style=Normal] (207) at (5, -3) {};
 		\node [style=Normal] (208) at (7, -3) {};
-		\node [style=Medium] (209) at (6, -2.5) {\mintinline{haskellc}/fillLeaf 3 d/};
+		\node [style=Medium] (209) at (6, -2.5) {\mintinline{haskellc}/d &fillLeaf 3/};
 		\node [style=Normal] (210) at (10.125, -3.625) {};
 		\node [style=Normal] (211) at (11.125, -3.625) {};
 		\node [style=Normal] (212) at (11.125, -4.625) {};
