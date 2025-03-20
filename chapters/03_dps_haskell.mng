@@ -194,38 +194,29 @@ toList dlist = unFromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
   \item \mintinline{haskellc}/toList/ (Figure~\ref{fig:schema-dlist-toList}) completes the UAmpar structure by plugging a new \emph{nil} \mintinline{haskellc}/[]/ constructor into its hole with \mintinline{haskellc}/fill @'[]/, and then removes the \mintinline{haskellc}/UAmpar/ wrapper as the structure is now complete, using \mintinline{haskellc}/unFromUAmpar'/\footnote{\mintinline{haskellc}/UAmpar/s are wrappers for unrestricted structures under construction in DPS Haskell, so when an \mintinline{haskellc}/UAmpar/ is complete, with \mintinline{haskellc}/fromUAmpar'/ we obtain a data structure wrapped in \mintinline{haskellc}/Ur/, the non-linearity/unrestrictedness modality of Linear Haskell. Here, \mintinline{haskellc}/unFromUAmpar'/ combines the conversion from the complete \mintinline{haskellc}/UAmpar/ to an \mintinline{haskellc}/Ur t/, and then also get rid of the \mintinline{haskellc}/Ur/ wrapper to just get the completed underlying structure.}.
 \end{itemize}
 
-To use this API safely, it is imperative that values of type \mintinline{haskellc}/UAmpar/ are used linearly. Otherwise we could first complete a difference list with \mintinline{haskellc}/l = toList dlist/, then add a new cons cell to \mintinline{haskellc}/dlist/ with \mintinline{haskellc}/append dlist x/ (actually reusing the destination inside \mintinline{haskellc}/dlist/ for the second time). Doing that creates a hole inside \mintinline{haskellc}/l/, although it is of type \mintinline{haskellc}/[t]/ so we are allowed to pattern-match on it (so we might get a segfault)! That's why \mintinline{haskellc}/newUAmpar/ consumes a linear token to produce a new UAmpar: it actually infects the UAmpar with linearity, as first described in \cref{sec:implem-destcalculus}.
+Of course, we can only do in-place memory mutations, as described in \cref{fig:schema-alloc,fig:schema-dlist-append,fig:schema-dlist-concat,fig:schema-dlist-toList} if the values of type \mintinline{haskellc}/UAmpar/ are used linearly, as first explained in \cref{sec:implem-destcalculus}.
 
-The implementation of difference list described above matches closely the intended memory behaviour, we can expect it to be more efficient than the functional encoding (where a difference list \mintinline{haskellc}/x :/\,$\holesq$ is represented by the function \mintinline{haskellc}/\ys -> x : ys/). We'll see in Section~\ref{sec:benchmark} that the prototype implementation of DPS Haskell, presented in Section~\ref{sec:implementation}, cannot yet demonstrate these performance improvements.
+Otherwise, we could first complete a difference list with \mintinline{haskellc}/l = toList dlist/, then add a new cons cell to \mintinline{haskellc}/dlist/ with \mintinline{haskellc}/append dlist x/ (actually reusing the destination inside \mintinline{haskellc}/dlist/ for the second time). Doing that creates a hole inside \mintinline{haskellc}/l/, although it is of type \mintinline{haskellc}/[t]/ so we would be able to pattern-match on it, and might get a segfault! That's why \mintinline{haskellc}/newUAmpar/ consumes a linear token to produce a new UAmpar: it actually infects the UAmpar with linearity, providing that tokens are managed linearly.
+
+With the implementation of difference list described above, we can expect it to be more efficient than the functional encoding (where a difference list \mintinline{haskellc}/x :/\,$\holesq$ is represented by the function \mintinline{haskellc}/\ys -> x : ys/). We'll see in Section~\ref{sec:benchmark} that the prototype implementation of DPS Haskell primitives (covered in Section~\ref{sec:implementation}) cannot yet demonstrate these performance improvements.
 
 \subsection{Breadth-first tree traversal}\label{ssec:bf-tree-traversal}
 
-Consider the problem, which Okasaki attributes to Launchbury~\cite{okasaki_bfs_2000}
-\begin{quote}
-  Given a tree $T$ , create a newUAmpar tree of the same
-  shape, but with the values at the nodes replaced
-  by the numbers $1\ldots|T|$ in breadth-first order.
-\end{quote}
+Let's move on now to breadth-first tree traversal. We want to traverse a binary tree and update its nodes values so that they are numbered in a breadth-first order.
 
-This problem admits a straightforward implementation if we're allowed
-to mutate trees. Nevertheless, a pure implementation is quite
-tricky~\cite{okasaki_bfs_2000,jones_gibbons_linearbfs_93} and a very
-elegant, albeit very clever, solution was proposed
-recently~\cite{gibbons_phases_2023}.
+In \cref{sec:bft}, we took full advantage of \destcalculus{}'s flexibility, and implemented the breadth-first traversal using a queue to drive the processing order, as we would do in an imperative programming language. This queue would contain both input subtrees and destination to output subtrees, in breadth-first order.
 
+Unlike the example of the previous subsection, we cannot just port the algorithm from \destcalculus{} into DPS Haskell. The major issue is that in \cref{sec:bft}, we built an efficient queue, inspired from Hood-Melville ones, but with an ampar-based difference list for the list representing newly enqueued elements (so that we don't have to reverse it before consuming it when the front list is depleted). But in DPS Haskell, destinations cannot be filled with linear elements. So an ampar-based difference list wouldn't be able to store the destinations we need to store (the one representing the output subtrees), neither would an ampar-based efficient queue.
 
+Fortunately, we can still use the regular, non-ampar-based data structures of Haskell to build a suitable Hood-Melville queue. That's at least one thing we get from using a language that isn't fully based on destinations to build data structures.\footnote{Destination-based data structure building is more general than constructor-based structure building as long as we can fill destinations with linear resources, as in \destcalculus{}. When we add the restriction that destination can only be filled with unrestricted elements, as we do in DPS Haskell, then it is no longer more general than constructor-based structure building, and we need to conserve both building ways in the language to stay at the same level of expressiveness.}
 
-With destinations as first-class objects in our toolbelt, we can
-implement a solution that is both easy to come up with and efficient,
-doing only a single breadth-first traversal pass on the original
-tree. The main idea is to keep a queue of pairs of a tree to be
+As before, we'll keep a queue of pairs of a tree to be
 relabeled and of the destination where the relabeled result is
-expected (as destinations can be stored in arbitrary containers!) and
-process each of them when their turn comes. The implementation
-provided in Listing~\ref{table:impl-bfs-tree-traversal}, implements the
-slightly more general \mintinline{haskellc}/mapAccumBFS/ which applies
-on each node of the tree a relabeling function that can depend on a
-state.
+expected, and
+process each of them when their turn comes. Nothing other than choice of implementation for the queue will change. The DPS Haskell implementation of breadth-first tree traversal 
+is provided in Listing~\ref{table:impl-bfs-tree-traversal}.
+
+% TODO: add implem of hood melville queue, and revisit code snippet
 
 \begin{listing}[t]
 \figtextsize
