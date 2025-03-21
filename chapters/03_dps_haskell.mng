@@ -210,11 +210,7 @@ Unlike the example of the previous subsection, we cannot just port the algorithm
 
 Fortunately, we can still use the regular, non-ampar-based data structures of Haskell to build a suitable Hood-Melville queue. That's at least one thing we get from using a language that isn't fully based on destinations to build data structures.\footnote{Destination-based data structure building is more general than constructor-based structure building as long as we can fill destinations with linear resources, as in \destcalculus{}. When we add the restriction that destination can only be filled with unrestricted elements, as we do in DPS Haskell, then it is no longer more general than constructor-based structure building, and we need to conserve both building ways in the language to stay at the same level of expressiveness.}
 
-As before, we'll keep a queue of pairs of a tree to be
-relabeled and of the destination where the relabeled result is
-expected, and
-process each of them when their turn comes. Nothing other than choice of implementation for the queue will change. The DPS Haskell implementation of breadth-first tree traversal 
-is provided in Listing~\ref{table:impl-bfs-tree-traversal}.
+As before, we'll keep a queue of pairs of a tree to be relabeled and of the destination where the relabeled result is expected, and process each of them when their turn comes. Nothing other than choice of implementation for the queue will change. The DPS Haskell implementation of breadth-first tree traversal is provided in Listing~\ref{table:impl-bfs-tree-traversal}.
 
 % TODO: add implem of hood melville queue, and revisit code snippet
 
@@ -246,13 +242,13 @@ dequeue (¤HMQueue front backRev) = case front of
 
 data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)
 
-relabelDPS ⩴ Tree t → Tree Int
+relabelDPS ⩴ Token ⊸ Tree t → Tree Int
 relabelDPS tree = fst (mapAccumBFS (\st _ → (st + 1, st)) 1 tree)
 
-mapAccumBFS ⩴ ∀ s t u. (s → t → (s, u)) → s → Tree t → (Tree u, s)
-mapAccumBFS f s0 tree =
+mapAccumBFS ⩴ ∀ s t u. Token ⊸ (s → t → (s, u)) → s → Tree t → (Tree u, s)
+mapAccumBFS tok f s0 tree =
   unFromUAmpar (
-    newUAmpar @(Tree u) `updWith` \dtree → go s0 (singleton (¤Ur tree, dtree)))
+    newUAmpar @(Tree u) tok `updWith` \dtree → go s0 (singleton (¤Ur tree, dtree)))
   where
     go ⩴ s → Queue (Ur (Tree t), UDest (Tree u)) ⊸ Ur s
     go st q = case dequeue q of
@@ -269,13 +265,15 @@ mapAccumBFS f s0 tree =
 \label{table:impl-bfs-tree-traversal}
 \end{listing}
 
-Note that the signatures of \mintinline{haskellc}/mapAccumBFS/ and \mintinline{haskellc}/relabelDPS/ don't involve linear types. Linear types only appear in the inner loop \mintinline{haskellc}/go/, which manipulates destinations. Linearity enforces the fact that every destination ever put in the queue is eventually filled at some point, which guarantees that the output tree is complete after the function has run.
+Here, in the signature of \mintinline{haskellc}/go/ function, linearity enforces the fact that every destination ever put in the queue is eventually consumed at some point, which guarantees that the output tree is complete after the function has run.
 
-As the state-transforming function \mintinline{haskellc}/s → t → (s, u)/ is non-linear, the nodes of the original tree won't be used in a linear fashion. However, we want to store these nodes together with their accompanying destinations in a queue of pairs, and destinations used to construct the queue have to be used linearly (because of \mintinline{haskellc}/`updWith`/ signature, which initially gives the root destination). That forces the queue to be used linearly, so the pairs too, so pairs' components too. Thus, we wrap the nodes of the input tree in the \mintinline{haskellc}/Ur/ wrapper, whose linear consumption allows for unrestricted use of its inner value, as detailed in Section~\ref{sec:intro-linearity}.
+However, if we look at signatures of \mintinline{haskellc}/mapAccumBFS/ and \mintinline{haskellc}/relabelDPS/, except from the linear \mintinline{haskellc}/Token/ argument, there is no linear function arrow involved. Linearity is only a tool in this excerpt to ensure that destinations are consumed exactly once, as in \cref{fig:impl-bfs} in \cref{sec:bft}.
 
-This example shows how destinations can be used even in a non-linear setting in order to improve the expressiveness of the language. This more natural and less convoluted implementation of breadth-first traversal also presents great performance gains compared to the fancy functional implementation from~\cite{gibbons_phases_2023}, as detailed in Section~\ref{sec:benchmark}.
+We will see in \ref{sec:benchmark} that this imperative-like implementation of breadth-first traversal in DPS Haskell, albeit not using difference-list-based efficient queues, still presents great performance gains compared to the fancy functional implementation from~\cite{gibbons_phases_2023}.
 
 \subsection{Deserializing, lifetime, and garbage collection}\label{ssec:parser-sexpr}
+
+Let's now move on a new example, which is more tied to implementation and practical concerns than previous ones.
 
 In client-server applications, the following pattern is very frequent: the server receives a request from a client with a serialized payload, the server then deserializes the payload, runs some code, and respond to the request. Most often, the deserialized payload is kept alive for the entirety of the request handling. In a garbage collected language, there's a real cost to this: the garbage collector (GC) will traverse the deserialized payload again and again, although we know that all its internal pointers are live for the duration of the request.
 
