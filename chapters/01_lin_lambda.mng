@@ -301,3 +301,62 @@ Data constructors only have focusing and unfocusing rules, as they do not descri
 In most cases, unfocusing and contraction rules could be merged into a single step. For example, a contraction could be triggered as soon as we have $[[(C ∘ (⬜ ►case m (x1,x2) ⟼ u))[(v1, v2)] ]]$, without the need to recreate the term $[[(v1, v2) ►case m (x1,x2) ⟼ u]]$. However, I prefer the presentation in three distinct steps, that despite being more verbose, clearly shows that contraction rules do not modify the evaluation context.
 
 The rest of the system is very standard. In particular, contraction rules of \CLdm{} --- that capture the essence of the calculus --- are very similar to those of lambda-calculi with sum and product types (and strict evaluation strategy).
+
+\section{Uniqueness and Linear Scopes}\label{sec:linear-scopes}
+
+In the introduction we said that we will use linear type systems to control the number of times a resource --in particular a destination-- is used.
+
+At first, linear type systems doesn't always seem to be the most suitable tool for that task. In a linear type system, we can only promise what will happen \emph{in the future} to a value we receive. We cannot say much about what has been done to it previously. And thus, we cannot ensure it has been used exactly once \emph{overall}.
+
+For instance, if I have a function of type $[[T ⊸ U]]$, and apply it to an argument of type $[[T]]$, I know that I won't duplicate this value of type $[[T]]$ (as long as I use the result of type $[[U]]$ exactly once). But I can't say if the $[[T]]$ has been duplicated or not beforehand: that's a major issue.
+
+Stating facts about \emph{the past} of a value is the land of \emph{uniqueness typing} or unique type systems. In a unique type system, the main property is not how many times a function uses a value to produce its output, but rather, whether a value has been aliased or not. Uniqueness (or non-uniqueness) is a property on values, while linearity is a property on functions\footnote{At least in the presentations above that follows from Girard's Linear Logic. There exists approaches of Linear Type systems that are more focused on the programming side, for which linearity is a property of values and their types, not functions.}. Having uniqueness or non-uniqueness property on values allows for easier control of resources that should always stay unique during their lifetime. The most common example is efficient implementation of functional arrays. If an array is handled uniquely and isn't shared, then we can implement array updates as in-place memory mutations. By being able to state that statically through the type system, we can allow predictable compiler optimizations.
+
+The thing is, uniqueness typing doesn't have a theoretical ground as rich as linear types. Unlike linearity, uniqueness properties have first been studied on the computational side and only later studied on the logical side, with \cite{harrington_uniqueness_2006}. There are also two downsides of uniqueness typing for what we want to do later. First, there isn't an easy way with unique type system to force the use of something (and we definitely want a way to force a destination to be used and not just be dropped). We can state or prove that it isn't aliased, but that's all. Secondly, and more importantly perhaps, higher-order functions (capturing lambda abstractions) are way more finicky in unique type systems, as detailed in Section 5 of \cite{harrington_uniqueness_2006} or mentioned briefly in \cite{sergey_linearity_uniqueness_2022} (that's one reason why they prefer a linear system as a basis with a uniqueness topping instead of a uniqueness system with a linearity topping).
+
+Actually, \citet{sergey_linearity_uniqueness_2022} argue that modern programming languages would benefit from integrating both linear and uniqueness typing, as linearity and uniqueness appear to be half-dual, half-complementary notions that together are enough for a very precise control of resource use in a language.
+
+In \cref{chap:dps-haskell} however, our main target language will be Haskell, which doesn't have uniqueness typing, only linear types. Fortunately, we can emulate uniqueness control in a language equipped with linear types, using \emph{linear scopes} or the \emph{scope function trick}, as one might call it.
+
+\paragraph{Linear scopes}
+
+As we said before, in Linear Haskell, as in most linear type systems, functions can be made to use their arguments linearly or not. In other terms, linearity is a contract that links the input and output of a function. But we cannot say anything a priori about what happened to the value passed as a parameter before the function call, or what happens to the function result after. Linearity control can only be enforced on \emph{variables}.
+
+As top-level bindings in a practical program are not really seen as variable bindings, and are reusable several times, one could write the following:
+
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}{haskellc}
+createR           ⩴ Resource -- no way to force the result to be used exactly once
+consumeR          ⩴ Resource ⊸ ()
+exampleShouldFail ⩴ () =      
+  let x = createR in consumeR x ; consumeR x -- valid even if x is consumed twice
+\end{minted}
+}
+\end{unbreakable}
+
+The solution is to force the consumer of a resource to pass a continuation representing what they want to do on the value, so that we can check through its signature that it is indeed a linear continuation, instead of giving the value to the consumer directly. 
+
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+withR       ⩴ (Resource ⊸ a) ⊸ a
+consumeR    ⩴ Resource ⊸ ()
+exampleFail ⩴ () = withR (\x → consumeR °\mold{x}° ; consumeR °\mold{x}°) -- not linear
+\end{minted}
+}
+\end{unbreakable}
+
+The \mintinline{haskellc}/Resource/ type is in positive position in the signature of \mintinline{haskellc}/withR/, so that the function should somehow know how to produce a \mintinline{haskellc}/Resource/, but this is opaque for the user. What matters is that a resource can only be accessed by providing a linear continuation to \mintinline{haskellc}/withR/.
+
+Still, this is not enough; because \mintinline{haskellc}/\x → x/ is indeed a linear continuation, one could use \mintinline{haskellc}/withR (\x → x)/ to leak a \mintinline{haskellc}/Resource/, and then use it in a non-linear fashion in the outside world. Hence we must forbid the resource from appearing anywhere in the return type of the continuation. To do that, we ask the return type to be wrapped in \mintinline{haskellc}/Ur/: because the resource comes from the left of a linear arrow, and doesn't implement \mintinline{haskellc}/Movable/, it cannot be wrapped in \mintinline{haskellc}/Ur/ without breaking linearity (see Section~\ref{sec:intro-linearity}). On the other hand, a \mintinline{haskellc}/Movable/ value of type \mintinline{haskellc}/()/ or \mintinline{haskellc}/Int/ can be returned:
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+withR'       ⩴ (Resource ⊸ Ur a) ⊸ Ur a
+consumeR     ⩴ Resource ⊸ ()
+exampleOk'   ⩴ Ur ()       = withR' (\x → let u ⩴ () = consumeR x' in move u)
+exampleFail' ⩴ Ur Resource = withR' (\x → °\mold{¤Ur x}°) -- not linear
+\end{minted}
+}
+\end{unbreakable}
