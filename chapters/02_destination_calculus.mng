@@ -1046,19 +1046,15 @@ However, this is a long way from the efficient implementation promised in \cref{
 
 An alternative is to refine the linear type system further in order to guarantee that ampars are unique and avoid copy-on-write altogether. We held back from doing that in the formalization of \destcalculus{} as, again, it obfuscates the presentation of the system without adding much in return.
 
-To make ampars linear, we follow a recipe proposed by~\citet{spiwack_linearly_2022} and introduce a new type $[[Token]]$, together with primitives $\ottkw{dup}$ and $\ottkw{drop}$. We also switch $[[alloc]]$ for $[[allocIP]]$:% :
+To make ampars linear, we follow the recipe we developed in \cref{sec:linear-scopes}, highly inspired from \cite{ spiwack_linearly_2022,spiwack_linear_scopes_2023}, and introduce a new built-in type $[[Token]]$, together with the primitive $\ottkw{dup}$ and $\ottkw{withToken}$. We also switch $[[alloc]]$ for $[[allocIP]]$:% :
 
 \codehere{\phantom{a}\!\!\!\!\!\!\begin{array}[t]{l}%
 \ottkw{dup} ~\pmb{:}~ [[Token ¹ν → Token ⨂ Token]]\\[\interdefskip]
-\ottkw{drop} ~\pmb{:}~ [[Token ¹ν → ①]]\\[\interdefskip]
+\ottkw{withToken} ~\pmb{:}~ [[(Token ¹∞ → !ω∞ T) ¹ν → !ω∞ T]]
 [[allocIP]] ~\pmb{:}~ [[Token ¹ν → T ⧔ ⌊ T ⌋ ¹ν]]
 \end{array}}
 
-For the in-place system to work, one solution is to consider that a linear root token variable, $[[tok0]]$, is available to a program. ``Closed'' programs can now typecheck in the non-empty context $\{[[{tok0 : ¹∞ Token}]]\}$. $[[tok0]]$ can be used to create new tokens $[[tokk]]$ via $\ottkw{dup}$, but each of these tokens still has to be used linearly.
-
-Ampar produced by $[[allocIP]]$ have a linear dependency on a variable $[[tokk]]$. If an ampar produced by $[[allocIP tokk]]$ were to be used twice in a block $[[t]]$, then $[[t]]$ would require a typing context $\{[[{tokk : ων Token}]]\}$, that itself would require $[[tok0]]$ to have multiplicity $[[ω]]$ too. Thus the program would be rejected.
-
-Instead of providing a root token to any closed program, which is a rather exotic modification of the type system, we can alternatively add a primitive function\\$\ottkw{withToken} ~\pmb{:}~ [[(Token ¹∞ → !ω∞ T) ¹ν → !ω∞ T]]$ that let the user use a token in a delimited scope, and the token cannot leak outside of it. This approach is similarly powerful and safe, while also being easier to bake in an existing functional language without modyfing the type system too much.
+Ampar produced by $[[allocIP]]$ have a linear dependency on a $[[Token]]$. If the same ampar, originally created with $[[allocIP tok]]$, were to be used twice in a block $[[t]]$, then $[[t]]$ would require a typing context $\{[[{tok : ω∞ Token}]]\}$, thus the block would be rejected by $\ottkw{withToken}$. In the other hand, duplicating $[[tok]]$ into $[[tok1]]$ and $[[tok2]]$ first, and then using each new token to create a different ampar would be linearly valid.
 
 Now that ampars are managed linearly, we can change the allocation and renaming mechanisms:
 \begin{itemize}
