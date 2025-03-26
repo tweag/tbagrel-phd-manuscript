@@ -8,7 +8,7 @@ However, it wouldn't be feasible to design an industrial-grade programming langu
 
 The Haskell programming language is equipped with support for linear types through its main compiler, \emph{GHC}, since version 9.0.1~\cite{bernardy_linear_2018}. There aren't many other industrial-grade functional programming languages, and most of them don't have support for linear types, which are the first piece required to make our system safe. OCaml, thanks to recent work from \citet{lorenzen_oxidizing_2024}, has support for \emph{affinity}, but not for linearity (despite the aforementioned work using the term ``linearity''): a resource can be restricted to at most one use, but there is no way to ensure it will be used exactly once; it could be dropped without being used at all.
 
-As a result, Haskell appeared to be a promising target for a real-world implementation of \destcalculus{}, as detailed in depth in \cref{chap:dest-calculus}. In addition, Haskell is also a \emph{pure} functional language, which is rather in line with the idea of hiding impure memory effects related to destinations behind a \emph{pure} API by preventing any read before a structure has been completed.
+As a result, Haskell appeared to be a promising target for a real-world implementation of \destcalculus{}, which is detailed in depth in \cref{chap:dest-calculus}. In addition, Haskell is also a \emph{pure} functional language, which is rather in line with the idea of hiding impure memory effects related to destinations behind a \emph{pure} API by preventing any read before a structure has been completed.
 
 However, the main challenge is that Haskell, albeit incorporating linear types, doesn't have any concept of scope or age control. So we won't be able to avoid the fundamental issues presented in \cref{sec:scope-escape-dests} without imposing limitations on the flexibility of the system.
 
@@ -23,9 +23,9 @@ Because there is no difference when creating the spine of a data structures that
 
 The mapping of operators and types between \destcalculus{} and DPS Haskell is given in \cref{fig:mapping-destcalculus-dpshaskell}
 
-In \destcalculus{}, destinations always have finite ages. As a result, we use age $[[∞]]$ as a marker that something doesn't contain destinations. That way, can still control linearity independently of scope control. This is particularly visible in rule \rref*{\CTyTerm\CSep\CFromA}, where a linear resource can be extracted from the right of an ampar as long as it has age $[[∞]]$.
+In \destcalculus{}, destinations always have finite ages. As a result, we use age $[[∞]]$ as a marker that something doesn't contain destinations. That way, can still enforce scope control independently of linearity. This is particularly visible in rule \rref*{\CTyTerm\CSep\CFromA}, where a linear resource can be extracted from the right of an ampar as long as it has age $[[∞]]$.
 
-In DPS Haskell however, we don't have ages. So we use the fact that destinations are always linear too, and we employ the $[[ω]]$ multiplicity as a marker that something doesn't contain destinations. Of course, that isn't cheap: we don't have a way in that world to control scopes, so we have to be overly conservative to preserve safety, and restrain the possibilities of a few operators. Because there is no construct in our language that can have unrestricted multiplicity with an intrinsically finite age, it makes sense to map the mode $[[ɷ]]$ of Linear Haskell to the pair $[[ω∞]]$ of \destcalculus{}. Consequently, $[[ˢᴇ ω∞ term]]$ corresponds to \mintinline{haskellc}/Ur term/.
+In DPS Haskell however, we don't have ages. So we use the fact that destinations are always linear too, and we employ the $[[ω]]$ multiplicity as a marker that something doesn't contain destinations. Of course, that isn't cheap; by doing that we conflate the absence of destination with non-linearity. As we don't have a way in that world to control scopes, except in banning scope-sensitive resources altogether (a.k.a. destinations) by using the $[[ω]]$ multiplicity, we have to be overly conservative to preserve safety which restrain the possibilities of a few operators. % In DPS Haskell, mode $[[ɷ]]$ is equivalent to the pair $[[ω∞]]$ of \destcalculus{}, as there is no no construct in our language that can have unrestricted multiplicity with an intrinsically finite age, it makes sense to map the mode $[[ɷ]]$ of Linear Haskell. Consequently, $[[ˢᴇ ω∞ term]]$ corresponds to \mintinline{haskellc}/Ur term/.
 
 
 \begin{figure}
@@ -43,7 +43,7 @@ $[[d ◀ term]]$ & \mintinline{haskellc}/fillLeaf term d/ &or& \mintinline{haske
 
 \end{tabular}
 
-(one can see \mintinline{haskellc}/&fill @'/ as $[[⨞]]$, \mintinline{haskellc}/&fillLeaf/ as $[[◀]]$, and \mintinline{haskellc}/&fillComp/ as $\mathop{\triangleleft\mycirc}$)
+(one can see \mintinline{haskellc}/&fill @'/ as the equivalent of $[[⨞]]$ in \destcalculus{}, \mintinline{haskellc}/&fillLeaf/ as $[[◀]]$, and \mintinline{haskellc}/&fillComp/ as $\mathop{\triangleleft\mycirc}$)
 
 \begin{tabular}{|l|l|}\hline
 \destcalculus{} & DPS Haskell \\\hline\hline
@@ -60,7 +60,7 @@ Now, let's see how programs look like in DPS Haskell. We'll start by reimplement
 
 The following subsections present three typical settings in which DPS programming brings expressiveness or performance benefits over a more traditional functional implementation. We'll start by revisiting examples from \label{sec:working-with-dests}.
 
-\subsection{Efficient difference lists}\label{ssec:dpshaskell-dlist}
+\subsection{Efficient difference lists, and proper memory model}\label{ssec:dpshaskell-dlist}
 
 Linked lists are a staple of functional programming, but they aren't efficient for concatenation, as we've seen in \cref{ssec:efficient-queue}, especially when the concatenation calls are nested to the left.
 
@@ -68,7 +68,7 @@ In an imperative context, it would be quite easy to concatenate linked lists eff
 
 In a functional setting, \emph{difference lists} are the closest equivalent, offering constant-time concatenation, and constant-time conversion to a normal linked list. Usually, as we've seen previously, functional difference lists are encoded as functions, but thanks to destination-passing style, we can represent them as an actual list with a hole at the end.
 
-This example will be the opportunity to show how DPS Haskell operates on memory. So far, with \destcalculus{}, we worked on a theoretical memory model with global substitutions and no explicit (de)allocations. Here, with DPS Haskell, we assume that we use a proper heap. We pay no attention right now to garbage collection; as it is a bit tricky; instead we will deal with this topic in \cref{ssec:impl-compact-regions}.
+This example will be the opportunity to show how DPS Haskell operates on memory. So far, with \destcalculus{}, we worked on a theoretical memory model with global substitutions and no explicit (de)allocations. Here, with DPS Haskell, we assume that we have a proper heap. We pay no attention right now to garbage collection; as it is a bit tricky; instead we will deal with this topic in \cref{ssec:impl-compact-regions}.
 
 Following the mapping tables of \cref{sec:restrict-dps-linhask}, we know the DPS Haskell representation of difference lists is \mintinline{haskellc}/type DList t = UAmpar [t] (UDest [t])/. As announced previously, because our difference lists are built using UAmpars, they cannot host linear resources. That's the major limitation of this first approach of DPS for Haskell.
 
@@ -82,7 +82,6 @@ The implementation of destination-backed difference lists is presented in Listin
 %   \label{fig:schema-fillComp}
 % \end{figure}
 
-% TODO check that the section reference in comment is up to date
 \begin{listing}[t]
 \figtextsize
 \begin{minted}{haskellc}
@@ -93,8 +92,7 @@ data [t] = []          -- nil constructor
 type DList t = UAmpar [t] (UDest [t])
 
 newDList ⩴ Token ⊸ DList t
-newDList = newUAmpar @[t]  -- newUAmpar primitive is roughly equivalent to new⧔IP from
-                                   -- Sec. 2.8, except the structure being built is non-linear
+newDList = newUAmpar @[t]
 
 append ⩴ DList t ⊸ t → DList t
 dlist `append` x =
@@ -104,9 +102,8 @@ dlist `append` x =
 concat ⩴ DList t ⊸ DList t ⊸ DList t
 dlist1 `concat` dlist2 = dlist1 `updWith` \dt1 → (dt1 &fillComp dlist2)
 
-toList ⩴ DList t ⊸ [t]
-toList dlist = unFromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
-               -- unFromUAmpar' is similar to from⧔' from Chap. 2
+toList ⩴ DList t ⊸ Ur [t]
+toList dlist = fromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
 \end{minted}
 \caption{Implementation of difference lists in DPS Haskell}
 \label{table:impl-dlist}
@@ -164,7 +161,7 @@ toList dlist = unFromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
     elements of both lists, and inherits the hole of the second list. Memory-wise,
     \mintinline{haskellc}/concat/ just writes the address of the second list into the hole of the first one.
 
-  \item \mintinline{haskellc}/toList/ (Figure~\ref{fig:schema-dlist-toList}) completes the UAmpar structure by plugging a new \emph{nil} \mintinline{haskellc}/[]/ constructor into its hole with \mintinline{haskellc}/fill @'[]/, and then removes the \mintinline{haskellc}/UAmpar/ wrapper as the structure is now complete, using \mintinline{haskellc}/unFromUAmpar'/\footnote{\mintinline{haskellc}/UAmpar/s are wrappers for unrestricted structures under construction in DPS Haskell, so when an \mintinline{haskellc}/UAmpar/ is complete, with \mintinline{haskellc}/fromUAmpar'/ we obtain a data structure wrapped in \mintinline{haskellc}/Ur/, the non-linearity/unrestrictedness modality of Linear Haskell. Here, \mintinline{haskellc}/unFromUAmpar'/ combines the conversion from the complete \mintinline{haskellc}/UAmpar/ to an \mintinline{haskellc}/Ur t/, and then also get rid of the \mintinline{haskellc}/Ur/ wrapper to just get the completed underlying structure.}.
+  \item \mintinline{haskellc}/toList/ (Figure~\ref{fig:schema-dlist-toList}) completes the UAmpar structure by plugging a new \emph{nil} \mintinline{haskellc}/[]/ constructor into its hole with \mintinline{haskellc}/fill @'[]/, and then removes the \mintinline{haskellc}/UAmpar/ wrapper as the structure is now complete, using \mintinline{haskellc}/fromUAmpar'/. The completed list is wrapped in \mintinline{haskellc}/Ur/, as it is allowed to be used non-linearly ---it's always the case with UAmpars--- and so that it can also escape the \mintinline{haskellc}/withToken/ linear scope if needed.
 \end{itemize}
 
 Of course, we can only do in-place memory mutations, as described in \cref{fig:schema-alloc,fig:schema-dlist-append,fig:schema-dlist-concat,fig:schema-dlist-toList} if the values of type \mintinline{haskellc}/UAmpar/ are used linearly, as first explained in \cref{sec:implem-destcalculus}.

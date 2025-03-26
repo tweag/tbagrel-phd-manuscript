@@ -177,6 +177,8 @@ is quadratic in \destcalculus{}. The usual solution to improve that complexity i
 
 The problem is that in the functional implementation, each concatenation still allocates a closure. If we're building a difference list from singletons and composition, there's roughly one composition per cons cell, so iterated composition effectively performs two traversals of the list. In \destcalculus{}, we actually have write pointers, in the form of \emph{destinations}, so we can do better by representing a difference list as a list with a hole, much like in an imperative setting. A singleton difference list becomes $[[x]] \ottsctor{::} \holesq$, and concatenation is filling the hole with another difference list, using composition operator $\mathop{\triangleleft\mycirc}$. The detailed implementation is given on the left of~\cref{fig:impl-dlist-queue}. This encoding for difference lists makes no superfluous traversal: concatenation is just an $O(1)$ in-place update.
 
+% Piggyback
+
 \sidebysidecodefig{\caption{Difference list and queue implementation in equirecursive \destcalculus{}}\label{fig:impl-dlist-queue}}{t}{0.49}{
 \newtype{[[DList T]]}{[[(List T) ⧔ ⌊ List T ⌋ ¹ν]]}
 \newoperatorb
