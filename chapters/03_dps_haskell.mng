@@ -12,33 +12,6 @@ As a result, Haskell appeared to be a promising target for a real-world implemen
 
 However, the main challenge is that Haskell, albeit incorporating linear types, doesn't have any concept of scope or age control. So we won't be able to avoid the fundamental issues presented in \cref{sec:scope-escape-dests} without imposing limitations on the flexibility of the system.
 
-\section{Linear Types in Haskell}\label{sec:intro-linearity}
-
-Linear Haskell~\cite{bernardy_linear_2018} is a language extension for the Glasgow Haskell Compiler (GHC) that introduces the linear function arrow, \mintinline{haskellc}/t ⊸ u/ and modifies the type checker of GHC so that it can enforce linearity requirement. A linear function of type \mintinline{haskellc}/t ⊸ u/ guarantees that the argument of the function will be consumed exactly once when the result of the function is consumed exactly once. The regular function arrow \mintinline{haskellc}/t → u/ is still available when Linear Haskell is enabled; this one doesn't guarantee how many times its argument will be consumed when its result is consumed once. There is also a multiplicity-polymorphic arrow, \mintinline{haskellc}/t %m → u/, much like $[[T m → U]]$ in \destcalculus{}.
-
-A value is said to be \emph{consumed once} (or \emph{consumed linearly}) when it is pattern-matched on and its sub-components are consumed once; or when it is passed as an argument to a linear function whose result is consumed once. A function is said to be \emph{consumed once} when it is applied to an argument and when the result is consumed exactly once. We say that a variable \mintinline{haskellc}/x/ is \emph{used linearly} in an expression \mintinline{haskellc}/u/ when consuming \mintinline{haskellc}/u/ once implies consuming \mintinline{haskellc}/x/ exactly once. Linearity on function arrows thus creates a chain of requirements about consumption of values.
-
-\paragraph{Unrestricted Values}
-
-Linear Haskell introduces a wrapper named \mintinline{haskellc}/Ur/ which is used to indicate that a value in a linear context doesn't have to be used linearly. \mintinline{haskellc}/Ur t/ is equivalent to $[[! T]]$ in linear logic ($[[! ɷ T]]$ in \CLdm{}), and there is an equivalence between \mintinline{haskellc}/Ur t ⊸ u/ and \mintinline{haskellc}/t → u/. As in \CLTwo{} and \CLdm{}, we can pattern-match on a term of type \mintinline{haskellc}/Ur t/ with \mintinline{haskellc}/case term of ¤Ur x ⊸ term'/ to obtain an unrestricted variable binding \mintinline{haskellc}/x/ of type \mintinline{haskellc}/t/.
-
-As usual with linear type systems, only values already wrapped in \mintinline{haskellc}/¤Ur/ or coming from the left of a non-linear arrow can be put in another \mintinline{haskellc}/¤Ur/ without breaking linearity. This echoes rules \rref*{\CLOne\CTy\CSep\CBangProm} or \rref*{\CLTwoOrm\CTy\CSep\CExp} where a term wrapped in $\ottsctor{Many}$ or $\expcons{[[ɷ]]}$ must only depend on an unrestricted context. The only exceptions to this rule are terms of types that implement the \mintinline{haskellc}/Movable/ typeclass\footnote{The \mintinline{haskellc}/Movable/ typeclass is not part of the Linear Haskell language extension, but instead defined in the \texttt{linear-base} library.} such as \mintinline{haskellc}/Int/ or \mintinline{haskellc}/()/. \mintinline{haskellc}/Movable/ provides the function \mintinline{haskellc}/move ⩴ t ⊸ Ur t/ so that a value can escape linearity restrictions.
-
-% Arnaud: this sentence sounds premature to me
-% Destinations are represented by the type \mintinline{haskellc}/UDest t/, where \mintinline{haskellc}/t/ stands for the type of the associated hole. \mintinline{haskellc}/UDest/s are meant to be managed linearly, so don't implement \mintinline{haskellc}/Movable/.
-
-\paragraph{Operators}
-
-Some Haskell operators and notations are often used in the rest of this article:
-
-\mintinline{haskellc}/(;) ⩴ () ⊸ u ⊸ u/ is used to chain a linear operation returning \mintinline{haskellc}/()/ with one returning a value of type \mintinline{haskellc}/u/ without breaking linearity. It's a shorthand for pattern-matching on the unit type.
-
-\mintinline{haskellc}/Class ⇒ .../ is notation for typeclass constraints (resolved implicitly by the compiler).
-
-\mintinline{haskellc}/@t/ in \mintinline{haskellc}/f @t .../ is a type application; it allows to specify an explicit type for polymorphic functions.
-
-In code excerpts, types are in blue, while terms, variables, and data constructors (sometimes having the same name as the type they belong to, like \mintinline{haskellc}/Ur/ (type) / \mintinline{haskellc}/¤Ur/ (data constructor)) are in black, to stay as consistent as possible with previous chapters.
-
 \section{Restricting \destcalculus{} so that it can be made safe with just linear types}\label{sec:restrict-dps-linhask}
 
 As we've seen in \cref{sec:scope-escape-dests}, linear types are not enough, alone, to make \destcalculus{} safe. We definitely need ages. In this chapter, we will take a radical decision: we will make it so that destinations can only be used to build non-linear (a.k.a. unrestricted) data structures, so that the issue of scope escape disappear completely. In exchange, we won't be able to store destinations inside data structures built using ampars.
