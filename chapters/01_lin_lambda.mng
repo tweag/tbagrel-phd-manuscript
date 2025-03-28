@@ -327,7 +327,7 @@ Some Haskell operators and notations are often used in the rest of this article:
 
 \mintinline{haskellc}/@t/ in \mintinline{haskellc}/f @t .../ is a type application; it allows to specify an explicit type for polymorphic functions.
 
-In code excerpts, types are in blue, while terms, variables, and data constructors (sometimes having the same name as the type they belong to, like \mintinline{haskellc}/Ur/ (type) / \mintinline{haskellc}/¤Ur/ (data constructor)) are in black, to stay as consistent as possible with previous chapters.
+In code excerpts, types are in blue, while terms, variables, and data constructors (sometimes having the same name as the type they belong to, like \mintinline{haskellc}/Ur/ (type) / \mintinline{haskellc}/¤Ur/ (data constructor)) are in black, to stay as consistent as possible with previous chapters. Unfortunately, while type variables $[[T]],[[U]]$ are in uppercase in our formalism, we have no choice than to use lowercase letters in Haskell \mintinline{haskellc}/t/, \mintinline{haskellc}/u/.
 
 \section{Uniqueness and Linear Scopes}\label{sec:linear-scopes}
 

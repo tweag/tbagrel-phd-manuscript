@@ -84,7 +84,7 @@ The implementation of destination-backed difference lists is presented in Listin
 
 \begin{listing}[t]
 \figtextsize
-\begin{minted}{haskellc}
+\begin{minted}[linenos]{haskellc}
 -- we recall here the definition of list type in Haskell
 data [t] = []          -- nil constructor
            | (:) t [t]  -- cons constructor
@@ -140,7 +140,7 @@ toList dlist = fromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
 % \end{figure}
 
 \begin{itemize}
-  \item \mintinline{haskellc}/newDList/ uses \mintinline{haskellc}/newUAmpar/ to linearly exchange a token for a new \mintinline{haskellc}/UAmpar [t] (UDest [t])/ ---that is, exactly \mintinline{haskellc}/DList t/. There is no data
+  \item \mintinline{haskellc}/newDList/ is just an alias for a call to \mintinline{haskellc}/newUAmpar/ to linearly exchange a token for a new \mintinline{haskellc}/UAmpar [t] (UDest [t])/ ---that is, exactly \mintinline{haskellc}/DList t/. There is no data
     in this UAmpar yet, it's just a hole and a destination pointing to it, as we see on \cref{fig:schema-alloc};
 
 
@@ -176,7 +176,7 @@ Let's move on now to breadth-first tree traversal. We want to traverse a binary 
 
 In \cref{sec:bft}, we took full advantage of \destcalculus{}'s flexibility, and implemented the breadth-first traversal using a queue to drive the processing order, as we would do in an imperative programming language. This queue would contain both input subtrees and destination to output subtrees, in breadth-first order.
 
-Unlike the example of the previous subsection, we cannot just port the algorithm from \destcalculus{} into DPS Haskell. The major issue is that in \cref{sec:bft}, we built an efficient queue, inspired from Hood-Melville ones, but with an ampar-based difference list for the list representing newly enqueued elements (so that we don't have to reverse it before consuming it when the front list is depleted). But in DPS Haskell, destinations cannot be filled with linear elements. So an ampar-based difference list wouldn't be able to store the destinations we need to store (the one representing the output subtrees), neither would an ampar-based efficient queue.
+Unlike the example of the previous subsection, we cannot just port the algorithm from \destcalculus{} into DPS Haskell. The major issue is that in \cref{ssec:efficient-queue}, we built an efficient queue, inspired from Hood-Melville ones, but with an ampar-based difference list for the list representing newly enqueued elements (so that we don't have to reverse it before consuming it when the front list is depleted). But in DPS Haskell, destinations cannot be filled with linear elements. So an ampar-based difference list wouldn't be able to store the destinations we need to store (the one representing the output subtrees), neither would an ampar-based efficient queue.
 
 Fortunately, we can still use the regular, non-ampar-based data structures of Haskell to build a suitable Hood-Melville queue. That's at least one thing we get from using a language that isn't fully based on destinations to build data structures.\footnote{Destination-based data structure building is more general than constructor-based structure building as long as we can fill destinations with linear resources, as in \destcalculus{}. When we add the restriction that destination can only be filled with unrestricted elements, as we do in DPS Haskell, then it is no longer more general than constructor-based structure building, and we need to conserve both building ways in the language to stay at the same level of expressiveness.}
 
@@ -186,7 +186,7 @@ As before, we'll keep a queue of pairs of a tree to be relabeled and of the dest
 
 \begin{listing}[p]
 \figtextsize
-\begin{minted}{haskellc}
+\begin{minted}[linenos]{haskellc}
 data HMQueue t = ¤HMQueue [t] [t]
 
 newHMQueue :: HMQueue t
@@ -235,11 +235,197 @@ mapAccumBFS tok f s0 tree =
 \label{table:impl-bfs-tree-traversal}
 \end{listing}
 
-Here, in the signature of \mintinline{haskellc}/go/ function, linearity enforces the fact that every destination ever put in the queue is eventually consumed at some point, which guarantees that the output tree is complete after the function has run.
-
-However, if we look at signatures of \mintinline{haskellc}/mapAccumBFS/ and \mintinline{haskellc}/relabelDPS/, except from the linear \mintinline{haskellc}/Token/ argument, there is no linear function arrow involved. Linearity is only a tool in this excerpt to ensure that destinations are consumed exactly once, as in \cref{fig:impl-bfs} in \cref{sec:bft}.
+Except from the choice of queue implementation, and the fact that ampars must be created from \mintinline{haskellc}/Token/s, this implementation is very much the same as in \cref{sec:bft}. In the signature of \mintinline{haskellc}/go/ function, the linear arrow enforces the fact that every destination ever put in the queue is eventually consumed at some point, which guarantees that the output tree is complete after the function has run.
 
 We will see in \ref{sec:benchmark} that this imperative-like implementation of breadth-first traversal in DPS Haskell, albeit not using difference-list-based efficient queues, still presents great performance gains compared to the fancy functional implementation from~\cite{gibbons_phases_2023}.
+
+\section{DPS Haskell API and Design concerns}\label{sec:api}
+
+Table~\ref{table:destination-api} presents the pure API of DPS Haskell. This API is sufficient to implement all the examples of Section~\ref{sec:motivating-examples}. This section explains its various parts in detail and how it compares to \cref{chap:dest-calculus}.
+
+\begin{listing}[t]
+\figtextsize
+\begin{minted}[linenos]{haskellc}
+data Token
+dup ⩴ Token ⊸ (Token, Token)
+drop ⩴ Token ⊸ ()
+withToken ⩴ ∀ t. (Token ⊸ Ur t) ⊸ Ur t
+
+data UAmpar s t
+newUAmpar ⩴ ∀ s. Token ⊸ UAmpar s (UDest s)
+newUAmparBesides ⩴ ∀ s t u. UAmpar s t ⊸ (UAmpar s t, UAmpar u (UDest u))
+toUAmpar ⩴ ∀ s. Token ⊸ s → UAmpar s ()
+fromUAmpar ⩴ ∀ s t. UAmpar s (Ur t) ⊸ Ur (s, t)
+fromUAmpar' ⩴ ∀ s. UAmpar s () ⊸ Ur s
+updWith ⩴ ∀ s t u. UAmpar s t ⊸ (t ⊸ u) ⊸ UAmpar s u
+
+data UDest t
+type family UDestsOf lCtor t  -- returns dests associated to fields of constructor
+fill ⩴ ∀ lCtor t. UDest t ⊸ UDestsOf lCtor t
+fillComp ⩴ ∀ s t. UAmpar s t ⊸ UDest s ⊸ t
+fillLeaf ⩴ ∀ t. t → UDest t ⊸ ()
+\end{minted}
+\caption{Destination API for Haskell}
+\label{table:destination-api}
+\end{listing}
+
+\subsection{The \texttt{UAmpar} type}
+
+As with Ampars from the previous chapter, UAmpar data structures can be freely passed around and stored, but need to be completed before any reading i.e. pattern-matching can be made on them. As a result, \mintinline{haskellc}/UAmpar s t/ is defined as an opaque data type, with no public constructor.
+
+In \mintinline{haskellc}/UAmpar s t/, \mintinline{haskellc}/s/ stands for the type of the structure being built, and \mintinline{haskellc}/t/ is the type of what needs to be linearly consumed before the structure can be read. Eventually, when complete, the structure will be wrapped in \mintinline{haskellc}/Ur/; this illustrates the fact that it has been made only from unrestricted elements.
+
+The \mintinline{haskellc}/newUAmpar/ operator is the main way for a user of the API to create a new UAmpar. Its signature is identical to $[[allocIP]]$ from \cref{sec:implem-destcalculus}.
+
+There is also a new alternative way to create a fresh UAmpar: \mintinline{haskellc}/newUAmparBesides/. Sometimes, when programming in DPS style, we won't have a \mintinline{haskellc}/Token/ at hand, but only an existing \mintinline{haskellc}/UAmpar/. In that case, we can piggyback on the linearity of that existing UAmpar (as it linearly depends, directly or indirectly, on a token) to enforce linearity discipline on the new UAmpar, which is the second element of the pair returned by \mintinline{haskellc}/newUAmparBesides/.
+
+The operator \mintinline{haskellc}/newUAmparBesides/ is particularly useful when implementing efficient queues in DPS Haskell (as in \cref{ssec:efficient-queue}):
+
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+type DList t = UAmpar [t] (UDest [t])
+type EffQueue t = ([t], DList t)
+
+newEffQueue ⩴ Token ⊸ EffQueue t
+newEffQueue tok = ([], newUAmpar @[t] tok)
+
+dequeue ⩴ EffQueue t ⊸ Maybe (t, EffQueue t)
+dequeue q = case q of
+  ((x : xs), dlist) -> Just (x, (xs, dlist))
+  ([], dlist) -> case (toList dlist) of
+    Ur [] -> Nothing
+    Ur (x : xs) -> Just (xs, °\mold{newUAmpar @[t] tok}°)
+\end{minted}
+}
+\end{unbreakable}
+
+In the second branch of the inner-most \mintinline{haskellc}/case/ in \mintinline{haskellc}/dequeue/, when we have transformed the back difference list (from which we used to write) into the new front list (from which we will now read), we have to create a new back difference list, that is, a new ampar. However, we don't have a token at hand. It would be quite unpractical for a function like \mintinline{haskellc}/dequeue/ to ask for a linear token to be passed; it's better if tokens are only requested when spawning a new data structure, not when operating on one. That's why \mintinline{haskellc}/newUAmparBesides/ comes handy: we can instead reuse the linearity requirement of the existing UAmpar:
+
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+newUAmparBesides ⩴ ∀ s t u. UAmpar s t ⊸ (UAmpar s t, UAmpar u (UDest u))
+
+dequeue ⩴ EffQueue t ⊸ Maybe (t, EffQueue t)
+dequeue q = case q of
+  ((x : xs), dlist) -> Just (x, (xs, dlist))
+  ([], dlist) -> case newUAmparBesides dlist of (dlist, dlist') -> case (toList dlist) of
+    Ur [] -> case (toList dlist') of Ur _ -> Nothing
+    Ur (x : xs) -> Just (xs, dlist')
+\end{minted}
+}
+\end{unbreakable}
+
+This new version is not perfect either though. We have to create the new UAmpar before even knowing if we will need it. Indeed, we can only know if a new UAmpar is really needed when we have read the content of the old one, and we can only read it when it is no longer a UAmpar... so at that point we cannot spawn a new one any longer. So the way forward is to always spawn a new UAmpar (difference list in that case) before consuming the old one, taking the risk that if the queue is really empty, we will have to discard the fresh UAmpar immediately (with \mintinline{haskellc}/case (toList dlist') of Ur _ -> Nothing/ instead of just returning \mintinline{haskellc}/Nothing/). Implicit token passing, as proposed by Linear Constraints\cite{spiwack_linearly_2022,spiwack_linear_prop_2023}, seems to really be the way forward to get rid of this kind of issues altogether.
+
+%------------------------------
+
+Same as in \destcalculus{}, the structure encapsulated within a UAmpar can be released in two ways: with \mintinline{haskellc}/fromUAmpar'/, the value on the \mintinline{haskellc}/t/ side must be unit (\mintinline{haskellc}/()/), and just the complete \mintinline{haskellc}/s/ is returned, wrapped in \mintinline{haskellc}/Ur/. With \mintinline{haskellc}/fromUAmpar/, the type on the \mintinline{haskellc}/t/ side must be of the form \mintinline{haskellc}/Ur t'/, and then a pair \mintinline{haskellc}/Ur (s, t')/ is returned.
+
+It is actually safe to wrap the structure that has been built in \mintinline{haskellc}/Ur/ because, as we've said previously, its leaves either come from non-linear sources (as \mintinline{haskellc}/fillLeaf ⩴ t → UDest t ⊸ ()/ consumes its first argument non-linearly) or are made of 0-ary constructors added with \mintinline{haskellc}/fill/, both of which can be used in an unrestricted fashion safely; and its spine, made of hollow constructors, can be duplicated at will.
+
+% \mintinline{haskellc}/UAmpar s t/ has a linear functor instance to map on the \mintinline{haskellc}/t/ side (the one carrying destinations) which forces the continuation to be linear:
+
+% {\figtextsize
+% \begin{minted}[escapeinside=°°]{haskellc}
+% instance Functor (UAmpar a) where
+%   fmap ⩴ ∀ b c. (b ⊸ c) ⊸ UAmpar a b ⊸ UAmpar b c
+%   fmap f (¤UAmpar (x, d)) = ¤UAmpar (x, f d)
+% \end{minted}
+% }
+
+% And \mintinline{haskellc}/newUAmpar ⩴ ∀ s. Token ⊸ UAmpar s (UDest s)/` is the only function in which a \mintinline{haskellc}/UDest/ appears in positive position, but locked by an \mintinline{haskellc}/UAmpar/ (which is an opaque wrapper for the user). So destinations can only ever be accessed by mapping over an \mintinline{haskellc}/UAmpar/ with \mintinline{haskellc}/fmap//\mintinline{haskellc}/`updWith`/, and cannot leak to the outside. It isn't possible either for a \mintinline{haskellc}/UDest t/ to be linearly consumed by filling another \mintinline{haskellc}/UDest (UDest t)/ with \mintinline{haskellc}/fillLeaf/, as the first argument of the \mintinline{haskellc}/fillLeaf/ function isn't used linearly.\footnote{It would actually be desirable to have \mintinline{haskellc}/UDest (UDest t)/ work. But it turns out that doing so naively compromises the type safety properties related to linearity that we describe in this section. How to recover type safety in presence of destinations of destinations is still an open problem.}
+
+% Morally, this linear \mintinline{haskellc}/Functor/ instance says that one can temporary forget about the root of the structure being built, and just manipulate the destinations as first-class objects that will produce remote building effects onto the structure that is invisible in the inner scope.
+
+\subsection{Filling functions for destinations}
+
+The last part of the API is the one in charge of actually building the structures in a top-down fashion. To fill a hole represented by \mintinline{haskellc}/UDest t/, three functions are available:
+
+\mintinline{haskellc}/fillLeaf ⩴ ∀ t. t → UDest t ⊸ ()/ uses a value of type \mintinline{haskellc}/t/ to fill the hole represented by the destination, as $[[◀]]$ from \destcalculus{}. However, if the destination is consumed linearly as in \destcalculus{}, the value to fill the hole isn't (as indicated by the first non-linear arrow). This is key to the fact that UAmpar only host unrestricted data. Memory-wise, when \mintinline{haskellc}/fillLeaf/ is used, the address of the object of type \mintinline{haskellc}/t/ is written into the memory cell pointed to by the destination of type \mintinline{haskellc}/UDest t/ (see Figure~\ref{fig:schema-fillLeaf}).
+
+\mintinline{haskellc}/fillComp ⩴ ∀ s t. UAmpar s t ⊸ UDest s ⊸ t/ is used to plug two \mintinline{haskellc}/UAmpar/ objects together. The larger \mintinline{haskellc}/UAmpar/ isn't represented in the signature of the function, as with the similar operator $\mathop{\triangleleft\mycirc}$ from \destcalculus{}. Instead, only the hole of the bigger UAmpar that will receive the address of the smaller UAmpar is represented by \mintinline{haskellc}/UDest s/; and \mintinline{haskellc}/UAmpar s t/ in the signature refers to the smaller UAmpar. A call to \mintinline{haskellc}/fillComp/ always takes place in the scope of \mintinline{haskellc}/`updWith`/ over the parent object:
+
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+parent ⩴ UAmpar BigStruct (UDest SmallStruct, UDest OtherStruct)
+child ⩴ UAmpar SmallStruct (UDest Int)
+comp = parent `updWith` \(ds, extra) → fillComp child ds
+       ⩴ UAmpar BigStruct (UDest Int, UDest OtherStruct)
+\end{minted}
+}
+\end{unbreakable}
+
+The resulting structure \mintinline{haskellc}/comp/ is morally a \mintinline{haskellc}/BigStruct/ like \mintinline{haskellc}/parent/, that inherited the hole from the child structure (\mintinline{haskellc}/UDest Int/) and still has its other hole (\mintinline{haskellc}/UDest OtherStruct/) remaining to be filled. An example of memory behavior of \mintinline{haskellc}/fillComp/ in action can be seen in Figure~\ref{fig:schema-dlist-concat}.
+
+Finally, \mintinline{haskellc}/fill ⩴ ∀ lCtor t. UDest t ⊸ UDestsOf lCtor t/ is the generic function to fill a destination with hollow constructors. It takes a constructor as a type parameter (\mintinline{haskellc}/lCtor/) and allocates a hollow heap object that has the same header/tag as the specified constructor but unspecified fields. The address of the allocated hollow constructor is written in the destination that is passed to \mintinline{haskellc}/fill/. An example of the memory behavior of \mintinline{haskellc}/fill @'(:) ⩴ UDest [t] ⊸ (UDest t, UDest [t])/ is given in Figure~\ref{fig:schema-fillCons} and the one of \mintinline{haskellc}/fill @'[] ⩴ UDest [t] ⊸ ()/ is given in Figure~\ref{fig:schema-fillNil}.
+
+The \mintinline{haskellc}/fill/ function also returns one destination of matching type for each of the fields of the constructor; in Haskell this is represented by \mintinline{haskellc}/UDestsOf lCtor t/. \mintinline{haskellc}/UDestsOf/ is a type family (i.e. a function operating on types) whose role is to map a constructor to the type of destinations for its fields. For example, \mintinline{haskellc}/UDestsOf '[] [t] = ()/ and \mintinline{haskellc}/UDestsOf '(:) [t] = (UDest t, UDest [t])/. More generally, the \mintinline{haskellc}/UDestsOf/ typeclass reflects the duality between the types of fields of a constructor and the ones of destinations for a hollow constructor, as first evoked in \cref{ssec:build-up-vocab}.
+
+\begin{figure}[t]\centering
+  \scalebox{\figscale}{\tikzfig{schemas/fillCons}}
+  \caption{Memory behavior of \mintinline{haskellc}/fill @'(:) ⩴ UDest [t] ⊸ (UDest t, UDest [t])/}
+  \label{fig:schema-fillCons}
+
+  \scalebox{\figscale}{\tikzfig{schemas/fillNil}}
+  \caption{Memory behavior of \mintinline{haskellc}/fill @'[] ⩴ UDest [t] ⊸ ()/}
+  \label{fig:schema-fillNil}
+
+  \scalebox{\figscale}{\tikzfig{schemas/fillLeaf}}
+  \caption{Memory behavior of \mintinline{haskellc}/fillLeaf ⩴ t → UDest [t] ⊸ ()/}
+  \label{fig:schema-fillLeaf}
+\end{figure}
+
+\section{Compact Regions: a playground to Implement the DPS Haskell API}\label{sec:implementation}
+
+Having UAmpar structures in the memory inherently introduces a lot of tension with both the garbage collector and compiler. Indeed, the GC assumes that every heap object it traverses is well-formed, whereas UAmpar structures are absolutely ill-formed: they contain uninitialized pointers, which the GC should absolutely not follow.
+
+The tension with the compiler is of lesser extent. The compiler can make some optimizations because it assumes that every object is immutable, while DPS programming breaks that guarantee by mutating constructors after they have been allocated (albeit only one update can happen). Fortunately, these errors are easily detected when implementing the API, and fixed by asking GHC not to inline specific parts of the code (with pragmas).
+
+\subsection{Compact Regions}\label{ssec:impl-compact-regions}
+
+As I teased in Section~\ref{ssec:parser-sexpr}, \emph{compact regions} from~\cite{yang_efficient_2015} make it very convenient to implement DPS programming in 
+Haskell. A compact region represents a memory area in the Haskell heap that is almost fully independent from the GC and the rest of the garbage-collected heap. For the GC, each compact region is seen as a single heap object with a single lifetime. The GC can efficiently check whether there is at least one pointer in the garbage-collected heap that points into the region, and while this is the case, the region is kept alive. When this condition is no longer matched, the whole region is discarded. The result is that the GC won't traverse any node from the region: it is treated as one opaque block (even though it is actually implemented as a chain of blocks of the same size, that doesn't change the principle). Also, compact regions are immobile in memory; the GC won't move them, so a destination can just be implemented as a raw pointer (type \mintinline{haskellc}/Addr#/ in Haskell): \mintinline{haskellc}/data UDest r t = ¤UDest Addr#/
+
+By using compact regions to implement DPS programming, we completely elude the concerns of tension between the garbage collector and UAmpar structures we want to build. Instead, we get two extra restrictions. First, every structure in a region must be in a fully-evaluated form. Regions are strict, and a heap object that is copied to a region is first forced into normal form. This might not always be a win; sometimes laziness, which is the default \emph{modus operandi} of the garbage-collected heap, might be preferable.
+
+Secondly, data in a region cannot contain pointers to the garbage-collected heap, or pointers to other regions: it must be self-contained. That forces us to slightly modify the API, to add a phantom type parameter \mintinline{haskellc}/r/ which tags each object with the identifier of the region it belongs to. There are two related consequences: \mintinline{haskellc}/fillLeaf/ has to copy each \emph{leaf} value from the garbage-collected heap into the region in which it will be used as a leaf; and \mintinline{haskellc}/fillComp/ can only plug together two \mintinline{haskellc}/UAmpar/s that come from the same region.
+
+A typeclass \mintinline{haskellc}/Region r/ is also needed to carry around the details about a region that are required for the implementation. This typeclass has a single method \mintinline{haskellc}/reflect/, not available to the user, that returns the \mintinline{haskellc}/RegionInfo/ structure associated to identifier \mintinline{haskellc}/r/.
+
+The \mintinline{haskellc}/withRegion/ function is the newUAmpar addition to the modified API presented in Listing~\ref{table:destination-api-regions} (the \mintinline{haskellc}/Token/ type and its associated functions \mintinline{haskellc}/dup2/ and \mintinline{haskellc}/consume/ are unchanged). \mintinline{haskellc}/withRegion/ is mostly a refinement over the \mintinline{haskellc}/withToken/ function from Listing~\ref{table:destination-api}. It receives a continuation in which \mintinline{haskellc}/r/ must be a free type variable. It then spawns both a newUAmpar compact region and a fresh type \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ (not a variable), and uses the \mintinline{text}/reflection/ library to provide an instance of \mintinline[escapeinside=°°]{haskellc}/Region °\muline{r}°/ on-the-fly that links \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ and the \mintinline{haskellc}/RegionInfo/ for the newUAmpar region, and calls the continuation at type \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/. This is fairly standard practice since~\cite{launchbury_lazy_1994}.
+
+\begin{listing}[t]
+\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+type Region r ⩴ Constraint
+°\\mnew{withRegion ⩴ ∀ a. (∀ r. Region r ⇒ Token ⊸ Ur a) ⊸ Ur a}°
+
+data UAmpar r a b
+updWith            ⩴ ∀ r a b c. UAmpar r a b ⊸ (b ⊸ c) ⊸ UAmpar r b c
+newUAmparUAmpar           ⩴ ∀ r a.     Region r ⇒ Token ⊸ UAmpar r a (UDest r a)
+toUAmpar  ⩴ ∀ r a.     Region r ⇒ Token ⊸ a → UAmpar r a ()
+fromUAmpar' ⩴ ∀ r a.     Region r ⇒ UAmpar r a () ⊸ Ur a
+fromUAmpar  ⩴ ∀ r a b.   Region r ⇒ UAmpar r a (Ur c) ⊸ Ur (a, c)
+
+data UDest r a
+type family UDestsOf lCtor r a
+fill     ⩴ ∀ lCtor r a. Region r ⇒ UDest r a ⊸ UDestsOf lCtor r a
+fillComp ⩴ ∀ r a b.     Region r ⇒ UAmpar r a b ⊸ UDest r a ⊸ b
+fillLeaf ⩴ ∀ r a.       Region r ⇒ a → UDest r a ⊸ ()
+\end{minted}
+\caption{Destination API using compact regions}
+\label{table:destination-api-regions}
+
+\medskip
+
+\centering
+  \scalebox{\figscale}{\tikzfig{schemas/alloc-region}}
+  \captionof{figure}{Memory behaviour of \mintinline{haskellc}/newUAmpar/` and \mintinline{haskellc}/toUAmpar/ in the region implementation}
+  \label{fig:schema-alloc-region}
+\end{listing}
 
 \subsection{Deserializing, lifetime, and garbage collection}\label{ssec:parser-sexpr}
 
@@ -392,211 +578,6 @@ Code for \mintinline{haskellc}/parseSListDPS/ is presented in Listing~\ref{table
 
 Thanks to that newUAmpar implementation which is barely longer (in terms of lines of code) than the naive one, the program runs almost twice as fast, mostly because garbage-collection time goes to almost zero. The detailed benchmark is available in Section~\ref{sec:benchmark}.
 
-\section{API Design}\label{sec:api}
-
-Table~\ref{table:destination-api} presents my pure API for functional DPS programming. This API is sufficient to implement all the examples of Section~\ref{sec:motivating-examples}. This section explains its various parts in detail.
-
-\begin{listing}[t]
-\figtextsize
-\begin{minted}{haskellc}
-data Token
-consume   ⩴      Token ⊸ ()
-dup2      ⩴      Token ⊸ (Token, Token)
-withToken ⩴ ∀ a. (Token ⊸ Ur a) ⊸ Ur a
-
-data UAmpar a b
-updWith                ⩴ ∀ a b c. UAmpar a b ⊸ (b ⊸ c) ⊸ UAmpar b c
-newUAmparUAmpar               ⩴ ∀ a.     Token ⊸ UAmpar a (UDest a)
-toUAmpar      ⩴ ∀ a.     Token ⊸ a → UAmpar a ()
-fromUAmpar'     ⩴ ∀ a.     UAmpar a () ⊸ Ur a
-fromUAmpar      ⩴ ∀ a b.   UAmpar a (Ur c) ⊸ Ur (a, c)
-
-data UDest a
-type family UDestsOf lCtor a -- returns dests associated to fields of constructor
-fill     ⩴ ∀ lCtor a. UDest a ⊸ UDestsOf lCtor a
-fillComp ⩴ ∀ a b.     UAmpar a b ⊸ UDest a ⊸ b
-fillLeaf ⩴ ∀ a.       a → UDest a ⊸ ()
-\end{minted}
-% unFromUAmpar' ⩴ ∀ a.     UAmpar a () ⊸ a
-% unFromUAmpar  ⩴ ∀ a b.   UAmpar a (Ur c) ⊸ (a, c)
-\caption{Destination API for Haskell}
-\label{table:destination-api}
-\end{listing}
-
-\subsection{The \texttt{UAmpar} type}
-
-The main design principle behind DPS structure building is that no structure can be read before all its destinations have been filled. That way, UAmpar data structures can be freely passed around and stored, but need to be completed before any pattern-matching can be made on them.
-
-Hence we introduce a newUAmpar data type \mintinline{haskellc}/UAmpar s t/ where \mintinline{haskellc}/s/ stands for the type of the structure being built, and \mintinline{haskellc}/t/ is the type of what needs to be linearly consumed before the structure can be read. The idea is that one can map over the right side, which will contain destinations or containers with destinations inside, until there is no destination left but just a non-linear value that can safely escape (e.g. \mintinline{haskellc}/()/, \mintinline{haskellc}/Int/, or something wrapped in \mintinline{haskellc}/Ur/). When destinations from the right side are consumed, the structure on the left side is built little by little in a top-down fashion, as we showed in Figures~\ref{fig:schema-dlist-append} and \ref{fig:schema-dlist-concat}. And when no destination remains on the right side, the value of type \mintinline{haskellc}/s/ no longer has holes, thus is ready to be released/read.
-
-It can be released in two ways: with \mintinline{haskellc}/fromUAmpar'/, the value on the \mintinline{haskellc}/t/ side must be unit (\mintinline{haskellc}/()/), and just the complete \mintinline{haskellc}/s/ is returned, wrapped in \mintinline{haskellc}/Ur/. With \mintinline{haskellc}/fromUAmpar/, the type on the \mintinline{haskellc}/t/ side must be of the form \mintinline{haskellc}/Ur t'/, and then a pair \mintinline{haskellc}/Ur (s, t')/ is returned.
-
-It is actually safe to wrap the structure that has been built in \mintinline{haskellc}/Ur/ because its leaves either come from non-linear sources (as \mintinline{haskellc}/fillLeaf ⩴ t → UDest t ⊸ ()/ consumes its first argument non-linearly) or are made of 0-ary constructors added with \mintinline{haskellc}/fill/, both of which can be used in an unrestricted fashion safely. Variants \mintinline{haskellc}/unFromUAmpar'/ and \mintinline{haskellc}/unFromUAmpar/ from the beginning of this article just drop the \mintinline{haskellc}/Ur/ wrapper.
-
-Conversely, the function \mintinline{haskellc}/toUAmpar/ takes a non-linear argument of type \mintinline{haskellc}/s/ and wraps it into an \mintinline{haskellc}/UAmpar/ with no destinations left to be consumed.
-
-\subsection{Ensuring write-once model for holes with linear types}\label{ssec:api-linearity}
-
-Types aren't linear by themselves in Linear Haskell. Instead, functions can be made to use their arguments linearly or not. So in direct style, where the consumer of a resource isn't tied to the resource creation site, there is no way to state that the resource must be used exactly once:
-
-\begin{unbreakable}
-{\figtextsize
-\begin{minted}{haskellc}
-createR           ⩴ Resource -- no way to force the result to be used exactly once
-consumeR          ⩴ Resource ⊸ ()
-exampleShouldFail ⩴ () =      
-  let x = createR in consumeR x ; consumeR x -- valid even if x is consumed twice
-\end{minted}
-}
-\end{unbreakable}
-
-The solution is to force the consumer of a resource to become explicit at the creation site of the resource, and to check through its signature that it is indeed a linear continuation:
-
-\begin{unbreakable}
-{\figtextsize
-\begin{minted}[linenos,escapeinside=°°]{haskellc}
-withR       ⩴ (Resource ⊸ a) ⊸ a
-consumeR    ⩴ Resource ⊸ ()
-exampleFail ⩴ () = withR (\x → consumeR °\mold{x}° ; consumeR °\mold{x}°) -- not linear
-\end{minted}
-}
-\end{unbreakable}
-
-The \mintinline{haskellc}/Resource/ type is in positive position in the signature of \mintinline{haskellc}/withR/, so that the function should somehow know how to produce a \mintinline{haskellc}/Resource/, but this is opaque for the user. What matters is that a resource can only be accessed by providing a linear continuation to \mintinline{haskellc}/withR/.
-
-Still, this is not enough; because \mintinline{haskellc}/\x → x/ is indeed a linear continuation, one could use \mintinline{haskellc}/withR (\x → x)/ to leak a \mintinline{haskellc}/Resource/, and then use it in a non-linear fashion in the outside world. Hence we must forbid the resource from appearing anywhere in the return type of the continuation. To do that, we ask the return type to be wrapped in \mintinline{haskellc}/Ur/: because the resource comes from the left of a linear arrow, and doesn't implement \mintinline{haskellc}/Movable/, it cannot be wrapped in \mintinline{haskellc}/Ur/ without breaking linearity (see Section~\ref{sec:intro-linearity}). On the other hand, a \mintinline{haskellc}/Movable/ value of type \mintinline{haskellc}/()/ or \mintinline{haskellc}/Int/ can be returned:
-\begin{unbreakable}
-{\figtextsize
-\begin{minted}[linenos,escapeinside=°°]{haskellc}
-withR'       ⩴ (Resource ⊸ Ur a) ⊸ Ur a
-consumeR     ⩴ Resource ⊸ ()
-exampleOk'   ⩴ Ur ()       = withR' (\x → let u ⩴ () = consumeR x' in move u)
-exampleFail' ⩴ Ur Resource = withR' (\x → °\mold{¤Ur x}°) -- not linear
-\end{minted}
-}
-\end{unbreakable}
-
-This explicit \emph{scope function} trick will no longer be necessary when linear constraints will land in GHC (see \cite{spiwack_linearly_2022}). In the meantime, this principle has been used to ensure safety of the DPS implementation in Haskell.
-
-% \mintinline{haskellc}/UAmpar s t/ has a linear functor instance to map on the \mintinline{haskellc}/t/ side (the one carrying destinations) which forces the continuation to be linear:
-
-% {\figtextsize
-% \begin{minted}[escapeinside=°°]{haskellc}
-% instance Functor (UAmpar a) where
-%   fmap ⩴ ∀ b c. (b ⊸ c) ⊸ UAmpar a b ⊸ UAmpar b c
-%   fmap f (¤UAmpar (x, d)) = ¤UAmpar (x, f d)
-% \end{minted}
-% }
-
-% And \mintinline{haskellc}/newUAmpar ⩴ ∀ s. Token ⊸ UAmpar s (UDest s)/` is the only function in which a \mintinline{haskellc}/UDest/ appears in positive position, but locked by an \mintinline{haskellc}/UAmpar/ (which is an opaque wrapper for the user). So destinations can only ever be accessed by mapping over an \mintinline{haskellc}/UAmpar/ with \mintinline{haskellc}/fmap//\mintinline{haskellc}/`updWith`/, and cannot leak to the outside. It isn't possible either for a \mintinline{haskellc}/UDest t/ to be linearly consumed by filling another \mintinline{haskellc}/UDest (UDest t)/ with \mintinline{haskellc}/fillLeaf/, as the first argument of the \mintinline{haskellc}/fillLeaf/ function isn't used linearly.\footnote{It would actually be desirable to have \mintinline{haskellc}/UDest (UDest t)/ work. But it turns out that doing so naively compromises the type safety properties related to linearity that we describe in this section. How to recover type safety in presence of destinations of destinations is still an open problem.}
-
-% Morally, this linear \mintinline{haskellc}/Functor/ instance says that one can temporary forget about the root of the structure being built, and just manipulate the destinations as first-class objects that will produce remote building effects onto the structure that is invisible in the inner scope.
-
-\paragraph{Ensuring linear use of \texttt{UAmpar} objects}
-
-If an \mintinline{haskellc}/UAmpar/ object is used linearly, then its destinations will be written to exactly once; this is ensured by the signature of \mintinline{haskellc}/updWith/ for \mintinline{haskellc}/UAmpar/s. So we need to ensure that \mintinline{haskellc}/UAmpar/ objects are used linearly. For that, we introduce a newUAmpar type \mintinline{haskellc}/Token/. A token can be linearly exchanged one-for-one with an \mintinline{haskellc}/UAmpar/ of any type with \mintinline{haskellc}/newUAmpar/`, linearly duplicated with \mintinline{haskellc}/dup2/, or linearly deleted with \mintinline{haskellc}/consume/. However, it cannot be linearly stored in \mintinline{haskellc}/Ur/ as it doesn't implement \mintinline{haskellc}/Movable/.
-
-As in the example above, we just ensure that \mintinline{haskellc}/withToken ⩴ (Token ⊸ Ur t) ⊸ Ur t/ is the only source of \mintinline{haskellc}/Token/s around. Now, to produce an \mintinline{haskellc}/UAmpar/, one must get a token first, so has to be in the scope of a continuation passed to \mintinline{haskellc}/withToken/. Putting either a \mintinline{haskellc}/Token/ or \mintinline{haskellc}/UAmpar/ in \mintinline{haskellc}/Ur/ inside the continuation would make it non-linear. So none of them can escape the scope as is, but a structure built from an \mintinline{haskellc}/UAmpar/ and finalized with \mintinline{haskellc}/fromUAmpar/ would be automatically wrapped in \mintinline{haskellc}/Ur/, thus could safely escape\footnote{This is why the \mintinline{haskellc}/unFromUAmpar/ and \mintinline{haskellc}/unFromUAmpar'/ variants aren't that useful in the actual memory-safe API (which differs slightly from the simplified examples of Section~\ref{sec:motivating-examples}): here the built structure would be stuck in the scope function without its \mintinline{haskellc}/Ur/ escape pass.}.
-
-\subsection{Filling functions for destinations}
-
-The last part of the API is the one in charge of actually building the structures in a top-down fashion. To fill a hole represented by \mintinline{haskellc}/UDest t/, three functions are available:
-
-\mintinline{haskellc}/fillLeaf ⩴ ∀ t. t → UDest t ⊸ ()/ uses a value of type \mintinline{haskellc}/t/ to fill the hole represented by the destination. The destination is consumed linearly, but the value to fill the hole isn't (as indicated by the first non-linear arrow). Memory-wise, the address of the object \mintinline{haskellc}/t/ is written into the memory cell pointed to by the destination (see Figure~\ref{fig:schema-fillLeaf}).
-
-\mintinline{haskellc}/fillComp ⩴ ∀ s t. UAmpar s t ⊸ UDest s ⊸ t/ is used to plug two \mintinline{haskellc}/UAmpar/ objects together. The target \mintinline{haskellc}/UAmpar/ isn't represented in the signature of the function. Instead, only the target hole that will receive the address of the child is represented by \mintinline{haskellc}/UDest s/; and \mintinline{haskellc}/UAmpar s t/ in the signature refers to the child object. A call to \mintinline{haskellc}/fillComp/ always takes place in the scope of \mintinline{haskellc}/`updWith`/ over the parent object:
-
-\begin{unbreakable}
-{\figtextsize
-\begin{minted}[linenos,escapeinside=°°]{haskellc}
-parent ⩴ UAmpar BigStruct (UDest SmallStruct, UDest OtherStruct)
-child ⩴ UAmpar SmallStruct (UDest Int)
-comp = parent `updWith` \(ds, extra) → fillComp child ds
-       ⩴ UAmpar BigStruct (UDest Int, UDest OtherStruct)
-\end{minted}
-}
-\end{unbreakable}
-
-The resulting structure \mintinline{haskellc}/comp/ is morally a \mintinline{haskellc}/BigStruct/ like \mintinline{haskellc}/parent/, that inherited the hole from the child structure (\mintinline{haskellc}/UDest Int/) and still has its other hole (\mintinline{haskellc}/UDest OtherStruct/) to be filled. An example of memory behavior of \mintinline{haskellc}/fillComp/ in action can be seen in Figure~\ref{fig:schema-dlist-concat}.
-
-\mintinline{haskellc}/fill ⩴ ∀ lCtor t. UDest t ⊸ UDestsOf lCtor t/ lets us build structures using layers of hollow constructors. It takes a constructor as a type parameter (\mintinline{haskellc}/lCtor/) and allocates a hollow heap object that has the same header/tag as the specified constructor but unspecified fields. The address of the allocated hollow constructor is written in the destination that is passed to \mintinline{haskellc}/fill/. As a result, one hole is now filled, but there is one newUAmpar hole in the structure for each field left unspecified in the hollow constructor that is now part of the bigger structure. So \mintinline{haskellc}/fill/ returns one destination of matching type for each of the fields of the constructor. An example of the memory behavior of \mintinline{haskellc}/fill @'(:) ⩴ UDest [t] ⊸ (UDest t, UDest [t])/ is given in Figure~\ref{fig:schema-fillCons} and the one of \mintinline{haskellc}/fill @'[] ⩴ UDest [t] ⊸ ()/ is given in Figure~\ref{fig:schema-fillNil}.
-
-\mintinline{haskellc}/UDestsOf/ is a type family (i.e. a function operating on types) whose role is to map a constructor to the type of destinations for its fields. For example, \mintinline{haskellc}/UDestsOf '[] [t] = ()/ and \mintinline{haskellc}/UDestsOf '(:) [t] = (UDest t, UDest [t])/. More generally, there is a duality between the type of a constructor \mintinline[escapeinside=°°]{haskellc}/¤Ctor ⩴ (¤f°$_1\ldots\,$°¤f°$_n$°) → t/ and of the associated destination-filling functions \mintinline[escapeinside=°°]{haskellc}/fill @'Ctor ⩴ UDest t ⊸ (UDest ¤f°$_1\ldots\,$°UDest ¤f°$_n$°)/. Destination-based data building can be seen as more general than the usual bottom-up constructor approach, as we can recover \mintinline{haskellc}/¤Ctor/ from the associated function \mintinline[escapeinside=°°]{haskellc}/fill @'Ctor/, but not the reverse:
-
-\begin{unbreakable}
-{\figtextsize
-\begin{minted}[linenos,escapeinside=°°]{haskellc}
-¤Ctor ⩴ (¤f°$_1\ldots\,$°¤f°$_n$°) → a
-¤Ctor (x°$_1\ldots\,$°x°$_n$°) = unFromUAmpar' (
-  newUAmparUAmpar `updWith` \(d ⩴ UDest a) → case fill @'Ctor d of
-    (dx°$_1\ldots\,$°dx°$_n$°) → fillLeaf x°$_1$° dx°$_1$° ; °$\ldots\,$° ; fillLeaf x°$_n$° dx°$_n$°)
-\end{minted}
-}
-\end{unbreakable}
-
-\begin{figure}[t]\centering
-  \scalebox{\figscale}{\tikzfig{schemas/fillCons}}
-  \caption{Memory behavior of \mintinline{haskellc}/fill @'(:) ⩴ UDest [t] ⊸ (UDest t, UDest [t])/}
-  \label{fig:schema-fillCons}
-
-  \scalebox{\figscale}{\tikzfig{schemas/fillNil}}
-  \caption{Memory behavior of \mintinline{haskellc}/fill @'[] ⩴ UDest [t] ⊸ ()/}
-  \label{fig:schema-fillNil}
-
-  \scalebox{\figscale}{\tikzfig{schemas/fillLeaf}}
-  \caption{Memory behavior of \mintinline{haskellc}/fillLeaf ⩴ t → UDest [t] ⊸ ()/}
-  \label{fig:schema-fillLeaf}
-\end{figure}
-
-\section{Implementing destinations in Haskell}\label{sec:implementation}
-
-Having UAmpar structures in the memory inherently introduces a lot of tension with both the garbage collector and compiler. Indeed, the GC assumes that every heap object it traverses is well-formed, whereas UAmpar structures are absolutely ill-formed: they contain uninitialized pointers, which the GC should absolutely not follow.
-
-The tension with the compiler is of lesser extent. The compiler can make some optimizations because it assumes that every object is immutable, while DPS programming breaks that guarantee by mutating constructors after they have been allocated (albeit only one update can happen). Fortunately, these errors are easily detected when implementing the API, and fixed by asking GHC not to inline specific parts of the code (with pragmas).
-
-\subsection{Compact Regions}\label{ssec:impl-compact-regions}
-
-As I teased in Section~\ref{ssec:parser-sexpr}, \emph{compact regions} from~\cite{yang_efficient_2015} make it very convenient to implement DPS programming in 
-Haskell. A compact region represents a memory area in the Haskell heap that is almost fully independent from the GC and the rest of the garbage-collected heap. For the GC, each compact region is seen as a single heap object with a single lifetime. The GC can efficiently check whether there is at least one pointer in the garbage-collected heap that points into the region, and while this is the case, the region is kept alive. When this condition is no longer matched, the whole region is discarded. The result is that the GC won't traverse any node from the region: it is treated as one opaque block (even though it is actually implemented as a chain of blocks of the same size, that doesn't change the principle). Also, compact regions are immobile in memory; the GC won't move them, so a destination can just be implemented as a raw pointer (type \mintinline{haskellc}/Addr#/ in Haskell): \mintinline{haskellc}/data UDest r t = ¤UDest Addr#/
-
-By using compact regions to implement DPS programming, we completely elude the concerns of tension between the garbage collector and UAmpar structures we want to build. Instead, we get two extra restrictions. First, every structure in a region must be in a fully-evaluated form. Regions are strict, and a heap object that is copied to a region is first forced into normal form. This might not always be a win; sometimes laziness, which is the default \emph{modus operandi} of the garbage-collected heap, might be preferable.
-
-Secondly, data in a region cannot contain pointers to the garbage-collected heap, or pointers to other regions: it must be self-contained. That forces us to slightly modify the API, to add a phantom type parameter \mintinline{haskellc}/r/ which tags each object with the identifier of the region it belongs to. There are two related consequences: \mintinline{haskellc}/fillLeaf/ has to copy each \emph{leaf} value from the garbage-collected heap into the region in which it will be used as a leaf; and \mintinline{haskellc}/fillComp/ can only plug together two \mintinline{haskellc}/UAmpar/s that come from the same region.
-
-A typeclass \mintinline{haskellc}/Region r/ is also needed to carry around the details about a region that are required for the implementation. This typeclass has a single method \mintinline{haskellc}/reflect/, not available to the user, that returns the \mintinline{haskellc}/RegionInfo/ structure associated to identifier \mintinline{haskellc}/r/.
-
-The \mintinline{haskellc}/withRegion/ function is the newUAmpar addition to the modified API presented in Listing~\ref{table:destination-api-regions} (the \mintinline{haskellc}/Token/ type and its associated functions \mintinline{haskellc}/dup2/ and \mintinline{haskellc}/consume/ are unchanged). \mintinline{haskellc}/withRegion/ is mostly a refinement over the \mintinline{haskellc}/withToken/ function from Listing~\ref{table:destination-api}. It receives a continuation in which \mintinline{haskellc}/r/ must be a free type variable. It then spawns both a newUAmpar compact region and a fresh type \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ (not a variable), and uses the \mintinline{text}/reflection/ library to provide an instance of \mintinline[escapeinside=°°]{haskellc}/Region °\muline{r}°/ on-the-fly that links \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ and the \mintinline{haskellc}/RegionInfo/ for the newUAmpar region, and calls the continuation at type \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/. This is fairly standard practice since~\cite{launchbury_lazy_1994}.
-
-\begin{listing}[t]
-\figtextsize
-\begin{minted}[linenos,escapeinside=°°]{haskellc}
-type Region r ⩴ Constraint
-°\\mnew{withRegion ⩴ ∀ a. (∀ r. Region r ⇒ Token ⊸ Ur a) ⊸ Ur a}°
-
-data UAmpar r a b
-updWith            ⩴ ∀ r a b c. UAmpar r a b ⊸ (b ⊸ c) ⊸ UAmpar r b c
-newUAmparUAmpar           ⩴ ∀ r a.     Region r ⇒ Token ⊸ UAmpar r a (UDest r a)
-toUAmpar  ⩴ ∀ r a.     Region r ⇒ Token ⊸ a → UAmpar r a ()
-fromUAmpar' ⩴ ∀ r a.     Region r ⇒ UAmpar r a () ⊸ Ur a
-fromUAmpar  ⩴ ∀ r a b.   Region r ⇒ UAmpar r a (Ur c) ⊸ Ur (a, c)
-
-data UDest r a
-type family UDestsOf lCtor r a
-fill     ⩴ ∀ lCtor r a. Region r ⇒ UDest r a ⊸ UDestsOf lCtor r a
-fillComp ⩴ ∀ r a b.     Region r ⇒ UAmpar r a b ⊸ UDest r a ⊸ b
-fillLeaf ⩴ ∀ r a.       Region r ⇒ a → UDest r a ⊸ ()
-\end{minted}
-\caption{Destination API using compact regions}
-\label{table:destination-api-regions}
-
-\medskip
-
-\centering
-  \scalebox{\figscale}{\tikzfig{schemas/alloc-region}}
-  \captionof{figure}{Memory behaviour of \mintinline{haskellc}/newUAmpar/` and \mintinline{haskellc}/toUAmpar/ in the region implementation}
-  \label{fig:schema-alloc-region}
-\end{listing}
-
 \subsection{Representation of \texttt{UAmpar} objects}
 
 Ideally, as we detailed in the API, we want \mintinline{haskellc}/UAmpar r s t/ to contains an \mintinline{haskellc}/s/ and a \mintinline{haskellc}/t/, and let the \mintinline{haskellc}/s/ free when the \mintinline{haskellc}/t/ is fully consumed (or linearly transformed into \mintinline{haskellc}/Ur t'/). So the most straightforward implementation for \mintinline{haskellc}/UAmpar/ would be a pair \mintinline{haskellc}/(s, t)/, where \mintinline{haskellc}/s/ in the pair is only partially complete.
@@ -673,7 +654,7 @@ As an example, here is how to allocate a hollow \mintinline{haskellc}/¤Just/ co
 
 \begin{unbreakable}
 {\figtextsize
-\begin{minted}{haskellc}
+\begin{minted}[linenos]{haskellc}
 hollowJust ⩴ Maybe a = compactAddHollow#
   compactRegion#
   (unsafeCoerceAddr (reifyInfoPtr# (# #) ⩴ InfoPtrPlaceholder# 'Just ))
@@ -690,7 +671,7 @@ So we added a newUAmpar type family \mintinline{haskellc}/LCtorToSymbol/ inside 
 
 \begin{listing}[p]
 \figtextsize
-\begin{minted}{c}
+\begin{minted}[linenos]{c}
 // compactAddHollow#
 //   ⩴ Compact# → Addr# → State# RealWorld → (# State# RealWorld, a #)
 stg_compactAddHollowzh(P_ compact, W_ info) {
@@ -718,7 +699,7 @@ stg_compactAddHollowzh(P_ compact, W_ info) {
 
 \begin{listing}[p]
 \figtextsize
-\begin{minted}{haskellc}
+\begin{minted}[linenos]{haskellc}
 case primop of
   [...]
   ¤ReifyStgInfoPtrOp → \_ →  -- we don't care about the function argument (# #)
@@ -740,7 +721,7 @@ case primop of
 
 \begin{listing}[p]
 \figtextsize
-\begin{minted}{haskellc}
+\begin{minted}[linenos]{haskellc}
 matchFamLCtorToSymbol ⩴ [Type] → Maybe (CoAxiomRule, [Type], Type)
 matchFamLCtorToSymbol [kind, ty]
   | ¤TyConApp tyCon _ ← ty, ¤Just dataCon ← isPromotedDataCon_maybe tyCon =
@@ -799,7 +780,7 @@ Finally, copying the result of the naive version to a compact region (for future
 
 % With destinations, \mintinline{haskellc}/map/ can be implemented in a tail-recursive fashion without the need for the reverse operation (as the list is built in a top-down approach). It can also be implemented as a fold:
 % {\figtextsize
-% \begin{minted}{haskellc}
+% \begin{minted}[linenos]{haskellc}
 % append ⩴ UDest [a] ⊸ a → UDest [a]
 % append d x = let !(dh, dt) = fill @'(:) d in fillLeaf x dh ; dt
 
