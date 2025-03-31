@@ -380,39 +380,45 @@ The \mintinline{haskellc}/fill/ function also returns one destination of matchin
 
 \section{Compact Regions: a playground to Implement the DPS Haskell API}\label{sec:implementation}
 
-Having UAmpar structures in the memory inherently introduces a lot of tension with both the garbage collector and compiler. Indeed, the GC assumes that every heap object it traverses is well-formed, whereas UAmpar structures are absolutely ill-formed: they contain uninitialized pointers, which the GC should absolutely not follow. Also, the compiler and GC can make some optimizations because they assume that every object is immutable, while DPS programming breaks that guarantee by mutating constructors after they have been allocated (albeit only one update can happen). As a result, we looked for a memory management alternative for Haskell that would let us implement DPS Haskell API more easily.
+Having incomplete structures in the memory inherently introduces a lot of tension with both the garbage collector and compiler. Indeed, the garbage collector of GHC assumes that every heap object it traverses is well-formed, whereas UAmpar structures are absolutely ill-formed: they contain uninitialized pointers, which the GC should absolutely not follow. Also, the compiler and GC can make some optimizations because they assume that every object is immutable, while DPS programming breaks that guarantee by mutating constructors after they have been allocated (albeit only one update can happen). As a result, we looked for a memory management alternative for Haskell that would let us implement DPS Haskell API more easily.
 
 \subsection{Compact Regions}\label{ssec:impl-compact-regions}
 
 \emph{compact regions} from~\cite{yang_efficient_2015} make it very convenient to implement DPS programming in 
-Haskell. A compact region represents a memory area in the Haskell heap that is almost fully independent from the GC and the rest of the garbage-collected heap. For the GC, each compact region is seen as a single heap object with a single lifetime. The GC can efficiently check whether there is at least one pointer in the garbage-collected heap that points into the region, and while this is the case, the region is kept alive. When this condition is no longer matched, the whole region is discarded. The result is that the GC won't traverse any node from the region: it is treated as one opaque block (even though it is actually implemented as a chain of blocks of the same size, that doesn't change the principle). Also, compact regions are immobile in memory; the GC won't move them, so a destination can just be implemented as a raw pointer (type \mintinline{haskellc}/Addr#/ in Haskell): \mintinline{haskellc}/data UDest r t = ¤UDest Addr#/, as we have the guarantee that the pointed UAmpar won't move.
+Haskell. A compact region represents a memory area in the Haskell heap that is almost fully independent from the GC and the rest of the garbage-collected heap. For the GC, each compact region is seen as a single heap object with a single lifetime. The GC can efficiently check whether there is at least one pointer in the garbage-collected heap that points into the region, and while this is the case, the region is kept alive. When this condition is no longer matched, the whole region is discarded. The result is that the GC won't traverse any node from the region: it is treated as one opaque block (even though it is actually implemented as a chain of blocks of the same size, that doesn't change the principle). Also, compact regions are immobile in memory; the GC won't move them, so a destination to a hole in the compact region can just be implemented as a raw pointer (type \mintinline{haskellc}/Addr#/ in Haskell): \mintinline{haskellc}/data UDest r t = ¤UDest Addr#/, as we have the guarantee that the pointed UAmpar (which contains the hole) won't move.
 
-By using compact regions to implement DPS programming, we completely elude the concerns of tension between the garbage collector and UAmpar structures we want to build. Instead, we get two extra restrictions. First, every structure in a region must be in a fully-evaluated form. Regions are strict, and a heap object that is copied to a region is first forced into normal form. This might not always be a win; sometimes laziness, which is the default \emph{modus operandi} of the garbage-collected heap, might be preferable.
+By using compact regions to implement DPS programming, we completely elude the concerns of tension between the garbage collector and UAmpar structures we want to build. Instead, we get two extra restrictions. First, every structure in a region must be in a fully-evaluated form. This is contrasting with usual Haskell evaluation scheme, where everything is lazy by default. Consequently, as regions are strict, any heap object that is copied to a region is first forced into normal form (i.e. it is being fully evaluated). This might not always be a win, sometimes laziness is preferable for better performance.
 
-Secondly, data in a region cannot contain pointers to the garbage-collected heap, or pointers to other regions: it must be self-contained. That forces us to slightly modify the API, to add a phantom type parameter \mintinline{haskellc}/r/ which tags each object with the identifier of the region it belongs to. There are two related consequences: \mintinline{haskellc}/fillLeaf/ has to copy each \emph{leaf} value from the garbage-collected heap into the region in which it will be used as a leaf; and \mintinline{haskellc}/fillComp/ can only plug together two \mintinline{haskellc}/UAmpar/s that come from the same region.
+Secondly, data in a region cannot contain pointers to the garbage-collected heap, or pointers to other regions: it must be self-contained. That forces us to slightly modify the API, to add a phantom type parameter \mintinline{haskellc}/r/ which tags each object with the identifier of the region it belongs to so that our API remains memory-safe, without runtime checks. There are two related consequences: first, when a value from the garbage-collected heap is used as an argument to \mintinline{haskellc}/fillLeaf/, it has to be fully evaluated and copied into the region instead of making just a pointer update; and secondly, \mintinline{haskellc}/fillComp/ can only plug together two \mintinline{haskellc}/UAmpar/s that come from the same region.
 
 A typeclass \mintinline{haskellc}/Region r/ is also needed to carry around the details about a region that are required for the implementation. This typeclass has a single method \mintinline{haskellc}/reflect/, not available to the user, that returns the \mintinline{haskellc}/RegionInfo/ structure associated to identifier \mintinline{haskellc}/r/.
 
-The \mintinline{haskellc}/withRegion/ function is the newUAmpar addition to the modified API presented in Listing~\ref{table:destination-api-regions} (the \mintinline{haskellc}/Token/ type and its associated functions \mintinline{haskellc}/dup2/ and \mintinline{haskellc}/consume/ are unchanged). \mintinline{haskellc}/withRegion/ is mostly a refinement over the \mintinline{haskellc}/withToken/ function from Listing~\ref{table:destination-api}. It receives a continuation in which \mintinline{haskellc}/r/ must be a free type variable. It then spawns both a newUAmpar compact region and a fresh type \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ (not a variable), and uses the \mintinline{text}/reflection/ library to provide an instance of \mintinline[escapeinside=°°]{haskellc}/Region °\muline{r}°/ on-the-fly that links \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ and the \mintinline{haskellc}/RegionInfo/ for the newUAmpar region, and calls the continuation at type \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/. This is fairly standard practice since~\cite{launchbury_lazy_1994}.
+The \mintinline{haskellc}/inRegion/ function is the new addition to the modified API presented in Listing~\ref{table:destination-api-regions}. It receives an expression of arbitrary type in which \mintinline{haskellc}/r/ must be a free type variable. It then spawns a new compact region and a fresh type \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ (not a variable), and uses the \mintinline{text}/reflection/ library to provide an instance of \mintinline[escapeinside=°°]{haskellc}/Region °\muline{r}°/ on-the-fly that links \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ and the \mintinline{haskellc}/RegionInfo/ for the new region, and then make type application for the supplied expression at the concrete type \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/. %This is fairly standard practice since~\cite{launchbury_lazy_1994}.
 
 \begin{listing}[t]
 \figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
+data Token
+dup ⩴ Token ⊸ (Token, Token)
+drop ⩴ Token ⊸ ()
+withToken ⩴ ∀ t. (Token ⊸ Ur t) ⊸ Ur t
+
 type Region r ⩴ Constraint
-°\\mnew{withRegion ⩴ ∀ a. (∀ r. Region r ⇒ Token ⊸ Ur a) ⊸ Ur a}°
+°\\mnew{inRegion ⩴ ∀ t. (∀ r. Region r ⇒ t) ⊸ t}°
 
-data UAmpar r a b
-updWith            ⩴ ∀ r a b c. UAmpar r a b ⊸ (b ⊸ c) ⊸ UAmpar r b c
-newUAmparUAmpar           ⩴ ∀ r a.     Region r ⇒ Token ⊸ UAmpar r a (UDest r a)
-toUAmpar  ⩴ ∀ r a.     Region r ⇒ Token ⊸ a → UAmpar r a ()
-fromUAmpar' ⩴ ∀ r a.     Region r ⇒ UAmpar r a () ⊸ Ur a
-fromUAmpar  ⩴ ∀ r a b.   Region r ⇒ UAmpar r a (Ur c) ⊸ Ur (a, c)
+data UAmpar r s t
+newUAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ UAmpar s (UDest s)
+newUAmparBesides ⩴ ∀ r1 r2 s t u. (Region r1, Region r2) ⇒ UAmpar r1 s t ⊸ (UAmpar r1 s t, UAmpar r2 u (UDest u))
+toUAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ s → UAmpar r s ()
+fromUAmpar  ⩴ ∀ r s t. Region r ⇒ UAmpar r s (Ur t) ⊸ Ur (s, t)
+fromUAmpar' ⩴ ∀ r s. Region r ⇒ UAmpar r s () ⊸ Ur s
+updWith ⩴ ∀ r s t u. Region r ⇒ UAmpar r s t ⊸ (t ⊸ u) ⊸ UAmpar r s u
 
-data UDest r a
-type family UDestsOf lCtor r a
-fill     ⩴ ∀ lCtor r a. Region r ⇒ UDest r a ⊸ UDestsOf lCtor r a
-fillComp ⩴ ∀ r a b.     Region r ⇒ UAmpar r a b ⊸ UDest r a ⊸ b
-fillLeaf ⩴ ∀ r a.       Region r ⇒ a → UDest r a ⊸ ()
+data UDest r t
+type family UDestsOf lCtor r t  -- returns dests associated to fields of constructor
+fill ⩴ ∀ lCtor r t. Region r ⇒ UDest r t ⊸ UDestsOf lCtor r t
+fillComp ⩴ ∀ r s t. Region r ⇒ UAmpar r s t ⊸ UDest r s ⊸ t
+fillLeaf ⩴ ∀ r t. Region r ⇒ t → UDest r t ⊸ ()
 \end{minted}
 \caption{Destination API using compact regions}
 \label{table:destination-api-regions}
@@ -425,17 +431,19 @@ fillLeaf ⩴ ∀ r a.       Region r ⇒ a → UDest r a ⊸ ()
   \label{fig:schema-alloc-region}
 \end{listing}
 
-\subsection{Deserializing, lifetime, and garbage collection}\label{ssec:parser-sexpr}
+\subsection{DPS programming in Compact regions: Deserializing, lifetime, and garbage collection}\label{ssec:parser-sexpr}
 
-Let's now move on a new example, which is more tied to implementation and practical concerns than previous ones.
+We will now tackle a new example of DPS programming which is more tied to implementation concerns and compact regions themselves than the previous ones.
 
 In client-server applications, the following pattern is very frequent: the server receives a request from a client with a serialized payload, the server then deserializes the payload, runs some code, and respond to the request. Most often, the deserialized payload is kept alive for the entirety of the request handling. In a garbage collected language, there's a real cost to this: the garbage collector (GC) will traverse the deserialized payload again and again, although we know that all its internal pointers are live for the duration of the request.
 
-Instead, we'd rather consider the deserialized payload as a single heap object, which doesn't need to be traversed, and is freed as a block. GHC supports this use-case with a feature named \emph{compact regions}~\cite{yang_efficient_2015}. Compact regions contain normal heap objects, but the GC never follows pointers into a compact region. The flipside is that a compact region can only be collected when all of the objects it contains are dead.
+Instead, we'd rather consider the deserialized payload as a single heap object, which doesn't need to be traversed, and is freed as a block. Compact regions are, in fact, the perfect tool for this job, as the GC never follows pointers into a compact region and consider each region as a having the same lifetime for all its contents.
 
-With compact regions, we would first deserialize the payload normally, in the GC heap, then copy it into a compact region and only keep a reference to the copy. That way, internal pointers of the region copy will never be followed by the GC, and that copy will be collected as a whole later on, whereas the original in the GC heap will be collected immediately.
+If we use compact regions as-is, with the API provided with GHC, we would first deserialize the payload normally, in the GC heap, then copy it into a compact region and then only keep a reference to the copy. That way, internal pointers of the region copy will never be followed by the GC, and that copy will be collected as a whole later on, whereas the original in the GC heap will be collected immediately.
 
-However, we are still allocating two copies of the deserialized payload. This is wasteful, it would be much better to allocate directly in the region, but this isn't part of the original compact region API. Destinations are one way to accomplish this. In fact, as I'll explain in Section~\ref{sec:implementation}, my implementation of DPS for Haskell is backed by compact regions because they provide more freedom to do low-level memory operations without interfering with GC.
+However, we are still allocating two copies of the deserialized payload. This is wasteful, it would be much better to allocate directly in the region. Fortunately, with our implementation of DPS Haskell throughout compact regions, we now have a much better way to allocate and build structures directly into them!
+
+%----------------
 
 Given a payload serialized as S-expressions, let's see how using destinations and compact regions for the parser can lead to greater performance. S-expressions are parenthesized lists whose elements are separated by spaces. These elements can be of several types: int, string, symbol (a textual token with no quotes around it), or a list of other S-expressions.
 
