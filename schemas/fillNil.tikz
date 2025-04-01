@@ -64,7 +64,7 @@
 		\node [style=Normal] (217) at (11.125, -3.625) {};
 		\node [style=Normal] (222) at (11.125, -4.625) {};
 		\node [style=Normal] (233) at (7.5, -1) {};
-		\node [style=Medium] (234) at (11, -0.5) {\figcomment{no newUAmpar hole}};
+		\node [style=Medium] (234) at (11, -0.5) {\figcomment{no new hole}};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=NormalEdge] (112.center) to (116.center);

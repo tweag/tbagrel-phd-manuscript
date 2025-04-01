@@ -2,6 +2,10 @@
 
 In the previous chapter we laid out important building blocks for the functional language that we'll develop here, namely \destcalculus{}. But first, let's focus again on destination-passing style programming, and why it matters in a functional setting.
 
+\begin{quote}
+  This chapter is adapted from article \cite{bagrel_destination_preprint_2025}, soon to be published at the OOPSLA1 2025 conference. The most significant changes are relative to the graded modal approach, which is already presented in detail in \cref{chap:preli}, and implementation concerns (\cref{sec:implem-destcalculus}).
+\end{quote}
+
 \section{Destination-passing style programming}\label{sec:intro}
 
 As brushed out in the introduction, in destination-passing style, a function doesn't return a value: it takes as an argument a location where the output of the function ought to be written. In this chapter, we will denote destinations by $[[⌊ T ⌋ ¹ν]]$ where $[[T]]$ is the type of what can be stored in the destination. A function of type $[[T → U]]$ would have signature $[[T → ⌊ U ⌋ ¹ν → ①]]$ instead when transformed into destination-passing style, where instead of returning a $[[U]]$, it consumes a destination of type $[[⌊U⌋ ¹ν]]$ instead and returns just \emph{unit} (type $[[①]]$). This style is common in system programming, where destinations $[[⌊ U ⌋ ¹ν]]$ are more commonly known as \emph{out parameters} (in C, $[[⌊ U ⌋ ¹ν]]$ would typically be a pointer of type $\ottstype{U*}$).

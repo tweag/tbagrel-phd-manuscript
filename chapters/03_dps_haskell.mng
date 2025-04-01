@@ -1,12 +1,16 @@
 \chapter{A first implementation of first-class destination passing in Haskell}\label{chap:dps-haskell}
 
-\section{Introduction}\label{intro-dps-haskell}
+In the previous chapter, we saw how we can build a $\lambda$-calculus from the ground up with first-class support for destination passing, and that still achieve memory safety. It's now time to put that into practice into an industrial-grade programming language.
 
-In the previous chapter, we saw how we can build a $\lambda$-calculus from the ground up with first-class support for destination passing, and that still achieve memory safety. It's now time to put that into practice.
+\begin{quote}
+  This chapter is adapted from article \cite{bagrel_destination-passing_2024}, published in Proceedings of JFLA 2024. Several sections have been reworked, since the theoretical work described in \cref{chap:dest-calculus} was still in very early stage when this article got published.
 
-However, it wouldn't be feasible to design an industrial-grade programming language \emph{just} to add support for destinations. Instead, we'll base our work on an existing functional programming language.
+  Since the conceptual and theoretical aspects of destination passing have been covered already in the previous chapters, this one can focus more on implementation concerns and Haskell specificities than the article it is based on. Notations have also been made as consistent as possible with the ones in previous chapters.
+\end{quote}
 
-The Haskell programming language is equipped with support for linear types through its main compiler, \emph{GHC}, since version 9.0.1~\cite{bernardy_linear_2018}. There aren't many other industrial-grade functional programming languages, and most of them don't have support for linear types, which are the first piece required to make our system safe. OCaml, thanks to recent work from \citet{lorenzen_oxidizing_2024}, has support for \emph{affinity}, but not for linearity (despite the aforementioned work using the term ``linearity''): a resource can be restricted to at most one use, but there is no way to ensure it will be used exactly once; it could be dropped without being used at all.
+\section{Linear Haskell is our implementation target}\label{intro-dps-haskell}
+
+Designing an industrial-grade programming language \emph{just} to add support for destinations would be a gigantic task, with much risk to fail. Instead, we'll base our work on an existing functional programming language. The Haskell programming language is equipped with support for linear types through its main compiler, \emph{GHC}, since version 9.0.1~\cite{bernardy_linear_2018}. There aren't many other industrial-grade functional programming languages, and most of them don't have support for linear types, which are the first piece required to make our system safe. OCaml, thanks to recent work from \citet{lorenzen_oxidizing_2024}, has support for \emph{affinity}, but not for linearity (despite the aforementioned work using the term ``linearity''): a resource can be restricted to at most one use, but there is no way to ensure it will be used exactly once; it could be dropped without being used at all.
 
 As a result, Haskell appeared to be a promising target for a real-world implementation of \destcalculus{}, which is detailed in depth in \cref{chap:dest-calculus}. In addition, Haskell is also a \emph{pure} functional language, which is rather in line with the idea of hiding impure memory effects related to destinations behind a \emph{pure} API by preventing any read before a structure has been completed.
 
@@ -384,8 +388,7 @@ Having incomplete structures in the memory inherently introduces a lot of tensio
 
 \subsection{Compact Regions}\label{ssec:impl-compact-regions}
 
-\emph{compact regions} from~\cite{yang_efficient_2015} make it very convenient to implement DPS programming in 
-Haskell. A compact region represents a memory area in the Haskell heap that is almost fully independent from the GC and the rest of the garbage-collected heap. For the GC, each compact region is seen as a single heap object with a single lifetime. The GC can efficiently check whether there is at least one pointer in the garbage-collected heap that points into the region, and while this is the case, the region is kept alive. When this condition is no longer matched, the whole region is discarded. The result is that the GC won't traverse any node from the region: it is treated as one opaque block (even though it is actually implemented as a chain of blocks of the same size, that doesn't change the principle). Also, compact regions are immobile in memory; the GC won't move them, so a destination to a hole in the compact region can just be implemented as a raw pointer (type \mintinline{haskellc}/Addr#/ in Haskell): \mintinline{haskellc}/data UDest r t = ¤UDest Addr#/, as we have the guarantee that the pointed UAmpar (which contains the hole) won't move.
+\emph{Compact regions} from~\citet{yang_efficient_2015} make it very convenient to implement DPS programming in Haskell. A compact region represents a memory area in the Haskell heap that is almost fully independent from the GC and the rest of the garbage-collected heap. For the GC, each compact region is seen as a single heap object with a single lifetime. The GC can efficiently check whether there is at least one pointer in the garbage-collected heap that points into the region, and while this is the case, the region is kept alive. When this condition is no longer matched, the whole region is discarded. The result is that the GC won't traverse any node from the region: it is treated as one opaque block (even though it is actually implemented as a chain of blocks of the same size, that doesn't change the principle). Also, compact regions are immobile in memory; the GC won't move them, so a destination to a hole in the compact region can just be implemented as a raw pointer (type \mintinline{haskellc}/Addr#/ in Haskell): \mintinline{haskellc}/data UDest r t = ¤UDest Addr#/, as we have the guarantee that the pointed UAmpar (which contains the hole) won't move.
 
 By using compact regions to implement DPS programming, we completely elude the concerns of tension between the garbage collector and UAmpar structures we want to build. Instead, we get two extra restrictions. First, every structure in a region must be in a fully-evaluated form. This is contrasting with usual Haskell evaluation scheme, where everything is lazy by default. Consequently, as regions are strict, any heap object that is copied to a region is first forced into normal form (i.e. it is being fully evaluated). This might not always be a win, sometimes laziness is preferable for better performance.
 
@@ -404,7 +407,7 @@ drop ⩴ Token ⊸ ()
 withToken ⩴ ∀ t. (Token ⊸ Ur t) ⊸ Ur t
 
 type Region r ⩴ Constraint
-°\\mnew{inRegion ⩴ ∀ t. (∀ r. Region r ⇒ t) ⊸ t}°
+°\mnew{inRegion ⩴ ∀ t. (∀ r. Region r ⇒ t) ⊸ t}°
 
 data UAmpar r s t
 newUAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ UAmpar s (UDest s)
@@ -422,14 +425,12 @@ fillLeaf ⩴ ∀ r t. Region r ⇒ t → UDest r t ⊸ ()
 \end{minted}
 \caption{Destination API using compact regions}
 \label{table:destination-api-regions}
-
-\medskip
-
-\centering
-  \scalebox{\figscale}{\tikzfig{schemas/alloc-region}}
-  \captionof{figure}{Memory behaviour of \mintinline{haskellc}/newUAmpar/` and \mintinline{haskellc}/toUAmpar/ in the region implementation}
-  \label{fig:schema-alloc-region}
 \end{listing}
+
+\begin{figure}
+\scalebox{\figscale}{\tikzfig{schemas/alloc-region}}
+\caption{Memory behaviour of \mintinline{haskellc}/newUAmpar/ and \mintinline{haskellc}/toUAmpar/ in the region implementation}\label{fig:schema-alloc-region}
+\end{figure}
 
 \subsection{DPS programming in Compact regions: Deserializing, lifetime, and garbage collection}\label{ssec:parser-sexpr}
 
@@ -443,9 +444,7 @@ If we use compact regions as-is, with the API provided with GHC, we would first 
 
 However, we are still allocating two copies of the deserialized payload. This is wasteful, it would be much better to allocate directly in the region. Fortunately, with our implementation of DPS Haskell throughout compact regions, we now have a much better way to allocate and build structures directly into them!
 
-%----------------
-
-Given a payload serialized as S-expressions, let's see how using destinations and compact regions for the parser can lead to greater performance. S-expressions are parenthesized lists whose elements are separated by spaces. These elements can be of several types: int, string, symbol (a textual token with no quotes around it), or a list of other S-expressions.
+Let's see how using destinations and compact regions for a parser of S-expressions (representing our request payload) can lead to greater performance. S-expressions are parenthesized lists whose elements are separated by spaces. These elements can be of several types: int, string, symbol (a textual token with no quotes around it), or a list of other S-expressions.
 
 Parsing an S-expression can be done naively with mutually recursive functions:
 \begin{itemize}
@@ -453,7 +452,7 @@ Parsing an S-expression can be done naively with mutually recursive functions:
   \item \mintinline{haskellc}/parseSList/ calls \mintinline{haskellc}/parseSExpr/ to parse the next token, and then calls itself again until reaching a closing parenthesis, accumulating the parsed elements along the way.
 \end{itemize}
 
-Only the implementation of \mintinline{haskellc}/parseSList/ will be presented here as it is enough for our purpose, but the full implementation of both the naive and destination-based versions of the whole parser can be found in \texttt{src/Compact/Pure/SExpr.hs} of~\cite{linear_dest} .
+Only the implementation of \mintinline{haskellc}/parseSList/ will be presented here as it is enough for our purpose, but the full implementation of both the naive and destination-based versions of the whole parser can be found in \texttt{src/Compact/Pure/SExpr.hs} of~\cite{linear_dest}.
 
 The implementation presented in Listing~\ref{table:impl-parser-naive} is quite standard: the accumulator \mintinline{haskellc}/acc/ collects the nodes that are returned by \mintinline{haskellc}/parseSExpr/ in the reverse order (because it's the natural building order for a linked list without destinations). When the end of the list is reached (line 5), the accumulator is reversed, wrapped in the \mintinline{haskellc}/¤SList/ constructor, and returned.
 
@@ -498,37 +497,37 @@ The implementation presented in Listing~\ref{table:impl-parser-naive} is quite s
 % \begin{minted}[linenos,escapeinside=°°]{haskellc}
 % parseSExprDPS ⩴ ByteString → Int → UDest SExpr ⊸ Either Error Int
 % parseSExprDPS bs i d = case bs !? i of
-%   ¤Nothing → °\\mnew{fillLeaf defaultSExpr d}° ; ¤Left (¤UnexpectedEOFSExpr i)
+%   ¤Nothing → °\mnew{fillLeaf defaultSExpr d}° ; ¤Left (¤UnexpectedEOFSExpr i)
 %   ¤Just x → case x of
-%     ')' → °\\mnew{fillLeaf defaultSExpr d}° ; ¤Left (¤UnexpectedClosingParen i)
-%     '(' → parseSListDPS bs (i + 1) °\\mnew{(fill @'SList d)}°
-%     '"' → parseSStringDPS bs (i + 1) ¤False °\\mnew{(fill @'SString d)}°
+%     ')' → °\mnew{fillLeaf defaultSExpr d}° ; ¤Left (¤UnexpectedClosingParen i)
+%     '(' → parseSListDPS bs (i + 1) °\mnew{(fill @'SList d)}°
+%     '"' → parseSStringDPS bs (i + 1) ¤False °\mnew{(fill @'SString d)}°
 %     _ → let tok = extractNextToken bs i -- take chars until delimiter/space
 %         in if null tok then parseSExprDPS bs (i + 1) d else case parseInt tok of
-%               ¤Just int → let °\\mnew{!dint = fill @'SInteger d}°
-%                           in °\\mnew{fillLeaf int dint}° ; ¤Right (i + length tok - 1)
-%               _ → let °\\mnew{!dsym = fill @'SSymbol d}°
-%                    in °\\mnew{fillLeaf (toString tok) dsym}° ; ¤Right (i + length tok - 1)
+%               ¤Just int → let °\mnew{!dint = fill @'SInteger d}°
+%                           in °\mnew{fillLeaf int dint}° ; ¤Right (i + length tok - 1)
+%               _ → let °\mnew{!dsym = fill @'SSymbol d}°
+%                    in °\mnew{fillLeaf (toString tok) dsym}° ; ¤Right (i + length tok - 1)
 % parseSListDPS ⩴ ByteString → Int → UDest [SExpr] ⊸ Either Error Int
 % parseSListDPS bs i d = case bs !? i of
-%   ¤Nothing → °\\mnew{fill @'[] d}° ; ¤Left (¤UnexpectedEOFSList i)
+%   ¤Nothing → °\mnew{fill @'[] d}° ; ¤Left (¤UnexpectedEOFSList i)
 %   ¤Just x → if
-%     | x == ')' → °\\mnew{fill @'[] d}° ; ¤Right i
+%     | x == ')' → °\mnew{fill @'[] d}° ; ¤Right i
 %     | isSpace x → parseSListDPS bs (i + 1) d
-%     | otherwise → let !(dh, dt) = °\\mnew{fill @'(:) d}°
-%                    in case parseSExprDPS bs i °\\mnew{dh}° of
+%     | otherwise → let !(dh, dt) = °\mnew{fill @'(:) d}°
+%                    in case parseSExprDPS bs i °\mnew{dh}° of
 %                         ¤Left err → fill @'[] dt ; ¤Left err
-%                         ¤Right endPos → parseSListDPS bs (endPos + 1) °\\mnew{dt}°
+%                         ¤Right endPos → parseSListDPS bs (endPos + 1) °\mnew{dt}°
 % parseSStringDPS ⩴ ByteString → Int → Bool → UDest [Char] ⊸ Either Error Int
 % parseSStringDPS bs i escape d = case bs !? i of
-%   ¤Nothing → °\\mnew{fill @'[] d}° ; ¤Left (¤UnexpectedEOFSString i)
+%   ¤Nothing → °\mnew{fill @'[] d}° ; ¤Left (¤UnexpectedEOFSString i)
 %   ¤Just x → case x of
-%     '"'  | not escape → °\\mnew{fill @'[] d}° ; ¤Right i
+%     '"'  | not escape → °\mnew{fill @'[] d}° ; ¤Right i
 %     '\\' | not escape → parseSStringDPS bs (i + 1) ¤True d
-%     'n'  | escape → let °\\mnew{!(dh, dt) = fill @'(:) d}°
-%                      in °\\mnew{fillLeaf '\textbackslash{}n' dh}° ; parseSStringDPS bs (i + 1) ¤False °\\mnew{dt}°
-%     _ → let °\\mnew{!(dh, dt) = fill @'(:) d}°
-%          in °\\mnew{fillLeaf x dh}° ; parseSStringDPS bs (i + 1) ¤False °\\mnew{dt}°
+%     'n'  | escape → let °\mnew{!(dh, dt) = fill @'(:) d}°
+%                      in °\mnew{fillLeaf '\textbackslash{}n' dh}° ; parseSStringDPS bs (i + 1) ¤False °\mnew{dt}°
+%     _ → let °\mnew{!(dh, dt) = fill @'(:) d}°
+%          in °\mnew{fillLeaf x dh}° ; parseSStringDPS bs (i + 1) ¤False °\mnew{dt}°
 % \end{minted}
 % \caption{Implementation of the S-expression parser with destinations}
 % \label{table:impl-sexpr-parser-with-dest}
@@ -556,15 +555,15 @@ parseSList bs i acc = case bs !? i of
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 parseSListDPS ⩴ ByteString → Int → UDest [SExpr] ⊸ Either Error Int
 parseSListDPS bs i d = case bs !? i of
-  ¤Nothing → °\\mnew{fill @'[] d}° ; ¤Left (¤UnexpectedEOFSList i)
+  ¤Nothing → °\mnew{d &fill @'[]}° ; ¤Left (¤UnexpectedEOFSList i)
   ¤Just x → if
-    | x == ')' → °\\mnew{fill @'[] d}° ; ¤Right i
+    | x == ')' → °\mnew{d &fill @'[]}° ; ¤Right i
     | isSpace x → parseSListDPS bs (i + 1) d
     | otherwise →
-        case °\\mnew{fill @'(:) d}° of
-          (dh, dt) → case parseSExprDPS bs i °\\mnew{dh}° of
-              ¤Left err → fill @'[] dt ; ¤Left err
-              ¤Right endPos → parseSListDPS bs (endPos + 1) °\\mnew{dt}°
+        case °\mnew{d &fill @'(:)}° of
+          (dh, dt) → case parseSExprDPS bs i °\mnew{dh}° of
+              ¤Left err → dt &fill @'[] ; ¤Left err
+              ¤Right endPos → parseSListDPS bs (endPos + 1) °\mnew{dt}°
 \end{minted}
 \caption{Implementation of the S-expression parser with destinations}
 \label{table:impl-parser-dps}
@@ -582,31 +581,43 @@ Code for \mintinline{haskellc}/parseSListDPS/ is presented in Listing~\ref{table
   \item DPS functions return the offset of the next character to read instead of a parsed value.
 \end{itemize}
 
-Thanks to that newUAmpar implementation which is barely longer (in terms of lines of code) than the naive one, the program runs almost twice as fast, mostly because garbage-collection time goes to almost zero. The detailed benchmark is available in Section~\ref{sec:benchmark}.
+Thanks to that new implementation which is barely longer (in terms of lines of code) than the naive one, the program runs almost twice as fast, mostly because garbage-collection time goes to almost zero. The detailed benchmark is available in Section~\ref{sec:benchmark}.
 
-\subsection{Representation of \texttt{UAmpar} objects}
+We see here that compact regions and destination-passing style are quite symbiotic; compact regions makes DPS easier to implement, and DPS makes compact regions more efficient and flexible to use.
 
-Ideally, as we detailed in the API, we want \mintinline{haskellc}/UAmpar r s t/ to contains an \mintinline{haskellc}/s/ and a \mintinline{haskellc}/t/, and let the \mintinline{haskellc}/s/ free when the \mintinline{haskellc}/t/ is fully consumed (or linearly transformed into \mintinline{haskellc}/Ur t'/). So the most straightforward implementation for \mintinline{haskellc}/UAmpar/ would be a pair \mintinline{haskellc}/(s, t)/, where \mintinline{haskellc}/s/ in the pair is only partially complete.
+\subsection{Representation of \texttt{UAmpar} objects in Compact Regions}\label{ssec:repr-ampar}
 
-It is also natural for \mintinline{haskellc}/newUAmpar/` to return an \mintinline{haskellc}/UAmpar r s (UDest s)/: there is nothing more here than an empty memory cell (named \emph{root receiver}) of type \mintinline{haskellc}/s/ which the associated destination of type \mintinline{haskellc}/UDest s/ points to, as presented in Figure~\ref{fig:schema-alloc}. A bit like the identity function, whatever goes in the hole is exactly what will be retrieved in the \mintinline{haskellc}/s/ side.
+Ideally, as we detailed in \cref{ssec:runtime-values,ssec:dpshaskell-dlist}, we want \mintinline{haskellc}/UAmpar r s t/ to be a kind of pair that contains a value of type \mintinline{haskellc}/s/ and one of type \mintinline{haskellc}/t/, and let the value of type \mintinline{haskellc}/s/ free when the one of type \mintinline{haskellc}/t/ has been fully consumed (or linearly transformed into \mintinline{haskellc}/Ur t'/).% So the most straightforward implementation for \mintinline{haskellc}/UAmpar/ would be a pair \mintinline{haskellc}/(s, t)/, where \mintinline{haskellc}/s/ in the pair is only partially complete.
 
-If \mintinline{haskellc}/UAmpar r s t/ is represented by a pair \mintinline{haskellc}/(s, t)/, then the root receiver should be the first field of the pair. However, the root receiver must be in the region, otherwise the GC might follow the garbage pointer that lives inside; whereas the \mintinline{haskellc}/UAmpar/ wrapper must be in the garbage-collected heap so that it can sometimes be optimized away by the compiler, and always deallocated as soon as possible.
+We also know that \mintinline{haskellc}/newUAmpar/ returns an \mintinline{haskellc}/UAmpar r s (UDest s)/: there is nothing more here than an empty memory cell that will host the root of the future structure of type \mintinline{haskellc}/s/, which the associated destination of type \mintinline{haskellc}/UDest s/ points to, as presented in Figure~\ref{fig:schema-alloc}. As we said as early as \cref{ssec:build-up-vocab}, whatever goes in the hole is exactly what will be retrieved in the \mintinline{haskellc}/s/ side.
 
-One potential solution is to represent \mintinline{haskellc}/UAmpar r s t/ by a pair \mintinline{haskellc}/(Ur s, t)/ where \mintinline{haskellc}/Ur/ is allocated inside the region and its field \mintinline{haskellc}/s/ serves as the root receiver. With this approach, the issue of \mintinline{haskellc}/newUAmpar/` representation is solved, but every \mintinline{haskellc}/UAmpar/ will now allocate a few words in the region (to host the \mintinline{haskellc}/Ur/ constructor) that won't be collected by the GC for a long time even if the parent \mintinline{haskellc}/UAmpar/ is collected. This makes \mintinline{haskellc}/toUAmpar/ quite inefficient memory-wise too, as the \mintinline{haskellc}/Ur/ wrapper is useless for already complete structures.
+If \mintinline{haskellc}/UAmpar r s t/ is represented by a pair \mintinline{haskellc}/(s, t)/, then the cell hosting the root of the structure should be the first field of the pair. However, that cell must be in the compact region, otherwise the GC might follow the garbage pointer(s) that lives inside; whereas the \mintinline{haskellc}/UAmpar/ wrapper (that is discarded when \mintinline{haskellc}/fromUAmpar/ or \mintinline{haskellc}/fromUAmpar'/ are called) must be in the garbage-collected heap so that it can sometimes be optimized away by the compiler, and always deallocated as soon as possible.
 
-The desired outcome is to only allocate a root receiver in the region for actual UAmpar structures, and skip that allocation for already complete structures that are turned into an \mintinline{haskellc}/UAmpar/ object, while preserving a same type for both use-cases. This is made possible by replacing the \mintinline{haskellc}/Ur/ wrapper inside the \mintinline{haskellc}/UAmpar/ by an indirection object (\mintinline{haskellc}/stg_IND/ label) for the actually-UAmpar case. \mintinline{haskellc}/UAmpar r s t/ will be represented by a pair \mintinline{haskellc}/(s, t)/ allocated in the garbage-collected heap, with slight variations as illustrated in Figure~\ref{fig:schema-alloc-region}:
+Given that UAmpar hold unrestricted data, one potential solution is to represent \mintinline{haskellc}/UAmpar r s t/ by a pair \mintinline{haskellc}/(Ur s, t)/ where \mintinline{haskellc}/Ur/ is allocated inside the region and its field \mintinline{haskellc}/s/ serves as the cell hosting the root of the structure. With this approach, the \mintinline{haskellc}/UAmpar/ wrapper can live in the GC heap and be discarded as soon as possible, while the cell receiving the root of the incomplete structure lives in the region. With that representation, we can also have a very efficient implementation of \mintinline{haskellc}/fromUAmpar'/, as the first element of the pair representing the UAmpar is directly what \mintinline{haskellc}/fromUAmpar'/ should return (it doesn't help for \mintinline{haskellc}/fromUAmpar/ though). The downside is now that every \mintinline{haskellc}/UAmpar/ will now allocate a few words in the region (to host the \mintinline{haskellc}/Ur/ constructor\footnote{One might ask why \mintinline{haskellc}/Ur/ can't be a zero-cost \mintinline{haskellc}/newtype/ wrapper; it mostly comes down to semantics motivations, see \cite{spiwack_ur_2024}.}) that won't be collected by the GC for a long time even if the parent \mintinline{haskellc}/UAmpar/ is collected. In particular, this makes \mintinline{haskellc}/toUAmpar/ quite inefficient memory-wise too, as the \mintinline{haskellc}/Ur/ wrapper that will stay in the region is useless for already complete structures.
+
+Another solution is to allocate a wrapper in the region to host the root of the structure \emph{only} for actual incomplete structures, and skip that allocation for already complete structures that are turned into an \mintinline{haskellc}/UAmpar/ object with \mintinline{haskellc}/toUAmpar/, while preserving a same type for both use-cases. This is made possible by replacing the \mintinline{haskellc}/Ur/ wrapper inside the \mintinline{haskellc}/UAmpar/ by an indirection object (\mintinline{haskellc}/stg_IND/ label) for the actually incomplete case. To conclude, the \mintinline{haskellc}/UAmpar r s t/ wrapper will be represented by a pair \mintinline{haskellc}/(s, t)/ allocated in the garbage-collected heap, with slight variations as illustrated in \cref{fig:schema-alloc-region}:
 \begin{itemize}
-  \item in the pair \mintinline{haskellc}/(s, t)/ returned by \mintinline{haskellc}/newUAmpar/`, the \mintinline{haskellc}/s/ side points to an indirection object (a sort of constructor with one field, whose resulting type \mintinline{haskellc}/s/ is the same as the field type \mintinline{haskellc}/s/), that is allocated in the region, and serves as the root receiver;
-  \item in the pair \mintinline{haskellc}/(s, t)/ returned by \mintinline{haskellc}/toUAmpar/, the \mintinline{haskellc}/s/ side directly points to the object of type \mintinline{haskellc}/s/ that has been copied to the region.
+  \item in the pair \mintinline{haskellc}/(s, t)/ returned by \mintinline{haskellc}/newUAmpar/, the \mintinline{haskellc}/s/ side points to an indirection object (a sort of constructor with one field, whose resulting type \mintinline{haskellc}/s/ is the same as the field type \mintinline{haskellc}/s/), that is allocated in the region, and serves as the cell hosting the root of the incomplete structure (because it is in the compact region, the GC won't follow yet-unspecified pointers that it might contain);
+  \item in the pair \mintinline{haskellc}/(s, t)/ returned by \mintinline{haskellc}/toUAmpar/, the \mintinline{haskellc}/s/ side directly points to the object of type \mintinline{haskellc}/s/ that has been copied to the region, without indirection.
 \end{itemize}
+Compared to the previous solution, this one is more efficient when using \mintinline{haskellc}/toUAmpar/ (as no long-lived garbage is produced), but does no longer bring improvements to memory efficiency for \mintinline{haskellc}/fromUAmpar'/. This is the solution we chose to implement in the original artifact \cite{linear_dest}, but it would be worth comparing and benchmarking it with the other one.
 
-The implementation of \mintinline{haskellc}/fromUAmpar'/ is then relatively straightforward. It allocates a hollow \mintinline{haskellc}/¤Ur □/ in the region, writes the address of the complete structure into it, and returns the \mintinline{haskellc}/¤Ur/ (an alternative would have been to use a regular \mintinline{haskellc}/¤Ur/ allocated in the GC heap).
+In the end, in \cite{linear_dest}, we have the following private definitions (in the sense that they are opaque for the consumer of the API) :
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+data Token = ¤Token  -- same representation as ()
+data UAmpar r s t = ¤UAmpar s t  -- same representation as (s, t)
+data UDest r t = ¤UDest Addr#  -- boxed Addr#, same representation as Ptr t
+\end{minted}
 
 \subsection{Deriving \texttt{fill} for all constructors with \texttt{Generics}}\label{ssec:impl-generics}
 
-The \mintinline{haskellc}/fill @lCtor @r @t/ function should plug a newUAmpar hollow constructor \mintinline{haskellc}/¤Ctor □ ⩴ t/ into the hole of an existing UAmpar structure, and return one destination object per newUAmpar hole in the structure (corresponding to the unspecified fields of the newUAmpar hollow constructor). Naively, we would need one \mintinline{haskellc}/fill/ function per constructor, but that cannot be realistically implemented. Instead, we have to generalize all \mintinline{haskellc}/fill/ functions into a typeclass \mintinline{haskellc}/Fill lCtor t/, and derive an instance of the typeclass (i.e. implement \mintinline{haskellc}/fill/) generically for any constructor, based only on statically-known information about that constructor.
+In \destcalculus, it was quite easy to have a dedicated fill function for each data constructor. Indeed, we only had to account for a finite number of them (one for unit, two for sums, one for pair, and one for exponential; with the one for function being quite optional).
 
-In Section~\ref{ssec:impl-ghc}, we will see how to allocate a hollow heap object for a specified constructor (which is known at compile-time). The only other information we need to implement \mintinline{haskellc}/fill/ generically is the shape of the constructor, and more precisely the number and type of its fields. So we will leverage \mintinline{haskellc}/GHC.Generics/ to find the required information.
+In Haskell however, we want to be able to do destination passing with arbitrary data types, even user-defined ones, so it wouldn't be feasible to implement, manually, one filling function per possible data constructor. So instead, we have to generalize all filling functions into a single, polymorphic \mintinline{haskellc}/fill/ function that is able to work for any data constructor.
+
+To this extend, we add a typeclass \mintinline{haskellc}/Fill lCtor t/, to which \mintinline{haskellc}/fill/ becomes a method, so that we are able to specialize the behaviour of \mintinline{haskellc}/fill/ based on the type parameter \mintinline{haskellc}/lCtor/. The idea is that \mintinline{haskellc}/lCtor/ represent the type-level name of the data constructor we want to use with \mintinline{haskellc}/fill/ (that's why the syntax is \mintinline{haskellc}/fill @'Ctor/: we lift \mintinline{haskellc}/¤Ctor/ into a type-level name with the \mintinline{haskellc}/'/ operator, then make a type application with \mintinline{haskellc}/@/). We will see how this type-level name can be used to derive all the information we need to decide on the concrete implementation for \mintinline{haskellc}/fill/, which should plug a new hollow constructor of the specified variant into the hole of a structure pointed to by the specified destination.
+
+What we need for \mintinline{haskellc}/fill/ is to generically is the shape of the constructor, and more precisely the number and type of its fields. So we will leverage \mintinline{haskellc}/GHC.Generics/ to find the required information.
 
 \mintinline{haskellc}/GHC.Generics/ is a built-in Haskell library that provides compile-time inspection of a type metadata through the \mintinline{haskellc}/Generic/ typeclass: list of constructors, their fields, memory representation, etc. And that typeclass can be derived automatically for any type! Here's, for example, the \mintinline{haskellc}/Generic/ representation of \mintinline{haskellc}/Maybe t/:
 
@@ -623,7 +634,13 @@ M1 D (MetaData "Maybe" "GHC.Maybe" "base" False) (
 
 We see that there are two different constructors (indicated by \mintinline{haskellc}/M1 C .../ lines): \mintinline{haskellc}/¤Nothing/ has zero fields (indicated by \mintinline{haskellc}/U1/) and \mintinline{haskellc}/¤Just/ has one field of type \mintinline{haskellc}/t/ (indicated by \mintinline{haskellc}/K1 R t/).
 
-With a bit of type-level programming\footnote{see \texttt{src/Compact/Pure/Internal.hs:418} in~\cite{linear_dest}}, we can extract the parts of that representation which are related to the constructor \mintinline{haskellc}/lCtor/ and use them inside the instance head of \mintinline{haskellc}/Fill lCtor t/ so the implementation of \mintinline{haskellc}/fill/ can depend on them. That's how we can give the proper types to the destinations returned by that function for a specified constructor. The \mintinline{haskellc}/UDestsOf lCtor t ⩴ Type/ type family also uses the generic representation of \mintinline{haskellc}/t/ to extract what it needs to know about \mintinline{haskellc}/lCtor/ and its fields.
+With a bit of type-level programming\footnote{see \texttt{src/Compact/Pure/Internal.hs:418} in~\cite{linear_dest}}, we can extract the parts of the representation of \mintinline{haskellc}/t/ which gives information on its constructor \mintinline{haskellc}/lCtor/ and use them inside the instance head of \mintinline{haskellc}/Fill lCtor t/ so the implementation of \mintinline{haskellc}/fill/ can depend on them. In particular, we implement one specialized version of \mintinline{haskellc}/fill/ per number of fields in \mintinline{haskellc}/lCtor/, from 0 to 7\footnote{We could go higher, 7 is just an arbitrary limit for the number of fields that is rather common in standard Haskell libraries.}, because there is no way to abstract over the length of a tuple in Haskell, and the number of fields of the chosen constructor is equal to the number of new destinations we must return (in a tuple, with 0 to 7 elements) from a call to \mintinline{haskellc}/fill/. 
+
+The resolution of the \mintinline{haskellc}/UDestsOf lCtor t ⩴ Type/ type family into a concrete type is also made thanks to the generic representation of \mintinline{haskellc}/t/, to extract what it needs to know about \mintinline{haskellc}/lCtor/ and its fields.
+
+At the end of the day, it's no surprise that we are able to implement \mintinline{haskellc}/fill/ generically for all linked data structures\footnote{Dealing with primitive or unboxed types is, on the other hand, quite challenging, see the mention at the end of \cref{sec:implem-destcalculus}.}: as the end of the day, every data constructor for a linked data type can be seen as a n-ary product constructor, and we just scale the recipe for \mintinline{haskellc}/fill @'(:)/ to more (or fewer) fields and destinations.
+
+Still, with all of that done, we still need internal Haskell machinery to allocate the proper hollow constructor object in the compact region. \mintinline{haskellc}/fill/ is just the external layer dealing with destinations, with a type-safe signature, etc.
 
 \subsection{Changes to GHC internals and RTS}\label{ssec:impl-ghc}
 
@@ -631,11 +648,11 @@ We will see here how to allocate a hollow heap object for a given constructor, b
 
 Haskell's runtime system (RTS) is written in a mix of C and C-{}-. The RTS has many roles, among which managing threads, organizing garbage collection or managing compact regions. It also defines various primitive operations, named \emph{external primops}, that expose the RTS capabilities as normal functions. Despite all its responsibilities, however, the RTS is not responsible for the allocation of normal constructors (built in the garbage-collected heap). One reason is that it doesn't have all the information needed to build a constructor heap object, namely, the info table associated to the constructor.
 
-The info table is what defines both the layout and behavior of a heap object. All heap objects representing a same constructor (let's say \mintinline{haskellc}/¤Just/) have the same info table, even when the associated types are different (e.g. \mintinline{haskellc}/Maybe Int/ and \mintinline{haskellc}/Maybe Bool/). Heap objects representing this constructor point to a label \mintinline{text}/<ctor>_con_info/ that will be later resolved by the linker into an actual pointer to the shared info table.
+The info table is what defines both the layout and behavior of a heap object. All heap objects representing a same constructor (let's say \mintinline{haskellc}/¤Just/) have the same info table, which acts as the identity card for a given data constructor, even when the associated types are different (e.g. \mintinline{haskellc}/Maybe Int/ and \mintinline{haskellc}/Maybe Bool/ shares the same info table). Heap objects representing this constructor all point to a label \mintinline{text}/<ctor>_con_info/ that will be later resolved by the linker into an actual pointer to the shared info table.
 
-The RTS is in fact a static piece of code that is compiled once when GHC is built. So the RTS has no direct way to access the information emitted during the compilation of a program. In other words, when the RTS runs, it has no way to inspect the program that it runs and info table labels have long been replaced by actual pointers so it cannot find them itself. But it is the one which knows how to allocate space inside a compact region.
+On the other hand, the RTS is a static piece of code that is compiled once when GHC is built. So the RTS has no direct way to access the information emitted during the compilation of a program. In other words, when the RTS runs, it has no way to inspect the program that it runs and info table labels have long been replaced by actual pointers so it cannot find them itself. But the RTS is the one which knows how to allocate space inside a compact region.
 
-As a result, I need to add two newUAmpar primitives to GHC to allocate a hollow constructor:
+As a result, we need a way to pass information from compile time to the runtime need. We do that with two new primitives:
 
 \begin{itemize}
 \item one \emph{external primop} to allocate space inside a compact region for a hollow constructor. This primop has to be implemented inside the RTS for the aforementioned reasons;
@@ -652,9 +669,9 @@ As announced, this primop takes the info table pointer of the constructor to all
 
 \paragraph{Internal primop: reify an info table label into a runtime value}
 
-The only way, in Haskell, to pass a constructor to a primop so that the primop can inspect it, is to lift the constructor into a type-level literal. It's common practice to use a \mintinline{haskellc}/Proxy t/ (the unit type with a phantom type parameter) to pass the type \mintinline{haskellc}/t/ as an input to a function. Unfortunately, due to a quirk of the compiler, primops don't have access to the type of their arguments. They can, however, access their return type. So I'm using a phantom type \mintinline{haskellc}/InfoPtrPlaceholder# t/ as the return type, to pass the contructor as an input!
+The only way, in Haskell, to pass a constructor to a primop so that the primop can inspect it, is to lift the constructor into a type-level literal. It's common practice to use a \mintinline{haskellc}/Proxy t/ (the unit type with a phantom type parameter) to pass the type \mintinline{haskellc}/t/ as an input to a function. Unfortunately, due to a quirk of the compiler, primops don't have access to the type of their arguments. They can, however, access their return type. So we use a phantom type \mintinline{haskellc}/InfoPtrPlaceholder# t/ as the return type, to pass the contructor as an input!
 
-The gist of this implementation is presented in Listing~\ref{table:impl-reifyInfoPtr}. The primop \mintinline{haskellc}/reifyInfoPtr#/ pattern-matches on the type \mintinline{haskellc}/resTy/ of its return value. In the case it reads a string literal, it resolves the primop call into the label \mintinline{text}/stg_<name>/ (this is used in particular to retrieve \mintinline{haskellc}/stg_IND/ to allocate indirection heap objects). In the case it reads a lifted data constructor, it resolves the primop call into the label which corresponds to the info table pointer of that constructor. The returned \mintinline{haskellc}/InfoPtrPlaceholder# t/ can later be converted back to an \mintinline{haskellc}/Addr#/ using the \mintinline{haskellc}/unsafeCoerceAddr/ function.
+The gist of this implementation is presented in Listing~\ref{table:impl-reifyInfoPtr}. The primop \mintinline{haskellc}/reifyInfoPtr#/ pattern-matches on the type \mintinline{haskellc}/resTy/ of its return value. In the case it reads a string literal, it resolves the primop call into the label \mintinline{text}/stg_<name>/ (this is used in particular to allocate a \mintinline{haskellc}/stg_IND/ object as mentionned in \cref{ssec:repr-ampar}). In the case it reads a lifted data constructor, it resolves the primop call into the label which corresponds to the info table pointer of that constructor. The returned \mintinline{haskellc}/InfoPtrPlaceholder# t/ can later be converted back to an \mintinline{haskellc}/Addr#/ using the \mintinline{haskellc}/unsafeCoerceAddr/ function.
 
 As an example, here is how to allocate a hollow \mintinline{haskellc}/¤Just/ constructor in a compact region:
 
@@ -744,11 +761,21 @@ axLCtorToSymbolDef =
 \label{table:impl-LCtorToSymbol}
 \end{listing}
 
+\paragraph{Putting it all together, and further evolutions}
+
+Combining all these elements, we are able to implement the low-level operations needed for destination passing and hollow constructor allocation.
+
+The implementation presented above has been thought to require the minimal number of changes on GHC, as we considered destination passing to be a niche concern that couldn't justify large exotic changes to this industrial-grade compiler.
+
+However, since this first experimentation\cite{custom_ghc}, a pull request has been opened\cite{bagrel_primitives_2024} to try to merge support for hollow constructor building in compact regions into the main, publicly-distributed branch of GHC. This PR tends to take the path of a slightly more complete set of primitives than the three aforementioned ones, in particular with primitive forms for \mintinline{haskellc}/fill/ being part of it (instead of being only in library code, as it is now). Still, much work remains to be done before reaching a mergeable state. I hope to dedicate a few weeks to work on the matter at the very end or just after the end of my PhD.
+
 \section{Evaluating the performance of DPS programming}\label{sec:benchmark}
+
+% ----------------------
 
 \paragraph{Benchmarking methodology}
 
-All over this article, I talked about programs in both naive style and DPS style. With DPS programs, the result is stored in a compact region, which also forces strictness i.e. the structure is automatically in fully evaluated form.
+In this chapter, we talked about programs in both naive style and DPS style. With DPS programs, the result is stored in a compact region, which also forces strictness i.e. the structure is automatically in fully evaluated form.
 
 For naive versions, we have a choice to make on how to fully evaluate the result: either force each chunk of the result inside the GC heap (using \mintinline{haskellc}/Control.DeepSeq.force/), or copy the result in a compact region that is strict by default (using \mintinline{haskellc}/Data.Compact.compact/).
 
@@ -800,16 +827,6 @@ Finally, copying the result of the naive version to a compact region (for future
 % We see in part 4 of Figure~\ref{fig:bench-charts} that the destination-based implementations takes 1.5-4$\times$ more time than \mintinline{haskellc}/map/ and \mintinline{haskellc}/mapTR'/ (depending on the dataset size), but memory-wise both \mintinline{haskellc}/mapDPS'/ and \mintinline{haskellc}/mapDPSFold'/ are more efficient than \mintinline{haskellc}/map/; and \mintinline{haskellc}/mapDPS'/ even manage to make 13\% fewer allocs than \mintinline{haskellc}/mapTR'/ on the largest dataset.
 
 % In OCaml, \mintinline{haskellc}/mapDPS'/ is actually more performant time-wise than \mintinline{haskellc}/mapTR'/ ($0.5-0.85\times$) even for small lists, as detailed in~\cite{bour_tmc_2021}.
-
-\section{Related work}
-
-The idea of functional data structures with write-once holes is not newUAmpar. Minamide already proposed in~\cite{minamide_functional_1998} a variant of $\lambda$-calculus with support for \emph{hole abstractions}, which can be represented in memory by an UAmpar structure with one hole and can be composed efficiently with each other (as with \mintinline{haskellc}/fillComp/ in Figure~\ref{fig:schema-dlist-concat}). With such a framework, it is fully possible to implement destination-backed difference lists for example.
-
-However, in Minamide's work, there is no concept of destination: the hole in a structure can only be filled if one has the structure itself at hand. On the other hand, our approach introduces destinations, as a way to interact with a hole remotely, even when one doesn't have a handle to the associated structure. Because destinations are first-class objects, they can be passed around or stored in collections or other structure, while preserving memory safety. This is the major step forward that our paper presents.
-
-More recently, \cite{protzenko_mezzo_2013} introduced the Mezzo programming language, in which mutable data structures can be freezed into immutable ones after having been completed. This principle is used to some extend in their list standard library module, to mimic a form of DPS programming. An earlier appearance of DPS programming as a mean to achieve better performance in a mutable language can also be seen in~\cite{larus_restructuring_1989}.
-
-Finally, both \cite{shaikhha_destination-passing_2017} and \cite{bour_tmc_2021} use DPS programming to make list or array processing algorithms more efficient in a functional, immutable context, by turning non tail-recursive functions into tail-recursive DPS ones. More importantly, they present an automatized way to go from a naive program to its tail-recursive version. However, holes/destinations are only supported at an intermediary language level, while both~\cite{minamide_functional_1998} and our present work support safe DPS programming in user-land. In a broader context, \cite{lorenzen_fp_2023} presents a system in which linearity is used to identify where destructive updates can be made, so as to reuse the same constructor instead of deallocating and reallocating one; but this optimization technique is still mostly invisible for the user, unlike ours which is made explicit.
 
 \section{Conclusion and future work}
 

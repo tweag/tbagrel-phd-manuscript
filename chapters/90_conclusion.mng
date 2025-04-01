@@ -10,6 +10,10 @@ The main difference between their work and ours is that their language is solely
 
 We see these two aspects as complementing each other: good compiler optimizations are important to alleviate the burden from the programmer and allow high-level abstraction; having the possibility to use destinations in code affords the programmer more control, should they need it.
 
+\section{Programming with Permissions in Mezzo}\label{ssec:mezzo}
+
+\citet{protzenko_mezzo_2013} introduced the Mezzo programming language, in which mutable data structures can be freezed into immutable ones after having been completed. This principle is used to some extend in their list standard library module, to mimic a form of DPS programming. An earlier appearance of DPS programming as a mean to achieve better performance in a mutable language can also be seen in~\cite{larus_restructuring_1989}.
+
 \section{Tail modulo constructor}\label{ssec:tmc}
 
 Another example of destinations in a compiler's optimizer is~\cite{bour_tmc_2021}. It's meant to address the perennial problem that the map function on linked lists isn't tail-recursive, hence consumes stack space. The observation is that there's a systematic transformation of functions where the only recursive call is under a constructor to a destination-passing tail-recursive implementation.
