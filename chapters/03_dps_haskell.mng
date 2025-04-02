@@ -775,9 +775,9 @@ However, since this first experimentation\cite{custom_ghc}, a pull request has b
 
 \paragraph{Benchmarking methodology}
 
-In this chapter, we talked about programs in both naive style and DPS style. With DPS programs, the result is stored in a compact region, which also forces strictness i.e. the structure is automatically in fully evaluated form.
+It's now time to compare programs in both naive style and DPS style, and see if our claims of performance are verified with our prototype destination passing implementation\cite{linear_dest}. With DPS programs,the output produced by the program is stored in a compact region; we cannot chance that. But as we said in \cref{ssec:impl-compact-regions}, compact regions also force strictness i.e. the structure will be automatically in fully evaluated form. It might be counterproductive in some use-cases, but at least it makes things simpler for a benchmark (in which we want to force the result to a fully evaluated form).
 
-For naive versions, we have a choice to make on how to fully evaluate the result: either force each chunk of the result inside the GC heap (using \mintinline{haskellc}/Control.DeepSeq.force/), or copy the result in a compact region that is strict by default (using \mintinline{haskellc}/Data.Compact.compact/).
+For naive versions of the programs, we have a choice to make on how to fully evaluate the result: either force each chunk of the result inside the GC heap (using \mintinline{haskellc}/Control.DeepSeq.force/), or copy the result in a compact region that is strict by default and thus will force evaluation (using \mintinline{haskellc}/Data.Compact.compact/).
 
 In programs where there is no particular long-lived piece of data, having the result of the function copied into a compact region isn't particularly desirable since it will generally inflate memory allocations. So we use \mintinline{haskellc}/force/ to benchmark the naive version of those programs (the associated benchmark names are denoted with a ``*'' suffix).
 
@@ -789,44 +789,52 @@ In programs where there is no particular long-lived piece of data, having the re
 
 \paragraph{Concatenating lists and difference lists}
 
-We compared three implementations. \\\mintinline{haskellc}/foldr (++)/* has calls to \mintinline{haskellc}/(++)/ nested to the right, giving the most optimal context for list concatenation (it should run in $\mathcal{O}(n)$ time). \mintinline[escapeinside=°°]{haskellc}/foldl' concat°$\lambda$°/* uses function-backed difference lists, and \mintinline{haskellc}/foldl' concatDPS/ uses destin\-ation-backed ones, so both should run in $\mathcal{O}(n)$ even if calls to concat are nested to the left.
+We compared three implementations for list concatenation. \\\mintinline{haskellc}/foldr (++)/* has calls to \mintinline{haskellc}/(++)/ nested to the right, giving the most optimal context for list concatenation (it should run in $\mathcal{O}(n)$ time). We only use it as a reference, as it is quite unrealistic: we often want to concatenate lists with nesting to the left, e.g. when appending lines to a log. On the other hand, \mintinline[escapeinside=°°]{haskellc}/foldl' concat°$\lambda$°/* uses function-backed difference lists, and \mintinline{haskellc}/foldl' concatDPS/ uses destin\-ation-backed ones (from \cref{ssec:dpshaskell-dlist}), both with calls to concat nested to the left. They should still run in $\mathcal{O}(n)$, thanks to difference list magic.
 
 We see in part \textbf{A} of Figure~\ref{fig:bench-charts} that the destination-backed difference lists have a comparable memory use as the two other linear implementations, while being quite slower (by a factor 2-4) on all datasets. We would expect better results though for a DPS implementation outside of compact regions because those cause extra copying.
 
+It's still unclear where the performance loss comes from for the destination-based version using compact regions. We tried to profile the program but we couldn't identify clear culprit that would cause a particular slowdown. We must admit that programming with destinations and linear types in general still require a bit of embarassing boilerplate compared to naive versions, where some performance might be lost. These tests would need to be redone though in a more recent version of GHC, as performance of linear types has been improved in GHC 9.8.
+
 \paragraph{Breadth-first relabeling}\label{par:benchmark-bf-tree-traversal}
 
-We see in part \textbf{B} of Figure~\ref{fig:bench-charts} that the destination-based tree traversal is almost one order of magnitude more efficient, both time-wise and memory-wise, compared to the implementation based on \emph{Phases} applicatives presented in~\cite{gibbons_phases_2023}.
+For breadth-first tree traversal, we benchmark the implementation of \cref{ssec:bf-tree-traversal} against a fancy functional implementation based on \emph{Phases} applicatives presented in~\cite{gibbons_phases_2023}:
+
+% TODO: code.
+
+We see in part \textbf{B} of Figure~\ref{fig:bench-charts} that the destination-based tree traversal is almost one order of magnitude more efficient, both time-wise and memory-wise, compared to the implementation from \citet{gibbons_phases_2023}.
 
 \paragraph{Parsing S-expressions}
 
-In part \textbf{C} of Figure~\ref{fig:bench-charts}, we compare the naive implementation of the S-expression parser and the DPS one (see Section~\ref{ssec:parser-sexpr}). For this particular program, where using compact regions might reduce the future GC load of the application, it is relevant to benchmark the naive version twice: once with \mintinline{haskellc}/force/ and once with \mintinline{haskellc}/compact/.
+In part \textbf{C} of Figure~\ref{fig:bench-charts}, we compare the naive implementation of the S-expression parser and the DPS one (as presented in \cref{ssec:parser-sexpr}). For this particular program, where using compact regions might reduce the future GC load of the application, it is relevant to benchmark the naive version twice: once to produce a result in the GC heap that we evaluate fully with \mintinline{haskellc}/force/ (its name is suffixed with a star), and once to produce a result that we copy in a compact region using \mintinline{haskellc}/compact/.
 
 The DPS version starts by being less efficient than the naive versions for small inputs, but gets an edge as soon as garbage collection kicks in (on datasets of size $\leq 2^{16}$, no garbage collection cycle is required as the heap size stays small).
 
-On the largest dataset ($2^{22} \simeq 4$MiB file), the DPS version still makes about 45\% more allocations than the starred naive version, but uses 35\% less memory at its peak, and more importantly, spends 47$\times$ less time in garbage collection. As a result, the DPS version only takes 0.55-0.65$\times$ the time spent by the naive versions, thanks to garbage collection savings. All of this also indicates that most of the data allocated in the GC heap by the DPS version just lasts one generation and thus can be discarded very early by the GC, without needing to be copied into the next generation, unlike most nodes allocated by the naive versions.
+On the largest dataset ($2^{22} \simeq 4$MiB file), the DPS version still makes about 45\% more allocations than the starred naive version, but uses 35\% less memory at its peak, and more importantly, spends 47$\times$ less time in garbage collection. As a result, the DPS version only takes 0.55-0.65$\times$ the time spent by the naive versions, thanks to garbage collection savings. All of this also indicates that most of the data allocated in the GC heap by the DPS version is wrappers such as \mintinline{haskellc}/UAmpar/s and \mintinline{haskellc}/UDest/s that just last one generation and thus can be discarded very early by the GC, without needing to be copied into the next generation, unlike most data nodes allocated by the naive versions.
 
-Finally, copying the result of the naive version to a compact region (for future GC savings) incurs a significant time and memory penalty, that the DPS version offers to avoid.
+Finally, we see that copying the result of the naive version to a compact region (for future GC savings) incurs a significant time and memory penalty, that the DPS version offers to avoid.
 
-% \subsection{Mapping a function over a list}\label{ssec:benchmark-map}
+\subsection{Mapping a function over a list}\label{ssec:benchmark-map}
 
-% It seemed important to also measure the performance of a \mintinline{haskellc}/map/ function implementation using destinations. In a strict functional language such as OCaml, the choice of implementation for \mintinline{haskellc}/map/ is crucial as the naive one makes the stack grow linearly with the size of the processed list. A strict tail-recursive version (\mintinline{haskellc}/mapTR'/) takes $\mathcal{O}(1)$ space, but it requires an extra $\mathcal{O}(n)$ operation at the end of the processing (reversing the accumulator). 
+It seemed important to also measure the performance of a \mintinline{haskellc}/map/ function implementation using destinations. In a strict functional language such as OCaml, the choice of implementation for \mintinline{haskellc}/map/ is crucial as the naive one makes the stack grow linearly with the size of the processed list. A strict tail-recursive version (\mintinline{haskellc}/mapTR'/) takes $\mathcal{O}(1)$ space, but it requires an extra $\mathcal{O}(n)$ operation at the end of the processing (reversing the accumulator). 
 
-% With destinations, \mintinline{haskellc}/map/ can be implemented in a tail-recursive fashion without the need for the reverse operation (as the list is built in a top-down approach). It can also be implemented as a fold:
-% {\figtextsize
-% \begin{minted}[linenos]{haskellc}
-% append ⩴ UDest [a] ⊸ a → UDest [a]
-% append d x = let !(dh, dt) = fill @'(:) d in fillLeaf x dh ; dt
+With destinations, \mintinline{haskellc}/map/ can be implemented in a tail-recursive fashion, as explained in \cref{ssec:map-tr}, without the need for the reverse operation (as the list is built in a top-down approach). It can alternatively be implemented as a fold, as shown below:
+{\figtextsize
+\begin{minted}[linenos]{haskellc}
+append ⩴ UDest [a] ⊸ a → UDest [a]
+append d x = let !(dh, dt) = fill @'(:) d in fillLeaf x dh ; dt
 
-% mapDPS' _ [] d = fill @'[] d
-% mapDPS' f (x : xs) d = let !y = f x ; !d' = append d y in mapDPS' f xs d'
+mapDPS' _ [] d = fill @'[] d
+mapDPS' f (x : xs) d = let !y = f x ; !d' = append d y in mapDPS' f xs d'
 
-% mapDPSFold' f l dl = fill @'[] (foldl' (\d x → let !y = f x in append d y) d l)
-% \end{minted}
-% }
+mapDPSFold' f l dl = fill @'[] (foldl' (\d x → let !y = f x in append d y) d l)
+\end{minted}
+}
 
-% We see in part 4 of Figure~\ref{fig:bench-charts} that the destination-based implementations takes 1.5-4$\times$ more time than \mintinline{haskellc}/map/ and \mintinline{haskellc}/mapTR'/ (depending on the dataset size), but memory-wise both \mintinline{haskellc}/mapDPS'/ and \mintinline{haskellc}/mapDPSFold'/ are more efficient than \mintinline{haskellc}/map/; and \mintinline{haskellc}/mapDPS'/ even manage to make 13\% fewer allocs than \mintinline{haskellc}/mapTR'/ on the largest dataset.
+% TODO: update figure
 
-% In OCaml, \mintinline{haskellc}/mapDPS'/ is actually more performant time-wise than \mintinline{haskellc}/mapTR'/ ($0.5-0.85\times$) even for small lists, as detailed in~\cite{bour_tmc_2021}.
+We see in part 4 of Figure~\ref{fig:bench-charts} that the destination-based implementations takes 1.5-4$\times$ more time than \mintinline{haskellc}/map/ and \mintinline{haskellc}/mapTR'/ (depending on the dataset size), but memory-wise both \mintinline{haskellc}/mapDPS'/ and \mintinline{haskellc}/mapDPSFold'/ are more efficient than \mintinline{haskellc}/map/; and \mintinline{haskellc}/mapDPS'/ even manage to make 13\% fewer allocs than \mintinline{haskellc}/mapTR'/ on the largest dataset.
+
+In OCaml, \mintinline{haskellc}/mapDPS'/ is actually more performant time-wise than \mintinline{haskellc}/mapTR'/ ($0.5-0.85\times$) even for small lists, as detailed in benchmarks of \cite{bour_tmc_2021}.
 
 \section{Conclusion and future work}
 
