@@ -263,6 +263,17 @@ However, when $[[vd]]$'s scope is parent to $[[v]]$'s, we can write a linearly t
 
 Again, the problem is, using purely a linear type system, we can only reject this example if we also reject the first, sound example. In this case, the type $[[⌊ ⌊ T⌋ ¹ν⌋ ¹ν]]$ would become practically useless: such destinations can never be filled. This isn't the direction we want to take: we really want to be able to store destinations in data structures with holes. So we want $[[t]]$ in $[[d ◀ t]]$ to be allowed to be linear. Without further restrictions, it wouldn't be sound, so to address this, we need an extra control system to prevent scope escape; it can't be just linearity. For \destcalculus{}, we decided to use a system of \emph{ages} to represent which scope a resource originates from. Ages are described in detail in \cref{sec:syntax-type-system}; but first, let's see an exemple where storing destinations in data structures really matters.
 
+% TODO: raconter ce qu'on a compris sur l'intéraction entre ref, linéarité, escape, dests
+
+\paragraph{General considerations on linearity, scopes, and references}
+
+Scope escape, that we just described, is not an issue specific to destinations. In fact, it seems that any form of storage, be it destinations, or \mintinline{haskellc}/ref/s \emph{à la} OCaml, or anything that can be written to, is susceptible to let scope escape happens if we give it a linear write interface.
+
+Most of the time, linear interfaces rely on the fact that there is a specific set of functions available acting as destructors for a given resource type, and we want to be sure that one of them is called for each resource at some point. Linearity forces us to consume the resource in the scope it is made available, and if the resource type is opaque, then the only way to consume it is by eventually calling one of these destructors. Except if we are given linear storage, in which case we can consume the resource by storing it away; this is the essence of scope escape.
+
+We are not aware of a technique that would let us reconcile mutable storage and linearity, without breaking safety of linear APIs.
+
+
 \section{Breadth-first tree traversal}\label{sec:bft}
 
 As a full-fledged example, which uses the full expressive power of \destcalculus{}, we focus breadth-first tree relabeling:
