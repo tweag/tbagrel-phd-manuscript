@@ -273,7 +273,6 @@ Most of the time, linear interfaces rely on the fact that there is a specific se
 
 We are not aware of a technique that would let us reconcile mutable storage and linearity, without breaking safety of linear APIs.
 
-
 \section{Breadth-first tree traversal}\label{sec:bft}
 
 As a full-fledged example, which uses the full expressive power of \destcalculus{}, we focus breadth-first tree relabeling:
