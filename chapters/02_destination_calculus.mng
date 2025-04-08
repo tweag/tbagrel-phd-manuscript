@@ -3,7 +3,7 @@
 In the previous chapter we laid out important building blocks for the functional language that we'll develop here, namely \destcalculus{}. But first, let's focus again on destination-passing style programming, and why it matters in a functional setting.
 
 \begin{quote}
-  This chapter is adapted from article \cite{bagrel_destination_preprint_2025}, soon to be published at the OOPSLA1 2025 conference. The most significant changes are relative to the graded modal approach, which is already presented in detail in \cref{chap:preli}, and implementation concerns (\cref{sec:implem-destcalculus}).
+  This chapter is adapted from article \cite{bagrel_destination_preprint_2025}, soon to be published at the OOPSLA1 2025 conference. The most significant changes are relative to the graded modal approach, which is already presented in detail in \cref{chap:preli}, and relative to implementation concerns (\cref{sec:implem-destcalculus}).
 \end{quote}
 
 \section{Destination-passing style programming}\label{sec:intro}
