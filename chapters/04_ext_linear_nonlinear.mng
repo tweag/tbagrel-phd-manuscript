@@ -14,7 +14,11 @@ If we only allow one hole, then it means we cannot have functions such that \min
 The signature of such a function would be as follows:
 
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-extend ⩴ forall lCtor k t s m fiTy kthFiTy othFiTys. (OnlyLinear lCtor t, FieldTypes lCtor t ~ fiTys, At k fiTys ~ kthFiTy, Remove k fiTys ~ othFiTys) ⇒ Ampar s (Dest m t) ⊸ othFiTys %m -> Ampar s (Dest m kthFiTy)
+extend ⩴ ∀ lCtor k t s m fiTy kthFiTy othFiTys.
+          (OnlyLinear lCtor t,
+           FieldTypes lCtor t ~ fiTys,
+           At k fiTys ~ kthFiTy, Remove k fiTys ~ othFiTys) ⇒
+          Ampar s (Dest m t) ⊸ othFiTys %m→ Ampar s (Dest m kthFiTy)
 \end{minted}
 
 There's a lot to decipher here. \mintinline{haskellc}/FieldsTypes/ is a type family that returns a tuple of the types of the fields for a given constructor, specified in its type-lifted representation \mintinline{haskellc}/lCtor/ and the type \mintinline{haskellc}/t/ to which the constructor belongs. For example, \mintinline{haskellc}/FieldsTypes '(:) [Int]/ resolves to \mintinline{haskellc}/(Int, [Int])/. \mintinline{haskellc}/At k/ is a type family that returns the \mintinline{haskellc}/k/\textsuperscript{th} element (i.e. type) of a tuple type, and similarly, \mintinline{haskellc}/Remove k/ returns the same tuple type it is given, with the \mintinline{haskellc}/k/\textsuperscript{th} removed.
@@ -25,4 +29,25 @@ For instance, in \mintinline{haskellc}/extend @'(:) @0 @[Int]/, \mintinline{hask
 
 \mintinline{haskellc}/extend/ takes an ampar whose right side is a destination of type \mintinline{haskellc}/t/, with multiplicity \mintinline{haskellc}/m/. It then allocates a new hollow constructor (specified by \mintinline{haskellc}/lCtor/), consumes \mintinline{haskellc}/othFiTys/ at multiplicity \mintinline{haskellc}/m/ to fill all the fields of the new hollow constructor except the \mintinline{haskellc}/k/\textsuperscript{th}, and then returns a destination with same multiplicity \mintinline{haskellc}/m/ for that remaining field of type \mintinline{haskellc}/kthFiTy/.
 
-Here, we assume that the constructor in question only has linear fields, as the multiplicity at which we consume the values for the fields, and at which we return the new destination, are the same as the multiplicity of the parent destination. We reflect that by the pseudo-constraint \mintinline{haskellc}/OnlyLinear lCtor t/. Ideally, we could go further and be polymorphic over the multiplicity of each field, however, to this date, we cannot get that information through GHC.Generics (GHC.Generics is only implemented for constructors having just linear fields). That also means we will have to build a custom version of \mintinline{haskellc}/extend/ for the \mintinline{haskellc}/Ur/ constructor.
+Note that \mintinline{haskellc}/extend/ doesn't support constructors with 0 fields, as these can be plugged into the structure, like any other complete value, with \mintinline{haskellc}/extendLeaf/:
+
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+extendLeaf ⩴ ∀ s t m. Ampar s (Dest m t) ⊸ t %m→ Ampar s ()
+\end{minted}
+Because we only have one destination on the right-hand side of the ampar, that has now been consumed, we could directly return the completed structure, instead of returning an \mintinline{haskellc}/Ampar s ()/:
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+fromAmparWithLeaf ⩴ ∀ s t m. Ampar s (Dest m t) ⊸ t %m→ s
+fromAmparWithLeaf = fromAmpar' . extendLeaf
+\end{minted}
+
+Note also that above, for \mintinline{haskellc}/extend/, we assumed that the constructor in question only has linear fields, as the multiplicity at which we consume the values for the fields, and at which we return the new destination, are the same as the multiplicity of the parent destination. We reflect that by the pseudo-constraint \mintinline{haskellc}/OnlyLinear lCtor t/. Ideally, we could go further and be polymorphic over the multiplicity of each field, however, to this date, we cannot get that information through GHC.Generics (GHC.Generics is only implemented for constructors having just linear fields). That also means we will have to build a custom version of \mintinline{haskellc}/extend/ for the \mintinline{haskellc}/Ur/ constructor:
+
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+extendUr ⩴ ∀ s t m. Ampar s (Dest m (Ur t)) ⊸ Ampar s (Dest ω t)
+\end{minted}
+
+The last function that we need, in this world is \mintinline{haskellc}/extendComp/, to plug two ampars together:
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+extendComp ⩴ ∀ s t u. Ampar s (Dest 1 t) ⊸ Ampar t u ⊸ Ampar s u
+\end{minted}
+In \mintinline{haskellc}/extendComp/, we need the destination in the parent ampar to be linear, as we fill it with an ampar, which is a linear resource\footnote{Even in a \destcalculus{}-like world, where ampars don't have to be linear, the destination used for composition using $\mathop{\triangleleft\mycirc}$ / \mintinline{haskellc}/fillComp/ / \mintinline{haskellc}/extendComp/ must be linear. The reason is that if we write the child ampar into an unrestricted destination of the parent ampar, then we would need to update the remaining destinations of that child ampar to be unrestricted too, and that is hard to do when we can have arbitrarily complex types on the right-hand side of an ampar.}.
