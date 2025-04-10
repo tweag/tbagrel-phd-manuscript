@@ -6,6 +6,8 @@ This is unfortunate, because previous work, such as \cite{minamide_functional_19
 
 One observation is that scope escape can only happen when we let the user have direct access to a linear destination\footnote{Starting from this point, we will call \emph{linear destination} an object of type $[[⌊ T ⌋ ˥]]$ or corresponding \mintinline{haskellc}/Dest 1 t/, that is, a destination that can host linear data. Similarly, an \emph{unrestricted destination} will be an object of type $[[⌊ T ⌋ ɷ]]$ or \mintinline{haskellc}/Dest ω t/}. That's one necessary condition for scope escape to happen.
 
+\subsection{Restricting ampars for linear data to a single hole}\label{ssec:single-hole}
+
 As we've seen in previous chapter, it's enough to forbid linear destinations to prevent any potential scope escape, and recover a safe system without the need for ages. But we could be more subtle, and allow linear destinations on the right-hand side of an ampar, while preventing the user from ever accessing them.
 
 If we do so, how could the user use these destinations to build a structure? Well, we need new operators, that operate on a closed ampars, instead of a destination. In fact, that is exactly what happens in \cite{minamide_functional_1998}, or \cite{lorenzen_searchtree_2024}: they only allow incomplete structures with one hole, and extending the structure happens by manipulating the whole incomplete structure itself, not destinations (as they don't exist in these works).
@@ -51,3 +53,12 @@ The last function that we need, in this world is \mintinline{haskellc}/extendCom
 extendComp ⩴ ∀ s t u. Ampar s (Dest 1 t) ⊸ Ampar t u ⊸ Ampar s u
 \end{minted}
 In \mintinline{haskellc}/extendComp/, we need the destination in the parent ampar to be linear, as we fill it with an ampar, which is a linear resource\footnote{Even in a \destcalculus{}-like world, where ampars don't have to be linear, the destination used for composition using $\mathop{\triangleleft\mycirc}$ / \mintinline{haskellc}/fillComp/ / \mintinline{haskellc}/extendComp/ must be linear. The reason is that if we write the child ampar into an unrestricted destination of the parent ampar, then we would need to update the remaining destinations of that child ampar to be unrestricted too, and that is hard to do when we can have arbitrarily complex types on the right-hand side of an ampar.}.
+
+\subsection{Arbitrary type on the right-hand side of ampars}\label{ssec:linear-lens}
+
+Being limited to only one hole on the right-hand side of ampars is not ideal.
+One idea to recover arbitrary types on the right-hand side of ampars while still preventing scope escape is to ask the user for a linear lens, to select which destination in the right-hand side they want to operate on. The idea is still the same: if we give a linear destination to the user, scope escape becomes possible, so instead we let the user select which destination they want to fill, by asking for both the ampar (that contain the destination) and a linear lens to focus that particular destination. The linear destination cannot escape its scope as we don't even let the user enter that scope themself.
+
+Unfortunately, adding linear lens to the mix means the signature of \mintinline{haskellc}/extend/ will become even more complex. But first, let's define what a linear lens is.
+
+Lenses are a pattern for defining functional getters and setters that compose easily in an immutable functional programming language.
