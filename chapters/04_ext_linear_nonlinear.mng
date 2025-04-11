@@ -61,4 +61,50 @@ One idea to recover arbitrary types on the right-hand side of ampars while still
 
 Unfortunately, adding linear lens to the mix means the signature of \mintinline{haskellc}/extend/ will become even more complex. But first, let's define what a linear lens is.
 
-Lenses are a pattern for defining functional getters and setters that compose easily in an immutable functional programming language.
+Lenses are a pattern for defining functional getters and setters that compose easily in an immutable functional programming language. A lens of type \mintinline{haskellc}/Lens t1 t2 u1 u2/ has two components (at least conceptually):
+\begin{itemize}
+    \item a getter for a value of type \mintinline{haskellc}/u1/ somewhere inside the structure of type \mintinline{haskellc}/t1/, which establishes the \emph{focus} of the lens;
+    \item a way to transform a structure of type \mintinline{haskellc}/t1/ into a structure of type \mintinline{haskellc}/t2/ by replacing the (focused) value of type \mintinline{haskellc}/u1/ by a value of type \mintinline{haskellc}/u2/.
+\end{itemize}
+
+Although it isn't the most efficient and practical representation, non-linear lenses can be implemented by the following datatype:
+\begin{minted}[escapeinside=°°]{haskellc}
+data LensNL t1 t2 u1 u2 = ¤LensNL { view ⩴ t1 → u1  -- just get u1 out of t1, discard the rest
+                                  , update ⩴ t1 → u2 → t2  -- discard the u1 inside t1 and replace it with a u2 to make a t2
+                                  }
+\end{minted}
+For linear lenses, we are not allowed to use the \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ components separately; otherwise we could drop parts of the original structure of type \mintinline{haskellc}/t1/. So instead, we group the two functions into one:
+\begin{minted}[escapeinside=°°]{haskellc}
+newtype Lens t1 t2 u1 u2 = ¤Lens (t1 ⊸ (u1, u2 ⊸ t2))
+\end{minted}
+With a linear lens of type \mintinline{haskellc}/Lens t1 t2 u1 u2/, we can split a structure of type \mintinline{haskellc}/t1/ into a pair of a value of type \mintinline{haskellc}/u1/ (the focus), and a closure of type \mintinline{haskellc}/u2 ⊸ t2/ that carries all the rest of the original \mintinline{haskellc}/t1/, and is ready to produce a structure of type \mintinline{haskellc}/t2/ if we give it a \mintinline{haskellc}/u2/. Both of these have to be consumed if we want to respect linearity.
+
+The simplest lens is the standard getter and setter, where \mintinline{haskellc}/t1 = t2/ and \mintinline{haskellc}/u1 = u2/, and thus, \mintinline{haskellc}/Lens t t u u/ becomes an alias for \mintinline{haskellc}/t ⊸ (u, u ⊸ t)/. There, the second element of the pair, of type \mintinline{haskellc}/u ⊸ t/, is really just a functional representation of a \mintinline{haskellc}/t/ missing a \mintinline{haskellc}/u/ to be complete! For example:
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+data Triple t1 t2 t3 = ¤Triple { first ⩴ t1, second ⩴ t2, third ⩴ t3 }
+
+fstMono ⩴ Lens (Triple t1 t2 t3) (Triple t1 t2 t3) t1 t1
+fstMono (¤Triple{ first, second, third }) = (first, \newFirst -> Pair { newFirst, second, third })
+\end{minted}
+
+As we see, when we are operating on a polymorphic type such as \mintinline{haskellc}/Triple/, it is a bit silly to restrict our lens to the same type \mintinline{haskellc}/t1/ for both the original value at the focus, and the updated one. We gain much more flexibility by doing:
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+data Triple t1 t2 t3 = ¤Triple { first ⩴ t1, second ⩴ t2, third ⩴ t3 }
+
+fst ⩴ Lens (Triple t1 t2 t3) (Triple t4 t2 t3) t1 t4
+fst (¤Triple{ first, second, third }) = (first, \newFirst -> Pair { newFirst, second, third })
+\end{minted}
+
+\paragraph{Lenses to select destinations to operate on}
+
+If we allow more than one linear destination on the right-hand side of ampars, and still disallow the user from using them directly (with fill-like functions), then we need to let them indicate which destination they want to operate on (it was obvious with \mintinline{haskellc}/extend/ in the previous section, as there was only one possible choice).
+
+For that, linear lenses appear to be the perfect solution. With them, the user can communicate which destination they want to focus, and we gain a way to inject back the newly produced destinations at the right place on the right-hand side of the ampar:
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+extendFocused ⩴ ∀ lCtor u t1 t2 s m.
+(OnlyLinear lCtor u) ⇒
+Lens t1 t2 (Dest m u) (DestsOf lCtor m u) ⊸ Ampar s t1 ⊸ Ampar s t2
+
+extendWithPairOnFirst ⩴ Ampar s (Triple (Dest m (t11, t12)) t2 t3) ⊸ Ampar s (Triple (Dest m t11, Dest m t12) t2 t3)
+extendWithPairOnFirst ampar = ampar & (fst & extendFocused @'(,))
+\end{minted}
