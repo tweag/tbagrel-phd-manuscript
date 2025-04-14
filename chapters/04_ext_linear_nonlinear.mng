@@ -56,7 +56,7 @@ In \mintinline{haskellc}/extendComp/, we need the destination in the parent ampa
 
 \subsection{Arbitrary type on the right-hand side of ampars}\label{ssec:linear-lens}
 
-Being limited to only one hole on the right-hand side of ampars is not ideal.
+Being limited to only one hole on the right-hand side of ampars is not ideal. Indeed, we stay at the same expressivity level than existing work.
 One idea to recover arbitrary types on the right-hand side of ampars while still preventing scope escape is to ask the user for a linear lens, to select which destination in the right-hand side they want to operate on. The idea is still the same: if we give a linear destination to the user, scope escape becomes possible, so instead we let the user select which destination they want to fill, by asking for both the ampar (that contain the destination) and a linear lens to focus that particular destination. The linear destination cannot escape its scope as we don't even let the user enter that scope themself.
 
 Unfortunately, adding linear lens to the mix means the signature of \mintinline{haskellc}/extend/ will become even more complex. But first, let's define what a linear lens is.
@@ -69,9 +69,10 @@ Lenses are a pattern for defining functional getters and setters that compose ea
 
 Although it isn't the most efficient and practical representation, non-linear lenses can be implemented by the following datatype:
 \begin{minted}[escapeinside=°°]{haskellc}
-data LensNL t1 t2 u1 u2 = ¤LensNL { view ⩴ t1 → u1  -- just get u1 out of t1, discard the rest
-                                  , update ⩴ t1 → u2 → t2  -- discard the u1 inside t1 and replace it with a u2 to make a t2
-                                  }
+data LensNL t1 t2 u1 u2 = ¤LensNL
+  { view ⩴ t1 → u1  -- just get u1 out of t1, discard the rest
+  , update ⩴ t1 → u2 → t2  -- discard the u1 inside t1 and replace it with a u2 to make a t2
+  }
 \end{minted}
 For linear lenses, we are not allowed to use the \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ components separately; otherwise we could drop parts of the original structure of type \mintinline{haskellc}/t1/. So instead, we group the two functions into one:
 \begin{minted}[escapeinside=°°]{haskellc}
@@ -84,15 +85,13 @@ The simplest lens is the standard getter and setter, where \mintinline{haskellc}
 data Triple t1 t2 t3 = ¤Triple { first ⩴ t1, second ⩴ t2, third ⩴ t3 }
 
 fstMono ⩴ Lens (Triple t1 t2 t3) (Triple t1 t2 t3) t1 t1
-fstMono (¤Triple{ first, second, third }) = (first, \newFirst -> Pair { newFirst, second, third })
+fstMono (¤Triple { first, second, third }) = (first, \newFirst -> Pair { newFirst, second, third })
 \end{minted}
 
 As we see, when we are operating on a polymorphic type such as \mintinline{haskellc}/Triple/, it is a bit silly to restrict our lens to the same type \mintinline{haskellc}/t1/ for both the original value at the focus, and the updated one. We gain much more flexibility by doing:
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-data Triple t1 t2 t3 = ¤Triple { first ⩴ t1, second ⩴ t2, third ⩴ t3 }
-
 fst ⩴ Lens (Triple t1 t2 t3) (Triple t4 t2 t3) t1 t4
-fst (¤Triple{ first, second, third }) = (first, \newFirst -> Pair { newFirst, second, third })
+fst (¤Triple { first, second, third }) = (first, \newFirst -> Pair { newFirst, second, third })
 \end{minted}
 
 \paragraph{Lenses to select destinations to operate on}
@@ -102,9 +101,17 @@ If we allow more than one linear destination on the right-hand side of ampars, a
 For that, linear lenses appear to be the perfect solution. With them, the user can communicate which destination they want to focus, and we gain a way to inject back the newly produced destinations at the right place on the right-hand side of the ampar:
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendFocused ⩴ ∀ lCtor u t1 t2 s m.
-(OnlyLinear lCtor u) ⇒
-Lens t1 t2 (Dest m u) (DestsOf lCtor m u) ⊸ Ampar s t1 ⊸ Ampar s t2
+                (OnlyLinear lCtor u) ⇒
+                Lens t1 t2 (Dest m u) (DestsOf lCtor m u) ⊸ Ampar s t1 ⊸ Ampar s t2
 
 extendWithPairOnFirst ⩴ Ampar s (Triple (Dest m (t11, t12)) t2 t3) ⊸ Ampar s (Triple (Dest m t11, Dest m t12) t2 t3)
-extendWithPairOnFirst ampar = ampar & (fst & extendFocused @'(,))
+extendWithPairOnFirst ampar = ampar &(fst &extendFocused @'(,))
 \end{minted}
+
+\paragraph{Limitations of lenses}
+
+Thanks to lenses, we now have a way to operate on linear destinations in arbitrary position on the right-hand side of ampars, but we cannot reorder them or move them around, so we cannot do breadth-first traversal on a linear tree, for example. I don't think there is a way to make destination handling less restricted, without reintroducing potential scope escape.
+
+Still, the situation is quite satisfying. We still can't store linear destinations into linear destinations, but we can store unrestricted destinations into linear destinations. As a result, we can implement breadth-first traversal (for an unrestricted tree), in which we store the unrestricted destinations of the output tree inside an efficient queue, which is made with difference list having linear destinations !
+
+In other terms, we can have at most two usable layers of nesting for destinations. Unrestricted destinations \mintinline{haskellc}/Dest ω t/ for the parent scope, that can be stored (temporarily) inside structures built in a more inner scope using linear destinations \mintinline{haskellc}/Dest 1 (Dest ω t)/. A destination of type \mintinline{haskellc}/Dest ω (Dest m t)/, whatever \mintinline{haskellc}/m/ is, wouldn't be able to be filled because destinations are always a linear resource, and a destination of type \mintinline{haskellc}/Dest 1 (Dest 1 t)/ wouldn't be able to be filled either because the user cannot ever have access to a linear destination as a variable thanks to the restriction we put in place.
