@@ -110,8 +110,63 @@ extendWithPairOnFirst ampar = ampar &(fst &extendFocused @'(,))
 
 \paragraph{Limitations of lenses}
 
+% TODO: in fact, that's not true!
+
 Thanks to lenses, we now have a way to operate on linear destinations in arbitrary position on the right-hand side of ampars, but we cannot reorder them or move them around, so we cannot do breadth-first traversal on a linear tree, for example. I don't think there is a way to make destination handling less restricted, without reintroducing potential scope escape.
 
 Still, the situation is quite satisfying. We still can't store linear destinations into linear destinations, but we can store unrestricted destinations into linear destinations. As a result, we can implement breadth-first traversal (for an unrestricted tree), in which we store the unrestricted destinations of the output tree inside an efficient queue, which is made with difference list having linear destinations !
 
 In other terms, we can have at most two usable layers of nesting for destinations. Unrestricted destinations \mintinline{haskellc}/Dest ω t/ for the parent scope, that can be stored (temporarily) inside structures built in a more inner scope using linear destinations \mintinline{haskellc}/Dest 1 (Dest ω t)/. A destination of type \mintinline{haskellc}/Dest ω (Dest m t)/, whatever \mintinline{haskellc}/m/ is, wouldn't be able to be filled because destinations are always a linear resource, and a destination of type \mintinline{haskellc}/Dest 1 (Dest 1 t)/ wouldn't be able to be filled either because the user cannot ever have access to a linear destination as a variable thanks to the restriction we put in place.
+
+% TODO: Truc bizarre, dans dps haskell, on peut composer des structures alors que les dests sont "unrestricted"
+% TODO: scope escape caché via fillComp -> possible car toAmpar est linéaire
+
+\begin{listing}[t]
+\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+data Token
+dup ⩴ Token ⊸ (Token, Token)
+drop ⩴ Token ⊸ ()
+withToken ⩴ ∀ t. (Token ⊸ Ur t) ⊸ Ur t
+
+type Region r ⩴ Constraint
+inRegion ⩴ ∀ t. (∀ r. Region r ⇒ t) ⊸ t
+
+data Ampar r s t
+newAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ Ampar s (Dest r 1 s)
+newAmparBesides ⩴ ∀ r1 r2 s t u. (Region r1, Region r2) ⇒ Ampar r1 s t ⊸ (Ampar r1 s t, Ampar r2 u (Dest r 1 u))
+toAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ s ⊸ Ampar r s () -- now linear
+fromAmpar  ⩴ ∀ r s t. Region r ⇒ Ampar r s (Ur t) ⊸ (s, Ur t)
+fromAmpar' ⩴ ∀ r s. Region r ⇒ Ampar r s () ⊸ s
+updWith ⩴ ∀ r s t u. Region r ⇒ Ampar r s t ⊸ (t ⊸ u) ⊸ Ampar r s u
+
+data Dest r m t
+type family DestsOf lCtor r m t -- returns dests associated to fields of constructor
+
+-- API for unrestricted destinations
+fill ⩴ ∀ lCtor r t. Region r ⇒ Dest r ω t ⊸ DestsOf lCtor r ω t
+fillLeaf ⩴ ∀ r t. Region r ⇒ t → Dest r ω t ⊸ ()
+
+-- API for ampars with linear destinations
+
+-- simplified
+extend ⩴ ∀ lCtor r k t s m fiTy kthFiTy othFiTys.
+          (Region r, OnlyLinear lCtor t,
+           FieldTypes lCtor t ~ fiTys,
+           At k fiTys ~ kthFiTy, Remove k fiTys ~ othFiTys) ⇒
+          Ampar r s (Dest r m t) ⊸ othFiTys %m→ Ampar r s (Dest r m kthFiTy)
+extendUr ⩴ ∀ r s t m. Region r ⇒ Ampar r s (Dest r m (Ur t)) ⊸ Ampar r s (Dest r ω t)
+extendLeaf ⩴ ∀ r s t m. Region r ⇒ Ampar r s (Dest r m t) ⊸ t %m→ Ampar r s ()
+extendComp ⩴ ∀ r s t u. Region r ⇒ Ampar r s (Dest r 1 t) ⊸ Ampar r t u ⊸ Ampar r s u
+
+-- with lenses
+extendFocused ⩴ ∀ lCtor r u t1 t2 s m.
+                (Region r, OnlyLinear lCtor u) ⇒
+                Lens t1 t2 (Dest r m u) (DestsOf lCtor r m u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
+
+\end{minted}
+\caption{More flexible Destination API (still using compact regions)}
+\label{table:destination-api-regions-v2}
+\end{listing}
+
+% TODO: On perd en généralité car on n'a plus fillComp

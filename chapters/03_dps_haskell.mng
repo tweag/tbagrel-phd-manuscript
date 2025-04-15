@@ -410,8 +410,8 @@ type Region r ⩴ Constraint
 °\mnew{inRegion ⩴ ∀ t. (∀ r. Region r ⇒ t) ⊸ t}°
 
 data UAmpar r s t
-newUAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ UAmpar s (UDest s)
-newUAmparBesides ⩴ ∀ r1 r2 s t u. (Region r1, Region r2) ⇒ UAmpar r1 s t ⊸ (UAmpar r1 s t, UAmpar r2 u (UDest u))
+newUAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ UAmpar s (UDest r s)
+newUAmparBesides ⩴ ∀ r1 r2 s t u. (Region r1, Region r2) ⇒ UAmpar r1 s t ⊸ (UAmpar r1 s t, UAmpar r2 u (UDest r u))
 toUAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ s → UAmpar r s ()
 fromUAmpar  ⩴ ∀ r s t. Region r ⇒ UAmpar r s (Ur t) ⊸ Ur (s, t)
 fromUAmpar' ⩴ ∀ r s. Region r ⇒ UAmpar r s () ⊸ Ur s
