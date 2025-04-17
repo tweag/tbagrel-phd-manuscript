@@ -34,11 +34,11 @@ For instance, in \mintinline{haskellc}/extend @'(:) @0 @[Int]/, \mintinline{hask
 Note that \mintinline{haskellc}/extend/ doesn't support constructors with 0 fields, as these can be plugged into the structure, like any other complete value, with \mintinline{haskellc}/extendLeaf/:
 
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-extendLeaf ⩴ ∀ s t m. Ampar s (Dest m t) ⊸ t %m→ Ampar s ()
+extendLeaf ⩴ ∀ s t m. t %m→ Ampar s (Dest m t) ⊸ Ampar s ()
 \end{minted}
 Because we only have one destination on the right-hand side of the ampar, that has now been consumed, we could directly return the completed structure, instead of returning an \mintinline{haskellc}/Ampar s ()/:
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-fromAmparWithLeaf ⩴ ∀ s t m. Ampar s (Dest m t) ⊸ t %m→ s
+fromAmparWithLeaf ⩴ ∀ s t m. t %m→ Ampar s (Dest m t) ⊸ s
 fromAmparWithLeaf = fromAmpar' . extendLeaf
 \end{minted}
 
@@ -156,13 +156,21 @@ extend ⩴ ∀ lCtor r k t s m fiTy kthFiTy othFiTys.
            At k fiTys ~ kthFiTy, Remove k fiTys ~ othFiTys) ⇒
           Ampar r s (Dest r m t) ⊸ othFiTys %m→ Ampar r s (Dest r m kthFiTy)
 extendUr ⩴ ∀ r s t m. Region r ⇒ Ampar r s (Dest r m (Ur t)) ⊸ Ampar r s (Dest r ω t)
-extendLeaf ⩴ ∀ r s t m. Region r ⇒ Ampar r s (Dest r m t) ⊸ t %m→ Ampar r s ()
+extendLeaf ⩴ ∀ r s t m. Region r ⇒ t %m→ Ampar r s (Dest r m t) ⊸ Ampar r s ()
 extendComp ⩴ ∀ r s t u. Region r ⇒ Ampar r s (Dest r 1 t) ⊸ Ampar r t u ⊸ Ampar r s u
 
 -- with lenses
 extendFocused ⩴ ∀ lCtor r u t1 t2 s m.
                 (Region r, OnlyLinear lCtor u) ⇒
                 Lens t1 t2 (Dest r m u) (DestsOf lCtor r m u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
+extendFocusedUr ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
+                  Lens t1 t2 (Dest r m (Ur u)) (Dest r ω u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
+extendFocusedLeaf ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
+                    u %m→ Lens t1 t2 (Dest r m u) () ⊸ Ampar r s t1 ⊸ Ampar r s t2
+                    
+                    -- TODO: inverse order
+extendFocusedComp ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
+                    Lens t1 t2 (Dest r m u) (DestsOf lCtor r m u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
 
 \end{minted}
 \caption{More flexible Destination API (still using compact regions)}
@@ -170,3 +178,16 @@ extendFocused ⩴ ∀ lCtor r u t1 t2 s m.
 \end{listing}
 
 % TODO: On perd en généralité car on n'a plus fillComp
+
+% Si on ne connait pas l'âge d'une dest, mais qu'on sait qu'elle a un age fini inconnu, alors on peut la remplir avec un truc omega infini
+% Se justifie via un opérateur de retard?
+% Age inconnu = plus petit élément du semiring
+
+% updWith non capturant
+
+% Sinon on peut faire :
+
+% ampar1 `updWith` \d1 ->
+% 	ampar2 `updWith` \d2 ->
+% 		(ampar3 `updWith` \d3 -> (d1, d3)) & (fst & extendFocusedLeaf d2)
+
