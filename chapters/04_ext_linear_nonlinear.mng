@@ -1,10 +1,39 @@
 \chapter{Extending DPS support for linear data structures}\label{chap:ext-linear-nonlinear}
 
-One problem with the approach of the previous chapter is that we are not able to build data structures hosting linear data with a destination-based approach.
+One issue with the approach of the previous chapter is that we are not able to build data structures hosting linear data with a destination-based approach. This is the consequence of having a lot of flexibility in the handling of destinations, without a system of ages to prevent scope escape in a fine-grained manner.
 
-This is unfortunate, because previous work, such as \cite{minamide_functional_1998}, or \cite{lorenzen_searchtree_2024} would allow for efficient queues to store linear data, without issues with scope escape.
+Previous work however, such as \cite{minamide_functional_1998}, or \cite{lorenzen_searchtree_2024}, would allow for efficient queues (see \cref{ssec:efficient-queue}) to store linear data, without issues with scope escape. So we ought to find a way for our Haskell implementation to be at least as expressive as these works.
 
-Let's say we now allow destinations to be filled with linear data\footnote{Starting from this point, we will call \emph{linear destination} an object of type $[[⌊ T ⌋ ˥]]$ or corresponding \mintinline{haskellc}/Dest 1 t/, that is, a destination that can host linear data. One observation is that scope escape can only happen when we let the user fill an older linear destination in a newer scope. Similarly, an \emph{unrestricted destination} will be an object of type $[[⌊ T ⌋ ɷ]]$ or \mintinline{haskellc}/Dest ω t/}. That's one necessary condition for scope escape to happen.
+If we now allow destinations to be filled with linear data\footnote{Starting from this point, we will call \emph{linear destination} an object of type $[[⌊ T ⌋ ˥]]$ or corresponding \mintinline{haskellc}/Dest 1 t/, that is, a destination that can host linear data. Similarly, an \emph{unrestricted destination} will be an object of type $[[⌊ T ⌋ ɷ]]$ or \mintinline{haskellc}/Dest ω t/}, we have to be extremely careful about potential scope escape. One observation is that scope escape can only happen when we let the user fill an older linear destination in a newer scope.
+
+A potential remedy would be to not allow older linear destinations to be filled using a \mintinline{haskellc}/fill/-like function. Instead, linear destinations could only be filled by operating on the ampar they belong to, as in \cite{minamide_functional_1998} and \cite{lorenzen_searchtree_2024}. Unrestricted destinations, on the other hand, could still be used with \mintinline{haskellc}/fill/-like functions:
+
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+data Ampar s t
+newAmpar ⩴ Token ⊸ Ampar s (Dest 1 s)
+
+-- for unrestricted destinations
+fillLeaf ⩴ t → Dest ω t → ()
+
+-- for linear destinations
+extendLeaf ⩴ t ⊸ Ampar s (Dest 1 t) ⊸ Ampar s ()
+\end{minted}
+
+The idea is that \mintinline{haskellc}/extendLeaf/ is a way of opening a new scope, and filling the linear destination, belonging to that fresh scope, immediately, without letting the user interfering. So we are sure that the linear destination filled by \mintinline{haskellc}/extendLeaf/ is strictly younger than whatever ends up stored into it, which prevents scope escape (recall the sane example of \cref{sec:scope-escape-dests}, where an older destination is stored into a younger one with no issues).
+
+Except\ldots{}it still isn't safe:
+
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+newAmpar tok0 `updWith` \d0 ->
+  newAmpar tok1 `updWith` \d1 ->
+    (newAmpar tok2 `updWith` \d2 -> d2 &fillLeaf () ; d0) &extendLeaf d1
+\end{minted}
+
+In this particularly cursed excerpt, we hide an old destination \mintinline{haskellc}/d0/ inside the nest of a fresher one \mintinline{haskellc}/d2/ that we've just consumed. So we have an ampar \mintinline{haskellc}/(newAmpar `updWith` \d2 -> d2 &fillLeaf () ; d0)/ whose right-hand side contains a destination which isn't its own; and we can use that together with \mintinline{haskellc}/extendLeaf/ to cause scope escape!
+
+There seems to be an inevitable friction between having a flexible \mintinline{haskellc}/updWith/ function, and having linear destinations, when we don't have a proper age system to ensure there is no cheating with scopes.
+
+\paragraph{}
 
 A simple remedy for that is to forbid older destinations from being captured in newer scopes. We cannot exactly do that, but we can be more brutal and force \mintinline{haskellc}/updWith/ to \emph{not} capture any linear resource. That way, the only destinations accessible and usable in the scope of \mintinline{haskellc}/updWith/ are the one coming immediately from the ampar being opened.
 

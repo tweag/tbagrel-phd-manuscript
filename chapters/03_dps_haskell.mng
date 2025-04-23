@@ -356,7 +356,7 @@ The last part of the API is the one in charge of actually building the structure
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 parent ⩴ UAmpar BigStruct (UDest SmallStruct, UDest OtherStruct)
 child ⩴ UAmpar SmallStruct (UDest Int)
-comp = parent `updWith` \(ds, extra) → fillComp child ds
+comp = parent `updWith` \(ds, extra) → ds &fillComp child
        ⩴ UAmpar BigStruct (UDest Int, UDest OtherStruct)
 \end{minted}
 }
