@@ -237,11 +237,12 @@ Should we count $[[d]]$ as linearly used here? The alternatives don't seem promi
 \end{itemize}\vspace{-0.04cm}
 So linear use it is. But it creates a problem: there's no way, within our linear type system, to distinguish between ``a destination has been used on the left of a triangle so its corresponding hole has been filled'' and ``a destination has been stored and its hole still exists at the moment''. This oversight may allow us to read uninitialized memory!
 
-Let's compare two examples. We assume a simple store semantics for now where structures with holes stay in the store until they are completed. We'll need the $\ottkw{alloc} \pmb{:} [[(⌊ T ⌋ ¹ν ¹ν → ①) ¹ν → T]]$ operator. The semantics of $\ottkw{alloc}$ is: allocate a structure with a single root hole in the store, call the supplied function with the destination to the root hole as an argument; when the function has consumed all destinations (so only unit remains), pop the structure from the store to obtain a complete $[[T]]$.
+Let's compare two examples. We assume a simple store semantics for now where structures with holes stay in the store until they are completed. We'll need the $\ottkw{alloc} \pmb{:} [[(⌊ T ⌋ ¹ν ¹ν → ①) ¹ν → T]]$ operator. The semantics of $\ottkw{alloc}$ is: allocate a structure with a single root hole in the store, call the supplied function with the destination to the root hole as an argument; when the function has consumed all destinations (so only unit remains), pop the structure from the store to obtain a complete $[[T]]$. $[[alloc' f]]$ corresponds, in type and behavior, to
+$[[from⧔' (alloc ►map d ⟼ f d)]]$.
 
 In this snippet, structures with holes are given names $[[v]]$ and $[[vd]]$ in the store; holes are given names too and denoted by $[[+h]]$ and $[[+hd]]$, and concrete destinations are denoted by $[[-h]]$ and $[[-hd]]$.
 
-When the building scope of $[[v]] \pmb{:} [[Bool]]$ is parent to the one of $[[vd]] \pmb{:} [[⌊ Bool ⌋ ¹ν]]$, everything works well because $[[vd]]$, that contains destination pointing to $[[+h]]$, has to be consumed before $[[v]]$ can be read:
+When the building scope of $[[v]] \pmb{:} [[Bool]]$ is parent to the one of $[[vd]] \pmb{:} [[⌊ Bool ⌋ ¹ν]]$, everything works well because $[[vd]]$, that contains destination pointing to $[[+h]]$, has to be consumed before $[[v]]$ can be read. In other terms, storing an older destination into a fresher one is not a problem:
 \bgroup\setlength{\arraycolsep}{0.5ex}
 \codehere{\!\!\!\begin{array}{crcl}
        & $\{ \}$ &|& [[ alloc' (ˢλ d ¹ν ⟼ (alloc' (ˢλ dd ¹ν ⟼ dd ◀ d) @ ⌊ Bool ⌋ ¹ν) ◀ true)]] \\
@@ -253,7 +254,7 @@ When the building scope of $[[v]] \pmb{:} [[Bool]]$ is parent to the one of $[[v
 [[⟶]] & $\{ \}$ &|& [[ true ]]
 \end{array}}
 
-However, when $[[vd]]$'s scope is parent to $[[v]]$'s, we can write a linearly typed yet unsound program:
+However, when $[[vd]]$'s scope is parent to $[[v]]$'s, i.e. when a newer destination is stored into an older one, then we can write a linearly typed yet unsound program:
 \codehere{\!\!\!\begin{array}{crcl}
        & $\{ \}$ &|& [[alloc' (ˢλ dd ¹ν ⟼ (alloc' (ˢλ d ¹ν ⟼ dd ◀ d) @ Bool) ►case ¹ν { true ⟼ (), false ⟼ () })]] \\
 [[⟶]] & [[ { vd ≔ +hd } ]] &|& [[(alloc' (ˢλ d ¹ν ⟼ -hd ◀ d)  @ Bool) ►case ¹ν { true ⟼ (), false ⟼ () } ; deref vd]] \\
@@ -272,8 +273,6 @@ Again, the problem is, using purely a linear type system, we can only reject thi
 Scope escape, that we just described, is not an issue specific to destinations. In fact, it seems that any form of storage, be it destinations, or \mintinline{haskellc}/ref/s \emph{à la} OCaml, or anything that can be written to, is susceptible to let scope escape happens if we give it a linear write interface.
 
 Most of the time, linear interfaces rely on the fact that there is a specific set of functions available acting as destructors for a given resource type, and we want to be sure that one of them is called for each resource at some point. Linearity forces us to consume the resource in the scope it is made available, and if the resource type is opaque, then the only way to consume it is by eventually calling one of these destructors. Except if we are given linear storage, in which case we can consume the resource by storing it away; this is the essence of scope escape.
-
-We are not aware of a technique that would let us reconcile mutable storage and linearity, without breaking safety of linear APIs.
 
 \section{Breadth-first tree traversal}\label{sec:bft}
 
