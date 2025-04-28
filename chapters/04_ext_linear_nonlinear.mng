@@ -61,7 +61,7 @@ So far we hadn't spoke about that danger, because mechanisms used to stop scope 
 
 We've just seen that to use linear destinations safely, we need operators that work on closed ampars, instead of destinations. In fact, that is exactly what happens in \cite{minamide_functional_1998}, or \cite{lorenzen_searchtree_2024}: they only allow incomplete structures with one hole, and extending the structure happens by manipulating the whole incomplete structure itself, not destinations (as they don't exist in these works).
 
-For starters, let's start on that way, and design operators for ampars with only one hole, so exactly one destination on their right-hand side. If we want always only one hole, then it means we cannot have equivalents for functions such that \mintinline{haskellc}/fill @'(:)/ that plugs a new hollow constructor with two new holes. Instead, we must ask the user to specify a value for all except one field of the newly added constructor, so that only one new hole remains\footnote{As we said above, it's still possible to use \mintinline{haskellc}/fill @'(:)/ on a linear destination, creating two new linear destinations. However, after that, we would have no way to fill either of these linear destinations, as \mintinline{haskellc}/extendLeaf/ or \mintinline{haskellc}/extendComp/ work on an ampar with just a single destination on the right-hand side, and \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ work only on unrestricted destinations.}. The signature of such a function would be as follows:
+For starters, let's start on this way, and design operators for ampars with only one hole, so exactly one destination on their right-hand side. If we want always have only one hole in the ampar, then, when plugging a new hollow constructor into the existing hole, we must fill all of the new fields of the hollow constructor except one,  so that only one new hole remains\footnote{It's still possible to use \mintinline{haskellc}/fill @'(:)/ on a linear destination, creating two new linear destinations. But then we can't use the \mintinline{haskellc}/extendLeaf/ function teased above to fill these destinations with complete values, because \mintinline{haskellc}/extendLeaf/ only works on an ampar with just a single destination on the right-hand side, and \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ only work on unrestricted destinations.}. In other terms, it means that we must ask the user to specify a value for all except one field of the newly added constructor. The signature of such a function would be as follows:
 
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extend ⩴ ∀ lCtor k t s m fiTys kthFiTy othFiTys.
@@ -107,7 +107,7 @@ In \mintinline{haskellc}/extendComp/, we need the destination in the parent ampa
 
 \section{Arbitrary type on the right-hand side of ampars for linear data}\label{sec:linear-lens}
 
-Being limited to only one destination on the right-hand side of ampars is not ideal. Indeed, we stay at the same expressivity level than existing work.
+Being limited to only one destination on the right-hand side of ampars if we want to be able to use \mintinline{haskellc}/extendLeaf/ is not ideal. Indeed, we stay at the same expressivity level as existing work.
 
 Going back to arbitrary types on the right hand-side of ampars, for instance to allow multiple destinations, as we did in \cref{chap:dest-calculus,chap:dps-haskell}, creates new challenges. Indeed, when we had only one destination for each ampar, we could operate on the destination through the ampar itself, with no choice to be made: there was only one destination that could be filled. If we have now an arbitrary type on the right-hand side of ampars, and we still want to operate on the destinations without giving direct access to them to the user (the motivations are still the same; work around the fact that \mintinline{haskellc}/updWith/ is now non-capturing, and also prevent scope escape/malicious interaction between sibling destinations), then we need a way for the user to select which destination inside the right-hand side of the ampar they want to operate on.
 
@@ -158,14 +158,20 @@ extendWithPairOnFirst ⩴ Ampar s (Triple (Dest m (t11, t12)) t2 t3) ⊸ Ampar s
 extendWithPairOnFirst ampar = ampar &(fst &extendFocused @'(,))
 \end{minted}
 
+As stated above, this technique gets even more useful for \mintinline{haskellc}/extendFocusedLeaf/, as we had no way previously to fill a linear destination contained in an arbitrary structure inside the right-hand side of an ampar. With \mintinline{haskellc}/extendFocusedLeaf/, it is now possible:
+
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+extendFocusedLeaf ⩴ ∀ u t1 t2 s m. u %m→ Lens t1 t2 (Dest m u) () ⊸ Ampar s t1 ⊸ Ampar s t2
+
+extendWithValOnFirst ⩴ t1 ⊸ Ampar s (Triple (Dest 1 t1) t2 t3) ⊸ Ampar s (Triple () t2 t3)
+extendWithPairOnFirst x ampar = ampar &(fst &extendFocusedLeaf x)
+\end{minted}
+
 \section{Limitations of this system}
 
 The situation is still not perfectly satisfying, but we don't think that a single perfect balance between expressiveness and simplicity exists for DPS programming in Haskell, given the constraint of using an existing type system.
 
 Here, we can have at most two usable layers of nesting for destinations. But that's enough for most use-cases, and in particular, it let us implement the breadth-first traversal of binary trees using efficient queues!
-
-% TODO: Truc bizarre, dans dps haskell, on peut composer des structures alors que les dests sont "unrestricted"
-% TODO: scope escape caché via fillComp -> possible car toAmpar est linéaire
 
 \section{Full API and breadth-first tree traversal, updated}
 
