@@ -55,7 +55,7 @@ fromAmpar' (
 \end{minted}
 Here, we create a new ampar for a pair of a \mintinline{haskellc}/t/ and a \mintinline{haskellc}/Dest 1 t/. After filling the root destination with a hollow pair constructor, we get two destinations, \mintinline{haskellc}/dt/ and \mintinline{haskellc}/ddt/. If we have access to a \mintinline{haskellc}/fillLeaf/ function operating with a linear destination on the left, we can actually put \mintinline{haskellc}/dt/ into \mintinline{haskellc}/ddt/. Because we've consumed the two destinations and unit is returned, it seems that the ampar is complete, while in fact we've never provided a value of type \mintinline{haskellc}/t/ for the first field of the pair! So the structure is still incomplete while we are allowed to call \mintinline{haskellc}/fromAmpar'/ on it and read it!
 
-So far we hadn't spoke about that danger, because mechanisms used to stop scope escape in \cref{chap:dest-calculus,chap:dps-haskell}, that is, the age system, or absence of linear destinations, are enough to also prevent sibling destinations interacting with one another. But here, the limitation put on \mintinline{haskellc}/updWith/ (not allowing capture of linear resources) only stops scope escape, but not this other issue, because both sibling destinations are coming from the same, freshest scope. Hence, we still cannot have a function \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ operating on linear destinations.
+So far we hadn't spoke about that danger, because mechanisms used to stop scope escape in \cref{chap:dest-calculus,chap:dps-haskell}, that is, the age system, or absence of linear destinations, are enough to also prevent sibling destinations from interacting with one another. But here, the limitation put on \mintinline{haskellc}/updWith/ (not allowing capture of linear resources) only stops scope escape, but not this other issue, because both sibling destinations are coming from the same, freshest scope. Hence, we still cannot have a function \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ operating on linear destinations.
 
 \section{\mintinline{haskellc}/extend/ functions for ampars with a single hole}\label{sec:single-hole}
 
@@ -65,10 +65,10 @@ For starters, let's start on this way, and design operators for ampars with only
 
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extend ⩴ ∀ lCtor k t s m fiTys kthFiTy othFiTys.
-          (OnlyLinear lCtor t,
+           (OnlyLinear lCtor t,
            FieldTypes lCtor t ~ fiTys,
            At k fiTys ~ kthFiTy, Remove k fiTys ~ othFiTys) ⇒
-          Ampar s (Dest m t) ⊸ othFiTys %m→ Ampar s (Dest m kthFiTy)
+           othFiTys %m→ Ampar s (Dest m t) ⊸ Ampar s (Dest m kthFiTy)
 \end{minted}
 
 There's a lot to decipher here. \mintinline{haskellc}/FieldsTypes/ is a type family that returns the types of the fields for a given constructor, specified in its type-lifted representation \mintinline{haskellc}/lCtor/ and the type \mintinline{haskellc}/t/ to which the constructor belongs. For example, \mintinline{haskellc}/FieldsTypes '(:) [Int]/ resolves to \mintinline{haskellc}/(Int, [Int])/. \mintinline{haskellc}/At k/ is a type family that returns the \mintinline{haskellc}/k/\textsuperscript{th} element (i.e. type) of a tuple type, and similarly, \mintinline{haskellc}/Remove k/ returns the same tuple type it is given, with the \mintinline{haskellc}/k/\textsuperscript{th} removed.
@@ -188,7 +188,7 @@ inRegion ⩴ ∀ t. (∀ r. Region r ⇒ t) ⊸ t
 
 data Ampar r s t
 newAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ Ampar s (Dest r 1 s)
-newAmparBesides ⩴ ∀ r1 r2 s t u. (Region r1, Region r2) ⇒ Ampar r1 s t ⊸ (Ampar r1 s t, Ampar r2 u (Dest r 1 u))
+tokenBesides ⩴ ∀ r s t. Region r ⇒ Ampar r s t ⊸ (Ampar r s t, Token)
 toAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ s ⊸ Ampar r s () -- now linear in s
 fromAmpar  ⩴ ∀ r s t. Region r ⇒ Ampar r s (Ur t) ⊸ (s, Ur t)
 fromAmpar' ⩴ ∀ r s. Region r ⇒ Ampar r s () ⊸ s
@@ -198,39 +198,107 @@ updWithToken ⩴ ∀ r s t u. Region r ⇒ Ampar r s t ⊸ ((t, Token) ⊸ u) �
 data Dest r m t
 type family DestsOf lCtor r m t -- now multiplicity-polymorphic
 
--- API for unrestricted destinations
-fill ⩴ ∀ lCtor r t. Region r ⇒ Dest r ω t ⊸ DestsOf lCtor r ω t
+-- === API for unrestricted destinations only ===
 fillLeaf ⩴ ∀ r t. Region r ⇒ t → Dest r ω t ⊸ ()
+-- we can no longer have fillComp for unrestricted destinations
 
--- API for ampars with linear destinations
+-- === API for ampars with linear or unrestricted destinations ===
+fill ⩴ ∀ lCtor r m t. (Region r, OnlyLinear lCtor t) ⇒ Dest r m t ⊸ DestsOf lCtor r m t
+fillUr ⩴ ∀ r m t. Region r ⇒ Dest r m (Ur t) ⊸ Dest r ω t
 
--- simplified
+-- only one destination on the right (simplified but less expressive)
 extend ⩴ ∀ lCtor r k t s m fiTy kthFiTy othFiTys.
-          (Region r, OnlyLinear lCtor t,
+           (Region r, OnlyLinear lCtor t,
            FieldTypes lCtor t ~ fiTys,
            At k fiTys ~ kthFiTy, Remove k fiTys ~ othFiTys) ⇒
-          Ampar r s (Dest r m t) ⊸ othFiTys %m→ Ampar r s (Dest r m kthFiTy)
+           othFiTys %m→ Ampar r s (Dest r m t) ⊸ Ampar r s (Dest r m kthFiTy)
 extendUr ⩴ ∀ r s t m. Region r ⇒ Ampar r s (Dest r m (Ur t)) ⊸ Ampar r s (Dest r ω t)
 extendLeaf ⩴ ∀ r s t m. Region r ⇒ t %m→ Ampar r s (Dest r m t) ⊸ Ampar r s ()
 extendComp ⩴ ∀ r s t u. Region r ⇒ Ampar r s (Dest r 1 t) ⊸ Ampar r t u ⊸ Ampar r s u
 
--- with lenses
+-- with arbitrary type on the right; destination focused with a linear lens
 extendFocused ⩴ ∀ lCtor r u t1 t2 s m.
-                (Region r, OnlyLinear lCtor u) ⇒
-                Lens t1 t2 (Dest r m u) (DestsOf lCtor r m u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
-extendFocusedUr ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
-                  Lens t1 t2 (Dest r m (Ur u)) (Dest r ω u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
-extendFocusedLeaf ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
-                    u %m→ Lens t1 t2 (Dest r m u) () ⊸ Ampar r s t1 ⊸ Ampar r s t2
-                    
-                    -- TODO: inverse order
-extendFocusedComp ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
+                    (Region r, OnlyLinear lCtor u) ⇒
                     Lens t1 t2 (Dest r m u) (DestsOf lCtor r m u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
+extendFocusedUr ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
+                       Lens t1 t2 (Dest r m (Ur u)) (Dest r ω u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
+extendFocusedLeaf ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
+                          u %m→ Lens t1 t2 (Dest r m u) () ⊸ Ampar r s t1 ⊸ Ampar r s t2
+extendFocusedComp ⩴ ∀ r u t1 t2 s u1 u2. (Region r) ⇒
+                          Ampar r u1 u2 ⊸ Lens t1 t2 (Dest r 1 u1) u2 ⊸ Ampar r s t1 ⊸ Ampar r s t2
 
 \end{minted}
-\caption{More flexible Destination API (still using compact regions)}
+\caption{Destination-passing API allowing linear destinations}
 \label{table:destination-api-regions-v2}
 \end{listing}
+
+\begin{listing}[p]
+\figtextsize
+\begin{minted}[linenos]{haskellc}
+type DList r t = Ampar r [t] (Dest r 1 [t])
+
+newDList :: Region r ⇒ Token ⊸ DList r t
+newDList = newAmpar @[t]
+
+dListToList :: Region r ⇒ DList r t ⊸ [t]
+dListToList dlist = fromAmpar' (dlist &extendLeaf [])
+
+append :: Region r ⇒ DList r t ⊸ t ⊸ DList r t
+append dlist x = dlist &extend @'(:) @1 (¤MkSolo x)
+
+-------------------------------------------------------------------------------
+
+data EffQueue r t = ¤EffQueue [t] (DList r t)
+
+newEffQueue :: Region r ⇒ Token ⊸ EffQueue r t
+newEffQueue tok = ¤EffQueue [] (newDList tok)
+
+singleton :: Region r ⇒ Token ⊸ t ⊸ EffQueue r t
+singleton tok x = ¤EffQueue [x] (newDList tok)
+
+queueToList :: Region r ⇒ EffQueue r t ⊸ [t]
+queueToList (¤EffQueue front back) = front ++ dListToList back
+
+enqueue :: Region r ⇒ EffQueue r t ⊸ t ⊸ EffQueue r t
+enqueue (¤EffQueue front back) x = ¤EffQueue front (back `append` x)
+
+dequeue :: Region r ⇒ EffQueue r t ⊸ Maybe (t, EffQueue r t)
+dequeue (¤EffQueue front back) = case front of
+  [] -> case tokenBesides back of (back, tok) -> case (toList back) of
+    [] -> drop tok ; Nothing
+    (x : xs) -> Just (x, (¤EffQueue xs (newDList tok)))
+  (x : xs) -> Just (x, (¤EffQueue xs back))
+
+-------------------------------------------------------------------------------
+
+data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)
+
+relabelDPS ⩴ Region r ⇒ Token ⊸ Tree t → Tree Int
+relabelDPS tree = fst (mapAccumBFS (\st _ → (st + 1, st)) 1 tree)
+
+mapAccumBFS ⩴ ∀ r s t u. Region r ⇒ Token ⊸ (s → t → (s, u)) → s → Tree t → (Tree u, s)
+mapAccumBFS tok f s0 tree =
+  case fromAmpar (newAmpar @(Ur (Tree u)) tok `updWith` \du → go s0 (singleton (¤Ur tree, du &fillUr)))
+  of (¤Ur outTree, ¤Ur st) → (outTree, st)
+  where
+    go ⩴ s → EffQueue r (Ur (Tree t), Dest r ω (Tree u)) ⊸ Ur s
+    go st q = case dequeue q of
+      ¤Nothing → ¤Ur st
+      ¤Just ((utree, dtree), q') → case utree of
+        ¤Ur ¤Nil → dtree &fill @'Nil ; go st q'
+        ¤Ur (¤Node x tl tr) → case (dtree &fill @'Node) of
+          (dy, dtl, dtr) →
+            let q'' = q' `enqueue` (¤Ur tl, dtl) `enqueue` (¤Ur tr, dtr)
+                (st', y) = f st x
+              in dy &fillLeaf y ; go st' q''
+\end{minted}
+\caption{Revisit of breadth-first tree traversal, with efficient queue storing destinations, in DPS Haskell}
+\label{table:impl-bfs-tree-traversal-v2}
+\end{listing}
+
+The implementation of difference lists here is very different from the one from \cref{ssec:dpshaskell-dlist}, because we are no longer using the full flexibility of destinations and \mintinline{haskellc}/updWith/, and instead, use primitives very similar in behavior to the ones from \citet{minamide_functional_1998,lorenzen_searchtree_2024}.
+
+On the other hand, the implementation of efficient queues displayed here is very similar to the one described in \cref{sec:api}, except that we are using \mintinline{haskellc}/Ampar/ instead of \mintinline{haskellc}/UAmpar/ so we can store linear elements inside the queue (but this almost doesn't affect the implementation).
 
 % TODO: On perd en généralité car on n'a plus fillComp
 

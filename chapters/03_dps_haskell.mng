@@ -221,8 +221,8 @@ relabelDPS tree = fst (mapAccumBFS (\st _ → (st + 1, st)) 1 tree)
 
 mapAccumBFS ⩴ ∀ s t u. Token ⊸ (s → t → (s, u)) → s → Tree t → (Tree u, s)
 mapAccumBFS tok f s0 tree =
-  unFromUAmpar (
-    newUAmpar @(Tree u) tok `updWith` \dtree → go s0 (singleton (¤Ur tree, dtree)))
+  case fromUAmpar (newUAmpar @(Tree u) tok `updWith` \dtree → go s0 (singleton (¤Ur tree, dtree)))
+  of ¤Ur (outTree, st) → (outTree, st)
   where
     go ⩴ s → Queue (Ur (Tree t), UDest (Tree u)) ⊸ Ur s
     go st q = case dequeue q of
@@ -257,7 +257,7 @@ withToken ⩴ ∀ t. (Token ⊸ Ur t) ⊸ Ur t
 
 data UAmpar s t
 newUAmpar ⩴ ∀ s. Token ⊸ UAmpar s (UDest s)
-newUAmparBesides ⩴ ∀ s t u. UAmpar s t ⊸ (UAmpar s t, UAmpar u (UDest u))
+tokenBesides ⩴ ∀ s t. UAmpar s t ⊸ (UAmpar s t, Token)
 toUAmpar ⩴ ∀ s. Token ⊸ s → UAmpar s ()
 fromUAmpar ⩴ ∀ s t. UAmpar s (Ur t) ⊸ Ur (s, t)
 fromUAmpar' ⩴ ∀ s. UAmpar s () ⊸ Ur s
@@ -281,49 +281,51 @@ In \mintinline{haskellc}/UAmpar s t/, \mintinline{haskellc}/s/ stands for the ty
 
 The \mintinline{haskellc}/newUAmpar/ operator is the main way for a user of the API to create a new UAmpar. Its signature is identical to $[[allocIP]]$ from \cref{sec:implem-destcalculus}.
 
-There is also a new alternative way to create a fresh UAmpar: \mintinline{haskellc}/newUAmparBesides/. Sometimes, when programming in DPS style, we won't have a \mintinline{haskellc}/Token/ at hand, but only an existing \mintinline{haskellc}/UAmpar/. In that case, we can piggyback on the linearity of that existing UAmpar (as it linearly depends, directly or indirectly, on a token) to enforce linearity discipline on the new UAmpar, which is the second element of the pair returned by \mintinline{haskellc}/newUAmparBesides/.
+Also, sometimes, when programming in DPS style, we won't have a \mintinline{haskellc}/Token/ at hand, but only an existing \mintinline{haskellc}/UAmpar/. In that case, we can piggyback on the linearity of that existing UAmpar (as it linearly depends, directly or indirectly, on a token) to get a new linear \mintinline{haskellc}/Token/ so that we can spawn a new UAmpar, or any other linear resource really. This is the goal of the \mintinline{haskellc}/tokenBesides/ function.
 
-The operator \mintinline{haskellc}/newUAmparBesides/ is particularly useful when implementing efficient queues in DPS Haskell (as in \cref{ssec:efficient-queue}):
+The operator \mintinline{haskellc}/tokenBesides/ is particularly useful when implementing efficient queues in DPS Haskell (as in \cref{ssec:efficient-queue}):
 
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 type DList t = UAmpar [t] (UDest [t])
-type EffQueue t = ([t], DList t)
+data EffQueue t = ¤EffQueue [t] (DList t)
 
 newEffQueue ⩴ Token ⊸ EffQueue t
-newEffQueue tok = ([], newUAmpar @[t] tok)
+newEffQueue tok = ¤EffQueue [] (newUAmpar @[t] tok)
 
 dequeue ⩴ EffQueue t ⊸ Maybe (t, EffQueue t)
-dequeue q = case q of
-  ((x : xs), dlist) -> Just (x, (xs, dlist))
-  ([], dlist) -> case (toList dlist) of
+dequeue (¤EffQueue front back) = case front of
+  [] -> case (toList back) of
     Ur [] -> Nothing
-    Ur (x : xs) -> Just (xs, °\mold{newUAmpar @[t] tok}°)
+    Ur (x : xs) -> Just (x, (¤EffQueue xs °\mold{(newUAmpar @[t] tok)}°))
+  (x : xs) -> Just (x, (¤EffQueue xs back))
 \end{minted}
 }
 \end{unbreakable}
 
-In the second branch of the inner-most \mintinline{haskellc}/case/ in \mintinline{haskellc}/dequeue/, when we have transformed the back difference list (from which we used to write) into the new front list (from which we will now read), we have to create a new back difference list, that is, a new ampar. However, we don't have a token at hand. It would be quite unpractical for a function like \mintinline{haskellc}/dequeue/ to ask for a linear token to be passed; it's better if tokens are only requested when spawning a new data structure, not when operating on one. That's why \mintinline{haskellc}/newUAmparBesides/ comes handy: we can instead reuse the linearity requirement of the existing UAmpar:
+In the second branch of the inner-most \mintinline{haskellc}/case/ in \mintinline{haskellc}/dequeue/, when we have transformed the back difference list (from which we used to write) into the new front list (from which we will now read), we have to create a new back difference list, that is, a new ampar. However, we don't have a token at hand. It would be quite unpractical for a function like \mintinline{haskellc}/dequeue/ to ask for a linear token to be passed; it's better if tokens are only requested when spawning a new data structure, not when operating on one. That's why \mintinline{haskellc}/tokenBesides/ comes handy: we can instead "reuse" the linearity requirement of the existing UAmpar:
 
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-newUAmparBesides ⩴ ∀ s t u. UAmpar s t ⊸ (UAmpar s t, UAmpar u (UDest u))
+tokenBesides ⩴ ∀ s t. UAmpar s t ⊸ (UAmpar s t, Token)
 
 dequeue ⩴ EffQueue t ⊸ Maybe (t, EffQueue t)
-dequeue q = case q of
-  ((x : xs), dlist) -> Just (x, (xs, dlist))
-  ([], dlist) -> case newUAmparBesides dlist of (dlist, dlist') -> case (toList dlist) of
-    Ur [] -> case (toList dlist') of Ur _ -> Nothing
-    Ur (x : xs) -> Just (xs, dlist')
+dequeue (¤EffQueue front back) = case front of
+  [] -> case tokenBesides back of (back, tok) -> case (toList back) of
+    Ur [] -> drop tok ; Nothing
+    Ur (x : xs) -> Just (x, (¤EffQueue xs (newDList tok)))
+  (x : xs) -> Just (x, (¤EffQueue xs back))
 \end{minted}
 }
 \end{unbreakable}
 
-This new version is not perfect either though. We have to create the new UAmpar before even knowing if we will need it. Indeed, we can only know if a new UAmpar is really needed when we have read the content of the old one, and we can only read it when it is no longer a UAmpar... so at that point we cannot spawn a new one any longer. So the way forward is to always spawn a new UAmpar (difference list in that case) before consuming the old one, taking the risk that if the queue is really empty, we will have to discard the fresh UAmpar immediately (with \mintinline{haskellc}/case (toList dlist') of Ur _ -> Nothing/ instead of just returning \mintinline{haskellc}/Nothing/). Implicit token passing, as proposed by Linear Constraints\cite{spiwack_linearly_2022,spiwack_linear_prop_2023}, seems to really be the way forward to get rid of this kind of issues altogether.
+This new version is not perfect either though. We have to create a new token before even knowing if we will need it. Indeed, we can only know if a new token is really needed when we have read the content of the old UAmpar, and we can only read it when it is no longer a UAmpar... so at that point we cannot spawn a new token any longer. So the way forward is to always spawn a new token before consuming the old UAmpar, taking the risk that if the queue is really empty, we will have to discard the fresh token immediately (with \mintinline{haskellc}/drop/) before returning \mintinline{haskellc}/Nothing/. Implicit token passing, as proposed by Linear Constraints\cite{spiwack_linearly_2022,spiwack_linear_prop_2023}, seems to really be the way forward to get rid of this kind of issues altogether.
 
 %------------------------------
+
+\paragraph{Getting out of an UAmpar}
 
 Same as in \destcalculus{}, the structure encapsulated within a UAmpar can be released in two ways: with \mintinline{haskellc}/fromUAmpar'/, the value on the \mintinline{haskellc}/t/ side must be unit (\mintinline{haskellc}/()/), and just the complete \mintinline{haskellc}/s/ is returned, wrapped in \mintinline{haskellc}/Ur/. With \mintinline{haskellc}/fromUAmpar/, the type on the \mintinline{haskellc}/t/ side must be of the form \mintinline{haskellc}/Ur t'/, and then a pair \mintinline{haskellc}/Ur (s, t')/ is returned.
 
@@ -411,7 +413,7 @@ type Region r ⩴ Constraint
 
 data UAmpar r s t
 newUAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ UAmpar s (UDest r s)
-newUAmparBesides ⩴ ∀ r1 r2 s t u. (Region r1, Region r2) ⇒ UAmpar r1 s t ⊸ (UAmpar r1 s t, UAmpar r2 u (UDest r u))
+tokenBesides ⩴ ∀ r s t. Region r ⇒ UAmpar r s t ⊸ (UAmpar r s t, Token)
 toUAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ s → UAmpar r s ()
 fromUAmpar  ⩴ ∀ r s t. Region r ⇒ UAmpar r s (Ur t) ⊸ Ur (s, t)
 fromUAmpar' ⩴ ∀ r s. Region r ⇒ UAmpar r s () ⊸ Ur s
