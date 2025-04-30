@@ -644,7 +644,7 @@
 %                         Page de titre:
 %-------------------------------------------------------------------
 
-\ThesisTitle{Formalization and Implementation of Safe Destination Passing in Functional Programming Languages}
+\ThesisTitle{Formalization and Implementation of Safe Destination Passing in Pure Functional Programming Settings}
 \ThesisDate{April 2025}
 \ThesisAuthor{Thomas Bagrel}
 
@@ -684,21 +684,26 @@
 
 \NumberAbstractPages
 \begin{ThesisAbstract}
-  \begin{FrenchAbstract}
-    TBD.
-    % \KeyWords{chat, chien, puces.}
-  \end{FrenchAbstract}
-  \begin{EnglishAbstract}
-    Destination-passing style programming introduces destinations, which represent the address of a write-once memory cell. Those destinations can be passed as function parameters, and thus enable the caller of a function to keep control over memory management: the body of the called function will just be responsible of filling that memory cell. This is especially useful in functional programming languages, in which the body of a function is typically responsible for allocation of the result value.
+\begin{FrenchAbstract}
+La programmation par passage de destination introduit le concept de \emph{destination}, qui représente l'adresse d'une cellule mémoire encore vierge sur laquelle on ne peut écrire qu'une fois. Ces destinations peuvent être passées en tant que paramètres de fonction, permettant à l'appelant de garder le contrôle de la gestion mémoire : la fonction appelée se contente de remplir la cellule au lieu d’allouer de l’espace pour une valeur de retour. Bien que principalement utilisé en programmation système, le passage de destination trouve aussi des applications en programmation fonctionnelle pure, où il permet d’écrire des programmes auparavant inexpressibles avec les structures de données immuables usuelles.
 
-Programming with destination in Haskell is an interesting way to improve performance of critical parts of some programs, without sacrificing memory guarantees. Indeed, thanks to a linearly-typed API I present, a write-once memory cell cannot be left uninitialized before being read, and is still disposed of by the garbage collector when it is not in use anymore, eliminating the risk of uninitialized read, memory leak, or double-free errors that can arise when memory is managed manually.
+Dans cette thèse, nous développons un $\lambda$-calcul avec destinations, \destcalculus{}. Ce nouveau système théorique est plus expressif que les travaux similaires existants, le passage de destination y étant conçu pour être aussi flexible que possible. Cette expressivité est rendue possible par un système de types modaux combinant types linéaires et un système d’âges pour gérer le contrôle lexical des ressources, afin de garantir la sûreté du passage de destination. Nous avons prouvé la sûreté de notre système via les théorèmes habituels de progression et de préservation des types, de façon mécanisée, avec l’assistant de preuve Coq.
 
-In this article, I present an implementation of destinations for Haskell, which relies on so-called compact regions. I demonstrate, in particular, a simple parser example for which the destination-based version uses 35\% less memory and time than its naive counterpart for large inputs.
+Nous montrons ensuite comment le passage de destination ---formalisé dans ce calcul théorique--- peut être intégré à un langage fonctionnel pur existant, Haskell, dont le système de types est moins puissant que notre système théorique. Préserver la sûreté nécessite alors de restreindre la flexibilité dans la gestion des destinations. Nous affinons par la suite l’implémentation pour retrouver une grande partie de cette flexibilité, au prix d’une complexité accrue pour l’utilisateur.
 
-\hrule
+L'implémentation prototype en Haskell montre des résultats encourageants pour l’adoption du passage de destination pour des parcours ou du mapping de grandes structures de données, telles que les listes ou les arbres.
 
-Destination passing ---aka. out parameters--- is taking a parameter to fill rather than returning a result from a function. Due to its apparent imperative nature, destination passing has struggled to find its way to pure functional programming. In this paper, we present a pure core calculus with destinations. Our calculus subsumes all the existing systems, and can be used to reason about their correctness or extension. In addition, our calculus can express programs that were previously not known to be expressible in a pure language. This is guaranteed by a modal type system where modes are used to represent both linear types and a system of ages to manage scopes. Type safety of our core calculus was largely proved formally with the Coq proof assistant.
-  \end{EnglishAbstract}
+% \KeyWords{chat, chien, puces.}
+\end{FrenchAbstract}
+\begin{EnglishAbstract}
+Destination-passing style programming introduces destinations, which represent the address of a write-once memory cell. These destinations can be passed as function parameters, allowing the caller to control memory management: the callee simply fills the cell instead of allocating space for a return value. While typically used in systems programming, destination passing also has applications in pure functional programming, where it enables programs that were previously unexpressible using usual immutable data structures.
+
+In this thesis, we develop a core $\lambda$-calculus with destinations, \destcalculus{}. Our new calculus is more expressive than similar existing systems, with destination passing designed to be as flexible as possible. This is achieved through a modal type system combining linear types with a system of ages to manage scopes, in order to make destination-passing safe. Type safety of our core calculus was proved formally with the Coq proof assistant.
+
+Then, we see how this core calculus can be adapted into an existing pure functional language, Haskell, whose type system is less powerful than our custom theoretical one. Retaining safety comes at the cost of removing some flexibility in the handling of destinations. We later refine the implementation to recover much of this flexibility, at the cost of increased user complexity.
+
+The prototype implementation in Haskell shows encouraging results for adopting destination-passing style programming when traversing or mapping over large data structures such as lists or data trees.
+\end{EnglishAbstract}
 \end{ThesisAbstract}
 
 %-------------------------------------------------------------------
