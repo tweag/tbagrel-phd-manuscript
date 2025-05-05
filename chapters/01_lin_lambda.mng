@@ -1,17 +1,21 @@
  
 \chapter{Linear $\lambda$-calculus}\label{chap:preli}
 
+\begin{quote}
+  In the following we assume that the reader is familiar with the simply-typed lambda calculus, its typing rules, and usual semantics. We also assume some degree of familiarity with the intuitionistic fragment of natural deduction. We kindly refer the reader to \cite{pierce_tapl_2002} and \cite{sorensen_natural_curry_howard_2006} for a proper introduction to these notions.
+\end{quote}
+
 \section{From $\lambda$-calculus to linear $\lambda$-calculus}
 
-At the end of the 30s, Church introduced the untyped $\lambda$-calculus as a formal mathematical model of computation. Untyped $\lambda$-calculus is based on the concept of function abstraction and application, and is Turing-complete: in other terms, it has the same expressive power as the empirical model of computation that Turing machines represent.
+At the end of the 30s, Alonzo Church introduced the \emph{untyped $\lambda$-calculus} as a formal mathematical model of computation. Untyped $\lambda$-calculus is based on the concept of function abstraction and application, and is Turing-complete: in other terms, it has the same expressive power as the rather imperative model of \emph{Turing machines}, introduced in the same decade. The only available objects in the untyped $\lambda$-calculus are pure functions; but they can be used smartly to encode many other kind of data, and as a result they are enough to form a solid model of computation.
 
-In 1940, Church defined a typed variant of its original calculus, the simply typed $\lambda$-calculus, or STLC, that gives up Turing-completeness but becomes strongly-normalizing: every well-typed term eventually reduces to a normal form. STLC assign types to terms, and restricts the application of functions to terms of the right type. This restriction is enforced by the typing rules of the calculus.
+In 1940, Church defined a typed variant of its original calculus, denoted \emph{simply-typed $\lambda$-calculus}, or STLC, that gives up Turing-completeness but becomes strongly-normalizing: every well-typed term eventually reduces to a normal form. STLC assign types to terms, and restricts the application of functions to terms of the right type. This restriction is enforced by the typing rules of the calculus.
 
-It has been observed by Howard in 1969 that the simply typed $\lambda$-calculus is actually isomorphic to the logical framework named \emph{natural deduction}. This observation relates to prior work by Curry where the also former observed very similar symmetries between systems on the computational side and on the logical side. All of these have been formalized into the \emph{Curry-Howard isomorphism}, which states that types in a typed $\lambda$-calculus correspond to formulas in a proof system, and terms correspond to proofs of these formulas. In the following we assume that the reader is familiar with the simply typed lambda calculus, its typing rules, and usual semantics. We also assume some degree of familiarity with the intuitionistic fragment of natural deduction.
+It has been observed by Howard in 1969\cite{howard_formulae-as-types_1969} that the simply-typed $\lambda$-calculus is actually isomorphic to the logical framework named \emph{natural deduction}. This observation relates to prior work by Curry where the former also observed the same sort of symmetries between systems on the computational side and on the logical side. These observations have been formalized into the \emph{Curry-Howard isomorphism} theorem, which states that types in a typed $\lambda$-calculus correspond to formulae in a proof system, and that terms correspond to proofs of these formulae. 
 
-The Curry-Howard isomorphism has been later extended to other logics and calculi, and has been a fruitful source of inspiration for research on both the logical and computational side. In that sense, Girard first introduced Linear Logic in 1987, and only later studied the corresponding calculus, denoted \emph{linear $\lambda$-calculus}. Linear logic follows from the observation that in some logical presentations, notably the sequent calculus\footnote{a very popular deduction system that is an alternative to natural deduction that has been also introduced by Gentzen in the 30s}, hypotheses are duplicated or discarded using explicit rules of the system, named \emph{contraction} and \emph{weakening} (in contrast to natural deduction where all that happens implicitly, as it is part of the meta-theory). As a result, it is possible to track the number of times a formula is used by counting the use of these structural rules. Linear logic take this idea further, and deliberately restricts contraction and weakening, so by default, every hypothesis must be used exactly once. Consequently, logical implication $[[T → U]]$ is not part of linear logic, but is replaced by linear implication $[[T ⊸ U]]$, where $[[T]]$ must be used exactly once to prove $[[U]]$. Linear logic also introduces a modality $\ottstype{!}$, pronounced \emph{of course} or \emph{bang}, to allow weakening and contraction on specific formulas: $[[!T]]$ denotes that $[[T]]$ can be used an arbitrary number of times (we say it is \emph{unrestricted}). We say that linear logic is a \emph{substructural} logic because it restricts the use of structural rules of usual logic.
+The Curry-Howard isomorphism has been later extended to other logics and calculi, and has been a fruitful source of inspiration for research on both the logical and computational side. In that sense, Jean-Yves Girard first introduced Linear Logic in 1987\cite{girard_original_1987}, and only later studied the corresponding calculus, denoted \emph{linear $\lambda$-calculus}. Linear logic follows from the observation that in some logical presentations, notably the sequent calculus\footnote{Sequent calculus is a very popular logic framework that is an alternative to natural deduction and that has also been introduced by Gentzen in the 30s}, hypotheses are duplicated or discarded explicitly using \emph{structural} rules of the system, named respectively \emph{contraction} and \emph{weakening} (in contrast to natural deduction where all that happens implicitly, as it is part of the meta-theory). As a result, it is possible to track the number of times a formula is used by counting the use of these structural rules. Linear logic take this idea further, and deliberately restricts contraction and weakening, so by default, every hypothesis must be used exactly once. Consequently, logical implication $[[T → U]]$ is not part of linear logic, but is replaced by linear implication $[[T ⊸ U]]$, where $[[T]]$ must be used exactly once to prove $[[U]]$. Linear logic also introduces a modality $\ottstype{!}$, pronounced \emph{of course} or \emph{bang}, to allow weakening and contraction on specific formulae: $[[!T]]$ denotes that $[[T]]$ can be used an arbitrary number of times (we say it is \emph{unrestricted}). We say that linear logic is a \emph{substructural} logic because it restricts the use of structural rules of usual logic.
 
-We present in \cref{fig:linlog} the natural deduction formulation of intuitionistic linear logic (\CILL), as it lends itself well to a computational interpretation as a linear $\lambda$-calculus with usual syntax. We borrow the \emph{sequent style} notation of sequent calculus for easier transition into typing rules of terms later. However, as we are in an intuitionistic setting, rules only derive a single conclusion from a multiset of formulas.
+We present in \cref{fig:linlog} the natural deduction formulation of intuitionistic linear logic (\CILL), as it lends itself well to a computational interpretation as a linear $\lambda$-calculus with usual syntax. We borrow the \emph{sequent style} notation of sequent calculus for easier transition into typing rules of terms later. However, as we are in an intuitionistic setting, rules only derive a single conclusion from a multiset of formulae.
 
 \bgroup
 \renewcommand\ottaltinferrule[4]{
@@ -20,9 +24,36 @@ We present in \cref{fig:linlog} the natural deduction formulation of intuitionis
     {#4}
 }
 
-All the rules of \CILL, except the ones related to the $\ottstype{!}$ modality, are directly taken (and slightly adapted) from natural deduction. $\ottstype{1}$ denotes the unit type, $\ottstype{\oplus}$ denotes (additive) disjunction, and $\ottstype{\otimes}$ denotes (multiplicative) conjunction. Hypotheses are represented by multisets $[[P]]$. These multisets keep track of how many times each formula appear in them. The comma operator in $[[P1,P2]]$ is multiset union, so it sums the number of occurrences of each formula in $[[P1]]$ and $[[P2]]$. We denote the empty multiset by $[[{}]]$.
+All the rules of \CILL, except the ones related to the $\ottstype{!}$ modality, are directly taken (and slightly adapted) from natural deduction. $\ottstype{1}$ denotes the truth constant, $\ottstype{\oplus}$ denotes (additive) disjunction, and $\ottstype{\otimes}$ denotes (multiplicative) conjunction. Hypotheses are represented by multisets $[[P]]$. These multisets keep track of how many times each formula appear in them. The comma operator in $[[P1,P2]]$ is multiset union, so it sums the number of occurrences of each formula in $[[P1]]$ and $[[P2]]$. We denote the empty multiset by $[[{}]]$.
 
-Let's focus on the four rules for the $\ottstype{!}$ modality now. The promotion rule \CILL\CSep\CBangProm{} states that a formula $[[T]]$ can become an unrestricted formula $[[!T]]$ if it only depends on formulas that are themselves unrestricted. This is denoted by the (potentially empty) multiset $[[!P]]$. The dereliction rule \CILL\CSep\CBangDerel{} states that an unrestricted formula $[[!T]]$ can be used in a place expecting a normal i.e. linear formula $[[T]]$. The contraction rule \CILL\CSep\CBangContr{} and weakening rule \CILL\CSep\CBangWeak{} state respectively that an unrestricted formula $[[!T]]$ can be cloned or discarded at any time.
+Let's focus on the four rules for the $\ottstype{!}$ modality now. The promotion rule \CILL\CSep\CBangProm{} states that a formula $[[T]]$ can become an unrestricted formula $[[!T]]$ if it only depends on formulae that are themselves unrestricted. This is denoted by the (potentially empty) multiset $[[!P]]$. The dereliction rule \CILL\CSep\CBangDerel{} states that an unrestricted formula $[[!T]]$ can be used in a place expecting a linear formula $[[T]]$. The contraction rule \CILL\CSep\CBangContr{} and weakening rule \CILL\CSep\CBangWeak{} state respectively that an unrestricted formula $[[!T]]$ can be cloned or discarded at any time.
+
+The linear logic system might appear very restrictive, but we can always simulate the usual non-linear natural deduction in \CILL, through the $\ottstype{!}$ modality. Girard gives precise rules for such a translation in Section 2.2.6 of~\cite{girard_linear_1995}, whose main idea is to prefix most formulae with $\ottstype{!}$ and encode the non-linear implication $[[T → U]]$ as $[[!T ⊸ U]]$.
+
+\begin{ottfig}{\caption{Intuitionistic linear logic in natural deduction presentation, sequent-style (\CILL)}\label{fig:linlog}}
+\bgroup\renewcommand{\ottdrulename}[1]{}
+\ottdefnLinMonXXLog{}\egroup
+\end{ottfig}
+
+To get more familiar with this system, let's see how we can derive the implication $[[!T ⊸ (T ⨂ T)]]$. In other terms, how we can get two (linear) copies of $[[T]]$s out of an unrestricted $[[T]]$:
+
+\[
+\inferrule*[right=\CFun]{
+  \inferrule*[right=\CBangContr]{
+    \inferrule*[right=\CId]{ }{[[_!T ╟ !T]]} \quad
+    \inferrule*[right=\CProd]{
+      \inferrule*[right=\CBangDerel]{
+        \inferrule*[right=\CId]{ }{[[_!T ╟ !T]]}
+      }{[[_!T ╟ T]]} \quad
+      \inferrule*[right=\CBangDerel]{
+        \inferrule*[right=\CId]{ }{[[_!T ╟ !T]]}
+      }{[[_!T ╟ T]]}
+    }{[[_!T, _!T ╟ T ⨂ T]]}
+  }{[[_!T ╟ T ⨂ T]]}
+}{[[{} ╟ !T ⊸ (T ⨂ T)]]}
+\]
+
+We use dereliction and identity rules in both branches of the pair, to transform the unrestricted $[[T]]$ into a regular one. That way, the product $[[T ⨂ T]]$ requires the context $[[_!T, _!T]]$ which is exactly of the right form to apply the contraction rule \rref*{\CILL\CSep\CBangContr}. We will see in next section how this derivation translates into a well-typed program.
 
 % mapping a function on a proto-list
 
@@ -37,13 +68,6 @@ Let's focus on the four rules for the $\ottstype{!}$ modality now. The promotion
 % case d of
 %   Inl u -> Inl u
 %   Inr x -> case x of (x1, x2) -> (f' x1, f' x2)
-
-The linear logic system might appear very restrictive, but we can always\unsure{We might need other connectives for that, such as \emph{with} $\ottstype{\&}$} simulate the usual non-linear natural deduction in \CILL. Girard gives precise rules for such a translation in Section 2.2.6 of~\cite{girard_linear_1995}, whose main idea is to prefix most formulas with $\ottstype{!}$ and encode the non-linear implication $[[T → U]]$ as $[[!T ⊸ U]]$.
-
-\begin{ottfig}{\caption{Natural deduction formulation of intuitionistic linear logic (sequent-style)}\label{fig:linlog}}
-\bgroup\renewcommand{\ottdrulename}[1]{\CILL\CSep}
-\ottdefnLinMonXXLog{}\egroup
-\end{ottfig}
 
 \section{Linear $\lambda$-calculus: a computational interpretation of linear logic}
 
@@ -61,14 +85,34 @@ There exists several possible interpretations of linear logic as a linear $\lamb
 \end{array}
 }\end{codefig}
 
-\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in monadic presentation (\CLOne)}\label{fig:linmon-ty-term}}
-\bgroup\renewcommand{\ottdrulename}[1]{\CLOne\CTy\CSep}
+\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in monadic presentation (\CLOne\CTy)}\label{fig:linmon-ty-term}}
+\bgroup\renewcommand{\ottdrulename}[1]{}
 \ottdefnLinMonXXTyXXterm{}\egroup
 \end{ottfig}
 
-In \CLOne, $[[P]]$ is now a finite map from variables to types that can be represented as a set of variable bindings $[[{x ⫶ T}]]$. As usual, duplicated variable names are not allowed in a context $[[P]]$. The comma operator denotes disjoint union for finite maps.
+In \CLOne, $[[P]]$ is now a finite map from variables to types that can be represented as a set of variable bindings $[[{x ⫶ T}]]$. As usual, duplicated variable names are not allowed in a context $[[P]]$. The comma operator now denotes disjoint union for finite maps.
 
-Term grammar for \CLOne{} borrows most of simply typed lambda calculus grammar. In addition, the language has a data constructor/wrapper for unrestricted terms and values, denoted by $[[ᴇ t]]$ and $[[ᴇ v]]$. Elimination of unit type $[[①]]$ is made with the $\patu$ operator. Pattern-matching on sum and product types is made with the $\ottkw{case}$ keyword. Finally, we have new operators $\ottkw{dup}$, $\ottkw{drop}$ and $\ottkw{derelict}$ for, respectively, contraction, weakening and dereliction of unrestricted terms with type $[[!T]]$. Promotion of a term to an unrestricted form is made by direct application of constructor $\ottsctor{Many}$. For easier presentation, we also introduce syntactic sugar $[[let x ≔ t in u]]$ and encode it as $[[(λ x ⟼ u)(t)]]$.
+Term grammar for \CLOne{} borrows most of simply-typed lambda calculus grammar. Elimination of unit type $[[①]]$ is made with the $\patu$ operator. Pattern-matching on sum and product types is made with the $\ottkw{case}$ keyword. Finally, we have new operators $\ottkw{dup}$, $\ottkw{drop}$ and $\ottkw{derelict}$ for, respectively, contraction, weakening and dereliction of unrestricted terms with type $[[!T]]$. In addition, the language includes a data constructor for unrestricted terms and values, denoted by $[[ᴇ t]]$ and $[[ᴇ v]]$. Promotion of a term to an unrestricted form is made by direct application of constructor $\ottsctor{Many}$. For easier exposition, we allow ourselves to use syntactic sugar $[[let x ≔ t in u]]$ and encode it as $[[(λ x ⟼ u)(t)]]$.
+
+The derivation of the linear implication $[[!T ⊸ (T ⨂ T)]]$ from previous section now translates into a typing derivation for a well-typed term of type $[[!T ⊸ (T ⨂ T)]]$. Let's see how it goes:
+
+\[
+\inferrule*[right=\CFun]{
+  \inferrule*[right=\CBangContr]{
+    \inferrule*[right=\CId]{ }{[[{x ⫶ !T } ⊪ x : !T]]} \quad
+    \inferrule*[right=\CProd]{
+      \inferrule*[right=\CBangDerel]{
+        \inferrule*[right=\CId]{ }{[[{x1 ⫶ !T } ⊪ x1 : !T]]}
+      }{[[{x1 ⫶ !T } ⊪ derelict x1 : T]]} \quad
+      \inferrule*[right=\CBangDerel]{
+        \inferrule*[right=\CId]{ }{[[{x2 ⫶ !T } ⊪ x2 : !T]]}
+      }{[[{x2 ⫶ !T } ⊪ derelict x2 : T]]}
+    }{[[{x1 ⫶ !T}, {x2 ⫶ !T} ⊪ ˢ(derelict x1, derelict x2) : T ⨂ T]]}
+  }{[[{x ⫶ !T} ⊪ dup x as x1 , x2 in ˢ(derelict x1, derelict x2) : T ⨂ T]]}
+}{[[{} ⊪ λ x ⟼ dup x as x1 , x2 in ˢ(derelict x1, derelict x2) : !T ⊸ (T ⨂ T)]]}
+\]
+
+This translation is very direct. The only change is that we have to give distinct variable names to hypotheses of the same type inside the typing context, while there was no concept of named copies of a same formula in \CILL. We also see that dealing with unrestricted hypotheses can be rather heavyweight because of the need of manual duplication and dereliction. Next section present a way to circumvent this issue.
 
 \section{Implicit structural rules for unrestricted resources}
 
@@ -77,7 +121,7 @@ Term grammar for \CLOne{} borrows most of simply typed lambda calculus grammar. 
 
 % Les variables sont là pour gérer les règles structurelles, et si les variables ne gèrent plus les règles structurelles, elles ne servent plus à grand chose.
 
-In the monadic presentation \CLOne, the use of unrestricted terms can become very verbose and unhandy because of the need for explicit contraction, weakening and dereliction. A second and equivalent presentation of the linear $\lambda$-calculus, named \emph{dyadic} presentation or \CLTwo, tends to alleviate this issue by using two typing contexts on each judgment, one for linear variables and one for unrestricted variables. The syntax and typing rules of \CLTwo{} are given in \cref{fig:lindya-grammar,fig:lindya-ty-term}.
+In the monadic presentation \CLOne, the use of unrestricted terms can become very verbose and unhandy because of the need for explicit contraction, weakening and dereliction. A second and equivalent presentation of the linear $\lambda$-calculus, named \emph{dyadic} presentation or \CLTwo, tends to alleviate this burden by using two typing contexts on each judgment, one for linear variables and one for unrestricted variables. The syntax and typing rules of \CLTwo{} are given in \cref{fig:lindya-grammar,fig:lindya-ty-term}.
 
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in dyadic presentation (\CLTwo)}\label{fig:lindya-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
@@ -92,47 +136,100 @@ In the monadic presentation \CLOne, the use of unrestricted terms can become ver
 \end{array}
 }\end{codefig}
 
-\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in dyadic presentation (\CLTwo)}\label{fig:lindya-ty-term}}
+\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in dyadic presentation (\CLTwo\CTy)}\label{fig:lindya-ty-term}}
 \bgroup\renewcommand{\ottdrulename}[1]{\CLTwo\CTy\CSep}
 \ottdefnLinDyaXXTyXXterm{}\egroup
 \end{ottfig}
 
-In \CLTwo there are no longer rules for contraction, weakening, and dereliction of unrestricted resources. Instead, each judgment is equipped with a second context $[[Ur]]$ that holds variable bindings that can be used in an unrestricted fashion. The $[[t ►case ¹ν ᴇ x ⟼ u]]$ construct is used to transform a term of type $[[!T]]$ into a variable binding $[[{x ⫶ T}]]$ that lives in the unrestricted context $[[Ur]]$. It's important to note that $[[t ►case ¹ν ᴇ x ⟼ u]]$ is not dereliction: one can still use $[[x]]$ several times within body $[[u]]$, or recreate $[[t]]$ by wrapping $[[x]]$ back as $[[ᴇ x]]$; while that wouldn't be possible in $[[let x ≔ derelict t in u]]$ of \CLOne. Morally, we can view the pair of contexts $[[P]] ; [[Ur]]$ of \CLTwo{} as a single context $[[P,!Ur]]$ of \CLOne, where $[[!Ur]]$ is the context with the same variable bindings as $[[Ur]]$, except that all types are prefixed by $\ottstype{!}$.
+In \CLTwo{} there are no longer rules for contraction, weakening, and dereliction of unrestricted resources. Instead, each judgment is equipped with a second context $[[Ur]]$ that holds variable bindings that can be used in an unrestricted fashion. The $[[t ►case ¹ν ᴇ x ⟼ u]]$ construct let us access a term of type $[[!T]]$ as a variable $[[x]]$ of type $[[T]]$ that lives in the unrestricted context $[[Ur]]$. It's important to note that $[[t ►case ¹ν ᴇ x ⟼ u]]$ is not dereliction: one can still use $[[x]]$ several times within body $[[u]]$, or recreate $[[t]]$ by wrapping $[[x]]$ back as $[[ᴇ x]]$; while that wouldn't be possible with $[[let x ≔ derelict t in u]]$ of \CLOne. Morally, we can view the pair of contexts $[[P]] ; [[Ur]]$ of \CLTwo{} as a single context $[[P,!Ur]]$ of \CLOne, where $[[!Ur]]$ is the context with the same variable bindings as $[[Ur]]$, except that all types are prefixed by $\ottstype{!}$.
 
-In \CLTwo, contraction for unrestricted resources happens implicitly every time a rule has two subterms as premises. Indeed, the unrestricted context $[[Ur]]$ is duplicated in both premises, unlike the linear context $[[P]]$ that must be split into two disjoint parts. All unrestricted variable bindings are thus propagated to the leaves of the typing tree, that is, the rules with no premises \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Lin}}, \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Ur}}, and \rref*{\CLTwo\CTy\CSep\CUnit}. These three rules discard all bindings of the unrestricted context $[[Ur]]$ that aren't used, performing several implicit weakening steps. Finally, this system has two identity rules. The first one, \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Lin}}, is the usual linear identity: it consumes the variable $[[x]]$ present in the linear typing context. Because the linear typing context must be split into disjoint parts between sibling subterms, the following derivation is \emph{not allowed}:
+In \CLTwo, contraction for unrestricted resources happens implicitly every time a rule has two subterms as premises. Indeed, the unrestricted context $[[Ur]]$ is duplicated in both premises, unlike the linear context $[[P]]$ that must be split into two disjoint parts. All unrestricted variable bindings are thus propagated to the leaves of the typing tree, that is, the rules with no premises \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Lin}}, \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Ur}}, and \rref*{\CLTwo\CTy\CSep\CUnit}. These three rules discard all bindings of the unrestricted context $[[Ur]]$ that aren't used, performing several implicit weakening steps. 
 
-\[\inferrule*[right=\CLTwo\CTy\CSep\CProd]{
-  \inferrule*[right=\CLTwo\CTy\CSep\CId\textsubscript{Lin}]{ }{[[{ x ⫶ T } ; {} ⊫ x : T]]} \\
-  \inferrule*[right=\CLTwo\CTy\CSep\CId\textsubscript{Lin}]{ }{[[{ x ⫶ T } ; {} ⊫ x : T]]}
+Finally, this system has two identity rules. The first one, \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Lin}}, is the usual linear identity: it consumes the variable $[[x]]$ present in the linear typing context. Because the linear typing context must be split into disjoint parts between sibling subterms (when a rule has several premises, like the product rule), it means $[[x]]$ can only be used in one of them. The second identity rule, \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Ur}}, is the unrestricted identity: it lets us use the variable $[[x]]$ from the unrestricted typing context in a place where a linear variable is expected, performing a sort of implicit dereliction. Because the unrestricted typing context is duplicated between sibling subterms (again, when a rule has several premises), an unrestricted variable can be used in several of them. For instance, the following derivation is \emph{not valid} because we don't respect the disjointness condition of the comma operator for the resulting typing context of the pair:
+
+\[\inferrule*[right=\CProd]{
+  \inferrule*[right=\CId\textsubscript{Lin}]{ }{[[{ x' ⫶ T } ; {} ⊫ x' : T]]} \quad
+  \inferrule*[right=\CId\textsubscript{Lin}]{ }{[[{ x' ⫶ T } ; {} ⊫ x' : T]]}
 }{
-  [[{ x ⫶ T } ; {} ⊫ ˢ(x, x) : T⨂T]]
+  [[{ x' ⫶ T }, { x' ⫶ T } ; {} ⊫ ˢ(x', x') : T⨂T]]
 }\]
 
-% STOPPED HERE
+but the following derivation is valid, as the unrestricted typing context is duplicated between sibling subterms:
 
-The second identity rule, \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Ur}}, is the unrestricted identity: it lets us use the variable $[[x]]$ from the unrestricted typing context in a place where a linear variable is expected, performing a sort of implicit dereliction.
+\[\inferrule*[right=\CProd]{
+  \inferrule*[right=\CId\textsubscript{Ur}]{ }{[[{} ; { x' ⫶ T } ⊫ x' : T]]} \quad
+  \inferrule*[right=\CId\textsubscript{Ur}]{ }{[[{} ; { x' ⫶ T } ⊫ x' : T]]}
+}{
+  [[{} ; { x' ⫶ T } ⊫ ˢ(x', x') : T⨂T]]
+}\]
 
-\cite{andreoli_linlog_1992} has a detailed proof that \CLOne{} and \CLTwo{} are equivalent, in other terms, that a program $[[t]]$ types in the pair of contexts $[[P]] ; [[Ur]]$ in \CLTwo{} if and only if it types in context $[[P,!Ur]]$ in \CLOne.
+At this point, we are very close from recreating a term of type $[[!T ⊸ (T ⨂ T)]]$ as we did in previous section. Let's finish the example:
+
+\[
+\inferrule*[right=\CFun]{
+  \inferrule*[right=\CPatE]{
+    \inferrule*[right=\CId\textsubscript{Lin}]{ }{[[{x ⫶ !T} ; {} ⊫ x : !T]]} \quad
+    \inferrule*[right=\CProd]{
+      \inferrule*[right=\CId\textsubscript{Ur}]{ }{[[{} ; { x' ⫶ T } ⊫ x' : T]]} \quad
+      \inferrule*[right=\CId\textsubscript{Ur}]{ }{[[{} ; { x' ⫶ T } ⊫ x' : T]]}
+    }{[[{} ; { x' ⫶ T } ⊫ ˢ(x', x') : T⨂T]]}
+  }{[[{x ⫶ !T} ; {} ⊫ x ►case ¹ν ᴇ x' ⟼ ˢ(x', x') : T⨂T]]}
+}{[[{} ; {} ⊫ λ x ⟼ ༼x ►case ¹ν ᴇ x' ⟼ ˢ(x', x')༽ : !T ⊸ T⨂T]]}
+\]
+
+If we had any useless variable binding polluting our unrestricted typing context (let's say $[[Ur]] = [[{y ⫶ !U}]]$), the derivation would still hold without any change at term level; the useless bindings would just be carried over throughout the typing tree, and eliminated at the leaves (via implicit weakening happening in leaf rules):
+
+\[
+\inferrule*[right=\CFun]{
+  \inferrule*[right=\CPatE]{
+    \inferrule*[right=\CId\textsubscript{Lin}]{ }{[[{x ⫶ !T} ; {y ⫶ !U} ⊫ x : !T]]} \quad
+    \inferrule*[right=\CProd]{
+      \inferrule*[right=\CId\textsubscript{Ur}]{ }{[[{} ; {y ⫶ !U} , { x' ⫶ T } ⊫ x' : T]]} \quad
+      \inferrule*[right=\CId\textsubscript{Ur}]{ }{[[{} ; {y ⫶ !U} , { x' ⫶ T } ⊫ x' : T]]}
+    }{[[{} ; {y ⫶ !U} , { x' ⫶ T } ⊫ ˢ(x', x') : T⨂T]]}
+  }{[[{x ⫶ !T} ; {y ⫶ !U} ⊫ x ►case ¹ν ᴇ x' ⟼ ˢ(x', x') : T⨂T]]}
+}{[[{} ; {y ⫶ !U} ⊫ λ x ⟼ ༼x ►case ¹ν ᴇ x' ⟼ ˢ(x', x')༽ : !T ⊸ T⨂T]]}
+\]
+
+Managing unrestricted hypotheses is, as we just demonstrated, much easier in the dyadic system \CLTwo{}. Typing trees are shorter, and probably easier to read too.
+
+Also, we don't loose anything by going from \CLOne{} presentation to \CLTwo{}: \citet{andreoli_linlog_1992} has a detailed proof that \CLOne\CTy{} and \CLTwo\CTy{} are equivalent, in other terms, that a program $[[t]]$ types in the pair of contexts $[[P]] ; [[Ur]]$ in \CLTwo\CTy{} if and only if it types in context $[[P,!Ur]]$ in \CLOne\CTy.
 
 \section{Back to a single context with the graded modal approach}
 
-So far, we only considered type systems that are linear, but that are otherwise fairly standard with relation to usual simply-typed $\lambda$-calculus. Anticipating on our future needs, further in this document we'll need to encode more information and ensure more invariants throughout the type system than just linearity alone.
+So far, we only considered type systems that are linear, but that are otherwise fairly standard with respect to usual simply-typed $\lambda$-calculus. Anticipating on our future needs, further in this document we'll need to carry more information and restrictions throughout the type system than just linearity alone.
 
-Naively, we could just multiply the typing contexts, for each new modality or control axis that we need (linearity being one of them, with two values, either \emph{linear} or \emph{unrestricted}). The problem is, that approach is not really scalable: as we increase the number of axes, in the end, we need one context per combination of value on each axis, so it grows really quickly.
+Naively, we could just multiply the typing contexts, for each new modality that we need. The problem is, that approach is not really scalable: at the end we need one context per possible combination of modalities (if modalities represent orthogonal principles), so it grows really quickly.
 
-Even without multiple axis, we already have a problem if we want a finer control over linearity. What if we want to allow variables to be used a fixed number of times that isn't just 1 or unlimited? In~\cite{girard_bounded_1992}, Girard considers that \emph{bounded} extension of linear logic, where the number of uses of hypotheses can be restricted to any value $[[m]]$ ---named \emph{multiplicity}--- instead of being just linear or unrestricted. For that he extends the $\ottstype{!}$ modality with an index $[[m]]$ that specifies how many times an hypothesis should be used. We say that $\ottstype{!}_{[[m]]}$ is a \emph{graded modality}.
+In fact, without thinking too far away, we already have a problem if we want a finer control over linearity. What if we want to allow variables to be used a fixed number of times that isn't just one or unlimited? In~\cite{girard_bounded_1992}, Girard considers the \emph{bounded} extension of linear logic, where the number of uses of hypotheses can be restricted to any value $[[m]]$ ---named \emph{multiplicity}--- instead of being just linear or unrestricted. For that he extends the $\ottstype{!}$ modality with an index $[[m]]$ that specifies how many times an hypothesis should be used. We say that $\ottstype{!}_{[[m]]}$ is a \emph{graded modality}.
 
-Having a family of modalities $\left(\ottstype{!}_{[[m]]}\right)_{[[m]] \in \ottsmode{M}}$ with an arbitrary number of elements instead of the single $\ottstype{!}$ modality of original linear logic means that we cannot really have a distinct context for each of them as in the dyadic presentation. One solution is to go back to the monadic presentation, where variables carry their modality on their type until the very end where they get used. We would also need a new operator to go from $\ottstype{!}_{[[m]]} [[T]]$ to a pair $\ottstype{!}_{[[m]]\ottsmode{-1}} [[T]], [[T]]$ so that we can extract a single use from a value wrapped in a modality allowing several uses. Actually, it gets hairy and unpractical very fast.
+Having a family of modalities $\left(\ottstype{!}_{[[m]]}\right)_{[[m]] \in \ottsmode{M}}$ with an arbitrary number of elements instead of the single $\ottstype{!}$ modality of original linear logic means that we cannot really have a distinct context for each of them as in the dyadic presentation. One solution is to go back to the monadic presentation, where variables carry their modality on their type until the very end when they get used. We would also need a new operator to go from $\ottstype{!}_{[[m]]} [[T]]$ to a pair $\ottstype{!}_{[[m]]\ottsmode{-1}} [[T]], [[T]]$ so that we can extract a single use from a value wrapped in a modality allowing several uses. Actually, it gets hairy and unpractical very fast.
 
-Fortunately, there's a way out of this. Instead of having $[[m]]$ be part of the modality and thus of the type of terms, we can bake it in as an annotation on variable bindings. In place of $[[x]]:[[S]],[[y]]:[[! m T]],[[z]]:[[! n U]] \pmb{\vdash} \ldots$, we can have $[[x]]:_{\ottsmode{1}} [[S]], [[y]]:_{[[m]]} [[T]], [[z]]:_{[[n]]} [[U]] \pmb{\vdash} \ldots$ without adding or losing any information. We'll call the new annotations on bindings \emph{modes}. Note that every binding is equipped with a mode $[[m]]$, even linear bindings that previously didn't have modalities on their types\footnote{This uniform approach where every binding receive a mode seems to originate from \cite{ghica_bounded_2014} and \cite{petricek_coeffects_2014}.}. Now, we can completely encode the restrictions and rules of our system by defining operations on modes and by extension, on typing contexts, and use these operations in typing rules, instead of needing extra operators such as $\ottkw{derelict}$ or $\ottkw{dup}$ that need their own typing rules and have to be used explicitly by the user. With that modal approach, we recover a system, like the dyadic one, in which contraction, weakening, and dereliction can be made conveniently implicit, without loosing any control power over resource use, and with no explosion of the number of contexts!
+Fortunately, there's a way out of this. Instead of having $[[m]]$ be part of the modality and thus of the type of terms, we can bake it in as an annotation on variable bindings. In place of $[[x]]:[[S]],[[y]]:[[! m T]],[[z]]:[[! n U]] \pmb{\vdash} \ldots$, we can have $[[x]]:_{\ottsmode{1}} [[S]], [[y]]:_{[[m]]} [[T]], [[z]]:_{[[n]]} [[U]] \pmb{\vdash}$. We'll call the new annotations on bindings \emph{modes}. Note that every binding is equipped with a mode $[[m]]$, even linear bindings that previously didn't have modalities on their types\footnote{This uniform approach where every binding receives a mode seems to originate from \cite{ghica_bounded_2014} and \cite{petricek_coeffects_2014}.}. Now, we can completely encode the restrictions and rules of a linear type system by defining operations on modes and by extension, on typing contexts, and use these operations in typing rules, instead of needing extra operators such as $\ottkw{derelict}$ or $\ottkw{dup}$ that need their own typing rules and have to be used explicitly by the user. With the modal approach, we recover a system, like the dyadic one, in which contraction, weakening, and dereliction can be made conveniently implicit, without loosing any control power over resource use, and with no explosion of the number of contexts!
 
-Moreover, we build on the key insight, which seem to originate with~\cite{ghica_bounded_2014}, that equipping the set of modes with a semiring structure is sufficient to express, algebraically, all the typing context manipulation that we need. The idea is to have two operations on modes: \emph{times} $\ottsmode{\cdot}$ that represents what happens to modes when there is composition (e.g. for linearity, if function $[[f]]$ uses its argument $\ottsmode{2}$ times and $[[g]]$ too, then $[[f (g x)]]$ uses $[[x]]$ $\ottsmode{2\cdot 2}$ times), while \emph{plus} $\ottsmode{+}$ describes what happens to modes when a same variable is used in two (or more) subterms (if subterm $[[t]]$ uses $[[x]]$ $\ottsmode{2}$ times and $[[u]]$ uses $[[x]]$ $\ottsmode{3}$ times, then $[[t ; u]]$ uses $[[x]]$ $\ottsmode{2+3}$ times).
+Moreover, we build on the key insight, which seem to originate with~\cite{ghica_bounded_2014}, that equipping the set of modes with a semiring structure is sufficient to express, algebraically, all the typing context manipulation that we need. The idea is to have two operations on modes: \emph{times} $\ottsmode{\cdot}$ that represents what happens to modes when there is composition (e.g. for linearity, if function $[[f]]$ uses its argument $\ottsmode{2}$ times and $[[g]]$ too, then $[[f (g x)]]$ uses $[[x]]$ $\ottsmode{2\cdot 2}$ times), while \emph{plus} $\ottsmode{+}$ describes what happens to modes when a same variable is used in two (or more) subterms (if subterm $[[t]]$ uses $[[x]]$ $\ottsmode{2}$ times and $[[u]]$ uses $[[x]]$ $\ottsmode{3}$ times, then $[[t ; u]]$ uses $[[x]]$ $\ottsmode{2+3}$ times). By abstracting away the structural restrictions of the type system as a mode system with a semiring structure, we make the type system much more scalable: if we were to enrich the type system, and if we are able to express the extension as a new semiring, then we almost don't have to modify the typing rules; just the underlying mode semiring.
 
-We then lift these operations to variable bindings, and then to typing contexts themselves in the following way. We lift \emph{times} so that it can scale a variable binding by a mode $[[n]]$: we pose $[[n·({ x : m T })]] \btriangleq [[{ x : n · m T }]]$. We then extend this operator point-wise to act on whole typing contexts as in $[[n·P]]$, not just single bindings.
+We then lift the mode operators to variable bindings and typing contexts in the following way:
 
-We also define typing context \emph{plus} as a partial operation where $[[({ x : m T }) + ({ x : m' T })]] = [[x]]:\!_{\![[m]]\ottsmode{+}[[m']]}[[T]]$ and  $[[({ x : m T }) + P]] = [[{ x : m T },P]]$\hspace*{0.6em}if $[[x]] \notin [[P]]$.
+{\figtextsize
+\bgroup
+\renewcommand\tabcolsep{2pt}
 
-We'll now show what the concrete \emph{modal} presentation for intuitionistic $\lambda$-calculus or \CLm looks like. We will go back to a very simple ringoid\footnote{We still get all the algebraic benefits of \cite{ghica_bounded_2014} even without a zero for our structure.} for modes, that just models linearity equivalently as the previous presentations \CLOne and \CLTwo{}: $[[˥]]$ for variables that must be managed in strict linear fashion, and $[[ɷ]]$ for unrestricted ones. We give the following operation tables:
+\begin{tabular}[c]{rclcc@{\qquad}l}
+  $[[n]]$ &$\cdot$& $[[{}]]$ & $\btriangleq$ & $[[{}]]$\\
+  $[[n]]$ &$\cdot$& $[[({ x : m T },P)]]$ & $\btriangleq$ & $[[({ x : n · m T }),n·P]]$\\
+\end{tabular}
+
+\begin{tabular}[c]{rclcc@{\qquad}l}
+  $[[{}]]$ &$+$& $[[P]]$ & $\btriangleq$ & $[[P]]$\\
+  $[[({ x : m T }, P1)]]$ &$+$& $[[P2]]$ & $\btriangleq$ & $[[{ x : m T },(P1+P2)]]$ & \textrm{if $[[x]]\notin[[P2]]$}\\
+  $[[({ x : m T }, P1)]]$ &$+$& $[[({ x : m' T }, P2)]]$ & $\btriangleq$ & $[[{x : m+m' T}, (P1+P2)]]$
+\end{tabular}
+
+\egroup
+}
+
+We'll now show what the concrete \emph{modal} presentation for intuitionistic $\lambda$-calculus or \CLm{} looks like. We use a very simple ringoid\footnote{We still get all the algebraic benefits of \cite{ghica_bounded_2014} even without a zero for our structure.} for modes, that just models linearity equivalently as the previous presentations \CLOne and \CLTwo{}: $[[˥]]$ for variables that must be managed in a linear fashion, and $[[ɷ]]$ for unrestricted ones. We give the following operation tables:
 
 %\begin{figure}[t]
 \begin{center}
@@ -149,7 +246,7 @@ $[[ω]]$        & $[[ω]]$ & $[[ω]]$ \\\hline
 \end{tabular}
 \end{center}
 
-Equipped with those, we can move to the grammar and typing rules of \CLm, given in \cref{fig:linmod-grammar,fig:linmod-ty-term}. Constructor for $[[! m T]]$ is now $[[ˢᴇ n t]]$ (instead of $[[ᴇ t]]$ for $[[! T]]$).
+Now that we have a completely defined ringoid for modes, we can move to the grammar and typing rules of \CLm, given in \cref{fig:linmod-grammar,fig:linmod-ty-term}. The main change compared to \CLTwo{} is that the constructor for $[[! m T]]$ is now $[[ˢᴇ m t]]$ (instead of $[[ᴇ t]]$ for $[[! T]]$).
 
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in modal presentation (\CLm)}\label{fig:linmod-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
@@ -164,18 +261,47 @@ Equipped with those, we can move to the grammar and typing rules of \CLm, given 
 \end{array}
 }\end{codefig}
 
-\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in modal presentation (\CLm)}\label{fig:linmod-ty-term}}
-\bgroup\renewcommand{\ottdrulename}[1]{\CLm\CTy\CSep}
+\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in modal presentation (\CLm\CTy)}\label{fig:linmod-ty-term}}
+\bgroup\renewcommand{\ottdrulename}[1]{}
 \ottdefnLinModXXTyXXterm{}\egroup
 \end{ottfig}
 
-In \CLm{} we're back to a single identity rule \rref*{\CLm\CTy\CSep\CId}, that asks for $[[x]]$ to be in the typing context with a mode $[[m]]$ that must be \emph{compatible with a single linear use} (we note $[[˥ ⥶ m]]$). In our ringoid, with only two elements, we have both $[[˥ ⥶ ˥]]$ and $[[˥ ⥶ ɷ]]$, so $[[x]]$ can actually have any mode (either linear or unrestricted, so encompassing both \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Lin}} and \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Ur}}), but in more complex modal systems, not all modes have to be compatible with the unit of the ringoid\footnote{Actually, in the type system for \destcalculus{} detailed in \cref{sec:sec:syntax-type-system}, mode $[[¹↑]]$ is not compatible with unit $[[¹ν]]$.}. Rules \rref*{\CLm\CTy\CSep\CId} and \rref*{\CLm\CTy\CSep\CUnit} also allow to discard any context composed only of unrestricted bindings, denoted by $[[ɷ·P]]$ (equivalent to notation $[[!P]]$ in \CLOne), so they are performing implicit weakening as in \CLTwo.
+In \CLm{} we're back to a single identity rule \rref*{\CLm\CTy\CSep\CId}, that asks for $[[x]]$ to be in the typing context with a mode $[[m]]$ that must be \emph{compatible with a single linear use} (we note $[[˥ ⥶ m]]$). In our ringoid, with only two elements, we have both $[[˥ ⥶ ˥]]$ and $[[˥ ⥶ ɷ]]$, so $[[x]]$ can actually have any mode (either linear or unrestricted, so encompassing both \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Lin}} and \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Ur}}), but in more complex modal systems, not all modes have to be compatible with the unit of the ringoid\footnote{See \cref{ssec:ty-term-val} for a case of a ringoid where not all modes are compatible with the unit.}. Rules \rref*{\CLm\CTy\CSep\CId} and \rref*{\CLm\CTy\CSep\CUnit} also allow to discard any context composed only of unrestricted bindings, denoted by $[[ɷ·P]]$ (equivalent to notation $[[!P]]$ in \CLOne), so they are performing implicit weakening as in \CLTwo.
 
-Every rule of \CLm{} that mentions two subterms uses the newly defined $+$ operator on typing contexts in the conclusion of the rule. If a same variable $[[x]]$ is required in both $[[P1]]$ and $[[P2]]$ (either with mode $[[˥]]$ or $[[ɷ]]$, it doesn't matter), then $[[P1+P2]]$ will contain binding $[[{x : ɷ T}]]$. Said differently, the parent term will automatically deduce whether $[[x]]$ needs to be linear or unrestricted based on how (many) subterms use $[[x]]$, thanks to the $+$ operator. It's a vastly different approach than the linear context split for subterms in \CLOneOrTwo{} and unrestricted context duplication for subterms in \CLTwo. I would argue that it makes the system smoother, and allows for easy extension without changing the typing rules much (compared to the monadic / dyadic presentation that are very specialized to handle linearity/unrestrictedness, and that alone).
+Every rule of \CLm{} that mentions two subterms uses the newly defined $+$ operator on typing contexts in the conclusion of the rule. If a same variable $[[x]]$ is required in both $[[P1]]$ and $[[P2]]$ (either with mode $[[˥]]$ or $[[ɷ]]$), then $[[P1+P2]]$ will contain binding $[[{x : ɷ T}]]$. Said differently, the parent term will automatically deduce whether $[[x]]$ needs to be linear or unrestricted based on how (many) subterms use $[[x]]$, thanks to the $+$ operator. It's a vastly different approach than the linear context split for subterms in \CLOneOrTwo{} and unrestricted context duplication for subterms in \CLTwo. I would argue that, thanks to the algebraic properties of the mode semiring, it makes the presentation of the system smoother (at the theoretical level at least; implementing type checking for such a linear type system can be trickier).
 
-Much as in \CLTwo, the exponential modality $\ottstype{!}_{[[n]]}$ is eliminated by a $[[t ►case ¹ν ᴇ n x ⟼ u]]$ expression, that binds the payload to a new variable $[[x]]$ with modality $[[n]]$. The original boxed value can be recreated if needed with $[[ˢᴇ n x]]$; indeed, as in \CLTwo, elimination for $\ottstype{!}_{[[n]]}$ is \emph{not} dereliction.
+Much as in \CLTwo, the exponential modality $\ottstype{!}_{[[m]]}$ is eliminated by a $[[t ►case ¹ν ᴇ m x ⟼ u]]$ expression, that binds the scrutinee to a new variable $[[x]]$ with mode $[[m]]$. The original boxed value can be recreated if needed with $[[ˢᴇ m x]]$; indeed, as in \CLTwo, elimination rule for $\ottstype{!}_{[[m]]}$ is \emph{not} dereliction.
 
-The last specificity of this system is that the function arrow $\ottstype{\multimap}$ now has a mode $[[m]]$ to which it consumes its argument. Actually that doesn't change the expressivity of the system compared to previous presentations; we would have been just fine with only a purely linear arrow, but because we have to assign a mode to any variable binding in this presentation, then it makes sense to allow this mode $[[m]]$ to be whatever the programmer wants, and not just default to $[[˥]]$. In rule for application \rref*{\CLm\CTy\CSep\CApp}, the typing context $[[P1]]$ required to type the argument is scaled in the conclusion of the rule by the mode $[[m]]$ that represents the "number" of times that the argument is used by the function.
+The last specificity of this system is that the function arrow $\ottstype{\multimap}$ now has a mode $[[m]]$ to which it binds its argument. Previously, in \CLOneOrTwo{}, the argument of a function was always linear, in the sense that the corresponding variable binding in the body of the function was linear. Here, in \CLm{}, we can bind argument at any mode $[[m]]$ (and the rule \rref*{\CLm\CTy\CSep\CApp} for function application reflects that: the typing context $[[P1]]$ for the argument passed to the function is multiplied by $[[m]]$ in the conclusion of the rule). Actually that doesn't change the expressivity of the system compared to previous presentations; we would have been just fine with only a purely linear arrow, but because we have to assign a mode to any variable binding in this presentation anyway, then it makes sense to allow this mode $[[m]]$ to be whatever the programmer wants, and not just default to $[[˥]]$.
+
+Let's update our running example. The term syntax doesn't change, we only see an evolution in typing contexts (as we now have only one, with mode annotations, instead of two):
+
+\[
+\inferrule*[right=\CFun]{
+  \inferrule*[right=\CPatE]{
+    \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{y : ɷ U}, {x : ˥ !T} ⫢ x : !T]]} \quad
+    \inferrule*[right=\CProd]{
+      \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{ x' : ˥ T } ⫢ x' : T]]} \quad
+      \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{ x' : ˥ T } ⫢ x' : T]]}
+    }{[[{y : ɷ U}, { x' : ɷ T } ⫢ ˢ(x', x') : T⨂T]]}
+  }{[[{y : ɷ U}, {x : ˥ !T} ⫢ x ►case ¹ν ᴇ ɷ x' ⟼ ˢ(x', x') : T⨂T]]}
+}{[[{y : ɷ U} ⫢ ˢλ x ˥ ⟼ ༼x ►case ¹ν ᴇ ɷ x' ⟼ ˢ(x', x')༽ : !T ˥ → T⨂T]]}
+\]
+
+Now the unrestricted, unused part of the typing context ($[[{y : ɷ U}]]$ in this case) doesn't have to be propagated towards all leaves, but only towards at least one of them (though we can still choose to propagate it towards all of them), thanks to the way the $+$ works on contexts. We also could have chosen to type $[[x']]$ at mode $[[ɷ]]$ in the two identical instances of the \rref*{\CLm\CTy\CSep\CId} rule at the top of the tree; it has no impact on the rest of the derivation as both $[[˥ + ˥]]$ and $[[ɷ + ɷ]]$ gives $[[ɷ]]$ as a result.
+
+Finally, we can give an alternative and more concise version of this function, taking advantage of the \emph{mode on function arrow} feature that we just discussed above. This new version has type $[[T ɷ → T⨂T]]$ instead of $[[!T ˥ → T⨂T]]$:
+
+\[
+\inferrule*[right=\CFun]{
+    \inferrule*[right=\CProd]{
+      \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{ x' : ˥ T } ⫢ x' : T]]} \quad
+      \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{ x' : ˥ T } ⫢ x' : T]]}
+    }{[[{y : ɷ U}, { x' : ɷ T } ⫢ ˢ(x', x') : T⨂T]]}
+}{[[{y : ɷ U} ⫢ ˢλ x' ɷ ⟼ ༼ˢ(x', x')༽ : T ɷ → T⨂T]]}
+\]
+
+% STOPPED THERE
 
 \section{Deep modes: projecting modes through fields of data structures}
 
