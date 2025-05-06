@@ -1,91 +1,91 @@
 \chapter{A formal functional language based on first-class destinations: \destcalculus{}}\label{chap:dest-calculus}
 
-In the previous chapter we laid out important building blocks for the functional language that we'll develop here, namely \destcalculus{}. But first, let's focus again on destination-passing style programming, and why it matters in a functional setting.
+In the previous chapter we laid out important building blocks for the functional language that we develop here, namely \destcalculus{}. Let's see why destination passing is valuable in a pure functional programming context, and how \destcalculus{} constitutes a good foundational layer for this.
 
-The results presented in this chapter have also been published at OOPSLA1 2025 conference\cite{REFNEEDED}.
+The results presented in this chapter have also been published at OOPSLA1 2025 conference\cite{bagrel_destination_2025}.
 
 % TODO: Context
 % TODO: Contributions
 % TODO: Plan du chapitre
 
-\section{Destination-passing style programming}\label{sec:intro}
+\section{Destination-passing style programming, in a functional setting}\label{sec:intro}
 
-In destination-passing style, a function doesn't return a value: it takes as an argument a location where the output of the function ought to be written. In this chapter, we will denote destinations by $[[⌊ T ⌋ ¹ν]]$ where $[[T]]$ is the type of what can be stored in the destination. A function of type $[[T → U]]$ would have signature $[[T → ⌊ U ⌋ ¹ν → ①]]$ instead when transformed into destination-passing style, where instead of returning a $[[U]]$, it consumes a destination of type $[[⌊U⌋ ¹ν]]$ instead and returns just \emph{unit} (type $[[①]]$). This style is common in system programming, where destinations $[[⌊ U ⌋ ¹ν]]$ are more commonly known as \emph{out parameters} (in C, $[[⌊ U ⌋ ¹ν]]$ would typically be a pointer of type $\ottstype{U*}$).
+In destination-passing style, a function doesn't return a value: it takes as an argument a location ---named \emph{destination}--- where the output of the function ought to be written. In this chapter, we will denote destinations by $[[⌊ T ⌋ ¹ν]]$ where $[[T]]$ is the type of what can be stored in the destination. A function of type $[[T → U]]$ would have signature $[[T → ⌊ U ⌋ ¹ν → ①]]$ when transformed into destination-passing style. Instead of returning an $[[U]]$, it consumes a destination of type $[[⌊U⌋ ¹ν]]$ and returns just \emph{unit} (type $[[①]]$). This style is common in systems programming, where destinations $[[⌊ U ⌋ ¹ν]]$ are more commonly known as \emph{out parameters} (in C, $[[⌊ U ⌋ ¹ν]]$ would typically be a pointer of type $\ottstype{U*}$).
 
-The reason why system programs rely on destinations so much is that using destinations can save calls to the memory allocator. If a function returns a $[[U]]$, it has to allocate the space for a $[[U]]$. But with destinations, the caller is responsible for finding space for a $[[U]]$. The caller may simply ask for the space to the memory allocator, in which case we've saved nothing; but it can also reuse the space of an existing $[[U]]$ which it doesn't need anymore, or space in an array, or even space in a region of memory that the allocator doesn't have access to, like a memory-mapped file. In fact, as we'll see in \cref{sec:syntax-type-system}, destination-passing style is always more general than its direct style counterpart; there is no drawbacks to use it as we can always recover regular direct style functions in a systematic way from the destination-passing ones.
+The reason why systems programs rely on destinations so much is that using destinations can save calls to the memory allocator, which are costly, in a context where every gain of performance is highly valuable. If a function returns a $[[U]]$, it has to allocate the space for a $[[U]]$. But with destinations, the caller is responsible for finding space for a $[[U]]$. The caller may simply ask for the space to the memory allocator, in which case we've saved nothing; but it can also reuse the space of an existing $[[U]]$ which it doesn't need anymore, or space in an array, or even space in a region of memory that the allocator doesn't have access to, like a memory-mapped file. In fact, as we'll see in \cref{sec:syntax-type-system}, destination-passing style is always more general than its direct style counterpart (though it might be slightly more verbose); there are no drawbacks to use it as we can always recover regular direct style functions in a systematic way from the destination-passing ones.
 
 So far we mostly considered destination passing in imperative contexts, such as systems programming, but we argue that destination passing also presents many benefits for functional programming languages, even pure ones. Where destinations truly shine in functional programming is that they let us borrow imperative-like programming techniques to get a more expressive language, with more control over processing, and with careful attention, we can still preserve the nice properties of functional languages such as purity and (apparent) immutability.
 
-Thus, the goal here will be to extend a rather-standard functional programming language just enough to be able to build immutable structures by destination passing without endangering purity and memory safety. Destinations in that particular setting become \emph{write-once-only} references into a structure that contains holes and that cannot be read yet. Quite more restrictive than C pointers (that can be used in read and write fashion without restrictions), but still powerful enough to bring new programming techniques into the functional world.
+Thus, the goal here will be to modify a standard functional programming language just enough to be able to build immutable structures by destination passing without endangering purity and memory safety. Destinations in this particular setting become \emph{write-once-only} references into a structure that contains holes and that cannot be read yet. Quite more restrictive than C pointers (that can be used in read and write fashion without restrictions), but still powerful enough to bring new programming techniques into the functional world.
 
-More precisely, there are two key elements that make the extra expressiveness of destination passing in functional contexts:
+More precisely, there are two key elements that contribute to the extra expressiveness of destination passing in functional contexts:
 \begin{itemize}
 \item structures can be built in any order. Not only from the leaves to the root, like in ordinary functional programming, but also from the root to the leaves, or any combination thereof. This can be done in ordinary functional programming using function composition in a form of continuation-passing; however destinations act as a very direct optimization of this scheme. This line of work was pioneered by~\citet{minamide_functional_1998};
-\item when destinations are first-class values, they can be passed and stored like ordinary values. The consequence is that not only the order in which a structure is built is arbitrary, this order can be determined dynamically during the runtime of the program. Here is the true novelty of our approach.
+\item when destinations are first-class values, they can be passed and stored like ordinary values. The consequence is not only that the order in which a structure is built is arbitrary, but also that this order can be determined dynamically during the runtime of the program. Here is the main novelty of our approach compared to earlier work.
 \end{itemize}
 
-In this chapter, we introduce \destcalculus{}, as a pure functional calculus that is based on the very concept of destinations at its core. We intend \destcalculus{} to serve as a foundational, theoretical calculus to reason about safe destinations in a functional setting; thus, we will only cover very briefly the implementation concerns in this chapter, as \destcalculus{} is not really meant to be implemented as a real programming language. Actual implementation of destination passing in an existing functional language will be the focus of the next chapters. 
+In this chapter, we introduce \destcalculus{}, a pure functional calculus that is based on the very concept of destinations at its core. We intend \destcalculus{} to serve as a foundational, theoretical calculus to reason about safe destinations in a functional setting; thus, we will only cover very briefly the implementation concerns in this chapter, as \destcalculus{} is not really meant to be implemented as a real programming language. Actual implementation of destination passing in an existing functional language will be the focus of the next chapters. 
 
-\destcalculus{} is supposed to subsume all the functional systems with destinations from the literature, from \cite{minamide_functional_1998} to \cite{lorenzen_searchtree_2024}. As such we expect that these systems or their extensions can be justified simply by giving them a translation into \destcalculus{}, in order to get all the safety results and metatheory of \destcalculus{} for free. In particular, we proved type safety theorems for \destcalculus{} with the Coq proof assistant, as described in \cref{sec:formal-proof}.
+\destcalculus{} subsumes all the functional systems with destinations from the literature, from \cite{minamide_functional_1998} to \cite{lorenzen_searchtree_2024}. As such we expect that these systems or their extensions can be justified simply by giving them a translation into \destcalculus{}, in order to get all the safety results and metatheory of \destcalculus{} for free. Indeed, we proved type safety theorems for \destcalculus{} with the Coq proof assistant, as described in \cref{sec:formal-proof}.
 
 \section{Working with destinations}\label{sec:working-with-dests}
 
-Let's introduce and get familiar with \destcalculus{}, our modal, linear, simply typed $\lambda$-calculus with destinations $\lambda$-calculus with destination. We borrow most of the syntax of the previous chapter, especially from \CLdm{}. We still use linear logic's $[[T⨁U]]$ and $[[T⨂U]]$ for sums and products, and linear function arrow $\ottstype{\multimap}$, since \destcalculus{} is linearly typed. The main difference with previous calculi being that \destcalculus{} doesn't have first-class data constructors like $[[ˢInl t]]$ or $[[ˢ(t1, t2)]]$, as they are replaced with the more general destination-filling operators that we'll discover in the next paragraphs.
+Let's introduce and get familiar with \destcalculus{}, a modal, linear, simply typed $\lambda$-calculus with destinations. We borrow most of the syntax of the previous chapter, especially from \CLdm{}. We still use linear logic's $[[T⨁U]]$ and $[[T⨂U]]$ for sums and products, and linear function arrow $\ottstype{\multimap}$, since \destcalculus{} is linearly typed. The main difference with previous calculi being that \destcalculus{} doesn't have first-class data constructors like $[[ˢInl t]]$ or $[[ˢ(t1, t2)]]$, as they are replaced with the more general destination-filling operators that we'll discover in the next paragraphs.
 
 \subsection{Building up a vocabulary}\label{ssec:build-up-vocab}
 
 \activespaces
 
-In its simplest form, destination passing, much like continuation passing, is using a location, received as an argument, to write a the output value instead of returning it proper. Instead of a linear function with signature $[[T ¹ν → U]]$, in \destcalculus{} you would have $[[T ¹ν → ⌊ U ⌋ ¹ν ¹ν → ①]]$, where $[[⌊ U ⌋ ¹ν]]$ is read “destination for type $[[U]]$”. For instance, here is a destination-passing version of the identity function:
+In its simplest form, destination passing, much like continuation passing, is using a location, received as an argument, to write a the output value instead of returning it proper. For instance, the following is a destination-passing version of the identity function:
 
 \codehere{\newoperator
 {\ottkw{dId}}{[[T ¹ν → ⌊ T ⌋ ¹ν ¹ν → ①]]}
 {\ottkw{dId}~[[x]]~[[d]]}{[[d ◀ x]]}}
 
-We think of a destination as a reference to an uninitialized memory location, and $[[d ◀ x]]$ (read “fill $[[d]]$ with $[[x]]$”) as writing $[[x]]$ to the memory location pointed to by $[[d]]$.
+We can think of a destination as a reference to an uninitialized memory location, and $[[d ◀ x]]$ (read “fill $[[d]]$ with $[[x]]$”) as writing $[[x]]$ to the memory location pointed to by $[[d]]$.
 
-The form $[[d ◀ x]]$ is the simplest way to use a destination: with that we fill it with a whole, complete value. But we don't have to fill a destination with a complete value in a single step; instead, we can fill a destination piecemeal by specifying just the outermost constructor that we want to fill it with:
+Performing $[[d ◀ x]]$ is the simplest way to use a destination: with that we fill it with a value directly. But we can also fill a destination piecewise, by specifying just the outermost constructor that we want to fill it with:
 
 \codehere{\newoperator
 {\ottkw{fillWithInl}}{[[⌊ T ⨁ U ⌋ ¹ν ¹ν → ⌊ T ⌋ ¹ν]]}
 {\ottkw{fillWithInl}~[[d]]}{[[d ⨞ Inl]]}}
 
-In this example, we're filling a destination for type $[[T ⨁ U]]$ by setting the outermost constructor to left variant $[[Inl]]$. We think of $[[d ⨞ Inl]]$ (read “fill $[[d]]$ with $[[Inl]]$”) as allocating memory to store a block of the form $[[Inl]]~\holesq$, write the address of that block to the location that $[[d]]$ points to, and return a new destination of type $[[⌊ T ⌋ ¹ν]]$ pointing to the uninitialized argument of $[[Inl]]$. Uninitialized memory, when part of a structure or value, like $\holesq$ in $[[Inl]]~\holesq$, is called a \emph{hole}.
+In this example, we're filling a destination for type $[[T ⨁ U]]$ by setting the outermost constructor to left variant $[[Inl]]$. We think of $[[d ⨞ Inl]]$ (read “fill $[[d]]$ with $[[Inl]]$”) as allocating memory to store a block of the form $[[Inl]]~\holesq$, and write the address of that block to the location that $[[d]]$ points to. Because we've just created an $[[Inl]]$ constructor with no argument yet, we return a new destination of type $[[⌊ T ⌋ ¹ν]]$ pointing to the uninitialized argument of $[[Inl]]$. Uninitialized memory, when part of a structure or value, like $\holesq$ in $[[Inl]]~\holesq$, is called a \emph{hole}.
 
-Notice that with $\ottkw{fillWithInl}$ we are constructing the structure from the outermost constructor inward: we've written a value of the form $[[Inl]]~\holesq$ into a hole, but we have yet to describe what goes in the new hole $\holesq$. Such data constructors with uninitialized arguments are called \emph{hollow constructors}\footnote{The full triangle $[[◀]]$ is used to fill a destination with a fully-formed value, while the \emph{hollow} triangle $[[⨞]]$ is used to fill a destination with a \emph{hollow constructor}.}. This is opposite to how functional programming usually works, where values are built from the innermost constructors outward: first we make a value $[[v]]$ and only then can we use $[[Inl]]$ to make $[[Inl v]]$. This is one of the two key ingredients in the expressiveness of destination passing that we mentioned earlier.
+Notice that with $\ottkw{fillWithInl}$ we are constructing the structure from the outermost constructor inward: we've written a value of the form $[[Inl]]~\holesq$ into a hole, but we have yet to describe what goes in the new hole $\holesq$. Such data constructors with uninitialized arguments are called \emph{hollow constructors}\footnote{The full triangle $[[◀]]$ is used to fill a destination with a fully-formed value, while the \emph{hollow} triangle $[[⨞]]$ is used to fill a destination with a \emph{hollow constructor}.}. This is opposite to how functional programming usually works, where values are built from the innermost constructors outward: first we build a value $[[v]]$ and only then can we use $[[Inl]]$ to make $[[Inl v]]$. Being able to build structures from the outermost constructor inward is a key ingredient to the extra expressiveness that we promised earlier.
 
-Yet, everything we've shown so far could have been done with continuations. So it's worth asking: how are destinations different from continuations? Part of the answer lies in our intention to effectively implement destinations as pointers to uninitialized memory (see~\cref{sec:implem-destcalculus}). But where destinations really differ from continuations is when one has several destinations at hand. Then they have to fill \emph{all} the destinations; whereas when one has multiple continuations, they can only return to one of them. Multiple destination arises when a destination for a pair gets filled with a hollow pair constructor:
+Yet, everything we've shown so far could have been done with continuations. So it's worth asking: how are destinations different from continuations? Part of the answer lies in our intention to effectively implement destinations as pointers to uninitialized memory (see~\cref{sec:implem-destcalculus}). But where destinations really differ from continuations is in the case where one has several destinations at hand. Then they have to fill \emph{all} the destinations; whereas when one has multiple continuations, they can only return to one of them. Multiple destination arises when a destination for a pair gets filled with a hollow pair constructor:
 
 \codehere{\newoperator
 {\ottkw{fillWithPair}}{[[⌊ T ⨂ U ⌋ ¹ν ¹ν → ⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν]]}
 {\ottkw{fillWithPair}~[[d]]}{[[d ⨞ (,)]]}}
 
-After using $\ottkw{fillWithPair}$, both the first field \emph{and} the second field must be filled, using the destinations of type $[[⌊ T ⌋ ¹ν]]$ and $[[⌊ U ⌋ ¹ν]]$ respectively. The key remark here is that $\ottkw{fillWithPair}$ couldn't exist if we replaced destinations by continuations, as we couldn't use both returned continuations easily.
+After using $\ottkw{fillWithPair}$, both the first field \emph{and} the second field of the pair must be filled, using the destinations of type $[[⌊ T ⌋ ¹ν]]$ and $[[⌊ U ⌋ ¹ν]]$ respectively. If we were to replace destinations by continuations in $\ottkw{fillWithPair}$, we wouldn't be able to use the two returned continuations easily.
 
 We can already note there that there is a sort of duality between destination-filling operators and associated constructors. Usual $[[Inl]]$ constructor has signature $[[T ¹ν → T ⨁ U]]$, while destination-filling $[[⨞]][[Inl]]$ has signature $[[⌊ T ⨁ U ⌋ ¹ν ¹ν → ⌊ T ⌋ ¹ν]]$. Similarly, pair constructor $[[(,)]]$ has signature $[[T ¹ν → U ¹ν → T⨂U]]$, while destination-filling $[[⨞]][[(,)]]$ has signature $[[⌊ T ⨂ U ⌋ ¹ν ¹ν → ⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν]]$. Assuming some flexibility with currying, we see that the types of arguments and results switch sides around the arrow, and get wrapped/unwrapped from $\ottstype{\lfloor\smallbullet\rfloor}$ when we go from the constructor to the destination-filling operator and vice-versa. This observation will generalize to all destination-filling operators and the corresponding constructors.
 
 \paragraph{Structures with holes}
 It is crucial to note that while a destination is used to build a structure, the destination refers only to a specific part of the structure that hasn't been defined yet; not the structure as a whole. Consequently, the (root) type of the structure being built will often be different from the type of the destination at hand. A destination of type $[[⌊ T ⌋ ¹ν]]$ only indicates that some bigger structure has at least a hole of type $[[T]]$ somewhere in it. The type of the structure itself never appears in the signature of destination-filling functions (for instance, using $\ottkw{fillWithPair}$ only indicates that the structure being operated on has a hole of type $[[T ⨂ U]]$ that is being written to).
 
-Thus, we still need a type to tie the structure under construction --- left implicit by destination-filling primitives --- with the destinations representing its holes. To represent this, \destcalculus{} introduces a type $[[S ⧔ ⌊ T ⌋ ¹ν]]$ for a structure of type $[[S]]$ missing a value of type $[[T]]$ to be complete. There can be several holes in $[[S]]$ --- resulting in several destinations on the right hand side --- and as long as there remains holes in $[[S]]$, it cannot be read. For instance, $[[S ⧔ (⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν)]]$ represents a $[[S]]$ that misses both a $[[T]]$ and a $[[U]]$ to be complete (thus to be readable). The right hand side of $\ottstype{\ltimes}$ is not restricted to pair and destination types only; it can be of arbitrarily complex type.
+Thus, we still need a type to tie the structure under construction --- left implicit by destination-filling primitives --- with the destinations representing its holes. To represent this, \destcalculus{} introduces a type $[[S ⧔ ⌊ T ⌋ ¹ν]]$ for a structure of type $[[S]]$ missing a value of type $[[T]]$ to be complete. There can be several holes in $[[S]]$ --- resulting in several destinations on the right hand side --- and as long as there remain holes in $[[S]]$, it cannot be read. For instance, $[[S ⧔ (⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν)]]$ represents an $[[S]]$ that misses both a $[[T]]$ and a $[[U]]$ to be complete (thus to be readable). The right hand side of $\ottstype{\ltimes}$ is not restricted to pair and destination types only; it can be of arbitrarily complex type.
 
 The general form $[[S ⧔ T ]]$ is read “$[[S]]$ ampar $[[T]]$”. The name “ampar” stands for “asymmetric memory par”. The “par” $\ottstype{\parr}$ operator originally comes from (classical) linear logic, and is an associative and commutative operator that can be used in place of linear implication and is slightly more flexible: $[[T ⊸ S]]$ is equivalent to $\ottstype{T^\perp \parr S}$ or $\ottstype{S \parr T^\perp}$. Similarly, $[[T1 ⊸ T2 ⊸ S]]$ is equivalent to $\ottstype{T1^\perp \parr T2^\perp \parr S}$. Function input's types ---which are in negative position--- are wrapped in the dualizing operator $\ottstype{\smallbullet^\perp}$ when a function is put into ``par'' form.
-Here we take sort of the same approach: \citet{minamide_functional_1998} first observed that structures with holes are akin to linear functions $[[T ⊸ S]]$, where $[[T]]$ represents the missing part; so we decide to represent them in a more flexible fashion under the form $[[S ⧔ ⌊ T ⌋ ¹ν]]$, so that destinations are made into a first-class type $[[⌊ T ⌋ ¹ν]]$. The asymmetric nature of our memory par is a bit disappointing, but it comes from limitations that we are in an intuitionistic setting, not a classical one like $\ottstype{\parr}$ needs.
+Here we take a similar approach: \citet{minamide_functional_1998} first observed that structures with holes are akin to linear functions $[[T ⊸ S]]$, where $[[T]]$ represents the missing part; so we decide to represent them in a more flexible fashion under the form $[[S ⧔ ⌊ T ⌋ ¹ν]]$. In this presentation, the \emph{missing part of type $[[T]]$} appears as a first-class type $[[⌊ T ⌋ ¹ν]]$, a.k.a the \emph{destination} type. The asymmetric nature of our memory par is a bit disappointing, compared to usual linear logic, but it comes from limitations that we are working in an intuitionistic setting, not a classical one like $\ottstype{\parr}$ needs.
 
-Destinations, albeit being first-class, always exist within the context of a structure with holes. A destination is both a witness of a hole present in the structure, and a handle to write to it. Crucially, destinations are otherwise ordinary values. To access the destinations of an ampar, \destcalculus{} provides a $\ottkw{upd}_{\ottkw{\ltimes} }$ construction, which lets us apply a function to the right-hand side of the ampar. It is in the body of $\ottkw{upd}_{\ottkw{\ltimes} }$ that functions operating on destinations can be called to update the structure:
+Destinations, albeit being first-class, always exist within the context of a structure with holes. A destination is both a witness of a hole present in the structure, and a handle to write to it. Crucially, destinations are otherwise ordinary values that lives in the right side of the corresponding ampar. To access the destinations of an ampar, \destcalculus{} provides a $\ottkw{upd}_{\ottkw{\ltimes} }$ construction, which lets us apply a function to the right-hand side of the ampar. It is in the body of $\ottkw{upd}_{\ottkw{\ltimes} } \pmb{:} [[S ⧔ T ¹ν → (T ¹ν → U) ¹ν → S ⧔ U]]$ that functions operating on destinations can be called to update the structure:
 
 \codehere{
   \newoperator
   {\ottkw{fillWithInl'}}{[[S ⧔ ⌊ T ⨁ U ⌋ ¹ν ¹ν → S ⧔ ⌊ T ⌋ ¹ν]]}
-  {\ottkw{fillWithInl'}~[[x]]}{[[x ►map d ⟼ fillWithInl d]]}
+  {\ottkw{fillWithInl'}~[[x]]}{[[x ►map d ⟼ d ⨞ Inl]]}
   \newoperator
   {\ottkw{fillWithPair'}}{[[S ⧔ ⌊ T ⨂ U ⌋ ¹ν ¹ν → S ⧔ (⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν)]]}
   {\ottkw{fillWithPair'}~[[x]]}{[[x ►map d ⟼ fillWithPair d]]}
 }
 
-To tie this up, we need a way to introduce and to eliminate structures with holes. Structures with holes are introduced with $[[alloc]]$ which creates a value of type $[[T ⧔ ⌊ T ⌋ ¹ν]]$. $[[alloc]]$ is a bit like the identity function: it is a hole (of type $[[T]]$) that needs a value of type $[[T]]$ to be a complete value of type $[[T]]$. Memory-wise, it is an uninitialized block large enough to host a value of type $[[T]]$, and a destination pointing to it. Conversely, structures with holes are eliminated with\footnote{As the name suggest, there is a more general elimination $\ottkw{from}_{\ottkw{\ltimes} }$. It will be discussed in~\cref{sec:syntax-type-system}.} $\ottkw{from}_{\ottkw{\ltimes} }' : [[S⧔① ¹ν → S]]$: if all the destinations have been consumed and only unit remains on the right side, then $[[S]]$ no longer has holes and thus is just a normal, complete structure.
+To tie this up, we need a way to introduce and to eliminate structures with holes. Structures with holes are introduced with $[[alloc]]$ which creates a value of type $[[T ⧔ ⌊ T ⌋ ¹ν]]$. $[[alloc]]$ is somewhat similar to the linear identity function: it is a hole (of type $[[T]]$) that needs a value of type $[[T]]$ to be a complete value of type $[[T]]$. Memory-wise, it is an uninitialized block large enough to host a value of type $[[T]]$, and a destination pointing to it. Conversely, structures with holes are eliminated with\footnote{As the name suggest, there is a more general elimination $\ottkw{from}_{\ottkw{\ltimes} }$. It will be discussed in~\cref{sec:syntax-type-system}.} $\ottkw{from}_{\ottkw{\ltimes} }' : [[S⧔① ¹ν → S]]$: if all the destinations have been consumed and only unit remains on the right side, then $[[S]]$ no longer has holes and thus is just a normal data structure.
 
-Equipped with these, we can, for instance, derive traditional constructors from piecemeal filling. Indeed, as we said earlier, \destcalculus{} doesn't have primitive constructor forms, constructors in \destcalculus{} are syntactic sugar. We show here the definition of $[[Inl]]$ and $[[(,)]]$, but the other constructors are derived similarly. Operator $\patu$, present in second example, is used to chain operations returning unit type $[[①]]$.
+Equipped with these new operators, we can finally show how to derive traditional constructors from piecemeal filling. Indeed, as we said earlier, \destcalculus{} doesn't have primitive constructor forms; constructors in \destcalculus{} are syntactic sugar. We show here the definition of $[[Inl]]$ and $[[(,)]]$, but the other constructors are derived similarly. Operator $\patu \pmb{:} [[① ¹ν → U ¹ν → U]]$, present in second example, is used to chain operations returning unit type $[[①]]$. For easier reading, we also provide type annotation when $[[alloc]]$ is used:
 
 \codehere{\newoperator
 {[[Inl]]}{[[T ¹ν → T ⨁ U]]}
@@ -106,7 +106,7 @@ We must reassure the reader here. Of course, using destinations in an unrestrict
   {\ottkw{forget}}{[[T]]}
   {\ottkw{forget}}{[[from⧔' ((alloc @ T ⧔ ⌊ T ⌋ ¹ν) ►map d ⟼ ())]]}}
 
-  then the result of $\ottkw{forget}$ would result in reading the location pointed to by a destination that we never used, in other words, reading uninitialized memory. That's clearly the biggest issue we must prevent;
+  then reading the result of $\ottkw{forget}$ would lead to reading a location pointed to by a destination that we never used, in other words, reading uninitialized memory. This must be prevented at all cost;
 \item if destinations are written several times, as in:
 
   \codehere{\newoperator
@@ -116,14 +116,15 @@ We must reassure the reader here. Of course, using destinations in an unrestrict
   {\ottkw{ambiguous2}}{[[Bool]]}
   {\ottkw{ambiguous2}}{[[from⧔' ((alloc @ Bool ⧔ ⌊ Bool ⌋ ¹ν) ►map d ⟼ let x ≔ (d ◀ false) in d ◀ true; x)]]}}
 
-  then we have $\ottkw{ambiguous1}$ that returns $[[false]]$ and $\ottkw{ambiguous2}$ that returns $[[true]]$ due to evaluation order, so we break \emph{let expansion} that is supposed to be valid in a functional programming language. We ought to keep that property true for \destcalculus{}.
+  then,
+   we have $\ottkw{ambiguous1}$ that returns $[[false]]$ and $\ottkw{ambiguous2}$ that returns $[[true]]$ due to evaluation order, so we break \emph{let expansion} that is supposed to be valid in a functional programming language (including \destcalculus{}).
 \end{itemize}
 
-Actually, we'll see in \cref{sec:scope-escape-dests} that a linear discipline is not even enough to ensure fully safe use of destinations in \destcalculus{}. But before dealing with that, let's get more familiar with \destcalculus{} keywords and operators through more complex examples.
+Actually, we'll see in \cref{sec:scope-escape-dests} that a linear discipline is not even enough to ensure fully safe use of destinations in \destcalculus{}. But before dealing with this, let's get more familiar with \destcalculus{} through more complex examples.
 
 \subsection{Tail-recursive map}\label{ssec:map-tr}
 
-Let's see how destinations can be used to build usual data structures. For these examples, we suppose that \destcalculus{} has equirecursive types and a fixed-point operator. These aren't part of the formal system of \cref{sec:syntax-type-system} but don't add any complication.
+Let's see how destinations can be used to build usual data structures. For these examples, we suppose that \destcalculus{} has equirecursive types and a fixed-point operator (though this isn't included in the formal system of \cref{sec:syntax-type-system}).
 
 \paragraph{Linked lists}
 
@@ -148,19 +149,19 @@ Just like we did in~\cref{ssec:build-up-vocab} we can recover traditional constr
 
 \paragraph{A tail-recursive map function}
 
-List being ubiquitous in functional programming, the fact that the most natural way to write a $\ottkw{map}$ function on lists isn't tail recursive (hence consumes unbounded stack space), is unpleasant. Map can be made tail-recursive in two passes: first build the result list in reverse, then reverse it. But thanks to destinations, we'll be able to avoid this two-pass process altogether, as they let us extend the tail of the result list directly.
+List being ubiquitous in functional programming, the fact that the most natural way to write a $\ottkw{map}$ function on lists isn't tail recursive (hence consumes unbounded stack space), is unpleasant. Map can be made tail-recursive in two passes: first build the result list in reverse order, then reverse it. But thanks to destinations, we are able to avoid this two-pass process altogether, as they let us extend the tail of the result list directly.
 We give the complete implementation in \cref{fig:impl-map-tr}.
 
 The tail-recursive function is $\ottkw{map'}$, it has type $
-[[(T ¹ν → U) ω∞ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]
-$. That is, instead of returning a resulting list, it takes a destination as an input and fills it with the result. At each recursive call, $\ottkw{map'}$ creates a new hollow cons cell to fill the destination. A destination pointing to the tail of the new cons cell is also created, on which $\ottkw{map'}$ is called (tail) recursively. This is really the same algorithm that you could write to implement map on a mutable list in an imperative language. Nevertheless \destcalculus{} is a pure language with only immutable types\footnote{We rely here on the fact that structure with holes cannot be scrutinized while they haven't been fully completed, so destination-related mutations are completely opaque and unobservable in \destcalculus{}.}.
+[[(T ¹ν → U) ɷ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]
+$\footnote{In fact, we'll develop a more complex system of modes starting from \cref{sec:syntax-type-system} to ensure scope control of destinations, and thus the proper signature will be $[[(T ¹ν → U) ω∞ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]$.}. That is, instead of returning a resulting list, it takes a destination as an input and fills it with the result. At each recursive call, $\ottkw{map'}$ creates a new hollow cons cell to fill the destination. A destination pointing to the tail of the new cons cell is also created, on which $\ottkw{map'}$ is called (tail) recursively. This is really the same algorithm that you could write to implement map on a mutable list in an imperative language. Nevertheless \destcalculus{} is a pure language with only immutable types\footnote{We consider data structures in \destcalculus{} to be immutable thanks to the fact that structure with holes cannot be scrutinized while they haven't been fully completed, so destination-related mutations are completely opaque and unobservable.}.
 
 To obtain the regular $\ottkw{map}$ function, all is left to do is to call $[[alloc]]$ to create an initial destination, and $\ottkw{from}_{\ottkw{\ltimes} }'$ when all destinations have been filled to extract the completed list; much like when we make constructors out of filling operators, like $\ottsctor{(::)}$ above.
 
 \begin{codefig}{\caption{Tail-recursive $\ottkw{map}$ function on lists}\label{fig:impl-map-tr}}
 \newtype{[[List T]]}{[[① ⨁ (T ⨂ (List T))]]}
 \newoperatorb
-  {\ottkw{map'}}{[[(T ¹ν → U) ω∞ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+  {\ottkw{map'}}{[[(T ¹ν → U) ɷ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
   {[[map' f l dl]]}{\!\!\!\begin{array}[t]{l}[[
 l ►case ¹ν {⮒
 ‥‥ˢ[] ⟼ dl⨞[],⮒
@@ -173,7 +174,9 @@ l ►case ¹ν {⮒
 
 \subsection{Functional queues, with destinations}\label{ssec:efficient-queue}
 
-Implementations for a tail-recursive map are present in most previous work, from~\cite{minamide_functional_1998}, to recent work~\cite{bour_tmc_2021,leijen_trmc_2023}. Tail-recursive map doesn't need the full power of \destcalculus{}'s first-class destinations: it just needs a notion of structures with a (single) hole. In \cref{sec:bft}, we will build an example which fully uses first-class destinations, but first, we need some more material.
+Implementations for a tail-recursive map are present in most of the previous works, from~\cite{minamide_functional_1998}, to recent work~\cite{bour_tmc_2021,leijen_trmc_2023}. Tail-recursive map doesn't need the full power of \destcalculus{}'s first-class destinations: it just needs a notion of structure with a (single) hole. We'll slowly works towards an example which uses first-class destinations at their full potential.
+
+% STOPPED THERE
 
 \paragraph{Difference lists}
 \newcommand{\lstcat}{\mathop{+\!+}}
