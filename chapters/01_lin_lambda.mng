@@ -508,7 +508,7 @@ Let say we want to design a file API without monads (that's actually one interes
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}{haskellc}
-openFile ⩴ Int ⊸ File
+openFile ⩴ String ⊸ File
 closeFile ⩴ File ⊸ ()
 
 file ⩴ File  -- no way to force this value to be used exactly once
@@ -527,7 +527,7 @@ The solution to that is to forbid the consumer from creating and directly access
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-withFile ⩴ Int ⊸ (File ⊸ t) ⊸ t
+withFile ⩴ String ⊸ (File ⊸ t) ⊸ t
 closeFile ⩴ File ⊸ ()
 nonLinearUseAndEffectivelyRejected ⩴ () =
   withFile "test.txt" (\file → closeFile °\mold{file}° ; closeFile °\mold{file}°) -- not linear
@@ -603,7 +603,7 @@ exampleOk2 ⩴ Ur () =
                         db = openDB "localhost" 3306 tok2
                      in closeFile file ; closeDB db ; ¤Ur ())
 exampleRejected ⩴ Ur File =
-  withToken (\tok →  ¤Ur (openFile' "test.txt" tok)°) -- leaking file which linearly depends on tok
+  withToken (\tok →  ¤Ur (openFile' "test.txt" tok)) -- leaking file which linearly depends on tok
 \end{minted}
 }
 \end{unbreakable}
