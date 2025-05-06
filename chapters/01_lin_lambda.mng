@@ -1,5 +1,5 @@
  
-\chapter{Linear $\lambda$-calculus}\label{chap:preli}
+\chapter{Linear $\lambda$-calculus and Linear Haskell}\label{chap:preli}
 
 \begin{quote}
   In the following we assume that the reader is familiar with the simply-typed lambda calculus, its typing rules, and usual semantics. We also assume some degree of familiarity with the intuitionistic fragment of natural deduction. We kindly refer the reader to \cite{pierce_tapl_2002} and \cite{sorensen_natural_curry_howard_2006} for a proper introduction to these notions.
@@ -30,7 +30,7 @@ Let's focus on the four rules for the $\ottstype{!}$ modality now. The promotion
 
 The linear logic system might appear very restrictive, but we can always simulate the usual non-linear natural deduction in \CILL, through the $\ottstype{!}$ modality. Girard gives precise rules for such a translation in Section 2.2.6 of~\cite{girard_linear_1995}, whose main idea is to prefix most formulae with $\ottstype{!}$ and encode the non-linear implication $[[T → U]]$ as $[[!T ⊸ U]]$.
 
-\begin{ottfig}{\caption{Intuitionistic linear logic in natural deduction presentation, sequent-style (\CILL)}\label{fig:linlog}}
+\begin{ottfig}{\caption{Intuitionistic linear logic in natural deduction presentation, sequent-style (\rref*{\CILL})}\label{fig:linlog}}
 \bgroup\renewcommand{\ottdrulename}[1]{}
 \ottdefnLinMonXXLog{}\egroup
 \end{ottfig}
@@ -85,7 +85,7 @@ There exists several possible interpretations of linear logic as a linear $\lamb
 \end{array}
 }\end{codefig}
 
-\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in monadic presentation (\CLOne\CTy)}\label{fig:linmon-ty-term}}
+\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in monadic presentation (\rref*{\CLOne\CTy})}\label{fig:linmon-ty-term}}
 \bgroup\renewcommand{\ottdrulename}[1]{}
 \ottdefnLinMonXXTyXXterm{}\egroup
 \end{ottfig}
@@ -136,8 +136,8 @@ In the monadic presentation \CLOne, the use of unrestricted terms can become ver
 \end{array}
 }\end{codefig}
 
-\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in dyadic presentation (\CLTwo\CTy)}\label{fig:lindya-ty-term}}
-\bgroup\renewcommand{\ottdrulename}[1]{\CLTwo\CTy\CSep}
+\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in dyadic presentation (\rref*{\CLTwo\CTy})}\label{fig:lindya-ty-term}}
+\bgroup\renewcommand{\ottdrulename}[1]{}
 \ottdefnLinDyaXXTyXXterm{}\egroup
 \end{ottfig}
 
@@ -193,7 +193,7 @@ If we had any useless variable binding polluting our unrestricted typing context
 
 Managing unrestricted hypotheses is, as we just demonstrated, much easier in the dyadic system \CLTwo{}. Typing trees are shorter, and probably easier to read too.
 
-Also, we don't loose anything by going from \CLOne{} presentation to \CLTwo{}: \citet{andreoli_linlog_1992} has a detailed proof that \CLOne\CTy{} and \CLTwo\CTy{} are equivalent, in other terms, that a program $[[t]]$ types in the pair of contexts $[[P]] ; [[Ur]]$ in \CLTwo\CTy{} if and only if it types in context $[[P,!Ur]]$ in \CLOne\CTy.
+Also, we don't loose anything by going from \CLOne{} presentation to \CLTwo{}: \citet{andreoli_linlog_1992} has a detailed proof that \rref*{\CLOne\CTy{}} and \rref*{\CLTwo\CTy{}} are equivalent, in other terms, that a program $[[t]]$ types in the pair of contexts $[[P]] ; [[Ur]]$ in \rref*{\CLTwo\CTy{}} if and only if it types in context $[[P,!Ur]]$ in \rref*{\CLOne\CTy}.
 
 \section{Back to a single context with the graded modal approach}
 
@@ -246,7 +246,7 @@ $[[ω]]$        & $[[ω]]$ & $[[ω]]$ \\\hline
 \end{tabular}
 \end{center}
 
-Now that we have a completely defined ringoid for modes, we can move to the grammar and typing rules of \CLm, given in \cref{fig:linmod-grammar,fig:linmod-ty-term}. The main change compared to \CLTwo{} is that the constructor for $[[! m T]]$ is now $[[ˢᴇ m t]]$ (instead of $[[ᴇ t]]$ for $[[! T]]$).
+Now that we have a completely defined the ringoid for modes, we can move to the grammar and typing rules of \CLm, given in \cref{fig:linmod-grammar,fig:linmod-ty-term}. The main change compared to \CLTwo{} is that the constructor for $[[! m T]]$ is now $[[ˢᴇ m t]]$ (instead of $[[ᴇ t]]$ for $[[! T]]$).
 
 \begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in modal presentation (\CLm)}\label{fig:linmod-grammar}}{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
@@ -261,7 +261,7 @@ Now that we have a completely defined ringoid for modes, we can move to the gram
 \end{array}
 }\end{codefig}
 
-\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in modal presentation (\CLm\CTy)}\label{fig:linmod-ty-term}}
+\begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in modal presentation (\rref*{\CLm\CTy})}\label{fig:linmod-ty-term}}
 \bgroup\renewcommand{\ottdrulename}[1]{}
 \ottdefnLinModXXTyXXterm{}\egroup
 \end{ottfig}
@@ -283,7 +283,7 @@ Let's update our running example. The term syntax doesn't change, we only see an
     \inferrule*[right=\CProd]{
       \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{ x' : ˥ T } ⫢ x' : T]]} \quad
       \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{ x' : ˥ T } ⫢ x' : T]]}
-    }{[[{y : ɷ U}, { x' : ɷ T } ⫢ ˢ(x', x') : T⨂T]]}
+    }{[[{ x' : ɷ T } ⫢ ˢ(x', x') : T⨂T]]}
   }{[[{y : ɷ U}, {x : ˥ !T} ⫢ x ►case ¹ν ᴇ ɷ x' ⟼ ˢ(x', x') : T⨂T]]}
 }{[[{y : ɷ U} ⫢ ˢλ x ˥ ⟼ ༼x ►case ¹ν ᴇ ɷ x' ⟼ ˢ(x', x')༽ : !T ˥ → T⨂T]]}
 \]
@@ -295,8 +295,8 @@ Finally, we can give an alternative and more concise version of this function, t
 \[
 \inferrule*[right=\CFun]{
     \inferrule*[right=\CProd]{
-      \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{ x' : ˥ T } ⫢ x' : T]]} \quad
-      \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{ x' : ˥ T } ⫢ x' : T]]}
+      \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{y : ɷ U},{ x' : ˥ T } ⫢ x' : T]]} \quad
+      \inferrule*[right=\CId]{[[˥]] ⥶ [[˥]]}{[[{y : ɷ U},{ x' : ˥ T } ⫢ x' : T]]}
     }{[[{y : ɷ U}, { x' : ɷ T } ⫢ ˢ(x', x') : T⨂T]]}
 }{[[{y : ɷ U} ⫢ ˢλ x' ɷ ⟼ ༼ˢ(x', x')༽ : T ɷ → T⨂T]]}
 \]
@@ -307,19 +307,17 @@ Finally, we can give an alternative and more concise version of this function, t
 
 In original linear logic from Girard (see \CILL{} and presentation \CLOne{} above), there is only a one-way morphism between $[[!T ⨂ !U]]$ and $[[!(T⨂U)]]$; we cannot go from $[[!(T⨂U)]]$ to $[[!T ⨂ !U]]$. In other terms, an unrestricted pair $[[!(T⨂U)]]$ doesn't allow for unrestricted use of its components. The pair can be duplicated or discarded at will, but to be used, it needs to be derelicted first, to become $[[T⨂U]]$, that no longer allow to duplicate or discard any of $[[T]]$ or $[[U]]$. As a result, $[[T]]$ and $[[U]]$ will have to be used exactly the same number of times, even though they are part of an unrestricted pair!
 
-Situation is no different in \CLTwo{} (resp. \CLm): although the pair of type $[[!(T⨂U)]]$ can be bound in an unrestricted binding $[[{x ⫶ T⨂U}]] \in [[Ur]]$ (resp. $[[{x : ɷ T⨂U}]]$) and be used as this without need for dereliction, when it will be pattern-matched on with \rref*{\CLTwoOrm\CTy\CSep\CPatP}, implicit dereliction will still happen, and linear-only bindings will be made for its components: $[[{x1 ⫶ T},{x2 ⫶ U}]]$ in the linear typing context (resp. $[[{x1 : ˥ T},{x2 : ˥ U}]]$).
+Situation is no different in \CLTwo{} (resp. \CLm): although the pair of type $[[!(T⨂U)]]$ can be bound in an unrestricted binding $[[{x ⫶ T⨂U}]] \in [[Ur]]$ (resp. $[[{x : ɷ T⨂U}]]$ in \CLm) and be used as this without need for dereliction, when it will be pattern-matched on (through the rule \rref*{\CLTwoOrm\CTy\CSep\CPatP}), implicit dereliction will still happen, and linear-only bindings will be made for its components: $[[{x1 ⫶ T},{x2 ⫶ U}]]$ in the linear typing context (resp. $[[{x1 : ˥ T},{x2 : ˥ U}]]$ in \CLm).
 
-It's in fact useful to lift this limitation. One motivation for \emph{deep modes} (in the sense that they propagate throughout a data structure) is that they make it more convenient to write non-linear programs in a linear language. Indeed, in a modal linear $\lambda$-calculus with deep modes (\CLdm), functions of type $[[T ɷ → U]]$ have exactly the same expressive power as the ones with type $[[T → U]]$ in STLC. In other terms, any program that is valid in STLC but doesn't abide by linearity can still type in \CLdm{} without any restructuration needed!
-
-Let's take the $\ottkw{fst}$ function, that extracts the first component of a pair, as an example. With deep modes in \CLdm{} we are able to write
+Let's say we want to write the $\ottkw{fst}$ function, that extracts the first element of a pair. In a non-linear language, we would probably write it that way:
 
 \codehere{
 \newoperator
-  {\ottkw{fst}_{\ottkw{dm}}}{[[T⨂U ɷ → T]]}
-  {\ottkw{fst}_{\ottkw{dm}}}{[[ˢλ x ɷ ⟼ x ►case ɷ (x1, x2) ⟼ x1]]}
+  {\ottkw{fst}_{\ottkw{nl}}}{[[T⨂U → T]]}
+  {\ottkw{fst}_{\ottkw{nl}}}{[[λ x ⟼ x ►case ¹ν (x1, x2) ⟼ x1]]}
 }
 
-\noindent{}as we would do in a non-linear language, like STLC, in which $\ottkw{fst}$ would have type $[[T⨂U → T]]$. On the other hand, in \CLm{} as presented in \cref{fig:linmod-grammar,fig:linmod-ty-term}, we need to indicate individually for each component of the pair that we want them unrestricted (at least for the second one that we want to discard), and add extra elimination for the $\ottstype{!}$ modality:
+But in \CLm{}, or even \CLOneOrTwo{}, we are not allowed to do this. A naive idea would be to give the function the signature $[[T⨂U ɷ → T]]$, but that still doesn't help: as we just said, even with an unrestricted pair, we have to consume both elements of the pair the same number of times. The only valid solution is to indicate, in the signature, that the second element of the pair --that we discard-- will not be used linearly:
 
 \codehere{
 \newoperator
@@ -330,6 +328,20 @@ Let's take the $\ottkw{fst}$ function, that extracts the first component of a pa
 ]]\end{array}}
 }
 
+It's often desirable to lift this limitation in a real programming language, and let the $\ottstype{!}_{[[m]]}$ modality, and more generally, the modes of variables, distribute over the other connectives like $\ottstype{\otimes}$ or $\ottstype{\oplus}$. The main motivation for \emph{deep modes} (in the sense that they propagate throughout a data structure) is that they make it more convenient to write non-linear programs in a linear language.
+
+Indeed, in a modal linear $\lambda$-calculus with deep modes (further denoted \CLdm), functions of type $[[T ɷ → U]]$ gain exactly the same expressive power as the ones with type $[[T → U]]$ in STLC. In other terms, any program that is valid in STLC but doesn't abide by linearity can still type in \CLdm{} without any restructuration needed, we just need to add the proper mode annotations! This was clearly not the case in a faithful interpretation of Girard's linear logic, like we just showed before with limitations of \CLm{} when implementing $\ottkw{fst}_{\ottkw{m}}$.
+
+Revisiting this $\ottkw{fst}$ function, with deep modes in \CLdm{}, we are able to write:
+
+\codehere{
+\newoperator
+  {\ottkw{fst}_{\ottkw{dm}}}{[[T⨂U ɷ → T]]}
+  {\ottkw{fst}_{\ottkw{dm}}}{[[ˢλ x ɷ ⟼ x ►case ɷ (x1, x2) ⟼ x1]]}
+}
+
+This is precisely the same implementation as $\ottkw{fst}_{\ottkw{nl}}$, with just extra mode annotations!
+
 Adding deep modes to a practical linear language is not a very original take; it has been done in Linear Haskell~\cite{bernardy_linear_2018} and in recent work from \citet{lorenzen_oxidizing_2024}.
 With deep modes, we get the following equivalences:
 
@@ -339,14 +351,14 @@ With deep modes, we get the following equivalences:
 [[!m (!n T)]] &\simeq& [[!(m·n) T]]
 \end{array}}
 
-The only change needed on the grammar is that $\ottkw{case}$ constructs now take a mode $[[m]]$ to which they consume the scrutinee, that is propagated to the field(s) of the scrutinee in the body of the $\ottkw{case}$. The new typing rules for $\ottkw{case}$ are presented in \cref{fig:lindeepmod-ty-term}, all the other rules of linear $\lambda$-calculus with deep modes, \CLdm, are supposed identical to \cref{fig:linmod-ty-term}.
+The only change needed on the grammar between \CLm{} and \CLdm{} is that the $\ottkw{case}$ constructs in \CLdm{} take a mode $[[m]]$ to which they consume the scrutinee , which is propagated to the variable bindings for the field(s) of the scrutinee in the body of the $\ottkw{case}$. The new typing rules for $\ottkw{case}$ are presented in \cref{fig:lindeepmod-ty-term}, all the other rules of linear $\lambda$-calculus with deep modes, \CLdm, are identical to those of \cref{fig:linmod-ty-term}.
 
-\begin{ottfig}{\caption{Altered typing rules for deep modes in linear $\lambda$-calculus in modal presentation (\CLdm)}\label{fig:lindeepmod-ty-term}}
-\bgroup\renewcommand{\ottdrulename}[1]{\CLdm\CTy\CSep}
+\begin{ottfig}{\caption{Altered typing rules for deep modes in linear $\lambda$-calculus in modal presentation (\rref*{\CLdm\CTy})}\label{fig:lindeepmod-ty-term}}
+\bgroup\renewcommand{\ottdrulename}[1]{}
 \ottdefnLinDeepModXXTyXXterm{}\egroup
 \end{ottfig}
 
-We observe that the typing context $[[P1]]$ in which the scrutinee types is scaled by $[[m]]$ in the conclusion of all the $\ottkw{case}$ rules. This is very similar to the application rule \rref*{\CLm\CTy\CSep\CApp} : it makes sure that the resources required to type $[[t]]$ are consumed $[[m]]$ times if we want to use $[[t]]$ at mode $[[m]]$. Given that $[[{ x2 : ˥ T2 } ⊢ ˢ((), x2) : ① ⨂ T2]]$ (the pair uses $[[x2]]$ exactly once), if we want to extract the pair components with mode $[[ɷ]]$ to drop $[[x2]]$ (as in $\ottkw{fst}_{\ottkw{dm}}$), then $[[ˢ((), x2) ►case ɷ (x1, x2) ⟼ x2]]$ will require context $[[ɷ·({ x2 : ˥ T2 })]]$ i.e. $[[{ x2 : ɷ T2 }]]$. In other terms, we cannot use parts of a structure made using linear resources in an unrestricted way (as that would break linearity).
+For these new $\ottkw{case}$ rules, we observe that the typing context $[[P1]]$ in which the scrutinee types is scaled by $[[m]]$ in the conclusion of these rules. This is very similar to the application rule \rref*{\CLm\CTy\CSep\CApp} : it makes sure that the resources required to type $[[t]]$ are consumed $[[m]]$ times if we want to use $[[t]]$ at mode $[[m]]$. Given that $[[{ x2 : ˥ T2 } ⊢ ˢ((), x2) : ① ⨂ T2]]$ (the pair uses $[[x2]]$ exactly once), if we want to extract the pair components with mode $[[ɷ]]$ to drop $[[x2]]$ (as in $\ottkw{fst}_{\ottkw{dm}}$), then $[[ˢ((), x2) ►case ɷ (x1, x2) ⟼ x2]]$ will require context $[[ɷ·({ x2 : ˥ T2 })]]$ i.e. $[[{ x2 : ɷ T2 }]]$. In other terms, we cannot use parts of a structure having dependencies on linear variables in an unrestricted way (as that would break linearity).
 
 The linear $\lambda$-calculus with deep modes, \CLdm, will be the basis for our core contribution that follows in next chapter: the destination calculus \destcalculus{}.
 
@@ -354,10 +366,12 @@ The linear $\lambda$-calculus with deep modes, \CLdm, will be the basis for our 
 
 Many semantics presentations exist for lambda calculus. In \cref{fig:linsem} we present a small-step reduction system for \CLdm, in \emph{reduction semantics} style inspired from~\cite{felleisen_calculi_1987} and subsequent~\cite{danvy_refocusing_2004,biernacka_syntactic_2007}, that is, a semantics in which the evaluation context $[[C]]$ is manipulated explicitly and syntactically as a stack.
 
-\begin{ottfig}{\caption{Small-step semantics for \CLdm}\label{fig:linsem}}
+We represent a running program by a pair $[[ C[t] ]]$ of an evaluation context $[[C]]$, and a term $[[t]]$ under focus. We call such a pair $[[ C[t] ]]$ a \emph{command}, borrowing the terminology from~\citet{herbelin_curien_2000}.
+
+\begin{ottfig}{\caption{Small-step semantics for \CLdm{} (\CLdm\CSemSuff\CSep)}\label{fig:linsem}}
 \begin{augmentwidth}{2cm}
 \bgroup
-\renewcommand{\ottdrulename}[1]{\CLdm\CSemSuff\CSep}
+\renewcommand{\ottdrulename}[1]{}
 \renewcommand\arraystretch{1.5}
 \renewcommand\ottaltinferrule[4]{
   % #4 is conclusion
@@ -422,13 +436,27 @@ Small-step evaluation rules are of three kinds:
 
 To have a fully deterministic and straightforward reduction system, focusing rules can only trigger when the subterm in question is not already a value (denoted by $\star$ in \cref{fig:linsem}).
 
-Data constructors only have focusing and unfocusing rules, as they do not describe computations that can be reduced. In that regard, $[[ˢᴇ n t]]$ is treated as an unary data constructor. Once a data constructor is focused, it is evaluated fully to a value form.
+Data constructors only have focusing and unfocusing rules, as they do not describe computations that can be reduced. In that regard, $[[ˢᴇ m t]]$ is treated as an unary data constructor. Once a data constructor is focused, it is evaluated fully to a value form.
 
 In most cases, unfocusing and contraction rules could be merged into a single step. For example, a contraction could be triggered as soon as we have $[[(C ∘ (⬜ ►case m (x1,x2) ⟼ u))[(v1, v2)] ]]$, without the need to recreate the term $[[(v1, v2) ►case m (x1,x2) ⟼ u]]$. However, I prefer the presentation in three distinct steps, that despite being more verbose, clearly shows that contraction rules do not modify the evaluation context.
 
 The rest of the system is very standard. In particular, contraction rules of \CLdm{} --- that capture the essence of the calculus --- are very similar to those of lambda-calculi with sum and product types (and strict evaluation strategy).
 
+For instance, let's see the reduction for function application. We reuse the same example of our function with signature $[[!T ⊸ (T ⨂ T)]]$, here applied to the argument $[[ᴇ ɷ (Inl ())]]$:
+
+\[\bgroup\renewcommand{\arraystretch}{1.5}\begin{array}{clrl}
+&                 [[ ⬜ [ (ˢλ x ˥ ⟼ ༼x ►case ¹ν ᴇ ɷ x' ⟼ ˢ(x', x')༽) (ᴇ ɷ (Inl ())) ] ]] & \\
+\longrightarrow & [[ ⬜ [ (ᴇ ɷ (Inl ()) ►case ¹ν ᴇ ɷ x' ⟼ ˢ(x', x')) ] ]] & \rref*{\CApp\CRed} &\text{ with substitution } [[x]] \assigneq [[ᴇ ɷ (Inl ())]] \\
+\longrightarrow & [[ ⬜ [ ˢ(Inl (), Inl ()) ] ]] & \rref*{\CPatE\CRed} &\text{ with substitution } [[x']] \assigneq [[Inl ()]]
+\end{array}\egroup\]
+
+Because we have a function in value form already, with simple body, applied to a value, we don't need to focus into a subterm and unfocus back later; we see only see a succession of contraction steps.
+
+A command of the form $[[ ⬜ [ v ] ]]$ with $[[v]]$ a value is the stopping point of the reduction for all well-typed programs. If we have a non-value term $[[t]]$ in $[[⬜ [ t ] ]]$ then a focusing or contraction step should trigger; and if we have a non-empty evaluation context $[[C]]$ in $[[C [ v ] ]]$ then an unfocusing step should trigger. Only ill-shaped term or value can cause the reduction to be stuck, which is a symptom of a wrongly-typed program.
+
 \section{Linear Types in Haskell}\label{sec:intro-linearity}
+
+It's no surprise that we intend to implement prototypes in a industrial functional programming language along our journey in the destination-passing world. And Haskell is a suitable target for that, thanks to its support for linear types.
 
 Linear Haskell~\cite{bernardy_linear_2018} is a language extension for the Glasgow Haskell Compiler (GHC) that introduces the linear function arrow, \mintinline{haskellc}/t ⊸ u/ and modifies the type checker of GHC so that it can enforce linearity requirements. A linear function of type \mintinline{haskellc}/t ⊸ u/ guarantees that the argument of the function will be consumed exactly once when the result of the function is consumed exactly once. The regular function arrow \mintinline{haskellc}/t → u/ is still available when Linear Haskell is enabled; this one doesn't guarantee how many times its argument will be consumed when its result is consumed once. Actually Linear Haskell is based on a modal formalism, like \CLdm{}, so there is also a multiplicity-polymorphic arrow, \mintinline{haskellc}/t %m → u/, much like $[[T m → U]]$; so \mintinline{haskellc}/t ⊸ u/ and \mintinline{haskellc}/t → u/ are sugar for \mintinline{haskellc}/t %1 → u/ and \mintinline{haskellc}/t %ω → u/ respectively.
 
@@ -447,7 +475,7 @@ As usual with linear type systems, only values already wrapped in \mintinline{ha
 
 Some Haskell operators and notations are often used in the rest of this article:
 
-\mintinline{haskellc}/(;) ⩴ () ⊸ u ⊸ u/ is used to chain a linear operation returning \mintinline{haskellc}/()/ with one returning a value of type \mintinline{haskellc}/u/ without breaking linearity. It's the Haskell equivalent of \rref*{\CLdm\CTy\CSep\CPatU}. It isn't part of usual Haskell, but can be defined simply as \mintinline{haskellc}/case term1 of () -> term2/.
+\mintinline{haskellc}/(;) ⩴ () ⊸ u ⊸ u/ is used to chain a linear operation returning \mintinline{haskellc}/()/ with one returning a value of type \mintinline{haskellc}/u/ without breaking linearity. It's the Haskell equivalent of \rref*{\CLdm\CTy\CSep\CPatU}. It isn't part of the core Haskell syntax, but can be defined simply as \mintinline{haskellc}/case term1 of () -> term2/.
 
 \mintinline{haskellc}/Class ⇒ .../ is notation for typeclass constraints (resolved implicitly by the compiler).
 
@@ -469,28 +497,30 @@ The thing is, uniqueness typing doesn't have a theoretical ground as rich as lin
 
 Actually, \citet{sergey_linearity_uniqueness_2022} argue that modern programming languages would benefit from integrating both linear and uniqueness typing, as linearity and uniqueness appear to be half-dual, half-complementary notions that together are enough for a very precise control of resource usage in a language.
 
-In \cref{chap:dps-haskell} however, our main target language will be Haskell, which doesn't have uniqueness typing, only linear types, as detailed in \ref{sec:intro-linearity}. Fortunately, we can emulate uniqueness control in a language equipped with linear types, using \emph{linear scopes} or the \emph{scope function trick}, as one might call it.
+In \cref{chap:dps-haskell} however, our main target language will be Haskell, which doesn't have uniqueness typing, only linear types, as detailed in \cref{sec:intro-linearity}. Fortunately, we can emulate uniqueness control in a language equipped with linear types, using \emph{linear scopes} or the \emph{scope function trick}, as one might call it.
 
 \paragraph{Linear scopes}
 
 As we said before, in Linear Haskell, as in most linear type systems, functions can be made to use their arguments linearly or not. In other terms, linearity is a contract that links the input and output of a function. But we cannot say anything a priori about what happened to the value passed as a parameter before the function call, or what happens to the function result after. Linearity control can only be enforced on \emph{variables}.
 
-Let say we want to design a file API without monads (that's actually one possible use of linear/unique types).
-As top-level bindings in a practical program are not seen as linear variable bindings, and are reusable several times, one could write the following program:
+Let say we want to design a file API without monads (that's actually one interesting use of linear/unique types). Assuming the following simplified API, one could write this small program:
 
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}{haskellc}
 openFile ⩴ Int ⊸ File
-file ⩴ File = openFile 1337 -- no way to force this value to be used exactly once
 closeFile ⩴ File ⊸ ()
+
+file ⩴ File  -- no way to force this value to be used exactly once
+file = openFile "test.txt"
+
 nonLinearUseButValid ⩴ () =
-  closeFile file ; closeFile file -- valid even if file is consumed twice
+  closeFile file ; closeFile file  -- valid even if file is consumed twice
 \end{minted}
 }
 \end{unbreakable}
 
-Note that the same issue would arise if we wouldn't use top-level binding \mintinline{haskellc}/file/ twice in \mintinline{haskellc}/nonLinearUseButValid/, but instead inlined its value twice without producing the side-effects of \mintinline{haskellc}/openFile/.
+With call-by-value or call-by-need semantics, the side-effects of \mintinline{haskellc}/openFile/ will be produced only once, while the side effects of \mintinline{haskellc}/closeFile/ will be produced twice, resulting in an error.
 
 The solution to that is to forbid the consumer from creating and directly accessing a value of the resource type for which we want to enforce linearity/uniqueness. Instead, we force the consumer of a resource to pass a continuation representing what they want to do on the resource, so that we can check through its signature that it is indeed a linear continuation:
 
@@ -500,25 +530,25 @@ The solution to that is to forbid the consumer from creating and directly access
 withFile ⩴ Int ⊸ (File ⊸ t) ⊸ t
 closeFile ⩴ File ⊸ ()
 nonLinearUseAndEffectivelyRejected ⩴ () =
-  withFile 1337 (\file → closeFile °\mold{file}° ; closeFile °\mold{file}°) -- not linear
+  withFile "test.txt" (\file → closeFile °\mold{file}° ; closeFile °\mold{file}°) -- not linear
 \end{minted}
 }
 \end{unbreakable}
 
-The \mintinline{haskellc}/File/ type is in positive position in the signature of \mintinline{haskellc}/withFile/, so that the function should somehow know how to produce a \mintinline{haskellc}/File/, but this is opaque for the user. What matters is that a file can only be accessed by providing a linear continuation to \mintinline{haskellc}/withFile/.
+The \mintinline{haskellc}/File/ type is in positive position in the signature of \mintinline{haskellc}/withFile/, so the function \mintinline{haskellc}/withFile/ should somehow know how to produce a \mintinline{haskellc}/File/, but this is opaque for the user. What matters is that a file can only be accessed by providing a linear continuation to \mintinline{haskellc}/withFile/.
 
-Still, this is not enough; because \mintinline{haskellc}/\file → file/ is indeed a linear continuation, one could use \mintinline{haskellc}/withFile 1337 (\file → file)/ to leak a \mintinline{haskellc}/File/, and then use it in a non-linear fashion in the outside world. Hence we must forbid \mintinline{haskellc}/File/ from appearing anywhere in the return type of the continuation.
+Still, this is not enough; because \mintinline{haskellc}/\file → file/ is indeed a linear continuation, one could use \mintinline{haskellc}/withFile "test.txt" (\file → file)/ to leak a \mintinline{haskellc}/File/, and then use it in a non-linear fashion in the outside world. Hence we must forbid \mintinline{haskellc}/File/ from appearing anywhere in the return type of the continuation.
 
-To do that, we ask the return type to be wrapped in the unrestricted modality \mintinline{haskellc}/Ur/ (the equivalent to $\ottstype{!}$ modality in the Linear Haskell realm): because the value of type \mintinline{haskellc}/File/ comes from the left of a linear arrow, it cannot be promoted to an \mintinline{haskellc}/Ur/ without breaking linearity, so it cannot leave the scope and has to be used exactly once in this scope. That's why we speak of \emph{linear scopes}. Here's the updated example:
+To do that, we ask the return type to be wrapped in the unrestricted modality \mintinline{haskellc}/Ur/ (the equivalent in the Linear Haskell realm to the $\ottstype{!}$ modality): because the value of type \mintinline{haskellc}/File/ comes from the left of a linear arrow, it cannot be promoted to an \mintinline{haskellc}/Ur/ without breaking linearity, so it cannot leave the scope and has to be used exactly once in this scope. That's why we speak of \emph{linear scopes}. Here's the updated example:
 
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-withFile' ⩴ Int ⊸ (File ⊸ Ur t) ⊸ Ur t
+withFile' ⩴ String ⊸ (File ⊸ Ur t) ⊸ Ur t
 closeFile ⩴ File ⊸ ()
-exampleOk ⩴ Ur () = withFile' 1337 (\file → closeFile file ; ¤Ur ())
+exampleOk ⩴ Ur () = withFile' "test.txt" (\file → closeFile file ; ¤Ur ())
 exampleFail ⩴ Ur File =
-  withFile' 1337 (\file → °\mold{¤Ur file}°) -- leaking file, effectively rejected
+  withFile' "test.txt" (\file → °\mold{¤Ur file}°) -- leaking file, effectively rejected
 \end{minted}
 }
 \end{unbreakable}
@@ -532,9 +562,9 @@ readLine ⩴ File ⊸ (Ur String, File)
 writeLine File ⊸ String ⊸ File
 
 exampleFail' ⩴ Ur () =
-  withFile' 1337 (\file1 →
+  withFile' "test.txt" (\file1 →
     ...
-    withFile' 1338 (\file2 →
+    withFile' "test2.txt" (\file2 →
       let (Ur line, file1') = readLine file1
           file2' = writeLine file2 line
        in closeFile file2' ; °\mold{¤Ur file1'}°)
@@ -546,9 +576,9 @@ exampleFail' ⩴ Ur () =
 
 The problem here is that we cannot return \mintinline{haskellc}/file1'/ from the inner scope, because it's a linear resource that cannot be promoted to \mintinline{haskellc}/Ur/. However, it would be perfectly safe to do so; it's just that we don't have precise enough tools at type level to convince the compiler of this fact.
 
-In that case, the most obvious workaround is to extend the scope of \mintinline{haskellc}/withFile' 1338 (file2 → ...)/ as long as we need to operate on \mintinline{haskellc}/file1'/. Very unfortunate and unpractical indeed to have to prolongate the inner scope because we still need to operate on resources from the outer one!\footnote{This is what is referred to as \emph{sticky end of linear scopes} in \cite{spiwack_linear_scopes_2023}}
+In that case, the most obvious workaround is to extend the scope of \mintinline{haskellc}/withFile' "test2.txt" (file2 → ...)/ as long as we need to operate on \mintinline{haskellc}/file1'/. Very unfortunate and unpractical indeed to have to prolongate the inner scope because we still need to operate on resources from the outer one!\footnote{This is what is referred to as \emph{sticky end of linear scopes} in \cite{spiwack_linear_scopes_2023}}
 
-One easy improvement we can do is to have a big, single linear scope, providing a linear token type, and let this token type be used to instantiate any resource for which we want to enforce linearity/uniqueness. That way, we can just have one big linear scope, and write most of the code in direct style, still without monads!
+One easy improvement we can do is to have a single linear scope, providing a linear token type, and let this token type be used to instantiate any resource for which we want to enforce linearity/uniqueness. That way, we can just have one big linear scope, and write most of the code in direct style, still without monads!
 
 \begin{unbreakable}
 {\figtextsize
@@ -558,22 +588,22 @@ dup ⩴ Token ⊸ (Token, Token)
 withToken ⩴ (Token ⊸ Ur t) ⊸ Ur t
 
 -- A first linear API
-openFile' ⩴ Int ⊸ Token ⊸ File
+openFile' ⩴ String ⊸ Token ⊸ File
 closeFile ⩴ File ⊸ ()
 
 -- A second linear API
-openDB ⩴ String ⊸ Int ⊸ Token ⊸ DB
+openDB ⩴ String ⊸ String ⊸ Token ⊸ DB
 closeDB ⩴ DB ⊸ ()
 
 exampleOk1 ⩴ Ur () =
-  withToken (\tok → let file = openFile' 1337 tok in closeFile file ; ¤Ur ())
+  withToken (\tok → let file = openFile' "test.txt" tok in closeFile file ; ¤Ur ())
 exampleOk2 ⩴ Ur () =
   withToken (\tok → let (tok1, tok2) = dup tok
-                        file = openFile' 1337 tok1
+                        file = openFile' "test.txt" tok1
                         db = openDB "localhost" 3306 tok2
                      in closeFile file ; closeDB db ; ¤Ur ())
-exampleFail ⩴ Ur File =
-  withToken (\tok → °\mold{¤Ur (openFile' 1337 tok)}°) -- leaking file which linearly depends on tok
+exampleRejected ⩴ Ur File =
+  withToken (\tok →  ¤Ur (openFile' "test.txt" tok)°) -- leaking file which linearly depends on tok
 \end{minted}
 }
 \end{unbreakable}
@@ -584,7 +614,7 @@ In fact, the goal of the \mintinline{haskellc}/Token/ type is to tie every resou
 
 The linear \mintinline{haskellc}/dup/ function creates two tokens out of one, but still tie the resulting tokens to the input one through a linear arrow. Allowing to duplicate tokens doesn't allow the consumer to duplicate the resources we want to control (files, database handles, etc.). So we're safe on that front.
 
-With this approach, dealing with multiple linear resources is much more uniform. We can piggyback on a remaining token to instantiate a new linear resource. As we only have one big linear scope, with every linear resource in it, it isn't as painful to extend it as much as needed. When a program is sliced into many sub-functions, these functions don't even have to deal or know about the linear scope; they just have to pass around and receive tokens.
+With this approach, dealing with multiple linear resource types is much more uniform. We can use any remaining token to instantiate one or several new linear resources. As we only have one big linear scope, with every linear resource in it, there is no issue with nested scopes that need to be extended. When a program is sliced into many sub-functions, these functions don't even have to deal or know about the linear scope; they just have to pass around and receive tokens, an can otherwise be written in direct style.
 
 Although it's out of scope for this document, \citet{spiwack_linearly_2022} goes further on the idea of linear tokens and scopes, with \emph{Linear constraints}, which are roughly a way to pass tokens around in an implicit fashion, to make programming with linear types even more convenient\footnote{At the time of writing this document, Linear Constraints are seriously considered to be added into GHC, the main Haskell compiler\cite{spiwack_linear_prop_2023}.}.
 
