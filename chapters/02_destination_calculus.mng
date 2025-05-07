@@ -182,7 +182,7 @@ Implementations for a tail-recursive map are present in most of the previous wor
 \newcommand{\lstcat}{\mathop{+\!+}}
 Just like in any language, iterated concatenation of linked lists
 $(([[xs1]] \lstcat [[xs2]])\lstcat \ldots)\lstcat [[xs]]_n$
-is quadratic in \destcalculus{}. The usual solution to improve that complexity is \emph{difference lists}. The name \emph{difference lists} covers many related implementations for the concept of a ``linked list missing a queue''. The idea is that a difference list carries the same elements as a list would, but can be easily extended by the back in constant time as we retain a way to set a value for its queue later. In pure functional languages, a difference list is usually represented as a function instead~\cite{hughes_dlist_1986}, as we usually don't have write pointers. A singleton difference list is then $\lamnt{[[ys]]}{[[¹ν]]}{[[x ˢ:: ys]]}$, and concatenation of difference lists is function composition. A difference is turned into a list by setting its queue to be the empty list, or in the functional case, by applying it to the empty list. The consequence is that no matter how many compositions we have, each cons cell will be allocated a single time, making the iterated concatenation linear indeed.
+is quadratic in \destcalculus{}. The usual solution to improve this complexity is to use \emph{difference lists}. The name \emph{difference lists} covers many related implementations for the concept of a ``linked list missing a queue''. The idea is that a difference list carries the same elements as a list would, but can be easily extended by the back in constant time as we retain a way to set a value for its queue later. In pure functional languages, a difference list is usually represented as a function instead~\cite{hughes_dlist_1986}, as we usually don't have write pointers. A singleton difference list is then $\lamnt{[[ys]]}{[[¹ν]]}{[[x ˢ:: ys]]}$, and concatenation of difference lists is function composition. A difference list is turned into a list by setting its queue to be the empty list, or in the functional case, by applying it to the empty list. The consequence is that no matter how many compositions we have, each cons cell will be allocated a single time, making the iterated concatenation linear indeed.
 
 The problem is that in the functional implementation, each concatenation still allocates a closure. If we're building a difference list from singletons and composition, there's roughly one composition per cons cell, so iterated composition effectively performs two traversals of the list. In \destcalculus{}, we actually have write pointers, in the form of \emph{destinations}, so we can do better by representing a difference list as a list with a hole, much like in an imperative setting. A singleton difference list becomes $[[x]] \ottsctor{::} \holesq$, and concatenation is filling the hole with another difference list, using composition operator $\mathop{\triangleleft\mycirc}$. The detailed implementation is given on the left of~\cref{fig:impl-dlist-queue}. This encoding for difference lists makes no superfluous traversal: concatenation is just an $O(1)$ in-place update.
 
@@ -221,7 +221,7 @@ q ►case ¹ν {⮒
 }
 
 \paragraph{Efficient queue using difference lists}
-In an immutable functional language, a queue can be implemented as a pair of lists $[[ˢ(front, back)]]$~\cite{hood_queue_1981}. $[[back]]$ stores new elements in reverse order ($O(1)$ prepend). We pop elements from $[[front]]$, except when it is empty, in which case we set the queue to $[[ˢ(reverse back, ˢ[])]]$, and pop from the new front.
+In an immutable functional language, a queue can be implemented as a pair of lists $[[ˢ(front, back)]]$~\cite{hood_queue_1981}. The list $[[back]]$ stores new elements in reverse order ($O(1)$ prepend). We pop elements from $[[front]]$, except when it is empty, in which case we set the queue to $[[ˢ(reverse back, ˢ[])]]$, and pop from the new front.
 
 For their simple implementation, Hood-Melville queues are surprisingly efficient: the cost of the reverse operation is $O(1)$ amortized for a single-threaded use of the queue. Still, it would be better to get rid of this full traversal of the back list. Taking a step back, this $[[back]]$ list that has to be reversed before it is accessed is really merely a representation of a list that can be extended from the back. And we already know an efficient implementation for this: difference lists.
 
@@ -229,45 +229,45 @@ So we can give an improved version of the simple functional queue using destinat
 
 \section{Scope escape of destinations}\label{sec:scope-escape-dests}
 
-In \cref{sec:working-with-dests}, we've been making an implicit assumption: establishing a linear discipline on destinations ensures that all destinations will eventually find their way to the left of a fill operator $\blacktriangleleft$ or $\triangleleft$, so that the associated holes get written to. This turns out to be slightly incomplete.
+In \cref{sec:working-with-dests}, we made an implicit assumption: establishing a linear discipline on destinations ensures that all destinations will eventually find their way to the left of a fill operator $\blacktriangleleft$ or $\triangleleft$, so that the associated holes get written to. This turns out to be slightly incomplete.
 
 To see why, let's consider the type $[[⌊ ⌊ T⌋ ¹ν⌋ ¹ν]]$: the type of a destination pointing to a hole where a destination is expected. Think of it as an equivalent of the pointer type $\ottstype{T*\!*}$ in the C language. Destinations are indeed ordinary values, so they can be stored in data structures, and before they get stored, holes stand in their place in the structure. For instance, if we have $[[d]]\pmb{:}[[⌊ T⌋ ¹ν]]$ and $[[dd]]\pmb{:}[[⌊ ⌊ T⌋ ¹ν⌋ ¹ν]]$, we can form $[[dd ◀ d]]$: $[[d]]$ will be stored in the structure pointed to by $[[dd]]$.
 
 Should we count $[[d]]$ as linearly used here? The alternatives don't seem promising:
 \vspace{-0.04cm}\begin{itemize}
-\item If we count this as a non-linear use of $[[d]]$, then $[[dd ◀ d]]$ is rejected since destinations (represented here by $[[d]]$) can only be used linearly. This choice is fairly limiting, as it would prevent us from storing destinations in structures with holes, as we do, crucially, in \cref{sec:bft}.
-\item If we do not count this use of $[[d]]$ at all, we can write $[[dd ◀ d ; d ◀ v]]$ so that $[[d]]$ is both stored for later use \emph{and} filled immediately (resulting in the corresponding hole being potentially written to twice), which is unsound, as discussed in \cref{ssec:build-up-vocab}.
+\item If we count this as a non-linear use of $[[d]]$, then $[[dd ◀ d]]$ is rejected since destinations (like $[[d]]$ here) can only be used linearly. This choice is fairly limiting, as it would prevent us from storing destinations in structures with holes, as we will do, crucially, in \cref{sec:bft}.
+\item If we do not count this use of $[[d]]$ at all, we can write $[[dd ◀ d ; d ◀ v]]$ so that $[[d]]$ is both stored for later use \emph{and} filled immediately (resulting in the corresponding hole being potentially written to twice), which is unsound, as discussed at the end of \cref{ssec:build-up-vocab}.
 \end{itemize}\vspace{-0.04cm}
-So linear use it is. But it creates a problem: there's no way, within our linear type system, to distinguish between ``a destination has been used on the left of a triangle so its corresponding hole has been filled'' and ``a destination has been stored and its hole still exists at the moment''. This oversight may allow us to read uninitialized memory!
+So linear use it is. But this creates a problem: there's no way, within our linear type system, to distinguish between ``a destination that has been used on the left of a triangle so its corresponding hole has been filled'' and ``a destination that has been stored and its hole still exists at the moment''. This oversight may allow us to read uninitialized memory!
 
-Let's compare two examples. We assume a simple store semantics for now where structures with holes stay in the store until they are completed. We'll need the $\ottkw{alloc} \pmb{:} [[(⌊ T ⌋ ¹ν ¹ν → ①) ¹ν → T]]$ operator. The semantics of $\ottkw{alloc}$ is: allocate a structure with a single root hole in the store, call the supplied function with the destination to the root hole as an argument; when the function has consumed all destinations (so only unit remains), pop the structure from the store to obtain a complete $[[T]]$. $[[alloc' f]]$ corresponds, in type and behavior, to
+Let's compare two examples. We assume a simple store semantics for now where structures with holes stay in the store until they are completed. A reduction step goes from a pair $[[Z]] | [[t]]$ of a store and a term to a new pair $[[Z']] | [[t']]$, and store are composed of named bindings of the form $[[ { lb ≔ v } ]]$ with $[[v]]$ a value that may contain holes. We'll also need the $\ottkw{alloc} \pmb{:} [[(⌊ T ⌋ ¹ν ¹ν → ①) ¹ν → T]]$ operator. The semantics of $\ottkw{alloc}$ is: allocate a structure with a single root hole in the store, call the supplied function with the destination to the root hole as an argument; when the function has consumed all destinations (so only unit remains), pop the structure from the store to obtain a complete $[[T]]$. $[[alloc' f]]$ corresponds, in type and behavior, to
 $[[from⧔' (alloc ►map d ⟼ f d)]]$.
 
-In this snippet, structures with holes are given names $[[v]]$ and $[[vd]]$ in the store; holes are given names too and denoted by $[[+h]]$ and $[[+hd]]$, and concrete destinations are denoted by $[[-h]]$ and $[[-hd]]$.
+In the following snippets, structures with holes are given names $[[lb]]$ and $[[lbd]]$ in the store; holes are given names too and denoted by $[[+h]]$ and $[[+hd]]$, and concrete destinations are denoted by $[[-h]]$ and $[[-hd]]$.
 
-When the building scope of $[[v]] \pmb{:} [[Bool]]$ is parent to the one of $[[vd]] \pmb{:} [[⌊ Bool ⌋ ¹ν]]$, everything works well because $[[vd]]$, that contains destination pointing to $[[+h]]$, has to be consumed before $[[v]]$ can be read. In other terms, storing an older destination into a fresher one is not a problem:
+When the building scope of $[[lb]] \pmb{:} [[Bool]]$ is parent to the one of $[[lbd]] \pmb{:} [[⌊ Bool ⌋ ¹ν]]$, everything works well because $[[lbd]]$, that contains destination pointing to $[[+h]]$, has to be consumed before $[[lb]]$ can be read. In other terms, storing an older destination into a fresher one is not a problem:
 \bgroup\setlength{\arraycolsep}{0.5ex}
 \codehere{\!\!\!\begin{array}{crcl}
        & $\{ \}$ &|& [[ alloc' (ˢλ d ¹ν ⟼ (alloc' (ˢλ dd ¹ν ⟼ dd ◀ d) @ ⌊ Bool ⌋ ¹ν) ◀ true)]] \\
-[[⟶]] & [[ { v ≔ +h } ]] &|& [[ (alloc' (ˢλ dd ¹ν ⟼ dd ◀ -h) @ ⌊ Bool ⌋ ¹ν) ◀ true ; deref v ]] \\
-[[⟶]] & [[ { v ≔ +h, vd ≔ +hd } ]] &|& [[ (-hd ◀ -h ; deref vd) ◀ true ; deref v ]] \\
-[[⟶]] & [[ { v ≔ +h, vd ≔ -h } ]] &|& [[ deref vd ◀ true ; deref v ]] \\
-[[⟶]] & [[ { v ≔ +h } ]] &|& [[ -h ◀ true ; deref v ]] \\
-[[⟶]] & [[ { v ≔ true } ]] &|& [[ deref v ]] \\
+[[⟶]] & [[ { lb ≔ +h } ]] &|& [[ (alloc' (ˢλ dd ¹ν ⟼ dd ◀ -h) @ ⌊ Bool ⌋ ¹ν) ◀ true ; deref lb ]] \\
+[[⟶]] & [[ { lb ≔ +h, lbd ≔ +hd } ]] &|& [[ (-hd ◀ -h ; deref lbd) ◀ true ; deref lb ]] \\
+[[⟶]] & [[ { lb ≔ +h, lbd ≔ -h } ]] &|& [[ deref lbd ◀ true ; deref lb ]] \\
+[[⟶]] & [[ { lb ≔ +h } ]] &|& [[ -h ◀ true ; deref lb ]] \\
+[[⟶]] & [[ { lb ≔ true } ]] &|& [[ deref lb ]] \\
 [[⟶]] & $\{ \}$ &|& [[ true ]]
 \end{array}}
 
-However, when $[[vd]]$'s scope is parent to $[[v]]$'s, i.e. when a newer destination is stored into an older one, then we can write a linearly typed yet unsound program:
+However, when $[[lbd]]$'s scope is parent to $[[lb]]$'s, i.e. when a newer destination is stored into an older one, then we can write a linearly typed yet unsound program:
 \codehere{\!\!\!\begin{array}{crcl}
        & $\{ \}$ &|& [[alloc' (ˢλ dd ¹ν ⟼ (alloc' (ˢλ d ¹ν ⟼ dd ◀ d) @ Bool) ►case ¹ν { true ⟼ (), false ⟼ () })]] \\
-[[⟶]] & [[ { vd ≔ +hd } ]] &|& [[(alloc' (ˢλ d ¹ν ⟼ -hd ◀ d)  @ Bool) ►case ¹ν { true ⟼ (), false ⟼ () } ; deref vd]] \\
-[[⟶]] & [[ { vd ≔ +hd , v ≔ +h } ]] &|& [[(-hd ◀ -h ; deref v) ►case ¹ν { true ⟼ (), false ⟼ () } ; deref vd]] \\
-[[⟶]] & [[ { vd ≔ -h , v ≔ +h } ]] &|& [[ (deref v) ►case ¹ν { true ⟼ (), false ⟼ () } ; deref vd]] \\
-[[⟶]] & [[ { vd ≔ -h } ]] &|& [[ +h ►case ¹ν { true ⟼ (), false ⟼ () } ; deref vd]] \qquad\qquad \raisebox{-0.8ex}{\scalebox{0.35}{\bcbombe\bcbombe\bcbombe}}
+[[⟶]] & [[ { lbd ≔ +hd } ]] &|& [[(alloc' (ˢλ d ¹ν ⟼ -hd ◀ d)  @ Bool) ►case ¹ν { true ⟼ (), false ⟼ () } ; deref lbd]] \\
+[[⟶]] & [[ { lbd ≔ +hd , lb ≔ +h } ]] &|& [[(-hd ◀ -h ; deref lb) ►case ¹ν { true ⟼ (), false ⟼ () } ; deref lbd]] \\
+[[⟶]] & [[ { lbd ≔ -h , lb ≔ +h } ]] &|& [[ (deref lb) ►case ¹ν { true ⟼ (), false ⟼ () } ; deref lbd]] \\
+[[⟶]] & [[ { lbd ≔ -h } ]] &|& [[ +h ►case ¹ν { true ⟼ (), false ⟼ () } ; deref lbd]] \qquad\qquad \raisebox{-0.8ex}{\scalebox{0.35}{\bcbombe\bcbombe\bcbombe}}
 \end{array}}\egroup
-\noindent{}Here the expression $[[dd ◀ d]]$ results in $[[d]]$ escaping its scope for the parent one, so $[[v]]$ is just uninitialized memory (the hole $[[+h]]$) when we dereference it. This example must be rejected by our type system.
+\noindent{}Here the expression $[[dd ◀ d]]$ results in $[[d]]$ escaping its scope for the parent one, so $[[lb]]$ is just uninitialized memory (the hole $[[+h]]$) when we dereference it. This example must be rejected by our type system.
 
-Again, the problem is, using purely a linear type system, we can only reject this example if we also reject the first, sound example. In this case, the type $[[⌊ ⌊ T⌋ ¹ν⌋ ¹ν]]$ would become practically useless: such destinations can never be filled. This isn't the direction we want to take: we really want to be able to store destinations in data structures with holes. So we want $[[t]]$ in $[[d ◀ t]]$ to be allowed to be linear. Without further restrictions, it wouldn't be sound, so to address this, we need an extra control system to prevent scope escape; it can't be just linearity. For \destcalculus{}, we decided to use a system of \emph{ages} to represent which scope a resource originates from. Ages are described in detail in \cref{sec:syntax-type-system}; but first, let's see an exemple where storing destinations in data structures really matters.
+Again, the problem is that, using purely a linear type system, we can only reject this example if we also reject the first, sound example. In this case, the type $[[⌊ ⌊ T⌋ ¹ν⌋ ¹ν]]$ would become practically useless: such destinations can never be filled. This isn't the direction we want to take: we really want to be able to store destinations in data structures with holes. So we want $[[t]]$ in $[[d ◀ t]]$ to be allowed to be linear. Without further restrictions, it wouldn't be sound, so to address this, we need an extra control system to prevent scope escape; it can't be just linearity. For \destcalculus{}, we decided to use a system of \emph{ages} to represent which scope a resource originates from. Ages are described in detail in \cref{sec:syntax-type-system}; but first, let's see an exemple where storing destinations in data structures really matters.
 
 % TODO: raconter ce qu'on a compris sur l'intéraction entre ref, linéarité, escape, dests
 
@@ -279,7 +279,7 @@ Most of the time, linear interfaces rely on the fact that there is a specific se
 
 \section{Breadth-first tree traversal}\label{sec:bft}
 
-As a full-fledged example, which uses the full expressive power of \destcalculus{}, we focus breadth-first tree relabeling:
+As a full-fledged example, which uses the full expressive power of \destcalculus{}, we focus on breadth-first tree relabeling:
 % \begin{quote}
 \emph{``
 Given a tree, create a new one of the same shape, but with the values at the nodes replaced by the numbers $1\ldots|T|$ in breadth-first order.
@@ -288,9 +288,9 @@ Given a tree, create a new one of the same shape, but with the values at the nod
 
 This isn't a very natural problem for functional programming, as breadth-first traversal implies that the order in which the structure must be built (left-to-right, top-to-bottom) is not the same as the structural order of a functional tree --- building the leaves first and going up to the root. So it usually requires fancy functional workarounds~\cite{okasaki_bfs_2000,jones_gibbons_linearbfs_93,gibbons_phases_2023}.
 
-It's very tempting to solve this exercise in an efficient imperative-like fashion, where a queue drives the processing order. That's the standard algorithm taught at university, where the next node to process is dequeued from the front of the queue, and its children nodes are enqueued at the back of the queue for later processing, achieving breadth-first traversal. For that, \citet{minamide_functional_1998}'s system where structures with holes are represented as linear functions cannot help. We really need destinations as first-class values to borrow from this imperative power.
+It's very tempting to solve this exercise in an efficient imperative-like fashion, where a queue drives the processing order. That's the standard algorithm taught at university, where the next node to process is dequeued from the front of the queue, and its children nodes are enqueued at the back of the queue for later processing, achieving breadth-first traversal. For that, Minamide's system\cite{minamide_functional_1998} where structures with holes are represented as linear functions cannot help. We really need destinations as first-class values to borrow from this imperative power.
 
-\Cref{fig:impl-bfs} presents how we can implement this breadth-first tree traversal in \destcalculus{}, thanks to first-class destinations. We assume the data type $[[Tree T]]$ as been defined, unsurprisingly, as $[[Tree T]]\btriangleq [[① ⨁ (T ⨂ ((Tree T) ⨂ (Tree T)))]]$; and we refer to the constructors of $[[Tree T]]$ as $\ottsctor{Nil}$ and $\ottsctor{Node}$, defined as syntactic sugar as we did for the other constructors before. We also assume some encoding of the type $[[Nat]]$ of natural number. Remember that $[[Queue T]]$ is the efficient queue type from \cref{ssec:efficient-queue}.
+\Cref{fig:impl-bfs} presents how we can implement this breadth-first tree traversal in \destcalculus{}, thanks to first-class destinations. We assume the data type $[[Tree T]]$ has been defined, unsurprisingly, as $[[Tree T]]\btriangleq [[① ⨁ (T ⨂ ((Tree T) ⨂ (Tree T)))]]$; and we refer to the constructors of $[[Tree T]]$ as $\ottsctor{Nil}$ and $\ottsctor{Node}$, defined as syntactic sugar as we did for the other constructors before. We also assume some encoding of the type $[[Nat]]$ of natural numbers. Remember that $[[Queue T]]$ is the efficient queue type from \cref{ssec:efficient-queue}.
 
 The core idea of our algorithm is that we hold a queue of pairs, storing each an input subtree and (a destination to) its corresponding output subtree. When the element $[[ˢ(tree, dtree)]]$ at the front of the queue has been processed, the children nodes of $[[tree]]$ and children destinations of $[[dtree]]$ are enqueued to be processed later, much as the original imperative algorithm.
 
@@ -298,7 +298,7 @@ We implement the actual breadth-first relabeling $\ottkw{relabelDPS}$ as an inst
 
 % The implementation of \cref{fig:impl-bfs} is very close to the one found in~\cite{bagrel_destination-passing_2024}. The difference is that, because they can't store destinations in structures with holes (see the discussion in \cref{sec:scope-escape-dests}), their implementation can't use the efficient queue implementation from \cref{ssec:efficient-queue}. So they have to revert to using a Hood-Melville queue for breadth-first traversal.
 
-This freshly gained expressivity has a cost though: we need a type system that combines linearity control \emph{and} age control to make the system sound, as exemplified in the previous section. We'll combine both linearity and the aforementioned ages in the same \emph{mode} system\footnote{We said earlier that the modal approach would allow us to combine several control axes efficiently in the same mode system.}. You already know the linearity annotations $[[¹]]$ and $[[ω]]$; here we also introduce the new age annotation $[[∞]]$, that indicates that the associated argument cannot carry destinations.Arguments with no modes displayed on them, or function arrows with no modes, default to the unit of the semiring/ringoid; in particular they are linear, and can capture destinations.
+This freshly gained expressivity has a cost though: we need a type system that combines linearity control \emph{and} age control to make the system sound, otherwise we run into the issues of scope escape described in the previous section. We'll combine both linearity and the aforementioned ages system in the same \emph{mode ringoid}\footnote{We said earlier that the modal approach would make the type system easier to extend, here is the proof.}. You already know the linearity annotations $[[¹]]$ and $[[ω]]$ from \cref{chap:preli}; here we also introduce the new age annotation $[[∞]]$, that indicates that the associated argument cannot carry destinations. Arguments with no modes displayed on them, or function arrows with no modes, default to the unit of the ringoid; in particular they are linear, and can capture destinations.
 
 \begin{codefig}{\caption{Breadth-first tree traversal in destination-passing style}\label{fig:impl-bfs}}
 \newoperator[~\mathbf{rec}]
@@ -436,7 +436,7 @@ from⧔' (alloc ►map d ⟼ (d ⨞ (,)) ►case ¹ν⮒
 \node (dots2) at (6,0) {\ldots};
 
 % Draw edges with labels
-\draw (inf) -- node[midway, above, rotate=30, inner sep=1pt] {$\aleq$} (zero);
+\draw (inf) -- node[fill=none, midway, above, rotate=30, inner sep=1pt] {$\aleq$} (zero);
 \draw (inf) -- node[midway, below, rotate=45, inner sep=1pt] {$\aleq$} (oneB);
 \draw (inf) -- node[midway, above, rotate=135, yscale=-1, inner sep=1pt] {$[[⥶]]_{\reflectbox{$\scriptscriptstyle{\pmb{\mathtt{a}}}$}}$} (k);
 \end{tikzpicture}\hfill\phantom{.}
@@ -509,13 +509,13 @@ $[[(p a) + (p' a')]] \btriangleq [[(p + p') (a + a')]]$
 \egroup
 \end{ottfig}
 
-\destcalculus{} is a simply typed $\lambda$-calculus with unit ($[[①]]$), product ($\ottstype{\otimes}$) and sum ($\ottstype{\oplus}$) types, inspired from \CLdm{} from \cref{chap:preli}. Its most distinctive features are the destination $[[⌊ T ⌋ m]]$ and ampar $[[S ⧔ T]]$ types which we've introduced in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}.
+\destcalculus{} is a simply typed $\lambda$-calculus with unit ($[[①]]$), product ($\ottstype{\otimes}$) and sum ($\ottstype{\oplus}$) types, inspired from \CLdm{} described in \cref{chap:preli}. It also features a mode-polymorphic function arrow $_{[[m]]}\!\ottstype{\multimap}$. Its most distinctive features however are the destination $[[⌊ T ⌋ m]]$ and ampar $[[S ⧔ T]]$ types which we've introduced in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}. Don't pay too much attention to the mode annotation on the destination type; so far it was hidden in the examples because we only considered linear destinations.
 
-To ensure that destinations are used soundly, we need both to enforce the linearity of destination but also to prevent destinations from escaping their scope, as discussed in \cref{sec:scope-escape-dests}. To that effect, \destcalculus{} tracks the \emph{age} of destinations, that is how many nested scope have been open between the current expression and the scope from which a destination originates. We'll see in \cref{ssec:ty-term-val} that scopes are introduced by the $[[t ►map x ⟼ t']]$ construct. For instance, we have a term $[[t1 ►map x1 ⟼ t2 ►map x2 ⟼ t3 ►map x3 ⟼ x1]]$, then wil will say that the innermost occurrence of $[[x1]]$ has age $[[↑]]^{\ottsmodee{2}}$ because two nested $\ottkw{upd}_{\ottkw{\ltimes} }$ separate the definition and use site of $[[x1]]$.
+To ensure that destinations are used soundly, we need both to enforce the linearity of destinations but also to prevent destinations from escaping their scope, as discussed in \cref{sec:scope-escape-dests}. To that effect, \destcalculus{} tracks the \emph{age} of destinations, that is how many nested scopes have been open between the current expression and the scope from which a destination originates. We'll see in \cref{ssec:ty-term-val} that scopes are introduced by the $[[t ►map x ⟼ t']]$ construct. For instance, if we have a term $[[t1 ►map x1 ⟼ t2 ►map x2 ⟼ t3 ►map x3 ⟼ x1]]$, then we say that the innermost occurrence of $[[x1]]$ has age $[[↑]]^{\ottsmodee{2}}$ because two nested $\ottkw{upd}_{\ottkw{\ltimes} }$ separate the definition and use site of $[[x1]]$.
 
 For \destcalculus{}, we take the same modal approach as for \CLdm{}, but we enrich our mode ringoid to have an \emph{age} axis. Thanks to the algebraic nature of the modal approach, for most typing rules, we'll be able to reuse those of \CLdm{} without any modification as just the elements of the ringoid change, not the properties nor the structure of the ringoid.
 
-The syntax of \destcalculus{} terms is presented in~\cref{fig:grammar}, including the syntactic sugar that we've been using in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}.
+The syntax of \destcalculus{} terms is presented in~\cref{fig:grammar}, including the syntactic sugar that we used in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}.
 
 \subsection{Modes and the age semiring}\label{ssec:age-control}
 

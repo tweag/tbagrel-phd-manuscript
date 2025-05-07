@@ -151,7 +151,7 @@ term, t, u :: 'term_' ::= {{ com Term }}
   | allocIP :: S :: SugarNewAIP {{ coq (term_Val val_Unit) }} {{ tex \ottkw{new}_{\ottkw{\ltimes IP} } }}
   | allocCoW :: S :: SugarNewACoW {{ coq (term_Val val_Unit) }} {{ tex \ottkw{new}_{\ottkw{\ltimes COW} } }}
   | alloc' t :: S :: SugarAllocP {{ coq (term_Val val_Unit) }} {{ tex \ottkw{alloc}~[[t]] }}
-  | deref t :: S :: SugarDeref {{ coq (term_Val val_Unit) }} {{ tex \ottkw{deref}~[[t]] }}
+  | deref lb :: S :: SugarDeref {{ coq (term_Val val_Unit) }} {{ tex \ottkw{deref}~[[lb]] }}
   | let x ≔ t in u :: S :: SugarLet {{ coq (term_App (sterm_Fun [[x]] (Some (pair Lin (Fin 0))) [[u]]) ([[t]])) }} {{ tex \ottkw{let}~[[x]]\assigneq[[t]]~\ottkw{in}~[[u]] }}
   | let x ≔ t in b u :: S :: SugarLetSp1 {{ coq (term_App (sterm_Fun [[x]] (Some (pair Lin (Fin 0))) [[u]]) ([[t]])) }} {{ tex \ottkw{let}~[[x]]\assigneq[[t]]~\ottkw{in}[[b]][[u]] }}
   | let x ≔ t in b sp u :: S :: SugarLetSp2 {{ coq (term_App (sterm_Fun [[x]] (Some (pair Lin (Fin 0))) [[u]]) ([[t]])) }} {{ tex \ottkw{let}~[[x]]\assigneq[[t]]~\ottkw{in}[[b]][[sp]][[u]] }}
@@ -189,6 +189,8 @@ val, v, vd :: 'val_' ::= {{ com Value }}
   | v [ H ⩲ h' ] :: M :: Cshift {{ com Shift hole names inside $[[v]]$ by $[[h']]$ if they belong to $[[H]]$. }} {{ coq (val_cshift [[v]] [[H]] [[h']]) }} {{ tex [[v]]\ottshname{[}[[H]][[⩲]][[h']]\ottshname{]} }}
   | ( v ) :: S :: Paren {{ coq [[v]] }} {{ tex ([[v]]) }}
   | v [ h ≔ H' v' ] :: M :: Fill {{ tex [[v]]\hspace*{0.11em}\llparenthesis [[h]]\assigneq_{[[H']]}\,[[v']]\hspace*{0.11em}\rrparenthesis }} {{ coq (val_fill [[v]] [[h]] [[H']] [[v']]) }}
+
+label, lb {{ tex \textit{l} }}, lbd {{ tex \textit{ld} }} :: 'lbl_' ::= {{ com Label }}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DYNAMIC SYNTAX
@@ -987,7 +989,7 @@ terminals :: 'terminals_' ::=
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 store_assign, w :: 'storea_' ::=
-  | v ≔ t :: :: Val {{ tex [[v]]\assigneq[[t]] }}
+  | lb ≔ t :: :: Val {{ tex [[lb]]\assigneq[[t]] }}
   | ul< w > :: S :: Underline {{ tex \uwave{[[w]]} }} {{ coq ([[w]]) }}
 
 store, Z {{ tex \mathcal{S} }} :: 'store_' ::=
