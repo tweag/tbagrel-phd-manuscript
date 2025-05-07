@@ -168,7 +168,7 @@ l ►case ¹ν {⮒
 ‥‥x ˢ:: xs ⟼ (dl⨞(::)) ►case ¹ν⮒
 ‥‥‥‥(dx, dxs) ⟼ dx ◀ f x ; map' f xs dxs}]]\end{array}}
 \newoperator
-  {\ottkw{map}}{[[(T ¹ν → U) ω∞ → List T ¹ν → List U]]}
+  {\ottkw{map}}{[[(T ¹ν → U) ɷ → List T ¹ν → List U]]}
   {[[map f l]]}{[[from⧔' ((alloc @ (List U) ⧔ ⌊ List U ⌋ ¹ν) ►map dl ⟼ map' f l dl)]]}
 \end{codefig}
 

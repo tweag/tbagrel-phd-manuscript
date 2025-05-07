@@ -619,3 +619,11 @@ With this approach, dealing with multiple linear resource types is much more uni
 Although it's out of scope for this document, \citet{spiwack_linearly_2022} goes further on the idea of linear tokens and scopes, with \emph{Linear constraints}, which are roughly a way to pass tokens around in an implicit fashion, to make programming with linear types even more convenient\footnote{At the time of writing this document, Linear Constraints are seriously considered to be added into GHC, the main Haskell compiler\cite{spiwack_linear_prop_2023}.}.
 
 In next chapters, we will reuse the \emph{linear scope with tokens} strategy to enforce linearity and uniqueness on linear resources, to allow safe effects in pure, direct-style APIs.
+
+\section{Conclusion}\label{sec:lin_lambda_conclusion}
+
+In this chapter we introduced the linear $\lambda$-calculus, from its roots in linear logic, to more practical and computation-centric presentations. In particular, we laid theoretical foundations for a modal linear $\lambda$-calculus, which will be reused in the rest of this document.
+
+Furthermore, we explored Linear Haskell, as a concrete target for experimenting with linear types. In particular, we illustrated how linear types can help with managing unique resources, that must be used but also must not be duplicated, even though it requires a bit of care to avoid the inherent limitations of linear types (in that, they can't guarantee per se what happened to a value in the past).
+
+We are now in comfortable ground and have all the tool needed to explore both theoretical and practical aspect of functional destination passing.

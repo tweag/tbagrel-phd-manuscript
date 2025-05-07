@@ -53,7 +53,7 @@
 \usepackage{enumitem}\let\newlist\relax\let\renewlist\relax
 \usepackage{fancybox}
 \usepackage{tabularx}
-\usepackage[defaultlines=4,all]{nowidow}
+\usepackage[defaultlines=3,all]{nowidow}
 % \usepackage{fancyhdr}
 
 %% For rendering of JFLA article
