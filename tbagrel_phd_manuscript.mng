@@ -68,7 +68,7 @@
 %% For schemas
 \usepackage{tikzit}
 \input{tikzstyle.tikzstyles}
-\tikzset{every picture/.style={line width=10pt}}
+%\tikzset{every picture/.style={line width=10pt}}
 \newcommand{\figcomment}[1]{\textcolor{gray}{#1}}
 \newcommand{\smallspc}{\hspace{-0.5em}}
 \def\figscale{1.2}
@@ -470,8 +470,8 @@
   \def\CFillP{$\ottstype{\lfloor \otimes\rfloor}$E}
   \def\CFillE{$\ottstype{\lfloor !\rfloor}$E}
   \def\CFillF{$\ottstype{\lfloor \multimap\rfloor}$E}
-  \def\CFillComp{$\ottstype{\lfloor}$c$\ottstype{\rfloor}$E}
-  \def\CFillLeaf{$\ottstype{\lfloor}$l$\ottstype{\rfloor}$E}
+  \def\CFillComp{$\ottstype{\lfloor}$~$\ottstype{\rfloor}$E\textsubscript{c}}
+  \def\CFillLeaf{$\ottstype{\lfloor}$~$\ottstype{\rfloor}$E\textsubscript{l}}
   \def\CId{id}
   \def\COpenAmpar{$\ottstype{\ltimes}$op}
   \def\CAmparOpen{$\ottstype{\ltimes}$op}

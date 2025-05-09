@@ -528,11 +528,39 @@ The multiplicity ringoid has elements $[[¹]]$ (linear) and $[[ω]]$ (unrestrict
 Ages are more interesting. We write ages as $[[↑^ka]]$ (with $[[ka]]$ a natural number), for ``defined $[[ka]]$ scopes ago''.
 We also have an age $[[∞]]$ for variables that don't originate from a $[[t ►map x ⟼ t']]$ construct i.e. that aren't destinations, and can be freely used in and returned by any scope. The main role of age $[[∞]]$ is thus to act as a guarantee that a value doesn't contain destinations. Finally, we will write $[[ν]] \btriangleq [[↑^0]]$  (``now'') for the age of destinations that originate from the current scope; and $[[↑]] \btriangleq [[↑^1]]$.
 
-The operations or order on ages aren't the usual ones on natural numbers though. It is crucial that \destcalculus{} tracks the precise age of variables. Variables from two scopes ago cannot be used as if they were from one scope ago, or vice-versa. The ordering reflects this with finite ages being arranged in a flat order, with $[[∞]]$ being bigger than all of them. Multiplication of ages reflects nesting of scope, as such, (finite) ages are multiplied by adding their numerical exponents $[[↑^ka · ↑^ja]] = [[↑^ka + ja]]$. In the typing rules, the most common form of scope nesting is opening a scope, which is represented by multiplying the age of existing bindings by $[[↑]]$ (that is, adding $1$ to the ages seen as a natural numbers). When a same variable is shared between two subterms, $\ottsmode{+}$ takes the least upper bound for the age order above, in other terms, the variable must be at the same age in both subterms, or have age $[[∞]]$ otherwise, which let it assume whichever age it needs in each subterm.
+The operations or order on ages aren't the usual ones on natural numbers though. Indeed, it's crucial that \destcalculus{} tracks the precise age of variables, and usually, ordering on modes usually implies a form of subtyping (where a variable having mode $[[n]]$ can be used in place where a variable with mode $[[m]]$ is expected if $[[m]] ⥶ [[n]]$). Here we don't want variables from two scopes ago to be used as if they were from one scope ago. The ordering reflects this with finite ages being arranged in a flat order (so $[[↑^1]]$ and $[[↑^2]]$ aren't comparable), with $[[∞]]$ being bigger than all of them. Multiplication of ages reflects nesting of scope, as such, (finite) ages are multiplied by adding their numerical exponents $[[↑^ka · ↑^ja]] = [[↑^ka + ja]]$. In the typing rules, the most common form of scope nesting is opening a scope, which is represented by multiplying the age of existing bindings by $[[↑]]$ (that is, adding $1$ to the ages seen as a natural numbers). When a same variable is shared between two subterms, $\ottsmode{+}$ takes the least upper bound for the age order above, in other terms, the variable must be at the same age in both subterms, or have age $[[∞]]$ otherwise, which let it assume whichever age it needs in each subterm.
 
 The unit of the new mode ringoid is the pair of the units from the multiplicity and age ringoids, ie. $[[¹ν]]$. We will usually omit the mode annotations when the mode is that unit.
 
 Finally, as in \CLm{} and \CLdm{} from \cref{chap:preli}, operations and modes are lifted to typing contexts, still following the insights from \cite{ghica_bounded_2014} (see \cref{fig:mul-age-tables}).
+
+Anticipating on next section, let's see how \emph{plus} works on context and modes, especially for ages. Let's type the expression $[[d ◀ x ; x]]$. Most of the typing here behaves the same as \rref*{\CLdm{}\CTy{}}. We have the following typing tree:
+
+\[
+\inferrule*[right=\CPatU]{
+  \inferrule*[right=\CFillLeaf]{
+    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ d : ¹ν ⌊T⌋ ¹ν } ⊢ d : ⌊T⌋ ¹ν]]} \quad
+    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ x : ¹ν T } ⊢ x : T]]}
+  }{[[{ d : ¹ν ⌊T⌋ ¹ν }, { x : ¹↑ T } ⊢ d ◀ x : ①]]}  \quad
+  \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ x : ¹ν T } ⊢ x : T]]}
+}{[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : ω∞ T } ⊢ d ◀ x ; x : T]]}
+\]
+
+The ``default choice'' is to type variables with mode $[[¹ν]]$ at the leaves of the tree. The operator $[[◀]]$ then scales the typing context of its right operand by $[[↑]]$ (which corresponds to asking it to be from the previous scope, to prevent scope escape of destinations). At the root of the tree, with operator $\patu$, the typing context of the two initial branches are summed, so we have ${[[({ d : ¹ν ⌊T⌋ ¹ν }, { x : ¹↑ T })+({ x : ¹ν T })]]=[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : (¹+¹)(ν+↑) T }]]=[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : ω∞ T }]]}$. In other terms, because we need $[[x]]$ to be of age $[[↑]]$ in the first branch, but of age $[[ν]]$ in the second branch (as, we recall, $[[ν]]=[[↑^0]]$ and $[[↑]]=[[↑^1]]$ are \emph{not} comparable, so we cannot use the rule \rref*{\CTyTerm\CSep\CVar} on a variable with mode $[[¹↑]]$), then $[[x]]$ must be of age $[[∞]]$\footnote{Age restrictions are only there for scope-sensitive resources, that is, just destinations and the structures they are stored in. Age $[[∞]]$ is meant to designate non scope-sensitive resources, and consequently, is also the result of incompatible age requirements as above.}.
+
+Alternatively, we can have:
+
+\[
+\inferrule*[right=\CPatU]{
+  \inferrule*[right=\CFillLeaf]{
+    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ d : ¹ν ⌊T⌋ ¹ν } ⊢ d : ⌊T⌋ ¹ν]]}  \quad
+    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ x : ω∞ T } ⊢ x : T]]}
+  }{[[{ d : ¹ν ⌊T⌋ ¹ν }, { x : ω∞ T } ⊢ d ◀ x : ①]]}  \quad
+  \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ x : ω∞ T } ⊢ x : T]]}
+}{[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : ω∞ T } ⊢ d ◀ x ; x : T]]}
+\]
+
+\noindent where $[[x]]$ is given mode $[[ω∞]]$ from the leaves to the root, as $[[¹ν]] ⥶ [[ω∞]]$, allowing variable use through \rref*{\CTyTerm\CSep\CVar}.
 
 \subsection{Typing rules}\label{ssec:ty-term-val}
 
