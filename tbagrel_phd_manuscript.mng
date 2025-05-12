@@ -40,13 +40,11 @@
 
 \usepackage{caption}
 \usepackage{subcaption}
-\usepackage{hyperref}
 \usepackage{refcount}
 \makeatletter
 \providecommand\english@loaded{}
 \providecommand\frensh@loaded{}
 \makeatother
-\usepackage[capitalize, noabbrev]{cleveref}
 \usepackage{url}
 \usepackage{lastpage}
 \usepackage{setspace}
@@ -272,6 +270,9 @@
     \newcommand{\improvement}[1]{}
     \newcommand{\resolved}[2]{}
 \fi
+
+\usepackage{hyperref}
+\usepackage[capitalize, noabbrev]{cleveref}
 
 %% User defined commands
 
