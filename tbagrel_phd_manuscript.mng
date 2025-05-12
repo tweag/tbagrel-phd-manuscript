@@ -441,8 +441,8 @@
 
 \IfFancyRuleNames{
   \def\CSep{/}
-  \def\CHole{idH}
-  \def\CDest{idD}
+  \def\CHole{id\textsubscript{H}}
+  \def\CDest{id\textsubscript{D}}
   \def\CUnit{$\ottstype{1}$I}
   \def\CFun{$\ottstype{\multimap}$I}
   \def\CLeft{$\ottstype{\oplus}$I\textsubscript{1}}
@@ -455,7 +455,7 @@
   \def\CBangContr{$\ottstype{!}$C}
   \def\CAmpar{$\ottstype{\ltimes}$I}
   \def\CVal{fromVal}
-  \def\CVar{idV}
+  \def\CVar{id\textsubscript{V}}
   \def\CApp{$\ottstype{\multimap}$E}
   \def\CPatU{$\ottstype{1}$E}
   \def\CPatS{$\ottstype{\oplus}$E}

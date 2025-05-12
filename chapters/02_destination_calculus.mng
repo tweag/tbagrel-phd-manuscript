@@ -532,9 +532,9 @@ The operations or order on ages aren't the usual ones on natural numbers though.
 
 The unit of the new mode ringoid is the pair of the units from the multiplicity and age ringoids, ie. $[[¹ν]]$. We will usually omit the mode annotations when the mode is that unit.
 
-Finally, as in \CLm{} and \CLdm{} from \cref{chap:preli}, operations and modes are lifted to typing contexts, still following the insights from \cite{ghica_bounded_2014} (see \cref{fig:mul-age-tables}).
+Finally, as in \CLm{} and \CLdm{} from \cref{chap:preli}, operations on modes are lifted to typing contexts, still following the insights from \cite{ghica_bounded_2014} (see \cref{fig:mul-age-tables}).
 
-Anticipating on next section, let's see how \emph{plus} works on context and modes, especially for ages. Let's type the expression $[[d ◀ x ; x]]$. Most of the typing here behaves the same as \rref*{\CLdm{}\CTy{}}. We have the following typing tree:
+Anticipating on next section, let's see how \emph{plus} works on context, modes, and especially ages. Let's type the expression $[[d ◀ x ; x]]$. Most of the typing here behaves the same as \rref*{\CLdm{}\CTy{}}, the only particularity is that the operator $[[◀]]$ scales the typing context of its right operand by $[[↑]]$ (which corresponds to asking it to be from the previous scope, to prevent scope escape of destinations). We have the following typing tree:
 
 \[
 \inferrule*[right=\CPatU]{
@@ -546,7 +546,7 @@ Anticipating on next section, let's see how \emph{plus} works on context and mod
 }{[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : ω∞ T } ⊢ d ◀ x ; x : T]]}
 \]
 
-The ``default choice'' is to type variables with mode $[[¹ν]]$ at the leaves of the tree. The operator $[[◀]]$ then scales the typing context of its right operand by $[[↑]]$ (which corresponds to asking it to be from the previous scope, to prevent scope escape of destinations). At the root of the tree, with operator $\patu$, the typing context of the two initial branches are summed, so we have ${[[({ d : ¹ν ⌊T⌋ ¹ν }, { x : ¹↑ T })+({ x : ¹ν T })]]=[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : (¹+¹)(ν+↑) T }]]=[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : ω∞ T }]]}$. In other terms, because we need $[[x]]$ to be of age $[[↑]]$ in the first branch, but of age $[[ν]]$ in the second branch (as, we recall, $[[ν]]=[[↑^0]]$ and $[[↑]]=[[↑^1]]$ are \emph{not} comparable, so we cannot use the rule \rref*{\CTyTerm\CSep\CVar} on a variable with mode $[[¹↑]]$), then $[[x]]$ must be of age $[[∞]]$\footnote{Age restrictions are only there for scope-sensitive resources, that is, just destinations and the structures they are stored in. Age $[[∞]]$ is meant to designate non scope-sensitive resources, and consequently, is also the result of incompatible age requirements as above.}.
+The ``default choice'' is to type variables with mode $[[¹ν]]$ at the leaves of the tree. At the root of the tree, with operator $\patu$, the typing context of the two initial branches are summed, so we have ${[[({ d : ¹ν ⌊T⌋ ¹ν }, { x : ¹↑ T })+({ x : ¹ν T })]]=[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : (¹+¹)(ν+↑) T }]]=[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : ω∞ T }]]}$. In other terms, because we need $[[x]]$ to be of age $[[↑]]$ in the first branch, but of age $[[ν]]$ in the second branch ---as, we recall, $[[ν]]=[[↑^0]]$ and $[[↑]]=[[↑^1]]$ are \emph{not} comparable, so we cannot use the rule \rref*{\CTyTerm\CSep\CVar} on a variable with mode $[[¹↑]]$--- then $[[x]]$ must be of age $[[∞]]$\footnote{Age requirements are only there for scope-sensitive resources, that is, just destinations and the structures they are stored in. Age $[[∞]]$ is meant to designate non scope-sensitive resources, and consequently, is also the result of incompatible age requirements (as only non scope-sensitive resources can fit incompatible age requirements).}.
 
 Alternatively, we can have:
 
@@ -560,33 +560,33 @@ Alternatively, we can have:
 }{[[{ d : ¹ν ⌊T⌋ ¹ν },{ x : ω∞ T } ⊢ d ◀ x ; x : T]]}
 \]
 
-\noindent where $[[x]]$ is given mode $[[ω∞]]$ from the leaves to the root, as $[[¹ν]] ⥶ [[ω∞]]$, allowing variable use through \rref*{\CTyTerm\CSep\CVar}.
+\noindent where $[[x]]$ is given mode $[[ω∞]]$ from the leaves to the root. We can make use of a variable with mode $[[ω∞]]$ because we have $[[¹ν]] ⥶ [[ω∞]]$, which matches the premise of rule \rref*{\CTyTerm\CSep\CVar}.
 
 \subsection{Typing rules}\label{ssec:ty-term-val}
 
-Typing rules of \destcalculus{} are given in \cref{fig:ty-term-sterm}. Rules for elimination of $\ottstype{\multimap}$, $[[①]]$, $\ottstype{\oplus}$, $\ottstype{\otimes}$ and $\ottstype{!_{[[m]]}}$ are the same as in \CLdm{} of \cref{chap:preli}, so we won't cover them again here.
+Core typing rules of \destcalculus{} are given in \cref{fig:ty-term}. Rules for elimination of $\ottstype{\multimap}$, $[[①]]$, $\ottstype{\oplus}$, $\ottstype{\otimes}$ and $\ottstype{!_{[[m]]}}$ are the same as in \CLdm{} of \cref{chap:preli}, so we won't cover them again here.
 
-\begin{ottfig}{\caption{Typing rules of \destcalculus{}}\label{fig:ty-term-sterm}}\bgroup\renewcommand{\ottdruleTyXXtermXXVal}{}
+\begin{ottfig}{\caption{Typing rules of \destcalculus{} (\rref*{\CTyTerm})}\label{fig:ty-term}}\bgroup\renewcommand{\ottdruleTyXXtermXXVal}{}
 
-\bgroup\SetPrefix{\CTyTerm\CSep}
+\bgroup\SetPrefix{}
 \ottdefnTyXXterm{}
 \egroup
 
-\bigskip
-\hrule
-\bigskip
+\egroup
+\end{ottfig}
+\begin{ottfig}{\caption{Derived typing rules for syntactic sugar (\rref*{\CTySTerm})}\label{fig:ty-sterm}}\bgroup
 
 \renewcommand\ottaltinferrule[4]{
   \inferrule*[fraction={===},narrower=0.3,lab=#1,#2]
     {#3}
     {#4}
 }
-\bgroup\SetPrefix{\CTySTerm\CSep}
+\bgroup\SetPrefix{}
 \ottdefnTyXXsterm{}\egroup
 \egroup
 \end{ottfig}
 
-One notable difference with \CLdm{} though, is, as announced, that introduction rules for data structures, aka. data constructors for types $[[①]]$, $\ottstype{\oplus}$, $\ottstype{\otimes}$ and $\ottstype{!_{[[m]]}}$, are derived from elimination rules of destinations, and thus are not part of the core language. They are presented on the distinct bottom part of \cref{fig:ty-term-sterm}. The introduction form for functions \rref*{\CTySTerm\CSep\CFun} is also derived from elimination form \rref*{\CTyTerm\CSep\CFillF} for the corresponding destinations of function, although functions are not purely ``data''.
+One notable difference with \CLdm{} though, is, as announced, that introduction rules for data structures, aka. data constructors for types $[[①]]$, $\ottstype{\oplus}$, $\ottstype{\otimes}$ and $\ottstype{!_{[[m]]}}$, are derived from elimination rules of destinations, and thus are not part of the core language. They are presented on the distinct \cref{fig:ty-sterm}. The introduction form for functions \rref*{\CTySTerm\CSep\CFun} is also derived from elimination form \rref*{\CTyTerm\CSep\CFillF} for the corresponding destinations of function, although functions are not purely ``data''.
 
 Rules \rref*{\CTyTerm\CSep\CVar}, \rref*{\CTyTerm\CSep\CNewA} and \rref*{\CTySTerm\CSep\CUnit}, that are the potential leaves of the typing tree, is where weakening for unrestricted variables is allowed to happen. That's why they allow to discard any typing context of the form $[[ων·P]]$. It's very similar to what happened in \rref*{\CLdm\CTy\CSep\CId} or \rref*{\CLdm\CTy\CSep\CUnit}, except that $[[P]]$ is scaled by $[[ων]]$ instead of $[[ɷ]]$ now.
 
@@ -600,32 +600,31 @@ Let's focus now on the real novelties of the typing rules of \destcalculus{}.
 
 As destinations always exist in the context of a structure with holes, and must stay in that context, we need a formal notion of \emph{scope}. Scopes are created by \rref*{\CTyTerm\CSep\CUpdA}, as destinations are only ever accessed through $\ottkw{upd}_{\ottkw{\ltimes} }$. More precisely, $[[t ►map x ⟼ t']]$ creates a new scope which spans over $[[t']]$. In that scope, $[[x]]$ has age $[[ν]]$ (now), and the ages of the existing bindings in $[[P2]]$ are multiplied by $[[↑]]$ (i.e. we add $1$ to ages seen as a numbers). That is represented by $[[t']]$ typing in $[[¹↑·P2,{ x : ¹ν T }]]$ while the parent term $[[t ►map x ⟼ t']]$ types in unscaled contexts $[[P1+P2]]$. This difference of age between $[[x]]$ --- introduced by $\ottkw{upd}_{\ottkw{\ltimes} }$, containing destinations --- and $[[P2]]$ lets us see what originates from older scopes. Specifically, distinguishing the age of destinations is crucial when typing filling primitives to avoid the pitfalls of \cref{sec:scope-escape-dests}.
 %
-\Cref{fig:scope-rules} illustrates scopes introduced by $\ottkw{upd}_{\ottkw{\ltimes} }$, and how the typing rules for $\ottkw{upd}_{\ottkw{\ltimes} }$ and $\blacktriangleleft$ interact.
 
-\begin{ottfig}{\caption{Scope rules for $\ottkw{upd}_{\ottkw{\ltimes} }$ in \destcalculus{}}\label{fig:scope-rules}}
+\begin{ottfig}{\caption{Evolution of ages through nested scopes}\label{fig:scope-rules}}
   \scalebox{0.85}{\tikzfig{schemas/mapscopes}}
 \end{ottfig}
 
-Anticipating \cref{ssec:runtime-values}, ampar values are pairs with a structure with holes on the left, and destinations on the right. With $\ottkw{upd}_{\ottkw{\ltimes} }$ we enter a new scope where the destinations are accessible, but the structure with holes remains in the outer scope. As a result, when filling a destination with \rref*{\CTyTerm\CSep\CFillLeaf}, for instance $[[d11 ◀ x0]]$ in~\cref{fig:scope-rules}, we type $[[d11]]$ in the new scope, while we type $[[x0]]$ in the outer scope, as it’s being moved to the structure with holes on the left of the ampar, which lives in the outer scope too. This is the opposite of the scaling that $\ottkw{upd}_{\ottkw{\ltimes} }$ does: while $\ottkw{upd}_{\ottkw{\ltimes} }$ creates a new scope for its body, operator $\blacktriangleleft$, and similarly, $\triangleleft\mycirc$ and $[[⨞]](\lamnt{[[x]]}{[[m]]}{[[u]]})$, transfer their right operand to the outer scope. In other words, the right-hand side of $[[◀]]$ or $[[⨞]]$ is an enclave for the parent scope.
+\Cref{fig:scope-rules} illustrates scopes introduced by $\ottkw{upd}_{\ottkw{\ltimes} }$, and how the typing rules for $\ottkw{upd}_{\ottkw{\ltimes} }$ and $\blacktriangleleft$ interact. For the first time here we see ampar values $\ottsctor{\langle}[[v2]]\,\ottsctor{\bbcomma}~[[v1]]\ottsctor{\rangle}$, represented as pair-like objects with a structure with holes $[[v2]]$ on the left, and an arbitrary structure $[[v1]]$ containing destinations on the right (ampar values will be formally introduced in \cref{ssec:runtime-values}). With $\ottkw{upd}_{\ottkw{\ltimes} }$ we enter a new scope where the destinations are accessible, but the structure with holes remains in the outer scope. As a result, when filling a destination with \rref*{\CTyTerm\CSep\CFillLeaf}, for instance $[[d11 ◀ x0]]$ in~\cref{fig:scope-rules}, we type $[[d11]]$ in the new scope, while we type $[[x0]]$ in the outer scope, as it’s being moved to the structure with holes on the left of the ampar, which lives in the outer scope too. This is the opposite of the scaling that $\ottkw{upd}_{\ottkw{\ltimes} }$ does: while $\ottkw{upd}_{\ottkw{\ltimes} }$ creates a new scope for its body, operator $\blacktriangleleft$, and similarly, $\triangleleft\mycirc$ and $[[⨞]](\lamnt{[[x]]}{[[m]]}{[[u]]})$, transfer their right operand to the outer scope. In other words, the right-hand side of $[[◀]]$ or $[[⨞]]$ is an enclave for the parent scope.
 
-When using $\ottkw{from}_{\ottkw{\ltimes} }'$ (rule \rref*{\CTySTerm\CSep\CFromA'}), the left of an ampar is extracted to the current scope (as seen at the bottom of~\cref{fig:scope-rules} with $[[x22]]$): this is the fundamental reason why the left of an ampar has to ``take place'' in the current scope. We know the structure is complete and can be extracted because the right-hand side is of type unit ($[[①]]$), and thus no destination on the right-hand side means no hole can remain on the left. $\ottkw{from}_{\ottkw{\ltimes} }'$ is implemented in terms of $\ottkw{from}_{\ottkw{\ltimes} }$ in~\cref{fig:sterm} to keep the core calculus tidier (and limit the number of typing rules, evaluation contexts, etc), but it can be implemented much more efficiently in a real-world implementation.
+When using $\ottkw{from}_{\ottkw{\ltimes} }'$ (rule \rref*{\CTySTerm\CSep\CFromA'}), the left of an ampar is extracted to the current scope. This is the fundamental reason why the left of an ampar has to ``take place'' in the current scope. We know the structure is complete and can be extracted because the right-hand side is of type unit ($[[①]]$) and thus, no destination on the right-hand side means no hole can remain on the left. $\ottkw{from}_{\ottkw{\ltimes} }'$ is implemented in terms of $\ottkw{from}_{\ottkw{\ltimes} }$ in~\cref{fig:sterm} to keep the core calculus tidier (and limit the number of typing rules, evaluation contexts, etc), but it can be implemented much more efficiently in a real-world implementation.
 
-When an ampar is eliminated with the more general $\ottkw{from}_{\ottkw{\ltimes} }$ in rule \rref*{\CTyTerm\CSep\CFromA} however, we extract both sides of the ampar to the current scope, even though the right-hand side is normally in a different scope. This is only safe to do because the right-hand side is required to have type $[[! ¹∞ T]]$, which means it is scope-insensitive: it can't contain any scope-controlled resource. This also ensures that the right-hand side cannot contain destinations, so the structure has to be complete and thus ready to be read.
+When an ampar is eliminated with the more general $\ottkw{from}_{\ottkw{\ltimes} }$ in rule \rref*{\CTyTerm\CSep\CFromA} however, we extract both sides of the ampar to the current scope, even though the right-hand side is normally in a different scope. This is only safe to do because the right-hand side is required to have type $[[! ¹∞ T]]$, which means it is scope-insensitive: it can't contain any scope-controlled resource. Furthermore, it ensures that the right-hand side cannot contain destinations, so the structure has to be complete and thus is ready to be read.
 
-In \rref*{\CTyTerm\CSep\CToA}, on the other hand, there is no need to bother with scopes: the operator $\ottkw{to}_{\ottkw{\ltimes} }$ embeds an already completed structure in an ampar whose left side is the structure (that continues to type in the current scope), and right-hand side is unit.
+In \rref*{\CTyTerm\CSep\CToA}, on the other hand, there is no need to bother with scopes: the operator $\ottkw{to}_{\ottkw{\ltimes} }$ wraps an already completed structure in a trivial ampar whose left side is the structure (that continues to type in the current scope), and right-hand side is unit.
 
 The remaining operators $[[⨞]][[()]], [[⨞]][[Inl]], [[⨞]][[Inr]], [[⨞]]\,\expcons{[[m]]}, [[⨞]][[(,)]]$ from rules \IfFancyRuleNames{of the form \textsc{\CTyTerm\CSep$\ottstype{\lfloor}~\ottstype{\rfloor}$E}}{\textsc{Ty-term-Fill$*$}} are the other destination-filling primitives. They write a hollow constructor to the hole pointed by the destination operand, and return the potential new destinations that are created for new holes in the hollow constructor (or unit if there is none).
 
 \section{Operational semantics}\label{sec:ectxs-sem}
 
-We give the operational semantics of \destcalculus{} in the \emph{reduction semantics} style that we used in \cref{chap:preli}, that's to say with explicit syntactic manipulation of evaluation contexts. However in this section we'll be more thorough. In particular, we'll give grammar of evaluation contexts properly, and we'll also define typing rules for evaluation contexts, so as to prove that typing is preserved throughout the reduction.
-
-For that, we'll need a few ingredients. Commands $[[ C[t] ]]$ are used to represent a running program; they're described in \cref{ssec:ty-ectxs-cmd}. We'll also need a class of runtime values (we'll often just say \emph{values}), as \destcalculus{} currently lacks any way to represent destinations or holes, or really any kind of value (for instance $[[Inl ()]]$ has been, so far, just syntactic sugar for a term $[[from⧔' (alloc ►map d ⟼ …)]]$). It's a peculiarity of \destcalculus{} that values (in particular, data constructors) only exist during the reduction; usually they are part of the term syntax of functional languages as in \CLdm{}. Our runtime values are described in described in \cref{ssec:runtime-values}. As announced, we'll also extend the type system to cover evaluation contexts, values and commands, so as to be able to state and prove type safety theorems.
+We give the operational semantics of \destcalculus{} in the \emph{reduction semantics} style that we used in \cref{chap:preli}, that's to say with explicit syntactic manipulation of evaluation contexts. However this time we'll be more thorough. In particular, we'll introduce the grammar of evaluation contexts formally, and we'll also define typing rules for evaluation contexts and commands, so as to prove that typing is preserved throughout the reduction. As before, commands $[[ C[t] ]]$ are used to represent running programs; they're described in detail in \cref{ssec:ty-ectxs-cmd}.
+ 
+But first, we need a class of runtime values (we'll often just say \emph{values}), and their corresponding typing rules, as \destcalculus{} currently lacks any way to represent destinations or holes, or really any kind of value (for instance $[[Inl ()]]$ has been, so far, just syntactic sugar for a term $[[from⧔' (alloc ►map d ⟼ …)]]$). It's a peculiarity of \destcalculus{} that values (in particular, data constructors) are just used during reduction; usually they are also allowed in the term syntax of functional languages as in \CLdm{}.
 
 \subsection{Runtime values and new typing context forms}\label{ssec:runtime-values}
 
-\begin{ottfig}{\caption{Runtime values and new typing context forms}\label{fig:grammar-val}\label{fig:ty-val}}
-\begin{minipage}{\linewidth}\sidebysidecodehere{c}{0.39}{\begin{minipage}{\linewidth}
+\begin{ottfig}{\caption{Runtime values, new typing context forms, and operators}\label{fig:grammar-val}}
+\sidebysidecodehere{c}{0.39}{\begin{minipage}{\linewidth}
 \begin{minipage}{\linewidth}\figtextsize\textit{Grammar extended with values:}\end{minipage}
 
 \bigskip
@@ -639,20 +638,6 @@ $\setlength{\arraycolsep}{0.6ex}\newlength\myskip\setlength{\myskip}{2.38ex}\!\b
              &|\,& [[()]] \grammsep [[ᵛλ x m ⟼ u]] \grammsep [[Inl v]] \\
              &|\,& [[Inr v]] \grammsep [[ᴇ m v]] \grammsep [[( v1 , v2 )]] \\
 \end{array}$
-
-\bigskip\bigskip
-\hrule
-\bigskip
-
-\begin{minipage}{\linewidth}\figtextsize\textit{Typing values as terms:}\end{minipage}
-
-\smallskip
-
-\[\bgroup\SetPrefix{\CTyTerm\CSep}
-  \drule{Ty-term-Val}\egroup
-\]
-
-\bigskip
 
 \end{minipage}}{\begin{minipage}{\linewidth}
 
@@ -668,7 +653,7 @@ $\setlength{\myskip}{2.38ex}\!\begin{array}{rrlcccc}
 
 \bigskip
 
-\begin{minipage}{\linewidth}\figtextsize\textit{Operations extended to new typing context forms:}\end{minipage}
+\begin{minipage}{\linewidth}\figtextsize\textit{Operations on new typing context forms:}\end{minipage}
 
 \smallskip
 
@@ -717,52 +702,64 @@ $\setlength{\myskip}{2.38ex}\!\begin{array}{rrlcccc}
 \begin{center}$\phantom{.}^{\dagger}$ : \textit{same rule is also true for $[[G]]$ or $[[D]]$ replacing $[[P]]$}\end{center}
 
 }\end{minipage}}
-\end{minipage}
+\end{ottfig}
+
+\begin{ottfig}{\caption{Typing rules for runtime values (\rref*{\CTyVal})\label{fig:ty-val}}}
+
+\begin{minipage}{\linewidth}\figtextsize\textit{Typing values as terms:}\end{minipage}
+
+\smallskip
+
+\[\bgroup\SetPrefix{\CTyTerm\CSep}
+  \drule{Ty-term-Val}\egroup
+\]
+
+\bigskip
 
 \bigskip
 \hrule
 \bigskip
 
-  \bgroup\SetPrefix{\CTyVal\CSep}
+  \bgroup\SetPrefix{}
   \ottdefnTyXXval{}\egroup
 \end{ottfig}
 
-The syntax of runtime values is given in \cref{fig:grammar-val}. It features constructors for all of our basic types, as well as functions (note that in $[[ᵛλ x m ⟼ u]]$, $[[u]]$ is a term, not a value). The more interesting values are holes $[[+ h]]$, destinations $[[- h]]$, and ampars $[[H ⟨ v2 ❟ v1 ⟩]]$, which we'll describe in the rest of the section. In order for the operational semantics to use substitution, which requires substituting variables with values, we also extend the syntax of terms to include values through rule \rref*{\CTyTerm\CSep\CVal}.
+The syntax of runtime values is given in \cref{fig:grammar-val}. It features constructors for all of our basic types, as well as functions (note that in $[[ᵛλ x m ⟼ u]]$, $[[u]]$ is a term, not a value). The more interesting values are holes $[[+ h]]$, destinations $[[- h]]$, and ampars $[[H ⟨ v2 ❟ v1 ⟩]]$, which were not present in \CLdm{}, and that we'll describe in the rest of the section. In order for the operational semantics to use substitution, which requires substituting variables with values, we also extend the syntax of terms to include values, and we add the corresponding typing rule \rref*{\CTyTerm\CSep\CVal} (at the top of \cref{fig:ty-val}).
 
-Destinations and holes are two faces of the same coin, as seen in~\cref{ssec:build-up-vocab}, and we must ensure that throughout the reduction, a destination always points to a hole, and a hole is always the target of exactly one destination. Thus, the new idea of our system is to feature \emph{hole bindings} $[[{ + h : T n }]]$ and \emph{destination bindings} $[[{ - h : m ⌊ T ⌋ n }]]$ in typing contexts in addition to the usual variable bindings $[[{ x : m T}]]$. In both cases, we call $[[h]]$ a \emph{hole name}. By definition, a context $[[G]]$ can contain both destination bindings and hole bindings, but \emph{not a destination binding and a hole binding for the same hole name}.
+Destinations and holes are two faces of the same coin, as seen in~\cref{ssec:build-up-vocab}, and we must ensure that throughout the reduction, a destination always points to a hole, and a hole is always the target of exactly one destination. Thus, the new idea of our system is to feature \emph{hole bindings} $[[{ + h : T n }]]$ and \emph{destination bindings} $[[{ - h : m ⌊ T ⌋ n }]]$ in typing contexts in addition to the usual variable bindings $[[{ x : m T}]]$. In both cases, we call $[[h]]$ a \emph{hole name}. We complement this by new typing context forms: we now have $[[P]]$, $[[G]]$ and $[[D]]$. $[[P]]$ is the form of typing context used when typing terms; we allow it to contain variable bindings (as before) but also destination bindings. On the other hand, the new context form $[[G]]$ can contain both destination bindings and hole bindings, but \emph{not a destination binding and a hole binding for the same hole name}. $[[G]]$ cannot contain variable bindings either. Finally, a typing context $[[D]]$ can only contain destination bindings.
 
 We extend our previous context operations $+$ and $\cdot$ to act on the new binding forms, as described in \cref{fig:grammar-val}. Context addition is still very partial; for instance, $[[({ + h : T n }) + ({ - h : m ⌊ T ⌋ n' })]]$ is not defined, as $[[h]]$ is present on both sides but with different binding forms.
 
-One of the main goals of \destcalculus{} is to ensure that a hole value is never read. The type system maintains this invariant by simply not allowing any hole bindings in the context when typing terms (see \cref{fig:grammar-val} for the different type of contexts used in the typing judgment). In fact, the only place where holes are introduced, is the left-hand side $[[v2]]$ in an ampar $[[H ⟨ v2 ❟ v1 ⟩]]$, in \rref*{\CTyVal\CSep\CAmpar}.
+One of the main goals of \destcalculus{} is to ensure that a hole value is never read. We don't distinguish values with holes from fully-defined values at the syntactic level: instead types prevent holes from being read. The type system maintains this invariant by simply not allowing any hole bindings in the context when typing terms (indeed, typing rules \rref*{\CTyTerm} from \cref{fig:ty-term} still hold, and for instance, typing contexts must be of shape $[[P]]$). In fact, the only place where holes are introduced, is in typing rules for values, in \cref{fig:ty-val}, and more precisely, in the left-hand side $[[v2]]$ of an ampar $[[H ⟨ v2 ❟ v1 ⟩]]$ in rule \rref*{\CTyVal\CSep\CAmpar}.
 
-Specifically, holes come from the operator $\ottshname{\destminus^{\scriptscriptstyle\text{-}1} }$, which represents the matching hole bindings for a set of destination bindings. It's a partial, pointwise operation on typing contexts $[[D]]$, as defined in \cref{fig:grammar-val}.
+Specifically, holes come from the operator $\ottshname{\destminus^{\scriptscriptstyle\text{-}1} }$, which represents the hole bindings matching the specified set of destination bindings. It's a partial, pointwise operation on typing contexts $[[D]]$, as defined in \cref{fig:grammar-val}.
 Note that $[[-⁻¹D]]$ is undefined if any destination binding in $[[D]]$ has a mode other than $[[¹ν]]$.
 
-Furthermore, in \rref*{\CTyVal\CSep\CAmpar}, the holes $[[-⁻¹D3]]$ and the corresponding destinations $[[D3]]$ are bound together and consequently removed from the ampar's typing context: this is how we ensure that, indeed, there's one destination per hole and one hole per destination. That being said, both sides of the ampar may also contain stored destinations from other scopes, represented by $[[¹↑·D1]]$ and $[[D2]]$ in the respective typing contexts of $[[v1]]$ and $[[v2]]$.
+Furthermore, in \rref*{\CTyVal\CSep\CAmpar}, the holes $[[-⁻¹D3]]$ and the corresponding destinations $[[D3]]$ of the ampar are bound together and consequently removed from the ampar's typing context: this is how we ensure that, indeed, there's one destination per hole and one hole per destination. We annotate, with subscript $[[H]]$, the set of hole names that an ampar $[[H ⟨ v2 ❟ v1 ⟩]]$ bounds. That's why, in rule \rref*{\CTyVal\CSep\CAmpar}, the resulting ampar carries the set of hole names $[[hnames(D3)]]$ (we use operator $\ottshname{\mathbf{hnames}(\smallbullet)}$ to denote the holes names present in a given typing context).
 
-Rule \rref*{\CTyVal\CSep\CHole} indicates that a hole must have mode $[[¹ν]]$ in typing context to be well-typed; in particular mode coercion is not allowed here, and neither is weakening. Only when a hole is behind an exponential, that mode can change to some arbitrary mode $[[n]]$. The mode of a hole constrains which values can be written to it, e.g. in $[[{ + h : T n } ⫦ ᴇ n +h : !n T]]$, only a value with mode $[[n]]$ (more precisely, a value typed in a context of the form $[[n · G]]$) can be written to $[[+h]]$.
+That being said, an ampar can also store destinations that aren't its own, from other scopes; they are represented by $[[¹↑·D1]]$ and $[[D2]]$ in the respective typing contexts of $[[v1]]$ and $[[v2]]$ in\rref*{\CTyVal\CSep\CAmpar}.
 
-Surprisingly, in \rref*{\CTyVal\CSep\CDest}, we see that a destination can be typed with any mode $[[m]]$ coercible to $[[¹ν]]$. We did this to mimic the rule \rref*{\CTyTerm\CSep\CVar} and make the general modal substitution lemma expressible for \destcalculus{}\footnote{Generally, in modal systems, if $[[{ x : m T},P ⊢ u : U]]$ and $[[D ⊢ v : T]]$ then $[[m·D,P ⊢ u[x ≔ v] : U]]$~\cite{bernardy_modality_2020}.\\We have $[[{ x : ω∞ ⌊ T ⌋ n} ⊢ () : ①]]$ and $[[{ -h : ¹ν ⌊ T ⌋ n} ⊢ -h : ⌊ T ⌋ n]]$ so $[[ω∞·({ -h : ¹ν ⌊ T ⌋ n}) ⊢ ()[x ≔ -h] : ①]]$ should be valid.}. We formally proved however that throughout a well-typed closed program, $[[m]]$ will never be of multiplicity $[[ω]]$ or age $[[∞]]$ --- a destination is always linear and of finite age --- so mode coercion is never actually used; and we used this result during the formal proof of the substitution lemma to make it quite easier. The other mode $[[n]]$, appearing in \rref*{\CTyVal\CSep\CDest}, is not the mode of the destination binding; instead it is part of the type $[[⌊ T ⌋ n]]$ and corresponds to the mode of values that we can write to the corresponding $[[+h]]$; so for it no coercion can take place.
+Rule \rref*{\CTyVal\CSep\CHole} indicates that a hole must have mode $[[¹ν]]$ in the typing context to be well-typed; in particular mode coercion is not allowed here, and neither is weakening. Only when a hole is behind an exponential, that mode can change to some arbitrary mode $[[n]]$. The mode of a hole constrains which values can be written to it, e.g. in $[[{ + h : T n } ⫦ ᴇ n +h : !n T]]$, only a value with mode $[[n]]$ (more precisely, a value typed in a context of the form $[[n · G]]$) can be written to $[[+h]]$.
+
+Surprisingly, in \rref*{\CTyVal\CSep\CDest}, we see that a destination can be typed with any mode $[[m]]$ coercible to $[[¹ν]]$. We did this to mimic the rule \rref*{\CTyTerm\CSep\CVar} and make the general modal substitution lemma expressible for \destcalculus{}\footnote{Generally, in modal systems, if $[[{ x : m T},P ⊢ u : U]]$ and $[[D ⊢ v : T]]$ then $[[m·D,P ⊢ u[x ≔ v] : U]]$~\cite{bernardy_modality_2020}.\\We have $[[{ x : ω∞ ⌊ T ⌋ n} ⊢ () : ①]]$ and $[[{ -h : ¹ν ⌊ T ⌋ n} ⊢ -h : ⌊ T ⌋ n]]$ so $[[ω∞·({ -h : ¹ν ⌊ T ⌋ n}) ⊢ ()[x ≔ -h] : ①]]$ should be valid.}. We formally proved however that throughout the reduction of a well-typed closed program, $[[m]]$ will never be of multiplicity $[[ω]]$ or age $[[∞]]$ --- a destination is always linear and of finite age --- so mode coercion is never actually used; and we used this at our advantage to make the formal proof of the substitution lemma much easier. The other mode $[[n]]$, appearing in \rref*{\CTyVal\CSep\CDest}, is not the mode of the destination binding; instead it is part of the type $[[⌊ T ⌋ n]]$ and corresponds to the mode of values that we can write to the corresponding $[[+h]]$; so for it no coercion can take place.
 
 \paragraph{Other salient points}
-We don't distinguish values with holes from fully-defined values at the syntactic level: instead types prevent holes from being read. In particular, while values are typed in contexts $[[G]]$ allowing both destination and hole bindings, when using a value as a term in \rref*{\CTyTerm\CSep\CVal}, it's only allowed to have free destinations, but no free holes.
+While values are typed in contexts $[[G]]$ allowing both destination and hole bindings, when using a value as a term in \rref*{\CTyTerm\CSep\CVal}, it's only allowed to have free destinations, but no free holes (as we require a typing context of form $[[D]]$ for the value).
 
-Notice, also, that values can't have free variables, since contexts $[[G]]$ only contain hole and destination bindings, no variable binding. That values are closed is a standard feature of denotational semantics or abstract machine semantics. This is true even for function values (\rref*{\CTyVal\CSep\CFun}), which, also is prevented from containing free holes. Since a function's body is unevaluated, it's unclear what it'd mean for a function to contain holes; at the very least it'd complicate our system a lot, and we are unaware of any benefit supporting free holes in functions could bring.
+Notice, also, that values (used as terms, or not) can't have free variables, since contexts $[[G]]$ only contain hole and destination bindings, but no variable binding. That values are closed is a standard feature of denotational semantics or abstract machine semantics. This is true even for function values (\rref*{\CTyVal\CSep\CFun}), which, also is prevented from containing free holes. Since a function's body is unevaluated, it's unclear what it'd mean for a function to contain holes; at the very least it'd complicate our system a lot, and we are unaware of any benefit supporting free holes in functions could bring.
 
 One might wonder how we can represent a curried function $[[ˢλ x ¹ν ⟼ ˢλ y ¹ν ⟼ x concat y]]$ at the value level, as the inner abstraction captures the free variable $[[x]]$. The answer is that such a function, at value level, is encoded as $[[ᵛλ x ¹ν ⟼ from⧔' (alloc ►map d ⟼ d ⨞ ( λ y ¹ν ⟼ x concat y))]]$, where the inner closure is not yet in value form. As the form $[[d ⨞ ( λ y ¹ν ⟼ x concat y)]]$ is part of term syntax, it's allowed to have free variable $[[x]]$.
 
 \subsection{Evaluation contexts and commands}\label{ssec:ectxs}\label{ssec:ty-ectxs-cmd}
 
-A running program is represented by a pair $[[ C[t] ]]$ of an evaluation context $[[C]]$, and an (extended) term $[[t]]$ under focus. We call such a pair $[[ C[t] ]]$ a \emph{command}, borrowing the terminology from~\citet{herbelin_curien_2000}.
+A running program is represented by a \emph{command} $[[ C[t] ]]$, that is, a pair of an evaluation context $[[C]]$, and an (extended) term $[[t]]$ under focus, as in \cref{sec:lincalc-sem}.
 
-The grammar of evaluation contexts is given in~\cref{fig:grammar-ty-ectxs}. As in \CLdm{}, an evaluation context $[[C]]$ is the composition of an arbitrary number of focusing components $[[c]]$. It might seem surprising that we don't need a notion of store or state in our semantics to represent the mutation induced by filling destinations. In fact, destination filling only require a very tame notion of state --- so tame that we can simply represent writing to a hole by a substitution \emph{on the evaluation context}, instead of using more heavy store semantics.
+The grammar of evaluation contexts is given in~\cref{fig:grammar-ectxs}. As for \CLdm{}, an evaluation context $[[C]]$ is the composition of an arbitrary number of focusing components $[[c]]$. It might seem surprising that we don't need a notion of store or state in our semantics to represent the mutation induced by filling destinations. In fact, destination filling only requires a very tame notion of state --- so tame that we can simply represent writing to a hole by a substitution \emph{on the evaluation context}, instead of using more heavy store semantics.
 
-\TODO{Find bib refs (Feilleisen et al.) about linear subsitutions in evaluation contexts}
+It's important to note, however, that unlike in \CLdm{}, command $[[ C[t] ]]$ of \destcalculus{} won't always have a corresponding term. The reason is that the focusing components are all directly derived from the term syntax, except for the \emph{open ampar} focusing component $[[H ᵒᵖ⟨ v2 ❟ ⬜ ⟩]]$ that doesn't have a corresponding term construct. This focusing component indicates that an ampar is currently being processed by $\ottkw{upd}_{\ottkw{\ltimes} }$, with its left-hand side $[[v2]]$ (the structure being built) being attached to the open ampar focusing component, while its right-hand side (containing destinations) is either in subsequent focusing components, or in the term under focus. Ampars being open during the evaluation of $\ottkw{upd}_{\ottkw{\ltimes} }$'s body and closed back afterwards is counterpart to the notion of scopes in typing rules.
 
-It's important to remember that the command $[[ C[t] ]]$ is formally a pair, so it won't always have a corresponding term. The reason is that focusing components are all directly derived from the term syntax, except for the \emph{open ampar} focusing component $[[H ᵒᵖ⟨ v2 ❟ ⬜ ⟩]]$ that doesn't have a corresponding term construct. This focusing component indicates that an ampar is currently being processed by $\ottkw{upd}_{\ottkw{\ltimes} }$, with its left-hand side $[[v2]]$ (the structure being built) being attached to the open ampar focusing component, while its right-hand side (containing destinations) is either in subsequent focusing components, or in the term under focus. Ampars being open during the evaluation of $\ottkw{upd}_{\ottkw{\ltimes} }$'s body and closed back afterwards is counterpart to the notion of scopes in typing rules.
-
-\begin{ottfig}{\caption{Evaluation contexts and their typing rules}\label{fig:grammar-ty-ectxs}}{\setlength{\arraycolsep}{1ex}
-\begin{minipage}{\linewidth}\codehere{\begin{minipage}{\linewidth}
+\begin{ottfig}{\caption{Evaluation contexts}\label{fig:grammar-ectxs}}{\setlength{\arraycolsep}{1ex}
+\codehere{\begin{minipage}{\linewidth}
 \begin{minipage}{\linewidth}\figtextsize\textit{Grammar of evaluation contexts:}\end{minipage}
 
 \smallskip
@@ -774,24 +771,33 @@ It's important to remember that the command $[[ C[t] ]]$ is formally a pair, so 
       &|\,& [[ ⬜ ⨞ () ]] \grammsep [[ ⬜ ⨞ Inl ]] \grammsep [[⬜ ⨞ Inr]] \grammsep [[⬜ ⨞ (,)]] \grammsep [[⬜ ⨞ ᴇ m]] \grammsep [[⬜ ⨞ ( λ x m ⟼ u )]] \\
       &|\,& [[ H ᵒᵖ⟨ v2 ❟ ⬜ ⟩ ]] \quad\quad\textit{(open ampar focusing component)} \\
 [[C]] &\grammdef& [[ ⬜ ]] \grammsep [[C ∘ c]] % \grammsep [[C [ h ≔ H v ] ]]
-\end{array}$\end{minipage}}\end{minipage}
-
-\bigskip
-\hrule
-\bigskip
-
-\begin{augmentwidth}{2cm}
-\bgroup\SetPrefix{\CTyEctxs\CSep}
-\ottdefnTyXXectxs{}\egroup
-\end{augmentwidth}
-
+\end{array}$\end{minipage}}
 }\end{ottfig}
 
-Evaluation contexts are typed in a context $[[D]]$ that can only contain destination bindings. As we will later see in rule \rref*{\CTyCmd} of \cref{fig:sem-full1}, $[[D]]$ is exactly the typing context that the term $[[t]]$ has to use to form a valid $[[ C[t] ]]$. In other words, while $[[P ⊢ t : T]]$ \emph{requires} the bindings of $[[P]]$, judgment $[[D ⊣ C : T ↣ U0]]$ \emph{provides} the bindings of $[[D]]$. Typing rules for evaluation contexts are given in~\cref{fig:grammar-ty-ectxs}.
+\begin{ottfig}{\caption{Typing rules of evaluation contexts (\rref*{\CTyEctxs}) and commands (\rref*{})}\label{fig:ty-ectxs}}\begin{minipage}{\linewidth}
+    \bgroup\SetPrefix{}
+    \ottdefnTyXXectxs{}\egroup
+
+    \bigskip
+    \hrule
+    \bigskip
+  
+    \bgroup\SetPrefix{}
+    \renewcommand\ottaltinferrule[4]{
+      \inferrule*[narrower=0.3,right=#1,#2]
+        {#3}
+        {#4}
+    }
+    \ottdefnTy{}\egroup
+\end{minipage}\end{ottfig}
+
+\paragraph{Typing of evaluation contexts}
+
+Evaluation contexts are typed in a context $[[D]]$ that can only contain destination bindings. The typing context $[[D]]$ of an evaluation context $[[C]]$ is exactly the typing context that the term $[[t]]$ has to use to form a valid $[[ C[t] ]]$. In other words, while $[[P ⊢ t : T]]$ \emph{requires} the bindings of $[[P]]$, judgment $[[D ⊣ C : T ↣ U0]]$ \emph{provides} the bindings of $[[D]]$. Typing rules for evaluation contexts, and the sole typing rule for commands, are given in~\cref{fig:ty-ectxs}.
 
 An evaluation context has a context type $[[T]]\ottstype{\rightarrowtail}[[U0]]$. The meaning of $[[C]][[:]] [[T]]\ottstype{\rightarrowtail}[[U0]]$ is that given $[[t]][[:]][[T]]$, $[[ C[t] ]]$ returns a value of type $[[U0]]$. Composing an evaluation context $[[C]][[:]][[T]]\ottstype{\rightarrowtail}[[U0]]$ with a new focusing component never affects the type $[[U0]]$ of the future command; only the type $[[T]]$ of the focus is altered.
 
-All typing rules for evaluation contexts can be derived systematically from the ones for the corresponding term (except for the rule \rref*{\CTyEctxs\CSep\COpenAmpar} that is a truly new form). Let's take the rule \rref*{\CTyEctxs\CSep\CPatP} as an example:
+All typing rules for evaluation contexts can be derived systematically from the ones for the corresponding term (except for the rule \rref*{\CTyEctxs\CSep\COpenAmpar}, as there is no direct term equivalent to the \emph{open ampar} forcusing component). Let's take the rule \rref*{\CTyEctxs\CSep\CPatP} as an example:
 
 \medskip
 
@@ -846,47 +852,13 @@ We think of the typing rule for an evaluation context as a rotation of the typin
 % \bgroup\SetPrefix{\CRed\CSep}
 
 
-Now that every piece is in place, let's focus on reduction rules of \destcalculus{}. As in \CLdm{}, focus, unfocus and contraction rules of \destcalculus{} (see \cref{fig:sem-full1,fig:sem-full2}) are triggered in a purely deterministic fashion. Once a subterm is a value, it cannot be focused on again.
+Now that every piece is in place, let's focus on the reduction rules of \destcalculus{}, displayed in \cref{fig:sem-full1,fig:sem-full2}. As in \CLdm{}, focus (F suffix), unfocus (U suffix) and contraction (C suffix) rules of \destcalculus{} are triggered in a purely deterministic fashion. Once a subterm is a value, it cannot be focused on again.
 
-\begin{ottfig}{\caption{Small-step reduction of commands for \destcalculus{} (part 1)}\label{fig:sem-full1}}
-
-\begin{minipage}{\linewidth}\sidebysidecodehere{t}{0.53}{\begin{minipage}{\linewidth}
-\bgroup\SetPrefix{}
-\renewcommand\ottaltinferrule[4]{
-  \inferrule*[narrower=0.3,right=#1,#2]
-    {#3}
-    {#4}
-}
-\ottdefnTy{}\egroup
-\end{minipage}}{\begin{minipage}{\linewidth}
-\begin{minipage}{\linewidth}\figtextsize\textit{Name set shift and conditional name shift:}\end{minipage}
-
-\bigskip\bigskip
-
-$\!\begin{array}{rcl}
-[[H ⩲ h']] &\btriangleq& \{ [[h+h']]~|~[[h]]\in [[H]] \}\\
-[[h [H ⩲ h'] ]] &\btriangleq& \left\{\begin{array}{ll}[[h+h']] & \text{if}~[[h]]\in[[H]]\\[[h]] & \text{otherwise}\end{array}\right.\end{array}$
-\end{minipage}}\end{minipage}
-
-\bigskip
-\hrule
-\bigskip
-
-\begin{minipage}{\linewidth}\figtextsize\textit{Special substitution for open ampars:}\end{minipage}
-
-\smallskip
-
-\hfill$\!\begin{array}{rcll}
-  [[ (C ∘ {h} ⨆ H ᵒᵖ⟨ v2 ❟ ⬜ ⟩) [h ≔ H' v'] ]] &=& [[C ∘ H ⨆ H' ᵒᵖ⟨ v2[ h ≔ H' v' ] ❟ ⬜ ⟩ ]] &\\
-  [[ (C ∘ c) [h ≔ H' v'] ]] &=& [[ C[h ≔ H' v'] ∘ c ]]&\text{if $[[h]] \notin [[c]]$}
-\end{array}$\hfill\phantom{.}
-
-\bigskip
-\hrule
-\bigskip
+\begin{ottfig}{\caption{Small-step reduction of commands for \destcalculus{} (\rref*{\CSem}, part 1)}\label{fig:sem-full1}}
+\begin{minipage}{\linewidth}
 
 \bgroup
-\renewcommand{\ottdrulename}[1]{\CSem\CSep}
+\renewcommand{\ottdrulename}[1]{}
 \renewcommand\arraystretch{1.5}
 \renewcommand\ottaltinferrule[4]{
   % #4 is conclusion
@@ -938,12 +910,38 @@ NewA-Red
 }
 \end{augmentwidth}
 \egroup
-\begin{center}$\star$~:~only allowed if the term under focus is not already a value\end{center}
+\begin{center}$\star$~:~only allowed if the term that would become the new focus is not already a value\end{center}
 
+\bigskip
+\hrule
+\bigskip
+
+\begin{minipage}{\linewidth}\figtextsize\textit{Name set shift and conditional name shift:}\end{minipage}
+
+\smallskip
+
+$\!\begin{array}{rcl}
+[[H ⩲ h']] &\btriangleq& \{ [[h+h']]~|~[[h]]\in [[H]] \}\\
+[[h [H ⩲ h'] ]] &\btriangleq& \left\{\begin{array}{ll}[[h+h']] & \text{if}~[[h]]\in[[H]]\\[[h]] & \text{otherwise}\end{array}\right.\end{array}$
+
+\bigskip
+\hrule
+\bigskip
+
+\begin{minipage}{\linewidth}\figtextsize\textit{Special substitution for open ampars:}\end{minipage}
+
+\smallskip
+
+\hfill$\!\begin{array}{rcll}
+  [[ (C ∘ {h} ⨆ H ᵒᵖ⟨ v2 ❟ ⬜ ⟩) [h ≔ H' v'] ]] &=& [[C ∘ H ⨆ H' ᵒᵖ⟨ v2[ h ≔ H' v' ] ❟ ⬜ ⟩ ]] &\\
+  [[ (C ∘ c) [h ≔ H' v'] ]] &=& [[ C[h ≔ H' v'] ∘ c ]]&\text{if $[[h]] \notin [[c]]$}
+\end{array}$\hfill\phantom{.}
+
+\end{minipage}
 \end{ottfig}
 
-\begin{ottfig}{\caption{Small-step reduction of commands for \destcalculus{} (part 2)}\label{fig:sem-full2}}\begin{augmentwidth}{2.5cm}\bgroup\renewcommand{\drulesectionhead}[2]{}
-\renewcommand{\ottdrulename}[1]{\CSem\CSep}
+\begin{ottfig}{\caption{Small-step reduction of commands for \destcalculus{} (\rref*{\CSem}, part 2)}\label{fig:sem-full2}}\begin{augmentwidth}{2.5cm}\bgroup\renewcommand{\drulesectionhead}[2]{}
+\renewcommand{\ottdrulename}[1]{}
 \renewcommand\arraystretch{1.5}
 \renewcommand\ottaltinferrule[4]{
   % #4 is conclusion
@@ -1008,7 +1006,7 @@ FillLeaf-Red
 [[h''']] &=& [[max(H ∪ hnames(C)) + 1]]
 \end{array}\right.\]
 
-\begin{center}$\star$~:~only allowed if the term under focus is not already a value\end{center}
+\begin{center}$\star$~:~only allowed if the term that would become the new focus is not already a value\end{center}
 \end{augmentwidth}\end{ottfig}
 
 \cref{fig:sem-full1} presents all the rules that don't incur any substitution on the evaluation context.
@@ -1017,18 +1015,18 @@ Reduction rules for function application and pattern-matching are the same as in
 
 Finally, $\ottkw{new}_{\ottkw{\ltimes} }$ has only a single rule that transforms it into the ``identity'' ampar object with just one hole on the left, and the corresponding destination on the right.
 
-Rules of \cref{fig:sem-full2} are all related to $\ottkw{upd}_{\ottkw{\ltimes} }$ and destination-filling operators, whose contraction rules modify the evaluation context deeply, instead of just pushing or popping a focusing composant. For that, we need to introduce the special substitution $[[ C[h ≔ H v] ]]$ that is used to update structures under construction, that are attached to open ampar focusing components in the stack. Such a substitution is triggered when a destination $[[-h]]$ is filled in the term under focus, typically in destination-filling primitives reductions, and results in the value $[[v]]$ being written to hole $[[+h]]$. The value $[[v]]$ may contain holes itself (e.g. when the hollow constructor $[[Inl +h'+1]]$ is being written to the hole $[[+h]]$ in \rref*{\CSem\CSep\CFillL\CRed}), hence the set $[[H]]$ tracks the potential hole names introduced by value $[[v]]$, and is used to update the hole name set of the corresponding (open) ampar. Proper definition of $[[ C[h ≔ H v] ]]$ is given at the top of \cref{fig:sem-full1}.
+Rules of \cref{fig:sem-full2} are all related to $\ottkw{upd}_{\ottkw{\ltimes} }$ and destination-filling operators, whose contraction rules modify the evaluation context deeply, instead of just pushing or popping a focusing composant. For that, we need to introduce the special substitution $[[ C[h ≔ H v] ]]$ that is used to update structures under construction, that are attached to open ampar focusing components in the stack. Such a substitution is triggered when a destination $[[-h]]$ is filled in the term under focus, typically in destination-filling primitives reductions, and results in the value $[[v]]$ being written to hole $[[+h]]$. The value $[[v]]$ may contain holes itself (e.g. when the hollow constructor $[[Inl +h'+1]]$ is being written to the hole $[[+h]]$ in \rref*{\CSem\CSep\CFillL\CRed}), hence the set $[[H]]$ tracks the potential hole names introduced by value $[[v]]$, and is used to update the hole name set of the corresponding (open) ampar. Proper definition of $[[ C[h ≔ H v] ]]$ is given at the bottom of \cref{fig:sem-full1}.
 
 \rref*{\CSem\CSep\CFillU\CRed} and \rref*{\CSem\CSep\CFillF\CRed} of \cref{fig:sem-full2} do not create any new hole; they only write a value to an existing one. On the other hand, rules \rref*{\CSem\CSep\CFillL\CRed}, \rref*{\CSem\CSep\CFillR\CRed}, \rref*{\CSem\CSep\CFillE\CRed} and \rref*{\CSem\CSep\CFillP\CRed} all write a hollow constructor to the hole $[[+h]]$ that contains new holes. Thus, we need to generate fresh names for these new holes, and also return a destination for each new hole with a matching name.
 
-The substitution $[[ C[h ≔ H v] ]]$ should only be performed if $[[h]]$ is a globally unique name; otherwise we break the promise of a write-once memory model. To this effect, we allow name shadowing while an ampar is closed (which is why $\ottkw{new}_{\ottkw{\ltimes} }$ is allowed to reduce to the same $[[{1}⟨+1 ❟ -1⟩]]$ every time), but as soon as an ampar is open, it should have globally unique hole names. This restriction is enforced in rule \rref*{\CTyEctxs\CSep\COpenAmpar} by premise $[[hnames(C)]] ~\mathtt{\#\#}~ [[hnames(D3)]]$, requiring hole name sets from $[[C]]$ and $[[D3]]$ to be disjoint when an open ampar focusing component is created during reduction of $\ottkw{upd}_{\ottkw{\ltimes} }$. Likewise, any hollow constructor written to a hole should have globally unique hole names. We assume that hole names are natural numbers for simplicity's sake.
+The substitution $[[ C[h ≔ H v] ]]$ should only be performed if $[[h]]$ is a globally unique name; otherwise we break the promise of a write-once memory model. To this effect, we allow name shadowing while an ampar is in value form (which is why $\ottkw{new}_{\ottkw{\ltimes} }$ is allowed to reduce to the same $[[{1}⟨+1 ❟ -1⟩]]$ every time), but as soon as an ampar is open (when it becomes an open ampar focusing component), it should have globally unique hole names. This restriction is enforced in rule \rref*{\CTyEctxs\CSep\COpenAmpar} by premise $[[hnames(C)]] ~\mathtt{\#\#}~ [[hnames(D3)]]$, requiring hole name sets from $[[C]]$ and $[[D3]]$ to be disjoint when an open ampar focusing component is created during reduction of $\ottkw{upd}_{\ottkw{\ltimes} }$. Likewise, any hollow constructor written to a hole should have globally unique hole names. We assume that hole names are natural numbers for simplicity's sake.
 
-To obtain globally fresh names, in the premises of the corresponding rules, we first set\\ $[[h']] = [[max(hnames(C) ∪ {h}) + 1]]$ or similar definitions for $[[h'']]$ and $[[h''']]$ (see at the bottom of \cref{fig:sem-full2}) to find the next unused name. Then we use either the \emph{shifted set} $[[H ⩲ h']]$ or the \emph{conditional shift operator} $[[h [H ⩲ h'] ]]$ as defined at top of \cref{fig:sem-full1} to replace all names or just specific one with fresh unused names.
+To obtain globally fresh names, in the premises of the corresponding rules, we first set\\ $[[h']] = [[max(hnames(C) ∪ {h}) + 1]]$ or similar definitions for $[[h'']]$ and $[[h''']]$ (see at the bottom of \cref{fig:sem-full2}) to find a new unused name\footnote{Sometimes we don't take the smallest unused name possible; it's mostly the result of using whatever made the formal proofs easier. For instance, in the formal proofs with Coq, renaming is implemented in terms of more general permutations, which make it more easily interoperable with typing contexts, represented as functions, but adds a few extra requirements to make lemma hold}. Then we use either the \emph{shifted set} $[[H ⩲ h']]$ or the \emph{conditional shift operator} $[[h [H ⩲ h'] ]]$ as defined at the bottom of \cref{fig:sem-full1} to replace all names or just a specific one with fresh unused name(s).
 We extend \emph{conditional shift} $\smallbullet\ottshname{[}[[H ⩲ h']]\ottshname{]}$ to arbitrary values, terms, and typing contexts in the obvious way (keeping in mind that $[[H' ⟨ v2 ❟ v1 ⟩]]$ binds the names in $[[H']]$).
 
-Rules \rref*{\CSem\CSep\CAmparOpen} and \rref*{\CSem\CSep\CAmparClose} dictate how and when a closed ampar (a value) is converted to an open ampar (a focusing component) and vice-versa, and they make use of the shifting strategy we've just introduced. With \rref*{\CSem\CSep\CAmparOpen}, the hole names bound by the ampar gets renamed to fresh ones, and the left-hand side gets attached to the focusing component $[[H⩲h' ᵒᵖ⟨ v2[H⩲h'''] ❟ ⬜⟩]]$ while the right-hand side (containing destinations) is substituted in the body of the $\ottkw{upd}_{\ottkw{\ltimes} }$ statement (which becomes the new term under focus). The rule \rref*{\CSem\CSep\CAmparClose} triggers when the body of a $\ottkw{upd}_{\ottkw{\ltimes} }$ statement has reduced to a value. In that case, we can close the ampar, by popping the focusing component from the stack $[[C]]$ and merging back with $[[v2]]$ to form a closed ampar again.
+Rules \rref*{\CSem\CSep\CAmparOpen} and \rref*{\CSem\CSep\CAmparClose} dictate how and when an ampar (a value) is converted to an open ampar (a focusing component) and vice-versa, and they make use of the shifting strategy we've just introduced. With \rref*{\CSem\CSep\CAmparOpen}, the hole names bound by the ampar gets renamed to fresh ones, and the left-hand side gets attached to the focusing component $[[H⩲h' ᵒᵖ⟨ v2[H⩲h'''] ❟ ⬜⟩]]$ while the right-hand side (containing destinations) is substituted in the body of the $\ottkw{upd}_{\ottkw{\ltimes} }$ statement (which becomes the new term under focus). The rule \rref*{\CSem\CSep\CAmparClose} triggers when the body of a $\ottkw{upd}_{\ottkw{\ltimes} }$ statement has reduced to a value. In that case, we can close the ampar, by popping the focusing component from the stack $[[C]]$ and merging back with $[[v2]]$ to form an ampar value again.
 
-In rule \rref*{\CSem\CSep\CFillComp\CRed}, we write the left-hand side $[[v2]]$ of a closed ampar $[[H ⟨ v2 ❟ v1 ⟩]]$ to a hole $[[+h]]$ that is part of a structure with holes somewhere inside $[[C]]$. This results in the composition of two structures with holes. Because we dissociate $[[v2]]$ and $[[v1]]$ that were previously bound together by the ampar connective ($[[v2]]$ is merged with another structure, while $[[v1]]$ becomes the new focus), their hole names are no longer bound, so we need to make them globally unique, as we do when an ampar is opened with $\ottkw{upd}_{\ottkw{\ltimes} }$. This renaming is carried out by the conditional shift $[[v2[H ⩲ h''] ]]$ and $[[v1[H ⩲ h''] ]]$.
+In rule \rref*{\CSem\CSep\CFillComp\CRed}, we write the left-hand side $[[v2]]$ of an ampar value $[[H ⟨ v2 ❟ v1 ⟩]]$ to a hole $[[+h]]$ that is part of a structure with holes somewhere inside $[[C]]$. This results in the composition of two structures with holes. Because we dissociate $[[v2]]$ and $[[v1]]$ that were previously bound together by the ampar connective ($[[v2]]$ is merged with another structure, while $[[v1]]$ becomes the new focus), their hole names are no longer bound, so we need to make them globally unique, as we do when an ampar is opened with $\ottkw{upd}_{\ottkw{\ltimes} }$. This renaming is carried out by the conditional shift $[[v2[H ⩲ h''] ]]$ and $[[v1[H ⩲ h''] ]]$.
 
 \paragraph{Type safety} With the semantics now defined, we can state the usual type safety theorems:
 

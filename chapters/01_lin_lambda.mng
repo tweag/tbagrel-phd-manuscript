@@ -362,13 +362,13 @@ For these new $\ottkw{case}$ rules, we observe that the typing context $[[P1]]$ 
 
 The linear $\lambda$-calculus with deep modes, \CLdm, will be the basis for our core contribution that follows in next chapter: the destination calculus \destcalculus{}.
 
-\section{Semantics of linear $\lambda$-calculus (with deep modes)}
+\section{Semantics of linear $\lambda$-calculus (with deep modes)}\label{sec:lincalc-sem}
 
 Many semantics presentations exist for lambda calculus. In \cref{fig:linsem} we present a small-step reduction system for \CLdm, in \emph{reduction semantics} style inspired from~\cite{felleisen_calculi_1987} and subsequent~\cite{danvy_refocusing_2004,biernacka_syntactic_2007}, that is, a semantics in which the evaluation context $[[C]]$ is manipulated explicitly and syntactically as a stack.
 
 We represent a running program by a pair $[[ C[t] ]]$ of an evaluation context $[[C]]$, and a term $[[t]]$ under focus. We call such a pair $[[ C[t] ]]$ a \emph{command}, borrowing the terminology from~\citet{herbelin_curien_2000}.
 
-\begin{ottfig}{\caption{Small-step semantics for \CLdm{} (\CLdm\CSemSuff\CSep)}\label{fig:linsem}}
+\begin{ottfig}{\caption{Small-step semantics for \CLdm{} (\CLdm\CSemSuff)}\label{fig:linsem}}
 \begin{augmentwidth}{2cm}
 \bgroup
 \renewcommand{\ottdrulename}[1]{}
@@ -420,7 +420,7 @@ LinRed-PatE}
 \vspace{-0.5cm}
 
 \begin{center}
-$\star$~:~only allowed if the term under focus is not already a value
+$\star$~:~only allowed if the term that would become the new focus is not already a value
 \end{center}
 \end{augmentwidth}
 \end{ottfig}
@@ -434,7 +434,7 @@ Small-step evaluation rules are of three kinds:
 \item contraction rules (C) that do not operate on the stack $[[C]]$ but just transform the term under focus when it's a redex.
 \end{itemize}
 
-To have a fully deterministic and straightforward reduction system, focusing rules can only trigger when the subterm in question is not already a value (denoted by $\star$ in \cref{fig:linsem}).
+To have a fully deterministic and straightforward reduction system, focusing rules can only trigger when the subterm that would be focused is not already a value (denoted by $\star$ in \cref{fig:linsem}).
 
 Data constructors only have focusing and unfocusing rules, as they do not describe computations that can be reduced. In that regard, $[[ˢᴇ m t]]$ is treated as an unary data constructor. Once a data constructor is focused, it is evaluated fully to a value form.
 
