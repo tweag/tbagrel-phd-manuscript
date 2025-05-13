@@ -620,9 +620,12 @@ In \rref*{\CTyTerm\CSep\CToA}, on the other hand, there is no need to bother wit
 
 The remaining operators $[[⨞]][[()]], [[⨞]][[Inl]], [[⨞]][[Inr]], [[⨞]]\,\expcons{[[m]]}, [[⨞]][[(,)]]$ from rules \IfFancyRuleNames{of the form \textsc{\CTyTerm\CSep$\ottstype{\lfloor}~\ottstype{\rfloor}$E}}{\textsc{Ty-term-Fill$*$}} are the other destination-filling primitives. They write a hollow constructor to the hole pointed by the destination operand, and return the potential new destinations that are created for new holes in the hollow constructor (or unit if there is none).
 
-As an exercise, now that we have all the typing rules in place, we can build the typing tree for the $\ottkw{map'}$ function from \cref{ssec:map-tr}. Now that we are allowed to use ages annotations, the proper signature is $\ottkw{map'}~\pmb{:}~[[(T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]$:
+As an exercise, now that we have all the typing rules in place, we can work out the typing tree for the $\ottkw{map'}$ function from \cref{ssec:map-tr}. Now that we are allowed to use ages annotations, the proper signature is
+$\ottkw{map'}~\pmb{:}~[[(T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]$:
 
-\begin{augmentwidth}{12cm}
+\critical{The example is way too big, but it's the smallest real-world example that I could think of. I have no idea at the moment to make it more readable. Suggestions are welcome.}
+
+\begin{augmentwidth}{34cm}
 
 $(A)$:
 \[
@@ -640,43 +643,43 @@ $(B)$:
 \inferrule*[right=\CApp]{
   \inferrule*[right=\CApp]{
     \inferrule*[right=\CApp]{
-      \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ callrec : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]} \quad
+      \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ rec : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]} \quad
       \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ f : ¹ν T ¹ν → U } ⊢ f : T ¹ν → U]]}
-    }{[[{ callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ callrec f : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① ]]}\quad
+    }{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ rec f : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① ]]}\quad
     \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ xs : ¹ν List T } ⊢ xs : List T]]}
-  }{[[{ callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T } ⊢ callrec f xs : ⌊ List U ⌋ ¹ν ¹ν → ①]]}\quad
+  }{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T } ⊢ rec f xs : ⌊ List U ⌋ ¹ν ¹ν → ①]]}\quad
   \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dxs : ⌊ List U ⌋ ¹ν]]}
-}{[[{ callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ callrec f xs dxs : ①]]}
+}{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ rec f xs dxs : ①]]}
 \]
 
 $(C)$:
 \[
 \inferrule*[right=\CPatU]{
   (A) \quad (B)
-}{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ x : ¹↑ T },{ xs : ¹↑ List T },{ dx : ¹ν ⌊ U ⌋ ¹ν },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dx ◀ f x ; callrec f xs dxs : ①]]}
+}{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ x : ¹↑ T },{ xs : ¹↑ List T },{ dx : ¹ν ⌊ U ⌋ ¹ν },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dx ◀ f x ; rec f xs dxs : ①]]}
 \]
 
 \[
-\inferrule*[right=\CTySTerm\CSep\CSFun]{
-  \inferrule*[right=\CTySTerm\CSep\CSFun]{
-    \inferrule*[right=\CTySTerm\CSep\CSFun]{
-      \inferrule*[right=\CTySTerm\CSep\CSFun]{
+\inferrule*[right=\CTySTerm\CSep\CFun]{
+  \inferrule*[right=\CTySTerm\CSep\CFun]{
+    \inferrule*[right=\CTySTerm\CSep\CFun]{
+      \inferrule*[right=\CTySTerm\CSep\CFun]{
       \inferrule*[]{
         \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ l : ¹ν List T } ⊢ l : List T]]} \quad
         \inferrule*[]{
-        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl : ⌊ List U ⌋ ¹ν]]}
-        }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl ⨞ [] : ①]]} \quad
+        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl : ⌊ List U ⌋ ¹ν]]}
+        }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl ⨞ [] : ①]]} \quad
         \inferrule*[right=\CPatP]{
           \inferrule*[]{
             \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl : ⌊ List U ⌋ ¹ν]]}
           }{[[{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl ⨞ (::) : ⌊ U ⌋ ¹ν ⨂ ⌊ List U ⌋ ¹ν]]}\quad
           (C)
-        }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν },{ x : ¹↑ T },{ xs : ¹↑ List T } ⊢ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ … : ①]]}
-      }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ … } : ①]]}
-      }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T} ⊢ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ …, x ˢ:: xs ⟼ … } : ⌊ List U ⌋ ¹ν ¹ν → ①]]}
-    }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ …, x ˢ:: xs ⟼ … } : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
-  }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ …, x ˢ:: xs ⟼ … } : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
-}{[[{} ⊢ ˢλ callrec ω∞ ⟼ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ …, x ˢ:: xs ⟼ … } : ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①) ω∞ → ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①)]]}
+        }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν },{ x : ¹↑ T },{ xs : ¹↑ List T } ⊢ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs : ①]]}
+      }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : ①]]}
+      }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T} ⊢ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+    }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+  }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+}{[[{} ⊢ ˢλ rec ω∞ ⟼ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①) ω∞ → ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①)]]}
 \]
 
 \end{augmentwidth}

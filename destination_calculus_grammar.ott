@@ -46,7 +46,7 @@ Defined.
 % NAMES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-metavar var, x, y, d, dd, un, ux, xs, ys, ex, st, tree, tl, tr, dtree, f, g, dh, dt, dx, dy, dxs, dys, dv, dtlr, dtl, dtr, q, tok, z, front, back, l, dl, ampar, callrec ::= {{ com Variable names }}
+metavar var, x, y, d, dd, un, ux, xs, ys, ex, st, tree, tl, tr, dtree, f, g, dh, dt, dx, dy, dxs, dys, dv, dtlr, dtl, dtr, q, tok, z, front, back, l, dl, ampar, rec ::= {{ com Variable names }}
  {{ tex \ottmv{[[var]]} }} {{ coq nat }}
 
 indexvar k ::= {{ coq nat }} {{ com Index for ranges }}
@@ -167,7 +167,7 @@ term, t, u :: 'term_' ::= {{ com Term }}
   | map t u :: S :: SugarMap {{ coq (term_Val val_Unit) }} {{ tex \ottkw{map}~[[t]]~[[u]] }}
   | map' t u1 u2 :: S :: SugarMapP {{ coq (term_Val val_Unit) }} {{ tex \ottkw{map'}~[[t]]~[[u1]]~[[u2]] }}
 
-sterm, s {{ tex \ottnt{\tilde{t} } }} :: 'sterm_' ::= {{ com Syntactic sugar for terms }}
+sterm, s {{ tex \ottnt{\tilde{t} } }} :: 'sterm_' ::= {{ com Syntactic sugar for terms }} 
   | from⧔' t :: M :: SugarFromA' {{ com Extract left side of ampar when right side is unit }}  {{ coq (sterm_FromA' [[t]]) }}
   | ˢ() :: M :: SugarUnit {{ com Unit }} {{ coq (sterm_Unit) }}
   | ˢλ x m ⟼ u :: M :: SugarFun {{ com Allocate function }} {{ coq (sterm_Fun [[x]] [[m]] [[u]]) }} % (+ bind x in u +)
