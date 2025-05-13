@@ -484,7 +484,7 @@
   \def\CTySTerm{\destcalculus{}--ty\textsubscript{s}}
   \def\CTyVal{\destcalculus{}--ty\textsubscript{v}}
   \def\CTyEctxs{\destcalculus{}--ty\textsubscript{E}}
-  \def\CTyCmd{\destcalculus{}--ty/cmd}
+  \def\CTyCmd{\destcalculus{}--ty\textsubscript{cmd}}
   \def\CSem{\destcalculus{}--sem}
   \def\CLOne{$\lambda_{L1}$}
   \def\CLTwo{$\lambda_{L2}$}
