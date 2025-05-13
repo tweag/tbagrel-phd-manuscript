@@ -28,7 +28,7 @@ In this chapter, we introduce \destcalculus{}, a pure functional calculus that i
 
 \destcalculus{} subsumes all the functional systems with destinations from the literature, from \cite{minamide_functional_1998} to \cite{lorenzen_searchtree_2024}. As such we expect that these systems or their extensions can be justified simply by giving them a translation into \destcalculus{}, in order to get all the safety results and metatheory of \destcalculus{} for free. Indeed, we proved type safety theorems for \destcalculus{} with the Coq proof assistant, as described in \cref{sec:formal-proof}.
 
-\section{Working with destinations}\label{sec:working-with-dests}
+\section{Working with destinations in \destcalculus{}}\label{sec:working-with-dests}
 
 Let's introduce and get familiar with \destcalculus{}, a modal, linear, simply typed $\lambda$-calculus with destinations. We borrow most of the syntax of the previous chapter, especially from \CLdm{}. We still use linear logic's $[[T⨁U]]$ and $[[T⨂U]]$ for sums and products, and linear function arrow $\ottstype{\multimap}$, since \destcalculus{} is linearly typed. The main difference with previous calculi being that \destcalculus{} doesn't have first-class data constructors like $[[ˢInl t]]$ or $[[ˢ(t1, t2)]]$, as they are replaced with the more general destination-filling operators that we'll discover in the next paragraphs.
 
@@ -154,7 +154,7 @@ We give the complete implementation in \cref{fig:impl-map-tr}.
 
 The tail-recursive function is $\ottkw{map'}$, it has type $
 [[(T ¹ν → U) ɷ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]
-$\footnote{In fact, we'll develop a more complex system of modes starting from \cref{sec:syntax-type-system} to ensure scope control of destinations, and thus the proper signature will be $[[(T ¹ν → U) ω∞ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]$.}. That is, instead of returning a resulting list, it takes a destination as an input and fills it with the result. At each recursive call, $\ottkw{map'}$ creates a new hollow cons cell to fill the destination. A destination pointing to the tail of the new cons cell is also created, on which $\ottkw{map'}$ is called (tail) recursively. This is really the same algorithm that you could write to implement map on a mutable list in an imperative language. Nevertheless \destcalculus{} is a pure language with only immutable types\footnote{We consider data structures in \destcalculus{} to be immutable thanks to the fact that structure with holes cannot be scrutinized while they haven't been fully completed, so destination-related mutations are completely opaque and unobservable.}.
+$\footnote{In fact, we'll develop a more complex system of modes starting from \cref{sec:syntax-type-system} to ensure scope control of destinations, and thus the proper signature will be $[[(T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]$.}. That is, instead of returning a resulting list, it takes a destination as an input and fills it with the result. At each recursive call, $\ottkw{map'}$ creates a new hollow cons cell to fill the destination. A destination pointing to the tail of the new cons cell is also created, on which $\ottkw{map'}$ is called (tail) recursively. This is really the same algorithm that you could write to implement map on a mutable list in an imperative language. Nevertheless \destcalculus{} is a pure language with only immutable types\footnote{We consider data structures in \destcalculus{} to be immutable thanks to the fact that structure with holes cannot be scrutinized while they haven't been fully completed, so destination-related mutations are completely opaque and unobservable.}.
 
 To obtain the regular $\ottkw{map}$ function, all is left to do is to call $[[alloc]]$ to create an initial destination, and $\ottkw{from}_{\ottkw{\ltimes} }'$ when all destinations have been filled to extract the completed list; much like when we make constructors out of filling operators, like $\ottsctor{(::)}$ above.
 
@@ -517,7 +517,7 @@ For \destcalculus{}, we take the same modal approach as for \CLdm{}, but we enri
 
 The syntax of \destcalculus{} terms is presented in~\cref{fig:grammar}, including the syntactic sugar that we used in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}.
 
-\subsection{Modes and the age semiring}\label{ssec:age-control}
+\subsection{Modes and the age ringoid}\label{ssec:age-control}
 
 % The precise algebraic structure that we'll be needing on modes is both a commutative additive semigroup $\ottsmode{+}$ and a multiplicative monoid $(\ottsmode{[[·]]}\,, \ottsmode{1})$, with the usual distributivity law $[[n·(m1+m2)]] = [[n·m1 + n·m2]]$. In addition we require a partial order $⥶$, such that $\ottsmode{+}$ and $\ottsmode{[[·]]}$ are order-preserving. In other words, we'll be dealing with ordered semirings\footnote{There terminology dispute where some prefer to use the term ``semiring'' when the additive semigroup has a zero. This terminology is arguably more popular, but leaves no term for the version without a zero. We'll follow the convention, in this article, that semirings with a zero are called ``rigs''.}. In the rest of the article, we'll just say ``semiring''. In practice, all our semirings will be commutative, and we won't be paying attention to the order of factors in mode multiplication.
 
@@ -619,6 +619,67 @@ When an ampar is eliminated with the more general $\ottkw{from}_{\ottkw{\ltimes}
 In \rref*{\CTyTerm\CSep\CToA}, on the other hand, there is no need to bother with scopes: the operator $\ottkw{to}_{\ottkw{\ltimes} }$ wraps an already completed structure in a trivial ampar whose left side is the structure (that continues to type in the current scope), and right-hand side is unit.
 
 The remaining operators $[[⨞]][[()]], [[⨞]][[Inl]], [[⨞]][[Inr]], [[⨞]]\,\expcons{[[m]]}, [[⨞]][[(,)]]$ from rules \IfFancyRuleNames{of the form \textsc{\CTyTerm\CSep$\ottstype{\lfloor}~\ottstype{\rfloor}$E}}{\textsc{Ty-term-Fill$*$}} are the other destination-filling primitives. They write a hollow constructor to the hole pointed by the destination operand, and return the potential new destinations that are created for new holes in the hollow constructor (or unit if there is none).
+
+As an exercise, now that we have all the typing rules in place, we can build the typing tree for the $\ottkw{map'}$ function from \cref{ssec:map-tr}. Now that we are allowed to use ages annotations, the proper signature is $\ottkw{map'}~\pmb{:}~[[(T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]$:
+
+\begin{augmentwidth}{12cm}
+
+$(A)$:
+\[
+\inferrule*[right=\CFillLeaf]{
+  \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dx : ¹ν ⌊ U ⌋ ¹ν } ⊢ dx : ⌊ U ⌋ ¹ν]]}
+  \inferrule*[right=\CApp]{
+    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ f : ω∞ T ¹ν → U } ⊢ f : T ¹ν → U]]}
+    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ x : ¹ν T } ⊢ x : T]]}
+  }{[[{ f : ω∞ T ¹ν → U },{ x : ¹ν T } ⊢ f x : U]]}
+}{[[{ dx : ¹ν ⌊ U ⌋ ¹ν },{ f : ω∞ T ¹ν → U },{ x : ¹↑ T } ⊢ dx ◀ f x : ①]]}
+\]
+
+$(B)$:
+\[
+\inferrule*[right=\CApp]{
+  \inferrule*[right=\CApp]{
+    \inferrule*[right=\CApp]{
+      \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ callrec : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]} \quad
+      \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ f : ¹ν T ¹ν → U } ⊢ f : T ¹ν → U]]}
+    }{[[{ callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ callrec f : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① ]]}\quad
+    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ xs : ¹ν List T } ⊢ xs : List T]]}
+  }{[[{ callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T } ⊢ callrec f xs : ⌊ List U ⌋ ¹ν ¹ν → ①]]}\quad
+  \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dxs : ⌊ List U ⌋ ¹ν]]}
+}{[[{ callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ callrec f xs dxs : ①]]}
+\]
+
+$(C)$:
+\[
+\inferrule*[right=\CPatU]{
+  (A) \quad (B)
+}{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ x : ¹↑ T },{ xs : ¹↑ List T },{ dx : ¹ν ⌊ U ⌋ ¹ν },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dx ◀ f x ; callrec f xs dxs : ①]]}
+\]
+
+\[
+\inferrule*[right=\CTySTerm\CSep\CSFun]{
+  \inferrule*[right=\CTySTerm\CSep\CSFun]{
+    \inferrule*[right=\CTySTerm\CSep\CSFun]{
+      \inferrule*[right=\CTySTerm\CSep\CSFun]{
+      \inferrule*[]{
+        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ l : ¹ν List T } ⊢ l : List T]]} \quad
+        \inferrule*[]{
+        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl : ⌊ List U ⌋ ¹ν]]}
+        }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl ⨞ [] : ①]]} \quad
+        \inferrule*[right=\CPatP]{
+          \inferrule*[]{
+            \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl : ⌊ List U ⌋ ¹ν]]}
+          }{[[{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl ⨞ (::) : ⌊ U ⌋ ¹ν ⨂ ⌊ List U ⌋ ¹ν]]}\quad
+          (C)
+        }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν },{ x : ¹↑ T },{ xs : ¹↑ List T } ⊢ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ … : ①]]}
+      }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ … } : ①]]}
+      }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T} ⊢ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ …, x ˢ:: xs ⟼ … } : ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+    }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ …, x ˢ:: xs ⟼ … } : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+  }{[[{callrec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ …, x ˢ:: xs ⟼ … } : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+}{[[{} ⊢ ˢλ callrec ω∞ ⟼ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ …, x ˢ:: xs ⟼ … } : ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①) ω∞ → ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①)]]}
+\]
+
+\end{augmentwidth}
 
 \section{Operational semantics}\label{sec:ectxs-sem}
 
