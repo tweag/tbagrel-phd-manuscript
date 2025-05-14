@@ -56,6 +56,11 @@ grammar
 hname, h, hd :: 'hname_' ::= {{ com Hole (or destination) name, represented by a natural number }} {{ coq nat }} {{ tex \ottshname{[[hname]]} }}
   | 1 :: S :: 1 {{ coq 1 }} {{ tex \textcolor{hnamecolor}{\mathtt{1} } }}
   | 2 :: S :: 2 {{ coq 2 }} {{ tex \textcolor{hnamecolor}{\mathtt{2} } }}
+  | 3 :: S :: 3 {{ coq 3 }} {{ tex \textcolor{hnamecolor}{\mathtt{3} } }}
+  | 4 :: S :: 4 {{ coq 4 }} {{ tex \textcolor{hnamecolor}{\mathtt{4} } }}
+  | 5 :: S :: 5 {{ coq 5 }} {{ tex \textcolor{hnamecolor}{\mathtt{5} } }}
+  | 6 :: S :: 6 {{ coq 6 }} {{ tex \textcolor{hnamecolor}{\mathtt{6} } }}
+  | 7 :: S :: 7 {{ coq 7 }} {{ tex \textcolor{hnamecolor}{\mathtt{7} } }}
   | h + h' :: M :: Add {{ coq ([[h]] + [[h']]) }} {{ tex [[h]]\hspace*{-.2ex}\ottshname{+}\hspace*{-.2ex}[[h']] }}
   | h [ H ⩲ h' ] :: M :: Cshift {{ com Shift by $[[h']]$ if $[[h]] \in [[H]]$ }} {{ coq (hname_cshift [[h]] [[H]] [[h']]) }} {{ tex [[h]]\ottshname{[}[[H]][[⩲]][[h']]\ottshname{]} }}
   | max ( H ) :: M :: Max {{ com Maximum of a set of hole names }} {{ coq (hname_max [[H]]) }} {{ tex \ottshname{\mathbf{max}(}[[H]]\ottshname{)} }}
@@ -231,6 +236,7 @@ ectx, c {{ tex \ottnt{e} }} :: 'ectx_' ::= {{ com Evaluation context component }
   | ˢ( ⬜ , t2 ) :: S :: SugarProd1 {{ tex \ottsctor{(}[[⬜]]\,\ottsctor{,}~[[t2]]\ottsctor{)} }} {{ coq ectx_FillU }}
   | ˢ( v1 , ⬜ ) :: S :: SugarProd2 {{ tex \ottsctor{(}[[v1]]\,\ottsctor{,}~[[⬜]]\ottsctor{)} }} {{ coq ectx_FillU }}
   | ˢᴇ m ⬜ :: S :: SugarExp {{ tex \expcons{[[m]]}[[⬜]] }} {{ coq ectx_FillU }}
+  | from⧔' ⬜ :: S :: FromAP {{ tex \ottkw{from}_{\ottkw{\ltimes} }'\,[[⬜]] }}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TYPING SYNTAX

@@ -511,7 +511,7 @@ $[[(p a) + (p' a')]] \btriangleq [[(p + p') (a + a')]]$
 
 \destcalculus{} is a simply typed $\lambda$-calculus with unit ($[[①]]$), product ($\ottstype{\otimes}$) and sum ($\ottstype{\oplus}$) types, inspired from \CLdm{} described in \cref{chap:preli}. It also features a mode-polymorphic function arrow $_{[[m]]}\!\ottstype{\multimap}$. Its most distinctive features however are the destination $[[⌊ T ⌋ m]]$ and ampar $[[S ⧔ T]]$ types which we've introduced in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}. Don't pay too much attention to the mode annotation on the destination type; so far it was hidden in the examples because we only considered linear destinations.
 
-To ensure that destinations are used soundly, we need both to enforce the linearity of destinations but also to prevent destinations from escaping their scope, as discussed in \cref{sec:scope-escape-dests}. To that effect, \destcalculus{} tracks the \emph{age} of destinations, that is how many nested scopes have been open between the current expression and the scope from which a destination originates. We'll see in \cref{ssec:ty-term-val} that scopes are introduced by the $[[t ►map x ⟼ t']]$ construct. For instance, if we have a term $[[t1 ►map x1 ⟼ t2 ►map x2 ⟼ t3 ►map x3 ⟼ x1]]$, then we say that the innermost occurrence of $[[x1]]$ has age $[[↑]]^{\ottsmodee{2}}$ because two nested $\ottkw{upd}_{\ottkw{\ltimes} }$ separate the definition and use site of $[[x1]]$.
+To ensure that destinations are used soundly, we need both to enforce the linearity of destinations but also to prevent destinations from escaping their scope, as discussed in \cref{sec:scope-escape-dests}. To that effect, \destcalculus{} tracks the \emph{age} of destinations, that is how many nested scopes have been open between the current expression and the scope from which a destination originates. We'll see in \cref{ssec:ty-term} that scopes are introduced by the $[[t ►map x ⟼ t']]$ construct. For instance, if we have a term $[[t1 ►map x1 ⟼ t2 ►map x2 ⟼ t3 ►map x3 ⟼ x1]]$, then we say that the innermost occurrence of $[[x1]]$ has age $[[↑]]^{\ottsmodee{2}}$ because two nested $\ottkw{upd}_{\ottkw{\ltimes} }$ separate the definition and use site of $[[x1]]$.
 
 For \destcalculus{}, we take the same modal approach as for \CLdm{}, but we enrich our mode ringoid to have an \emph{age} axis. Thanks to the algebraic nature of the modal approach, for most typing rules, we'll be able to reuse those of \CLdm{} without any modification as just the elements of the ringoid change, not the properties nor the structure of the ringoid.
 
@@ -562,7 +562,7 @@ Alternatively, we can have:
 
 \noindent where $[[x]]$ is given mode $[[ω∞]]$ from the leaves to the root. We can make use of a variable with mode $[[ω∞]]$ because we have $[[¹ν]] ⥶ [[ω∞]]$, which matches the premise of rule \rref*{\CTyTerm\CSep\CVar}.
 
-\subsection{Typing rules}\label{ssec:ty-term-val}
+\subsection{Typing rules}\label{ssec:ty-term}
 
 Core typing rules of \destcalculus{} are given in \cref{fig:ty-term}. Rules for elimination of $\ottstype{\multimap}$, $[[①]]$, $\ottstype{\oplus}$, $\ottstype{\otimes}$ and $\ottstype{!_{[[m]]}}$ are the same as in \CLdm{} of \cref{chap:preli}, so we won't cover them again here.
 
@@ -620,69 +620,152 @@ In \rref*{\CTyTerm\CSep\CToA}, on the other hand, there is no need to bother wit
 
 The remaining operators $[[⨞]][[()]], [[⨞]][[Inl]], [[⨞]][[Inr]], [[⨞]]\,\expcons{[[m]]}, [[⨞]][[(,)]]$ from rules \IfFancyRuleNames{of the form \textsc{\CTyTerm\CSep$\ottstype{\lfloor}~\ottstype{\rfloor}$E}}{\textsc{Ty-term-Fill$*$}} are the other destination-filling primitives. They write a hollow constructor to the hole pointed by the destination operand, and return the potential new destinations that are created for new holes in the hollow constructor (or unit if there is none).
 
-As an exercise, now that we have all the typing rules in place, we can work out the typing tree for the $\ottkw{map'}$ function from \cref{ssec:map-tr}. Now that we are allowed to use ages annotations, the proper signature is
-$\ottkw{map'}~\pmb{:}~[[(T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]$:
+\paragraph{Putting into practice}
 
-\critical{The example is way too big, but it's the smallest real-world example that I could think of. I have no idea at the moment to make it more readable. Suggestions are welcome.}
+As an exercise, now that we have all the typing rules in place, we can work out the typing tree for the synthetic destination-filling operator $\ottsctor{[[⨞]] (::)}$ and the corresponding synthetic constructor $\ottsctor{(::)}$ that we used since \cref{ssec:map-tr}. Starting with $\ottsctor{[[⨞]] (::)}$, we have the following definition.
 
-\begin{augmentwidth}{34cm}
+\codehere{
+\newoperator
+  {\ottsctor{[[⨞]] (::)}}{[[⌊ List T ⌋ m ¹ν → (⌊T⌋ m ⨂ ⌊ List T ⌋ m)]]}
+  {[[d ⨞(::)]]}{[[d ⨞ Inr ⨞ (,)]]}
+}
 
-$(A)$:
-\[
-\inferrule*[right=\CFillLeaf]{
-  \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dx : ¹ν ⌊ U ⌋ ¹ν } ⊢ dx : ⌊ U ⌋ ¹ν]]}
-  \inferrule*[right=\CApp]{
-    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ f : ω∞ T ¹ν → U } ⊢ f : T ¹ν → U]]}
-    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ x : ¹ν T } ⊢ x : T]]}
-  }{[[{ f : ω∞ T ¹ν → U },{ x : ¹ν T } ⊢ f x : U]]}
-}{[[{ dx : ¹ν ⌊ U ⌋ ¹ν },{ f : ω∞ T ¹ν → U },{ x : ¹↑ T } ⊢ dx ◀ f x : ①]]}
-\]
+We recall that $[[List T]] \btriangleq [[① ⨁ (T ⨂ (List T))]]$. Let's see the typing tree:
 
-$(B)$:
-\[
-\inferrule*[right=\CApp]{
-  \inferrule*[right=\CApp]{
-    \inferrule*[right=\CApp]{
-      \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ rec : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]} \quad
-      \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ f : ¹ν T ¹ν → U } ⊢ f : T ¹ν → U]]}
-    }{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ rec f : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① ]]}\quad
-    \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ xs : ¹ν List T } ⊢ xs : List T]]}
-  }{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T } ⊢ rec f xs : ⌊ List U ⌋ ¹ν ¹ν → ①]]}\quad
-  \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dxs : ⌊ List U ⌋ ¹ν]]}
-}{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ rec f xs dxs : ①]]}
-\]
-
-$(C)$:
-\[
-\inferrule*[right=\CPatU]{
-  (A) \quad (B)
-}{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ x : ¹↑ T },{ xs : ¹↑ List T },{ dx : ¹ν ⌊ U ⌋ ¹ν },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dx ◀ f x ; rec f xs dxs : ①]]}
-\]
-
+\rref*{A-ty}:
 \[
 \inferrule*[right=\CTySTerm\CSep\CFun]{
-  \inferrule*[right=\CTySTerm\CSep\CFun]{
-    \inferrule*[right=\CTySTerm\CSep\CFun]{
-      \inferrule*[right=\CTySTerm\CSep\CFun]{
-      \inferrule*[]{
-        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ l : ¹ν List T } ⊢ l : List T]]} \quad
-        \inferrule*[]{
-        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl : ⌊ List U ⌋ ¹ν]]}
-        }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl ⨞ [] : ①]]} \quad
-        \inferrule*[right=\CPatP]{
-          \inferrule*[]{
-            \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl : ⌊ List U ⌋ ¹ν]]}
-          }{[[{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl ⨞ (::) : ⌊ U ⌋ ¹ν ⨂ ⌊ List U ⌋ ¹ν]]}\quad
-          (C)
-        }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν },{ x : ¹↑ T },{ xs : ¹↑ List T } ⊢ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs : ①]]}
-      }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : ①]]}
-      }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T} ⊢ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : ⌊ List U ⌋ ¹ν ¹ν → ①]]}
-    }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
-  }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
-}{[[{} ⊢ ˢλ rec ω∞ ⟼ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①) ω∞ → ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①)]]}
+  \inferrule*[right=\CFillP]{
+    \inferrule*[right=\CFillR]{
+      \inferrule*[right=\text{\textnormal{unfold $[[List T]]$ definition on the right}}]{
+        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ d : ¹ν ⌊ List T ⌋ m } ⊢ d : ⌊ List T ⌋ m]]}
+      }{[[{ d : ¹ν ⌊ List T ⌋ m } ⊢ d : ⌊ ① ⨁ (T ⨂ (List T)) ⌋ m]]}
+    }{[[{ d : ¹ν ⌊ List T ⌋ m } ⊢ d ⨞ Inr : ⌊T ⨂ (List T)⌋ m]]}
+  }{[[{ d : ¹ν ⌊ List T ⌋ m } ⊢ d ⨞ Inr ⨞ (,) : ⌊T⌋ m ⨂ ⌊List T⌋ m]]}
+}{[[{} ⊢ ˢλ d ¹ν ⟼ d ⨞ Inr ⨞ (,) : ⌊ List T ⌋ m ¹ν → ⌊T⌋ m ⨂ ⌊List T⌋ m]]}
 \]
 
+Now, let's move on to $\ottsctor{(::)}$ synthetic constructor:
+
+\codehere{
+\newoperator
+  {\ottsctor{(::)}}{[[T ¹ν → List T ¹ν → List T]]}
+  {[[x ˢ:: xs ]]}{[[from⧔' (alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs)]]}
+}
+
+We will first type the subexpression $B \btriangleq [[(d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs]]$, then type the whole expression corresponding to operator $\ottsctor{(::)}$.
+
+\noindent\rref*{B-ty}:
+
+\noindent\begin{augmentwidth}{8cm}
+\[
+  \inferrule*[Right=\CPatP]{
+    \inferrule*[right=A-ty]{
+      \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ d : ¹ν ⌊ List T ⌋ ¹ν } ⊢ d : ⌊ List T ⌋ ¹ν]]}
+    }{[[{ d : ¹ν ⌊ List T ⌋ ¹ν } ⊢ d ⨞(::) : ⌊T⌋ ¹ν ⨂ ⌊List T⌋ ¹ν]]}\quad
+    \inferrule*[Right=\CPatU]{
+      \inferrule*[right=\CFillLeaf]{
+        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dx : ¹ν ⌊ T ⌋ ¹ν } ⊢ dx : ⌊ T ⌋ ¹ν]]} \quad
+        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ x : ¹ν T } ⊢ x : T]]}
+      }{[[{ dx : ¹ν ⌊ T ⌋ ¹ν }, ¹↑·{ x : ¹ν T } ⊢ dx ◀ x : ①]]} \quad
+      \inferrule*[Right=\CFillLeaf]{
+        \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dxs : ¹ν ⌊ List T ⌋ ¹ν } ⊢ dxs : ⌊ List T ⌋ ¹ν]]}\quad
+        \inferrule*[Right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ xs : ¹ν List T } ⊢ xs : List T]]}
+      }{[[{ dxs : ¹ν ⌊ List T ⌋ ¹ν }, ¹↑·{ xs : ¹ν List T } ⊢ dxs ◀ xs : ①]]}
+    }{[[{ dx : ¹ν ⌊ T ⌋ ¹ν }, { dxs : ¹ν ⌊ List T ⌋ ¹ν }, ¹↑·({ x : ¹ν T },{ xs : ¹ν List T }) ⊢ dx ◀ x ; dxs ◀ xs : ①]]}
+  }{[[{ d : ¹ν ⌊ List T ⌋ ¹ν },¹↑·({ x : ¹ν T },{ xs : ¹ν List T }) ⊢ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs : ①]]}
+\]
 \end{augmentwidth}
+
+\noindent\rref*{C-ty}:
+
+\noindent\begin{augmentwidth}{8cm}
+\[
+\inferrule*[Right=\CTySTerm\CSep\CFun]{
+  \inferrule*[Right=\CTySTerm\CSep\CFun]{
+    \inferrule*[Right=\CFromA']{
+      \inferrule*[Right=\CUpdA]{
+        \inferrule*[right=\CNewA]{\phantom{a}}{[[{} ⊢ alloc : List T ⧔ ⌊List T⌋ ¹ν]]}\quad
+        % \inferrule*[Right=(B)]{}{[[{ d : ¹ν ⌊ List T ⌋ ¹ν },¹↑·({ x : ¹ν T },{ xs : ¹ν List T }) ⊢ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs : ①]]}
+        \inferrule*[Right=B-ty]{\phantom{a}}{[[{ d : ¹ν ⌊ List T ⌋ ¹ν },¹↑·({ x : ¹ν T },{ xs : ¹ν List T })]][[⊢]]B\pmb{:}[[①]]}
+      }{[[{ x : ¹ν T },{ xs : ¹ν List T }⊢alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs : List T ⧔ ①]]}
+    }{[[{ x : ¹ν T },{ xs : ¹ν List T }⊢from⧔' (alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs): List T]]}
+  }{[[{ x : ¹ν T }⊢ˢλ xs ¹ν ⟼ from⧔' (alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs): List T ¹ν → List T]]}
+}{[[{}⊢ˢλ x ¹ν ⟼ ˢλ xs ¹ν ⟼ from⧔' (alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs): T ¹ν → List T ¹ν → List T]]}
+\]
+\end{augmentwidth}
+
+\bigskip
+
+If look at the typing tree $\rref*{C-ty}$ from the root to the leaves, we see that when going under $\ottkw{upd}_{\ottkw{\ltimes} }$, variable bindings for $[[x]]$ and $[[xs]]$ are multiplied by $[[¹↑]]$ (their age is increased by one). But this is not an issue; in fact, it's required by the typing rule \rref*{\CTyTerm\CSep\CFillLeaf} that the right operand is of age $[[↑]]$ (as always, to prevent scope escape), as we see in typing tree $\rref*{B-ty}$.
+
+Also, as in a regular functional programming language, modes and more specifically ages do \emph{not} show up in the signature of synthetic constructor $\ottsctor{(::)}$; only in its internal typing derivations, because the use of destinations to define $\ottsctor{(::)}$ is, from this point of view, just implementation details hidden to the user.
+
+% $\ottkw{map'}~\pmb{:}~[[(T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]$:
+
+% As an exercise, now that we have all the typing rules in place, we can work out the typing tree for the $\ottkw{map'}$ function from \cref{ssec:map-tr}. Now that we are allowed to use ages annotations, the proper signature is
+% $\ottkw{map'}~\pmb{:}~[[(T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]$:
+
+% \critical{The example is way too big, but it's the smallest real-world example that I could think of. I have no idea at the moment to make it more readable. Suggestions are welcome.}
+
+% \begin{augmentwidth}{34cm}
+
+% $(A)$:
+% \[
+% \inferrule*[right=\CFillLeaf]{
+%   \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dx : ¹ν ⌊ U ⌋ ¹ν } ⊢ dx : ⌊ U ⌋ ¹ν]]}
+%   \inferrule*[right=\CApp]{
+%     \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ f : ω∞ T ¹ν → U } ⊢ f : T ¹ν → U]]}
+%     \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ x : ¹ν T } ⊢ x : T]]}
+%   }{[[{ f : ω∞ T ¹ν → U },{ x : ¹ν T } ⊢ f x : U]]}
+% }{[[{ dx : ¹ν ⌊ U ⌋ ¹ν },{ f : ω∞ T ¹ν → U },{ x : ¹↑ T } ⊢ dx ◀ f x : ①]]}
+% \]
+
+% $(B)$:
+% \[
+% \inferrule*[right=\CApp]{
+%   \inferrule*[right=\CApp]{
+%     \inferrule*[right=\CApp]{
+%       \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[ω∞]]}{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ rec : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]} \quad
+%       \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ f : ¹ν T ¹ν → U } ⊢ f : T ¹ν → U]]}
+%     }{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ rec f : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① ]]}\quad
+%     \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ xs : ¹ν List T } ⊢ xs : List T]]}
+%   }{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T } ⊢ rec f xs : ⌊ List U ⌋ ¹ν ¹ν → ①]]}\quad
+%   \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dxs : ⌊ List U ⌋ ¹ν]]}
+% }{[[{ rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ xs : ¹↑ List T },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ rec f xs dxs : ①]]}
+% \]
+
+% $(C)$:
+% \[
+% \inferrule*[right=\CPatU]{
+%   (A) \quad (B)
+% }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ x : ¹↑ T },{ xs : ¹↑ List T },{ dx : ¹ν ⌊ U ⌋ ¹ν },{ dxs : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dx ◀ f x ; rec f xs dxs : ①]]}
+% \]
+
+% \[
+% \inferrule*[right=\CTySTerm\CSep\CFun]{
+%   \inferrule*[right=\CTySTerm\CSep\CFun]{
+%     \inferrule*[right=\CTySTerm\CSep\CFun]{
+%       \inferrule*[right=\CTySTerm\CSep\CFun]{
+%       \inferrule*[]{
+%         \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ l : ¹ν List T } ⊢ l : List T]]} \quad
+%         \inferrule*[]{
+%         \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl : ⌊ List U ⌋ ¹ν]]}
+%         }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl ⨞ [] : ①]]} \quad
+%         \inferrule*[right=\CPatP]{
+%           \inferrule*[]{
+%             \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl : ⌊ List U ⌋ ¹ν]]}
+%           }{[[{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ dl ⨞ (::) : ⌊ U ⌋ ¹ν ⨂ ⌊ List U ⌋ ¹ν]]}\quad
+%           (C)
+%         }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{ dl : ¹ν ⌊ List U ⌋ ¹ν },{ x : ¹↑ T },{ xs : ¹↑ List T } ⊢ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs : ①]]}
+%       }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T},{ dl : ¹ν ⌊ List U ⌋ ¹ν } ⊢ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : ①]]}
+%       }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U},{l : ¹↑ List T} ⊢ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+%     }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① },{f : ω∞ T ¹ν → U} ⊢ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+%   }{[[{rec : ω∞ (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ① } ⊢ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : (T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+% }{[[{} ⊢ ˢλ rec ω∞ ⟼ ˢλ f ω∞ ⟼ ˢλ l ¹↑ ⟼ ˢλ dl ¹ν ⟼ l ►case ¹↑ { ˢ[] ⟼ dl ⨞ [], x ˢ:: xs ⟼ (dl ⨞ (::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ f x ; rec f xs dxs } : ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①) ω∞ → ((T ¹ν → U) ω∞ → List T ¹↑ → ⌊ List U ⌋ ¹ν ¹ν → ①)]]}
+% \]
+
+% \end{augmentwidth}
 
 \section{Operational semantics}\label{sec:ectxs-sem}
 
@@ -1114,7 +1197,44 @@ Rules \rref*{\CSem\CSep\CAmparOpen} and \rref*{\CSem\CSep\CAmparClose} dictate h
 
 In rule \rref*{\CSem\CSep\CFillComp\CRed}, we write the left-hand side $[[v2]]$ of an ampar value $[[H ⟨ v2 ❟ v1 ⟩]]$ to a hole $[[+h]]$ that is part of a structure with holes somewhere inside $[[C]]$. This results in the composition of two structures with holes. Because we dissociate $[[v2]]$ and $[[v1]]$ that were previously bound together by the ampar connective ($[[v2]]$ is merged with another structure, while $[[v1]]$ becomes the new focus), their hole names are no longer bound, so we need to make them globally unique, as we do when an ampar is opened with $\ottkw{upd}_{\ottkw{\ltimes} }$. This renaming is carried out by the conditional shift $[[v2[H ⩲ h''] ]]$ and $[[v1[H ⩲ h''] ]]$.
 
-\paragraph{Type safety} With the semantics now defined, we can state the usual type safety theorems:
+\paragraph{Putting into practice}
+
+Let's reuse the example from \cref{ssec:ty-term} with the synthetic $\ottsctor(::)$ \emph{cons} constructor, and see the reduction of expression $[[() ˢ:: Inl ()]]$. Here, $[[Inl ()]]$ is the value form corresponding to \emph{nil} (given our encoding of lists), and we also assume that $[[()]]$ in the expression is the value form of \cref{fig:grammar-val}, not the syntactic constructor defined in \cref{fig:sterm}. Finally, we consider $\ottkw{from}_{\ottkw{\ltimes} }'$ to be a primitive (for brevity) with its contraction rule \rref*{\CSem\CSep\CFromA'\CRed} : $[[C [ from⧔' ({} ⟨ v2 ❟ () ⟩) ] ⟶ C [ v2 ] ]]$ and trivial focus and unfocus rules.
+
+\begin{augmentwidth}{8cm}
+\[\bgroup\renewcommand{\arraystretch}{1.5}\begin{array}{cll}
+&                 [[ ⬜ [ () ˢ:: Inl () ] ]] & \\
+\longrightarrow & [[ ⬜ [ from⧔' (alloc ►map d ⟼ (d ⨞ Inr ⨞ (,)) ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl ()) ] ]] & \text{expanding $\ottsctor{(::)}$ and $[[⨞]]\ottsctor{(::)}$ definitions} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜) [alloc ►map d ⟼ (d ⨞ Inr ⨞ (,)) ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl () ] ]] & \rref*{\CFromA'\CFocus} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ ⬜ ►map d ⟼ (d ⨞ Inr ⨞ (,)) ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl ()) [alloc] ]] & \rref*{\CUpdA\CFocus} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ ⬜ ►map d ⟼ (d ⨞ Inr ⨞ (,)) ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl ()) [{1} ⟨ +1 ❟ -1 ⟩] ]] & \rref*{\CNewA\CRed} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜) [{1} ⟨ +1 ❟ -1 ⟩ ►map d ⟼ (d ⨞ Inr ⨞ (,)) ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl ()] ]] & \rref*{\CUpdA\CUnfocus} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {2} ᵒᵖ⟨ +2 ❟ ⬜⟩ ) [(-2 ⨞ Inr ⨞ (,)) ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl ()] ]] & \rref*{\CAmparOpen} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {2} ᵒᵖ⟨ +2 ❟ ⬜⟩ ∘ ⬜ ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl ()) [-2 ⨞ Inr ⨞ (,) ] ]] & \rref*{\CPatP\CFocus} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {2} ᵒᵖ⟨ +2 ❟ ⬜⟩ ∘ ⬜ ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl () ∘ ⬜ ⨞ (,)) [-2 ⨞ Inr] ]] & \rref*{\CFillP\CFocus} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {2} ᵒᵖ⟨ Inr +4 ❟ ⬜⟩ ∘ ⬜ ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl () ∘ ⬜ ⨞ (,)) [-4] ]] & \rref*{\CFillR\CRed}\text{ with sub.  }[[C[2 ≔ {4} Inr +4] ]] \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {4} ᵒᵖ⟨ Inr +4 ❟ ⬜⟩ ∘ ⬜ ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl ()) [-4 ⨞ (,)] ]] & \rref*{\CFillP\CUnfocus} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {6,7} ᵒᵖ⟨ Inr (+6, +7) ❟ ⬜⟩ ∘ ⬜ ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl ()) [(-6, -7)] ]] & \rref*{\CFillP\CRed}\text{ with sub.  }[[C[4 ≔ {6,7} (+6, +7)] ]] \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {6,7} ᵒᵖ⟨ Inr (+6, +7) ❟ ⬜⟩) [(-6, -7) ►case ¹ν (dx, dxs) ⟼ dx ◀ (); dxs ◀ Inl ()] ]] & \rref*{\CPatP\CUnfocus} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {6,7} ᵒᵖ⟨ Inr (+6, +7) ❟ ⬜⟩) [-6 ◀ (); -7 ◀ Inl ()] ]] & \rref*{\CPatP\CRed} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {6,7} ᵒᵖ⟨ Inr (+6, +7) ❟ ⬜⟩ ∘ ⬜ ; -7 ◀ Inl ()) [-6 ◀ ()] ]] & \rref*{\CPatU\CFocus} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {7} ᵒᵖ⟨ Inr ((), +7) ❟ ⬜⟩ ∘ ⬜ ; -7 ◀ Inl ()) [()] ]] & \rref*{\CFillLeaf\CRed}\text{ with sub.  }[[C[6 ≔ {} ()] ]] \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {7} ᵒᵖ⟨ Inr ((), +7) ❟ ⬜⟩) [() ; -7 ◀ Inl ()] ]] & \rref*{\CPatU\CUnfocus} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {7} ᵒᵖ⟨ Inr ((), +7) ❟ ⬜⟩) [-7 ◀ Inl ()] ]] & \rref*{\CPatU\CRed} \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜ ∘ {} ᵒᵖ⟨ Inr ((), Inl ()) ❟ ⬜⟩) [()] ]] & \rref*{\CFillLeaf\CRed}\text{ with sub.  }[[C[7 ≔ {} Inl ()] ]] \\
+\longrightarrow & [[ (⬜ ∘ from⧔' ⬜) [{} ⟨ Inr ((), Inl ()) ❟ ()⟩] ]] & \rref*{\CAmparClose} \\
+\longrightarrow & [[ ⬜ [from⧔' ({} ⟨ Inr ((), Inl ()) ❟ ()⟩)] ]] & \rref*{\CFromA'\CUnfocus} \\
+\longrightarrow & [[ ⬜ [Inr ((), Inl ())] ]] & \rref*{\CFromA'\CRed}
+\end{array}\egroup\]
+\end{augmentwidth}
+
+\bigskip
+
+At the end of the reduction, we get the empty evaluation context with value $[[Inr ((), Inl ())]]$ on focus, which is the value form for the singleton list containing just unit, as expected.
+
+We also see how, throughout the reduction, the contractions of destination-filling operations under focus will trigger global substitutions $[[C[h ≔ H v] ]]$ on the evaluation context $[[C]]$. As said before, these substitutions are responsible for mutating the structure under construction, which is (always) attached on \emph{open ampar} focusing component, somewhere in the evaluation context $[[C]]$.
+
+\subsection{Type safety}\label{ssec:destcalc-type-safety} With the semantics now defined, we can state the usual type safety theorems:
 
 \begin{theorem}[Type preservation]\label{thm:preservation}
   If $[[⊢ C [t] : T]]$ and $[[C[t] ⟶ C'[t'] ]]$ then $[[⊢ C' [t'] : T]]$.
@@ -1124,7 +1244,7 @@ In rule \rref*{\CSem\CSep\CFillComp\CRed}, we write the left-hand side $[[v2]]$ 
   If $[[⊢ C [t] : T]]$ and $\forall [[v]], [[C [t] ]] \neq [[ ⬜[v] ]]$ then $\exists [[C']], [[t']].~[[ C [t] ⟶ C' [t'] ]]$.
 \end{theorem}
 
-A command of the form $[[ ⬜[v] ]]$ cannot be reduced further, as it only contains a fully determined value, and no pending computation. This it is the stopping point of the reduction, and any well-typed command eventually reaches this form.
+As seen in the example above, a command of the form $[[ ⬜[v] ]]$ cannot be reduced further, as it only contains a fully determined value, and no pending computation. This it is the stopping point of the reduction, and any well-typed command eventually reaches this form.
 
 \section{Formal proof of type safety}\label{sec:formal-proof}
 
