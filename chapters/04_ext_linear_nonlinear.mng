@@ -10,6 +10,8 @@ If we now allow destinations to be filled with linear data\footnote{Starting fro
 
 A potential remedy would be to not allow older linear destinations to be filled using \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ functions. Instead, linear destinations could only be filled with a value by operating on the ampar they belong to, as in \cite{minamide_functional_1998} and \cite{lorenzen_searchtree_2024}. We will use the base name \mintinline{haskellc}/extend/ for this new family of operators. Unrestricted destinations, on the other hand, could still be used with \mintinline{haskellc}/fill/-like functions. Filling a destination with a hollow constructor cannot cause any scope escape issues, so it's safe to do with \mintinline{haskellc}/fill @lCtor/ for both linear and unrestricted destinations. Let's see what the API could look like:
 
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 data Ampar s t
 data Dest m t  -- m is the multiplicity, either 1 or ω
@@ -22,16 +24,21 @@ fillLeaf ⩴ t → Dest ω t → ()
 -- for linear destinations
 extendLeaf ⩴ t ⊸ Ampar s (Dest 1 t) ⊸ Ampar s ()
 \end{minted}
+}
+\end{unbreakable}
 
 The idea is that \mintinline{haskellc}/extendLeaf/ is a way of opening a new scope, and filling the linear destination, belonging to that fresh scope, immediately, without letting the user interfere. So we are confident that the linear destination filled by \mintinline{haskellc}/extendLeaf/ is strictly younger than whatever ends up stored into it, which prevents scope escape (recall the sane example of \cref{sec:scope-escape-dests}, where an older destination is stored into a younger one with no issues).
 
 Except\ldots{}it doesn't work:
-
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 newAmpar tok0 `updWith` \(d0 ⩴ Dest 1 (Dest 1 t)) ->
   newAmpar tok1 `updWith` \(d1 ⩴ Dest 1 t) ->
     (newAmpar tok2 `updWith` \(d2 ⩴ Dest ω ()) -> d2 &fillLeaf () ; d0) &extendLeaf d1
 \end{minted}
+}
+\end{unbreakable}
 
 In this particularly cursed but valid excerpt\footnote{It's valid in Linear Haskell, but the example would be rejected by \destcalculus{}, as \mintinline{haskellc}/d0/ would have age $[[↑^2]]$ when it is used as a variable in the innermost scope, which isn't allowed by rule \rref*{\CTyTerm\CSep\CId}.}, we hide an old destination \mintinline{haskellc}/d0/ inside the nest of a fresher one \mintinline{haskellc}/d2/ that we've just consumed. So we have an ampar \mintinline{haskellc}/(newAmpar `updWith` \d2 -> d2 &fillLeaf () ; d0)/ whose right-hand side contains a destination \mintinline{haskellc}/d0/ which isn't its own; and we can use that together with \mintinline{haskellc}/extendLeaf/ to cause scope escape (as \mintinline{haskellc}/d1/ get stored in the outermost ampar)!
 
@@ -46,6 +53,8 @@ This is done by changing the signature from \mintinline{haskellc}/updWith ⩴ Am
 First, obviously, we cannot use any linear resource coming from outer scopes inside the scope of \mintinline{haskellc}/updWith/. In particular, we cannot use a \mintinline{haskellc}/Token/ coming from the top-level linear scope. Instead, we have to start a new nested linear scope (by calling \mintinline{haskellc}/withToken/) if we want to create new ampars in that scope, or tweak \mintinline{haskellc}/updWith/ to also provide a linear token to the inner scope: \mintinline{haskellc}/updWith ⩴ Ampar s t ⊸ ((t, Token) ⊸ u) → Ampar s u/.
 
 Also, we still cannot fill linear destinations using a \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ function, for two main reasons. One being that we cannot bring linear resources in the scope anyway, so we wouldn't have something useful to fill into the linear destination. The second being that in addition to scope escape, we must be careful about sibling destinations from the same scope interacting with one another:
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 fromAmpar' (
   newAmpar @(t, Dest 1 t) tok `updWith` \(d :: Dest 1 (t, Dest 1 t)) ->
@@ -53,6 +62,8 @@ fromAmpar' (
       ddt &fillLeaf dt
 )
 \end{minted}
+}
+\end{unbreakable}
 Here, we create a new ampar for a pair of a \mintinline{haskellc}/t/ and a \mintinline{haskellc}/Dest 1 t/. After filling the root destination with a hollow pair constructor, we get two destinations, \mintinline{haskellc}/dt/ and \mintinline{haskellc}/ddt/. If we have access to a \mintinline{haskellc}/fillLeaf/ function operating with a linear destination on the left, we can actually put \mintinline{haskellc}/dt/ into \mintinline{haskellc}/ddt/. Because we've consumed the two destinations and unit is returned, it seems that the ampar is complete, while in fact we've never provided a value of type \mintinline{haskellc}/t/ for the first field of the pair! So the structure is still incomplete while we are allowed to call \mintinline{haskellc}/fromAmpar'/ on it and read it!
 
 So far we hadn't spoke about that danger, because mechanisms used to stop scope escape in \cref{chap:dest-calculus,chap:dps-haskell}, that is, the age system, or absence of linear destinations, are enough to also prevent sibling destinations from interacting with one another. But here, the limitation put on \mintinline{haskellc}/updWith/ (not allowing capture of linear resources) only stops scope escape, but not this other issue, because both sibling destinations are coming from the same, freshest scope. Hence, we still cannot have a function \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ operating on linear destinations.
@@ -62,7 +73,8 @@ So far we hadn't spoke about that danger, because mechanisms used to stop scope 
 We've just seen that to use linear destinations safely, we need operators that work on closed ampars, instead of destinations. In fact, that is exactly what happens in \cite{minamide_functional_1998}, or \cite{lorenzen_searchtree_2024}: they only allow incomplete structures with one hole, and extending the structure happens by manipulating the whole incomplete structure itself, not destinations (as they don't exist in these works).
 
 For starters, let's start on this way, and design operators for ampars with only one hole, so exactly one destination on their right-hand side. If we want always have only one hole in the ampar, then, when plugging a new hollow constructor into the existing hole, we must fill all of the new fields of the hollow constructor except one,  so that only one new hole remains\footnote{It's still possible to use \mintinline{haskellc}/fill @'(:)/ on a linear destination, creating two new linear destinations. But then we can't use the \mintinline{haskellc}/extendLeaf/ function teased above to fill these destinations with complete values, because \mintinline{haskellc}/extendLeaf/ only works on an ampar with just a single destination on the right-hand side, and \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ only work on unrestricted destinations.}. In other terms, it means that we must ask the user to specify a value for all except one field of the newly added constructor. The signature of such a function would be as follows:
-
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extend ⩴ ∀ lCtor k t s m fiTys kthFiTy othFiTys.
            (OnlyLinear lCtor t,
@@ -70,6 +82,8 @@ extend ⩴ ∀ lCtor k t s m fiTys kthFiTy othFiTys.
            At k fiTys ~ kthFiTy, Remove k fiTys ~ othFiTys) ⇒
            othFiTys %m→ Ampar s (Dest m t) ⊸ Ampar s (Dest m kthFiTy)
 \end{minted}
+}
+\end{unbreakable}
 
 There's a lot to decipher here. \mintinline{haskellc}/FieldsTypes/ is a type family that returns the types of the fields for a given constructor, specified in its type-lifted representation \mintinline{haskellc}/lCtor/ and the type \mintinline{haskellc}/t/ to which the constructor belongs. For example, \mintinline{haskellc}/FieldsTypes '(:) [Int]/ resolves to \mintinline{haskellc}/(Int, [Int])/. \mintinline{haskellc}/At k/ is a type family that returns the \mintinline{haskellc}/k/\textsuperscript{th} element (i.e. type) of a tuple type, and similarly, \mintinline{haskellc}/Remove k/ returns the same tuple type it is given, with the \mintinline{haskellc}/k/\textsuperscript{th} removed.
 
@@ -81,28 +95,44 @@ In practice, \mintinline{haskellc}/extend/ takes an ampar whose right side is a 
 
 Note that \mintinline{haskellc}/extend/ doesn't support constructors with 0 fields (it would make the signature of the function way to complex), as these can be plugged into the structure, like any other complete value, with \mintinline{haskellc}/extendLeaf/ anyway:
 
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendLeaf ⩴ ∀ s t m. t %m→ Ampar s (Dest m t) ⊸ Ampar s ()
 \end{minted}
+}
+\end{unbreakable}
 
 Here we've made \mintinline{haskellc}/extendLeaf/ multiplicity-polymorphic, compared to the initial version presented above. But its behavior is the same.
 
 Because we only have one destination on the right-hand side of any ampar, that is consumed and not replaced with a new one when calling \mintinline{haskellc}/extendLeaf/, we could alternatively return the completed structure, instead of returning an \mintinline{haskellc}/Ampar s ()/:
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 fromAmparWithLeaf ⩴ ∀ s t m. t %m→ Ampar s (Dest m t) ⊸ s
 fromAmparWithLeaf = fromAmpar' . extendLeaf
 \end{minted}
+}
+\end{unbreakable}
 
 Note also that above, for \mintinline{haskellc}/extend/, we assumed that the constructor in question only has linear fields\footnote{In \destcalculus{}, every data constructor has linear fields, except the exponential constructor $\expcons{[[m]]}$ which has a single field of mode $[[m]]$. In Haskell however, constructors have only linear fields by default, but can have unrestricted fields when the corresponding datatype is defined with GADT syntax and that an unrestricted arrow \mintinline{haskellc}/→/ is following the field's type. An unrestricted field is a way to hold unrestricted data without explicit need for \mintinline{haskellc}/Ur/.}, as the multiplicity \mintinline{haskellc}/m/ at which we consume the values for the fields, and at which we return the new destination, are the same as the multiplicity of the parent destination. We reflect that by the pseudo-constraint \mintinline{haskellc}/OnlyLinear lCtor t/. Ideally, we could go further and be polymorphic over the multiplicity of each field, however, to this date, we cannot get that information through GHC.Generics (GHC.Generics is only implemented for constructors having just linear fields\footnote{So the constraint \mintinline{haskellc}/OnlyLinear lCtor t/ would only be needed in practice if GHC.Generics were to provide, in the future, an instance of \mintinline{haskellc}/Generic t/ for types \mintinline{haskellc}/t/ defined with GADT syntax.}). That also means we have to build a custom version of \mintinline{haskellc}/extend/ for the \mintinline{haskellc}/Ur/ constructor:
 
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendUr ⩴ ∀ s t m. Ampar s (Dest m (Ur t)) ⊸ Ampar s (Dest ω t)
 \end{minted}
+}
+\end{unbreakable}
 
 The last function that we need, in this world is \mintinline{haskellc}/extendComp/, to plug two ampars together:
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendComp ⩴ ∀ s t u. Ampar s (Dest 1 t) ⊸ Ampar t u ⊸ Ampar s u
 \end{minted}
+}
+\end{unbreakable}
 In \mintinline{haskellc}/extendComp/, we need the destination in the parent ampar to be linear, as we fill it with an ampar, which is a linear resource\footnote{Even in a \destcalculus{}-like world, where ampars don't have to be linear, the destination used for composition using $\mathop{\triangleleft\mycirc}$ / \mintinline{haskellc}/fillComp/ / \mintinline{haskellc}/extendComp/ must be linear. The reason is that if we write the child ampar into an unrestricted destination of the parent ampar, then we would need to update the remaining destinations of this child ampar to be unrestricted too, and this is hard to express when we can have arbitrarily complex types on the right-hand side of an ampar.}.
 
 \section{Arbitrary type on the right-hand side of ampars for linear data}\label{sec:linear-lens}
@@ -120,35 +150,53 @@ Lenses are a pattern for defining functional getters and setters that compose ea
 \end{itemize}
 
 Although it isn't the most efficient and practical representation, non-linear lenses can be implemented by the following datatype:
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[escapeinside=°°]{haskellc}
 data LensNL t1 t2 u1 u2 = ¤LensNL
   { view ⩴ t1 → u1  -- just get u1 out of t1, discard the rest
   , update ⩴ t1 → u2 → t2  -- discard the u1 inside t1 and replace it with a u2 to make a t2
   }
 \end{minted}
+}
+\end{unbreakable}
 For linear lenses, we are not allowed to use the \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ components separately; otherwise we could drop parts of the original structure of type \mintinline{haskellc}/t1/. So instead, we group the two functions into one:
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[escapeinside=°°]{haskellc}
 newtype Lens t1 t2 u1 u2 = ¤Lens (t1 ⊸ (u1, u2 ⊸ t2))
 \end{minted}
+}
+\end{unbreakable}
 With a linear lens of type \mintinline{haskellc}/Lens t1 t2 u1 u2/, we can split a structure of type \mintinline{haskellc}/t1/ into a pair of a value of type \mintinline{haskellc}/u1/ (the focus), and a closure of type \mintinline{haskellc}/u2 ⊸ t2/ that carries all the rest of the original \mintinline{haskellc}/t1/, and is ready to produce a structure of type \mintinline{haskellc}/t2/ if we give it a \mintinline{haskellc}/u2/. Both of these have to be consumed if we want to respect linearity.
 
 The simplest lens is the standard getter and setter, where \mintinline{haskellc}/t1 = t2/ and \mintinline{haskellc}/u1 = u2/, and thus, \mintinline{haskellc}/Lens t t u u/ becomes an alias for \mintinline{haskellc}/t ⊸ (u, u ⊸ t)/. There, the second element of the pair, of type \mintinline{haskellc}/u ⊸ t/, is really just a functional representation of a \mintinline{haskellc}/t/ missing a \mintinline{haskellc}/u/ to be complete! For example:
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 data Triple t1 t2 t3 = ¤Triple { first ⩴ t1, second ⩴ t2, third ⩴ t3 }
 
 fstMono ⩴ Lens (Triple t1 t2 t3) (Triple t1 t2 t3) t1 t1
 fstMono (¤Triple { first, second, third }) = ¤Lens (first, \newFirst -> Pair { newFirst, second, third })
 \end{minted}
+}
+\end{unbreakable}
 
 As we see, when we are operating on a polymorphic type such as \mintinline{haskellc}/Triple/, it is a bit silly to restrict our lens to the same type \mintinline{haskellc}/t1/ for both the original value at the focus, and the updated one. We gain much more flexibility by doing:
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 fst ⩴ Lens (Triple t1 t2 t3) (Triple t4 t2 t3) t1 t4
 fst (¤Triple { first, second, third }) = ¤Lens (first, \newFirst -> Pair { newFirst, second, third })
 \end{minted}
+}
+\end{unbreakable}
 
 \paragraph{Lenses to select destinations to operate on}
 
 With linear lenses, the user can communicate which destination they want to focus, and we gain a way to inject back the potential newly produced destinations at the right place on the right-hand side of the ampar:
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendFocused ⩴ ∀ lCtor u t1 t2 s m.
                 (OnlyLinear lCtor u) ⇒
@@ -157,15 +205,21 @@ extendFocused ⩴ ∀ lCtor u t1 t2 s m.
 extendWithPairOnFirst ⩴ Ampar s (Triple (Dest m (t11, t12)) t2 t3) ⊸ Ampar s (Triple (Dest m t11, Dest m t12) t2 t3)
 extendWithPairOnFirst ampar = ampar &(fst &extendFocused @'(,))
 \end{minted}
+}
+\end{unbreakable}
 
 As stated above, this technique gets even more useful for \mintinline{haskellc}/extendFocusedLeaf/, as we had no way previously to fill a linear destination contained in an arbitrary structure inside the right-hand side of an ampar. With \mintinline{haskellc}/extendFocusedLeaf/, it is now possible:
 
+\begin{unbreakable}
+{\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendFocusedLeaf ⩴ ∀ u t1 t2 s m. u %m→ Lens t1 t2 (Dest m u) () ⊸ Ampar s t1 ⊸ Ampar s t2
 
 extendWithValOnFirst ⩴ t1 ⊸ Ampar s (Triple (Dest 1 t1) t2 t3) ⊸ Ampar s (Triple () t2 t3)
 extendWithPairOnFirst x ampar = ampar &(fst &extendFocusedLeaf x)
 \end{minted}
+}
+\end{unbreakable}
 
 \section{Limitations of this system}
 

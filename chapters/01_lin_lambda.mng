@@ -266,7 +266,7 @@ Now that we have a completely defined the ringoid for modes, we can move to the 
 \ottdefnLinModXXTyXXterm{}\egroup
 \end{ottfig}
 
-In \CLm{} we're back to a single identity rule \rref*{\CLm\CTy\CSep\CId}, that asks for $[[x]]$ to be in the typing context with a mode $[[m]]$ that must be \emph{compatible with a single linear use} (we note $[[˥ ⥶ m]]$). In our ringoid, with only two elements, we have both $[[˥ ⥶ ˥]]$ and $[[˥ ⥶ ɷ]]$, so $[[x]]$ can actually have any mode (either linear or unrestricted, so encompassing both \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Lin}} and \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Ur}}), but in more complex modal systems, not all modes have to be compatible with the unit of the ringoid\footnote{See \cref{ssec:ty-term-val} for a case of a ringoid where not all modes are compatible with the unit.}. Rules \rref*{\CLm\CTy\CSep\CId} and \rref*{\CLm\CTy\CSep\CUnit} also allow to discard any context composed only of unrestricted bindings, denoted by $[[ɷ·P]]$ (equivalent to notation $[[!P]]$ in \CLOne), so they are performing implicit weakening as in \CLTwo.
+In \CLm{} we're back to a single identity rule \rref*{\CLm\CTy\CSep\CId}, that asks for $[[x]]$ to be in the typing context with a mode $[[m]]$ that must be \emph{compatible with a single linear use} (we note $[[˥ ⥶ m]]$). In our ringoid, with only two elements, we have both $[[˥ ⥶ ˥]]$ and $[[˥ ⥶ ɷ]]$, so $[[x]]$ can actually have any mode (either linear or unrestricted, so encompassing both \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Lin}} and \rref*{\CLTwo\CTy\CSep\CId\textsubscript{Ur}}), but in more complex modal systems, not all modes have to be compatible with the unit of the ringoid\footnote{See \cref{ssec:ty-term} for a case of a ringoid where not all modes are compatible with the unit.}. Rules \rref*{\CLm\CTy\CSep\CId} and \rref*{\CLm\CTy\CSep\CUnit} also allow to discard any context composed only of unrestricted bindings, denoted by $[[ɷ·P]]$ (equivalent to notation $[[!P]]$ in \CLOne), so they are performing implicit weakening as in \CLTwo.
 
 Every rule of \CLm{} that mentions two subterms uses the newly defined $+$ operator on typing contexts in the conclusion of the rule. If a same variable $[[x]]$ is required in both $[[P1]]$ and $[[P2]]$ (either with mode $[[˥]]$ or $[[ɷ]]$), then $[[P1+P2]]$ will contain binding $[[{x : ɷ T}]]$. Said differently, the parent term will automatically deduce whether $[[x]]$ needs to be linear or unrestricted based on how (many) subterms use $[[x]]$, thanks to the $+$ operator. It's a vastly different approach than the linear context split for subterms in \CLOneOrTwo{} and unrestricted context duplication for subterms in \CLTwo. I would argue that, thanks to the algebraic properties of the mode semiring, it makes the presentation of the system smoother (at the theoretical level at least; implementing type checking for such a linear type system can be trickier).
 
@@ -585,6 +585,7 @@ One easy improvement we can do is to have a single linear scope, providing a lin
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 type Token
 dup ⩴ Token ⊸ (Token, Token)
+drop ⩴ Token ⊸ ()
 withToken ⩴ (Token ⊸ Ur t) ⊸ Ur t
 
 -- A first linear API
@@ -608,7 +609,7 @@ exampleRejected ⩴ Ur File =
 }
 \end{unbreakable}
 
-What might be surprising here is that we are allowed to duplicate a token (with \mintinline{haskellc}/dup/), which we announced as a linear resource!
+What might be surprising here is that we are allowed to duplicate or drop a token (with \mintinline{haskellc}/dup/ or \mintinline{haskellc}/drop/), which we announced as a linear resource!
 
 In fact, the goal of the \mintinline{haskellc}/Token/ type is to tie every resource to a linearity requirement. The important part is that the \mintinline{haskellc}/Token/ type should not have a way to be promoted to \mintinline{haskellc}/Ur/, otherwise tokens and other linear resources could leak and live outside of the linear scope of \mintinline{haskellc}/withToken/.
 

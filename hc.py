@@ -21,7 +21,7 @@ __all__ = ['HC']
 
 uniLlWithoutD = uni.Ll.replace("d", "")
 
-baseType = r"(?:(?:[stur]'?|lCtor)\b|¤'?[_" + uni.Ll + r"][\w']*|('')?[" + uni.Lu + r"][\w\'#]*|(')[" + uni.Lu + r"][\w\']*|(')\[[^\]]*\]|(')\([^)]*\)|(')[:!#$%&*+.\\/<=>?@^|~-]+)"
+baseType = r"(?:(?:[stur]|lCtor)\b'?|¤'?[_" + uni.Ll + r"][\w']*|('')?[" + uni.Lu + r"][\w\'#]*|(')[" + uni.Lu + r"][\w\']*|(')\[[^\]]*\]|(')\([^)]*\)|(')[:!#$%&*+.\\/<=>?@^|~-]+)"
 typeApp = lambda b: r"(?:" + b + r"|(?:\s*" + b + r")+)"
 typeList = r"\[" + typeApp(baseType) + r"\]"
 nestedTypeList = r"\[\[" + typeApp(baseType) + r"\]\]"

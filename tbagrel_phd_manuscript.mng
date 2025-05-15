@@ -23,8 +23,8 @@
 \usepackage{polyglossia}
 \setmainlanguage{english}
 \setotherlanguage{french}
-\PolyglossiaSetup{english}{indentfirst=true}
-\PolyglossiaSetup{french}{indentfirst=true}
+\SetLanguageKeys{english}{indentfirst=true}
+\SetLanguageKeys{french}{indentfirst=true}
 \usepackage{float}
 \renewcommand{\topfraction}{.85}
 \renewcommand{\bottomfraction}{.7}
