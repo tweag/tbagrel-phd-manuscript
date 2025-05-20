@@ -888,7 +888,7 @@ In a strict functional language such as OCaml, the choice of implementation for 
 With destinations, \emph{map} can be implemented in a tail-recursive fashion too (\mintinline{haskellc}/mapDPS'/), as explained in \cref{ssec:map-tr}, without requiring the reverse operation that \mintinline{haskellc}/mapTR'/ needs, as the list is built directly in a top-down approach. It can alternatively be implemented as a fold (\mintinline{haskellc}/mapDPSFold'/), as we also show below. Here, the \mintinline{haskellc}/!/ in front of a variable name denotes a (weakly) strict binding, so the expression assigned to the variable will be partially evaluated before the body of the \mintinline{haskellc}/let/ is evaluated:
 {\figtextsize
 \begin{minted}[linenos]{haskellc}
-append ⩴ UDest [a] ⊸ a → UDest [a]
+append ⩴ UDest [t] ⊸ t → UDest [t]
 d `append` x = case d &fill @'(:) of (dh, dt) -> dh &fillLeaf x ; dt
 
 mapDPS' _ [] d = d &fill @'[]

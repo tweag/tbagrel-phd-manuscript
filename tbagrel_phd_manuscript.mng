@@ -387,7 +387,7 @@
 \newunicodechar{;}{\ensuremath{\fatsemi}}
 \newunicodechar{∀}{\ensuremath{\pmb{\forall}}}
 \newunicodechar{⩴}{\hspace{-0.2ex}:\hspace{-0.4ex}:\hspace{-0.2ex}}
-
+\newunicodechar{Ⴈ}{1}
 
 \newlength{\widthaugment}
 \NewEnviron{augmentwidth}[1]
