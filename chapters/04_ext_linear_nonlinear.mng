@@ -284,8 +284,8 @@ Nonetheless, we could have implemented \mintinline{haskellc}/extendWithNodeOnFst
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendFocusedLeaf ⩴ ∀ u t1 t2 s m. u %m→ Lens t1 t2 (Dest m u) () → Ampar s t1 ⊸ Ampar s t2
 
-extendWithValOnFirst ⩴ t1 ⊸ Ampar s (Triple (Dest Ⴈ t1) t2 t3) ⊸ Ampar s (Triple () t2 t3)
-extendWithPairOnFirst x ampar = ampar &(fst &extendFocusedLeaf x)
+extendWithValOnFst ⩴ t1 ⊸ Ampar s (Triple (Dest Ⴈ t1) t2 t3) ⊸ Ampar s (Triple () t2 t3)
+extendWithValOnFst x ampar = ampar &(fst &extendFocusedLeaf x)
 \end{minted}
 }
 \end{unbreakable}
@@ -307,11 +307,11 @@ extendFocusedComp ⩴ ∀ u t1 t2 s u1 u2.
 
 Both of these functions are very similar to their respective one-hole versions \mintinline{haskellc}/extendUr/ and \mintinline{haskellc}/extendComp/. In \mintinline{haskellc}/extendFocusedUr/, we consume a destination of type \mintinline{haskellc}/Dest m (Ur u)/ and replace it with a destination of type \mintinline{haskellc}/Dest ω u/. In \mintinline{haskellc}/extendFocusedComp/, we consume a destination of type \mintinline{haskellc}/Dest Ⴈ u1/, to which we write the left-hand side (of type \mintinline{haskellc}/u1/) of the child ampar, and we replace this consumed destination with whatever was on the right-hand side (of type \mintinline{haskellc}/u2/) of the child ampar. The only difference, between the \mintinline{haskellc}/extend/ and the corresponding \mintinline{haskellc}/extendFocused/ functions, is that the filling operation in the latter happens at a focused location on the right-hand side of an ampar instead of being made on the single destination at top level as in the former.
 
-\section{Breadth-first tree traversal, updated, and final API}
+\section{Breadth-first tree traversal, updated, and final API}\label{sec:bf-api-final}
 
 The family of \mintinline{haskellc}/extendFocused/ functions, based on linear lenses, addresses the core challenge of safely filling destinations with linear data. Although the resulting interface is not entirely satisfactory ---particularly from an ergonomic standpoint--- it still strikes a reasonable compromise between expressiveness and complexity of the interface (given the constraint of working with the existing Haskell type system).
 
-For instance, the DPS system supports two usable levels of nesting for destinations, allowing us to construct and use linear destinations of destinations (type \mintinline{haskellc}/Dest Ⴈ (Dest m t)/). This is in fact perfectly sufficient to implement non-trivial examples, such as the breadth-first traversal of a tree, but this time using the efficient, destination-based queues in Haskell! Let's revisit this example. For the final part of this chapter, we also take compact region considerations into account (this mostly consists in adding \mintinline{haskellc}/r/ and \mintinline{haskellc}/Region r/ all over the function's signatures). The code of efficient queues (and difference lists for linear data, that they are made of) is presented in \cref{table:eff-queue-lin}, and the code for updated breadth-first tree traversal is given in \cref{table:impl-bfs-tree-traversal-v2}.
+For instance, the DPS system supports two usable levels of nesting for destinations, allowing us to construct and use linear destinations of destinations (type \mintinline{haskellc}/Dest Ⴈ (Dest m t)/). This is in fact perfectly sufficient to implement non-trivial examples, such as the breadth-first traversal of a tree, but this time using the efficient, destination-based queues in Haskell! Let's revisit these examples one last time. For the final part of this chapter, we also take compact region considerations into account (this mostly consists in adding \mintinline{haskellc}/r/ and \mintinline{haskellc}/Region r/ all over the function's signatures). The code of efficient queues (and difference lists for linear data, that they are made of) is presented in \cref{table:eff-queue-lin}, and the code for updated breadth-first tree traversal is given in \cref{table:impl-bfs-tree-traversal-v2}.
 
 \begin{listing}[p]
 \figtextsize
@@ -466,3 +466,15 @@ extendFocusedComp ⩴ ∀ r u t1 t2 s u1 u2. (Region r) ⇒
 % 		(ampar3 `updWith` \d3 → (d1, d3)) & (fst & extendFocusedLeaf d2)
 
 \section{Conclusion}
+
+In this chapter we took time to explore what happens when we relax the drastic restriction we had imposed in \cref{chap:dps-haskell}, namely, that destinations could only be filled with non-linear data (which, consequently, meant that ampars could only be used to store non-linear data).
+
+In several careful steps, avoiding scope escape and similar dangers at every corner, we refined our DPS Haskell API to lift this limitation. First, by allowing the user to build ampars to store linear data, but only if they have only one hole each, in the light of the foundational works \cite{minamide_functional_1998,lorenzen_searchtree_2024}. This gave birth to the family of \mintinline{haskellc}/extend/ functions, that operate on ampars directly instead of destinations.
+
+In a second time, we released yet another set of functions, denoted by \mintinline{haskellc}/extendFocused/, that let the user fill ampars of arbitrary shapes, with no limit on the number of holes or destinations, with linear data. These functions also operate directly on an ampar, and let the user select the destination they want to focus on, inside the ampar, with a \emph{linear lens} ---that is, a convenient object that acts as both a getter and setter for immutable functional data structures.
+
+In the end, we recover a system that is as close as possible to \destcalculus{} (\cref{chap:dest-calculus}), in terms of flexibility and expressiveness, while still conforming itself to the existing type system of Haskell. Of course, the ergonomics for filling linear destinations are not as smooth as in \destcalculus{}, but our newly gained flexibility let us implemented a revised version of breadth-first tree traversal in Haskell, that this time, uses exactly the same algorithm and underlying data structures as the initial version provided for \destcalculus{} in \cref{sec:bft}.
+
+The final API we obtain, after all these refinements, has not been implemented yet in Haskell, though we don't think that it will be particularly challenging, as most of the hard work for low-level operations has already been done in \cref{sec:implementation}.
+
+Finally, should time be available to devote to this topic in the future, it would be worth exploring how we can leverage the theoretical framework developed in \cref{chap:dest-calculus} to formally prove that our proposed Hakell API in \cref{sec:bf-api-final} is indeed safe.
