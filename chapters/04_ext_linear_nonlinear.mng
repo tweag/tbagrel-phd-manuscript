@@ -35,14 +35,14 @@ Except\ldots{}it doesn't work:
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-newAmpar tok0 `updWith` \(d0 ⩴ Dest Ⴈ (Dest Ⴈ t)) ->
-  newAmpar tok1 `updWith` \(d1 ⩴ Dest Ⴈ t) ->
-    (newAmpar tok2 `updWith` \(d2 ⩴ Dest ω ()) -> d2 &fillLeaf () ; d0) &extendLeaf d1
+newAmpar tok0 `updWith` \(d0 ⩴ Dest Ⴈ (Dest Ⴈ t)) →
+  newAmpar tok1 `updWith` \(d1 ⩴ Dest Ⴈ t) →
+    (newAmpar tok2 `updWith` \(d2 ⩴ Dest ω ()) → d2 &fillLeaf () ; d0) &extendLeaf d1
 \end{minted}
 }
 \end{unbreakable}
 
-In this particularly cursed but valid\footnote{It's valid in Linear Haskell, but the example would be rejected by \destcalculus{}, as \mintinline{haskellc}/d0/ would have age $[[↑^2]]$ when it is used as a variable in the innermost scope, which isn't allowed by rule \rref*{\CTyTerm\CSep\CId}.} excerpt, we hide an old destination \mintinline{haskellc}/d0/ inside the nest of a fresher one \mintinline{haskellc}/d2/ that we've just consumed. So we have an ampar \mintinline{haskellc}/(newAmpar `updWith` \d2 -> d2 &fillLeaf () ; d0)/ whose right-hand side contains a destination \mintinline{haskellc}/d0/ which isn't its own, but comes from a previous scope. However, it is indistinguishable from an ampar whose right side contains only its own destinations, if we just look at the types. So we are allowed to use \mintinline{haskellc}/extendLeaf/ on the cursed ampar, which causes scope escape (as \mintinline{haskellc}/d1/ get stored in the outermost ampar)!
+In this particularly cursed but valid\footnote{It's valid in Linear Haskell, but the example would be rejected by \destcalculus{}, as \mintinline{haskellc}/d0/ would have age $[[↑^2]]$ when it is used as a variable in the innermost scope, which isn't allowed by rule \rref*{\CTyTerm\CSep\CId}.} excerpt, we hide an old destination \mintinline{haskellc}/d0/ inside the nest of a fresher one \mintinline{haskellc}/d2/ that we've just consumed. So we have an ampar \mintinline{haskellc}/(newAmpar `updWith` \d2 → d2 &fillLeaf () ; d0)/ whose right-hand side contains a destination \mintinline{haskellc}/d0/ which isn't its own, but comes from a previous scope. However, it is indistinguishable from an ampar whose right side contains only its own destinations, if we just look at the types. So we are allowed to use \mintinline{haskellc}/extendLeaf/ on the cursed ampar, which causes scope escape (as \mintinline{haskellc}/d1/ get stored in the outermost ampar)!
 
 There seems to be an inevitable friction between having a flexible \mintinline{haskellc}/updWith/ function, and having safe linear destinations, when we don't have a proper age system to ensure there is no cheating with scopes.
 
@@ -61,8 +61,8 @@ Also, even with this restriction on \mintinline{haskellc}/updWith/, we still can
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 fromAmpar' (
-  newAmpar @(t, Dest Ⴈ t) tok `updWith` \(d :: Dest Ⴈ (t, Dest Ⴈ t)) ->
-    case (d &fill @'(,)) of (dt :: Dest Ⴈ t, ddt :: Dest Ⴈ (Dest Ⴈ t)) ->
+  newAmpar @(t, Dest Ⴈ t) tok `updWith` \(d :: Dest Ⴈ (t, Dest Ⴈ t)) →
+    case (d &fill @'(,)) of (dt :: Dest Ⴈ t, ddt :: Dest Ⴈ (Dest Ⴈ t)) →
       ddt &fillLeaf dt
 )
 \end{minted}
@@ -172,7 +172,7 @@ extendUr ⩴ ∀ s t m. Ampar s (Dest m (Ur t)) ⊸ Ampar s (Dest ω t)
 }
 \end{unbreakable}
 
-Given that \mintinline{haskellc}/m/$\ottstype{\pmb{\cdot}}$\mintinline{haskellc}/ω/$ = $\mintinline{haskellc}/ω/ for any \mintinline{haskellc}/m/, the \mintinline{haskellc}/extendUr/ function can operate on an ampar with either a linear or unrestricted destination, but always return an ampar with an unrestricted destination.
+Given that \mintinline{haskellc}/m/$\ottstype{\pmb{\cdot}}$\mintinline{haskellc}/ω/$ = $\mintinline{haskellc}/ω/ for any \mintinline{haskellc}/m/, the \mintinline{haskellc}/extendUr/ function can operate on an ampar with either a linear or unrestricted destination, but always returns an ampar with an unrestricted destination.
 
 Using \mintinline{haskellc}/extendUr/ is the primary way, in this world, to obtain an initial unrestricted destination \mintinline{haskellc}/Dest ω t/, as \mintinline{haskellc}/newAmpar/ initially spawns an ampar with just a linear destination on the right.
 
@@ -190,21 +190,21 @@ In \mintinline{haskellc}/extendComp/, we need the destination in the parent ampa
 
 % STOPPED HERE%
 
-\section{Arbitrary type on the right-hand side of ampars for linear data}\label{sec:linear-lens}
+\section{Arbitrary type on the right-hand side of ampars storing linear data}\label{sec:linear-lens}
 
-Being limited to only one destination on the right-hand side of ampars if we want to be able to use \mintinline{haskellc}/extendLeaf/ is not ideal. Indeed, we stay at the same expressivity level as existing work.
+Being limited to only one destination on the right-hand side of ampars is not ideal. Indeed, we stay at the same expressivity level as existing work, and we loose part of the flexibility that made \destcalculus{} innovative in the first place.
 
-Going back to arbitrary types on the right hand-side of ampars, for instance to allow multiple destinations, as we did in \cref{chap:dest-calculus,chap:dps-haskell}, creates new challenges. Indeed, when we had only one destination for each ampar, we could operate on the destination through the ampar itself, with no choice to be made: there was only one destination that could be filled. If we have now an arbitrary type on the right-hand side of ampars, and we still want to operate on the destinations without giving direct access to them to the user (the motivations are still the same; work around the fact that \mintinline{haskellc}/updWith/ is now non-capturing, and also prevent scope escape/malicious interaction between sibling destinations), then we need a way for the user to select which destination inside the right-hand side of the ampar they want to operate on.
+Supporting multiple linear destinations on the right-hand side of ampars introduces significant complexity however. In the previous section, with only one destination per ampar, we avoided scope escape by requiring the user to interact with the ampar directly, rather than with the destination itself. This was straightforward, as there was no ambiguity ---the single destination was the only possible target of the \mintinline{haskellc}/extend/ operation. By contrast, if we now allow arbitrary types on the right-hand side, but still aim to restrict direct user access to destinations (for the same reasons as above; \mintinline{haskellc}/updWith/ is now non-capturing, and we want to prevent scope escape and malicious interaction between sibling destinations), we must introduce a mechanism for users to indicate which specific destination they intend to operate on.
 
-One idea for that is to ask the user for a linear lens. First, let's define what it is.
+One idea for that is to ask the user for a linear lens. First, let's define what a lens is.
 
 Lenses are a pattern for defining functional getters and setters that compose easily in an immutable functional programming language. A lens of type \mintinline{haskellc}/Lens t1 t2 u1 u2/ has two components (at least conceptually):
 \begin{itemize}
-    \item a getter for a value of type \mintinline{haskellc}/u1/ somewhere inside the structure of type \mintinline{haskellc}/t1/, which establishes the \emph{focus} of the lens;
-    \item a way to transform a structure of type \mintinline{haskellc}/t1/ into a structure of type \mintinline{haskellc}/t2/ by replacing the (focused) value of type \mintinline{haskellc}/u1/ by a value of type \mintinline{haskellc}/u2/.
+    \item a getter function to access a value of type \mintinline{haskellc}/u1/ somewhere inside a structure of type \mintinline{haskellc}/t1/, which establishes the \emph{focus} of the lens;
+    \item a function to transform a structure of type \mintinline{haskellc}/t1/ into a structure of type \mintinline{haskellc}/t2/ by replacing the focused value of type \mintinline{haskellc}/u1/ by a value of type \mintinline{haskellc}/u2/. In particular, when \mintinline{haskellc}/u1/$ = $\mintinline{haskellc}/u2/, then \mintinline{haskellc}/t1/$ = $\mintinline{haskellc}/t2/, and thus this function acts as an (immutable) setter for the focused value.
 \end{itemize}
 
-Although it isn't the most efficient and practical representation, non-linear lenses can be implemented by the following datatype:
+Although it isn't the most efficient representation, non-linear lenses can be implemented by the following datatype:
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[escapeinside=°°]{haskellc}
@@ -215,7 +215,24 @@ data LensNL t1 t2 u1 u2 = ¤LensNL
 \end{minted}
 }
 \end{unbreakable}
-For linear lenses, we are not allowed to use the \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ components separately; otherwise we could drop parts of the original structure of type \mintinline{haskellc}/t1/. So instead, we group the two functions into one:
+
+Given a data structure \mintinline{haskellc}/Triple/ with 3 fields, let's create a lens to focus on the first field:
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+data Triple s t u = ¤Triple { first ⩴ s, second ⩴ t, third ⩴ u }
+
+fstNL ⩴ LensNL (Triple s t u) (Triple s' t u) s s'
+fstNL = ¤LensNL { view ⩴ \(¤Triple x y z) → x
+                    , update ⩴ \(¤Triple x y z) → x' → ¤Triple x' y z }
+\end{minted}
+}
+\end{unbreakable}
+
+With a non-linear lens \mintinline{haskellc}/LensNL/ such as above, if we use the \mintinline{haskellc}/view/ component, then we consume a value of type \mintinline{haskellc}/t1/ but discard most of it except the part of type \mintinline{haskellc}/u1/. If we use the \mintinline{haskellc}/update/ component, it's the opposite; we discard the part of type \mintinline{haskellc}/u1/ but keep all the rest of the original \mintinline{haskellc}/t1/.
+
+For linear lenses, that we'll introduce now, we are not allowed to use the \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ components separately; otherwise we could drop parts of the original structure of type \mintinline{haskellc}/t1/, as we've just seen. So instead, we group the two functions \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ into a single one:
+
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[escapeinside=°°]{haskellc}
@@ -223,33 +240,25 @@ newtype Lens t1 t2 u1 u2 = ¤Lens (t1 ⊸ (u1, u2 ⊸ t2))
 \end{minted}
 }
 \end{unbreakable}
-With a linear lens of type \mintinline{haskellc}/Lens t1 t2 u1 u2/, we can split a structure of type \mintinline{haskellc}/t1/ into a pair of a value of type \mintinline{haskellc}/u1/ (the focus), and a closure of type \mintinline{haskellc}/u2 ⊸ t2/ that carries all the rest of the original \mintinline{haskellc}/t1/, and is ready to produce a structure of type \mintinline{haskellc}/t2/ if we give it a \mintinline{haskellc}/u2/. Both of these have to be consumed if we want to respect linearity.
 
-The simplest lens is the standard getter and setter, where \mintinline{haskellc}/t1 = t2/ and \mintinline{haskellc}/u1 = u2/, and thus, \mintinline{haskellc}/Lens t t u u/ becomes an alias for \mintinline{haskellc}/t ⊸ (u, u ⊸ t)/. There, the second element of the pair, of type \mintinline{haskellc}/u ⊸ t/, is really just a functional representation of a \mintinline{haskellc}/t/ missing a \mintinline{haskellc}/u/ to be complete! For example:
+With a linear lens of type \mintinline{haskellc}/Lens t1 t2 u1 u2/, we can split a structure of type \mintinline{haskellc}/t1/ into a pair of a value of type \mintinline{haskellc}/u1/ (the focus), and a closure of type \mintinline{haskellc}/u2 ⊸ t2/ that carries all the rest of the original \mintinline{haskellc}/t1/, and is ready to produce a structure of type \mintinline{haskellc}/t2/ if we give it a \mintinline{haskellc}/u2/. In other terms, this second component of type \mintinline{haskellc}/u2 ⊸ t2/ is really just a functional representation of a \mintinline{haskellc}/t2/ missing a \mintinline{haskellc}/u2/ to be complete. Both of the components of the pair have to be consumed if we want to respect linearity.
+
+It's fairly immediate to update our \mintinline{haskellc}/Triple/ exemple for linear lenses:
+
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-data Triple t1 t2 t3 = ¤Triple { first ⩴ t1, second ⩴ t2, third ⩴ t3 }
-
-fstMono ⩴ Lens (Triple t1 t2 t3) (Triple t1 t2 t3) t1 t1
-fstMono (¤Triple { first, second, third }) = ¤Lens (first, \newFirst -> Pair { newFirst, second, third })
-\end{minted}
-}
-\end{unbreakable}
-
-As we see, when we are operating on a polymorphic type such as \mintinline{haskellc}/Triple/, it is a bit silly to restrict our lens to the same type \mintinline{haskellc}/t1/ for both the original value at the focus, and the updated one. We gain much more flexibility by doing:
-\begin{unbreakable}
-{\figtextsize
-\begin{minted}[linenos,escapeinside=°°]{haskellc}
-fst ⩴ Lens (Triple t1 t2 t3) (Triple t4 t2 t3) t1 t4
-fst (¤Triple { first, second, third }) = ¤Lens (first, \newFirst -> Pair { newFirst, second, third })
+fst ⩴ Lens (Triple s t u) (Triple s' t u) s s'
+fst = ¤Lens (\(¤Triple x y z) → (x, \x' → ¤Triple x' y z))
+--                     captures x ↗          ↖ captures y and z
 \end{minted}
 }
 \end{unbreakable}
 
 \paragraph{Lenses to select destinations to operate on}
 
-With linear lenses, the user can communicate which destination they want to focus, and we gain a way to inject back the potential newly produced destinations at the right place on the right-hand side of the ampar:
+With linear lenses that we just introduced, the user can specify which destination to operate on when using the new family of \mintinline{haskellc}/extendFocused/ functions. We also get, at the same time, a way to reinsert the newly produced destinations (for fields of the new hollow constructor), or the byproduct of the filling operation, at the exact position that was previously occupied by the destination we just consumed, on the right-hand side of the ampar (thanks to the dual nature of lenses, acting both as a form of getter and setter):
+
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
@@ -257,18 +266,23 @@ extendFocused ⩴ ∀ lCtor u t1 t2 s m.
                 (OnlyLinear lCtor u) ⇒
                 Lens t1 t2 (Dest m u) (DestsOf lCtor m u) → Ampar s t1 ⊸ Ampar s t2
 
-extendWithPairOnFirst ⩴ Ampar s (Triple (Dest m (t11, t12)) t2 t3) ⊸ Ampar s (Triple (Dest m t11, Dest m t12) t2 t3)
-extendWithPairOnFirst ampar = ampar &(fst &extendFocused @'(,))
+extendWithNodeOnFst ⩴ Ampar s (Triple (Dest m (Tree t1)) t2 t3)
+                        ⊸ Ampar s (Triple (Dest m (Tree t1), Dest m t1, Dest m (Tree t1)) t2 t3)
+extendWithNodeOnFst ampar = ampar &(fst &extendFocused @'Node)
 \end{minted}
 }
 \end{unbreakable}
 
-As stated above, this technique gets even more useful for \mintinline{haskellc}/extendFocusedLeaf/, as we had no way previously to fill a linear destination contained in an arbitrary structure inside the right-hand side of an ampar. With \mintinline{haskellc}/extendFocusedLeaf/, it is now possible:
+Here, \mintinline{haskellc}/extendFocused/ takes a lens of type \mintinline{haskellc}/Lens t1 t2 (Dest m u) (DestsOf lCtor m u)/, i.e., a lens that focuses on a \mintinline{haskellc}/Dest m u/ inside the right-hand side of type \mintinline{haskellc}/t1/ of the ampar, and let us build a new right-hand side of type \mintinline{haskellc}/t2/ for the resulting ampar, where the destination of type \mintinline{haskellc}/Dest m u/ is replaced by a value of type \mintinline{haskellc}/DestsOf lCtor m u/ (that is, a tuple with the new potential destinations).
+
+The lens is taken as a non-linear argument by \mintinline{haskellc}/extendFocused/ (as indicated by the non-linear arrow \mintinline{haskellc}/→/), so that it cannot capture any linear resource. So the lens is forced to be just a purely structural operation that can be applied as many times as we want on various values of type \mintinline{haskellc}/t1/.
+
+Nonetheless, we could have implemented \mintinline{haskellc}/extendWithNodeOnFst/ in terms of \mintinline{haskellc}/updWith/ and \mintinline{haskellc}/fill @'Node/\footnote{As said previously, \mintinline{haskellc}/fill @'Ctor/ cannot cause scope escape and thus is safe to use for both linear and unrestricted destinations}. In fact, the added value of linear lenses becomes clear when designing the \mintinline{haskellc}/extendFocusedLeaf/ function, which for the first time ever (in the Haskell implementation), enables us to fill a linear destination with a value when the said destination is located within an arbitrary structure on the right-hand side of an ampar:
 
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-extendFocusedLeaf ⩴ ∀ u t1 t2 s m. u %m→ Lens t1 t2 (Dest m u) () ⊸ Ampar s t1 ⊸ Ampar s t2
+extendFocusedLeaf ⩴ ∀ u t1 t2 s m. u %m→ Lens t1 t2 (Dest m u) () → Ampar s t1 ⊸ Ampar s t2
 
 extendWithValOnFirst ⩴ t1 ⊸ Ampar s (Triple (Dest Ⴈ t1) t2 t3) ⊸ Ampar s (Triple () t2 t3)
 extendWithPairOnFirst x ampar = ampar &(fst &extendFocusedLeaf x)
@@ -276,13 +290,109 @@ extendWithPairOnFirst x ampar = ampar &(fst &extendFocusedLeaf x)
 }
 \end{unbreakable}
 
-\section{Limitations of this system}
+No scope escape can happen here. As \mintinline{haskellc}/updWith/ is non-capturing, we're sure that the destinations on the right-hand side of an ampar are the ones pointing to the holes on its left-hand side (eliminating the issue presented at the end of \cref{sec:dps-lin-challenges}). So like \mintinline{haskellc}/extendLeaf/, the \mintinline{haskellc}/extendFocusedLeaf/ function can only be used to fill a newer destination with existing (thus, older) values. Likewise, we cannot have sibling destinations interacting with one another. Which means, we've reached our goal for this chapter!
 
-The situation is still not perfectly satisfying, but we don't think that a single perfect balance between expressiveness and simplicity exists for DPS programming in Haskell, given the constraint of using an existing type system.
+For completeness, we finally define \mintinline{haskellc}/extendFocusedUr/ and \mintinline{haskellc}/extendFocusedComp/, following the same pattern as for \mintinline{haskellc}/extendFocusedLeaf/:
 
-Here, we can have at most two usable layers of nesting for destinations. But that's enough for most use-cases, and in particular, it let us implement the breadth-first traversal of binary trees using efficient queues!
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+extendFocusedUr ⩴ ∀ u t1 t2 s m.
+                       Lens t1 t2 (Dest m (Ur u)) (Dest ω u) → Ampar s t1 ⊸ Ampar s t2
+extendFocusedComp ⩴ ∀ u t1 t2 s u1 u2.
+                          Ampar u1 u2 ⊸ Lens t1 t2 (Dest Ⴈ u1) u2 → Ampar s t1 ⊸ Ampar s t2
+\end{minted}
+}
+\end{unbreakable}
 
-\section{Full API and breadth-first tree traversal, updated}
+Both of these functions are very similar to their respective one-hole versions \mintinline{haskellc}/extendUr/ and \mintinline{haskellc}/extendComp/. In \mintinline{haskellc}/extendFocusedUr/, we consume a destination of type \mintinline{haskellc}/Dest m (Ur u)/ and replace it with a destination of type \mintinline{haskellc}/Dest ω u/. In \mintinline{haskellc}/extendFocusedComp/, we consume a destination of type \mintinline{haskellc}/Dest Ⴈ u1/, to which we write the left-hand side (of type \mintinline{haskellc}/u1/) of the child ampar, and we replace this consumed destination with whatever was on the right-hand side (of type \mintinline{haskellc}/u2/) of the child ampar. The only difference, between the \mintinline{haskellc}/extend/ and the corresponding \mintinline{haskellc}/extendFocused/ functions, is that the filling operation in the latter happens at a focused location on the right-hand side of an ampar instead of being made on the single destination at top level as in the former.
+
+\section{Breadth-first tree traversal, updated, and final API}
+
+The family of \mintinline{haskellc}/extendFocused/ functions, based on linear lenses, addresses the core challenge of safely filling destinations with linear data. Although the resulting interface is not entirely satisfactory ---particularly from an ergonomic standpoint--- it still strikes a reasonable compromise between expressiveness and complexity of the interface (given the constraint of working with the existing Haskell type system).
+
+For instance, the DPS system supports two usable levels of nesting for destinations, allowing us to construct and use linear destinations of destinations (type \mintinline{haskellc}/Dest Ⴈ (Dest m t)/). This is in fact perfectly sufficient to implement non-trivial examples, such as the breadth-first traversal of a tree, but this time using the efficient, destination-based queues in Haskell! Let's revisit this example. For the final part of this chapter, we also take compact region considerations into account (this mostly consists in adding \mintinline{haskellc}/r/ and \mintinline{haskellc}/Region r/ all over the function's signatures). The code of efficient queues (and difference lists for linear data, that they are made of) is presented in \cref{table:eff-queue-lin}, and the code for updated breadth-first tree traversal is given in \cref{table:impl-bfs-tree-traversal-v2}.
+
+\begin{listing}[p]
+\figtextsize
+\begin{minted}[linenos]{haskellc}
+type DList r t = Ampar r [t] (Dest r 1 [t])
+
+newDList :: Region r ⇒ Token ⊸ DList r t
+newDList = newAmpar @[t]
+
+dListToList :: Region r ⇒ DList r t ⊸ [t]
+dListToList dlist = fromAmpar' (dlist &extendLeaf [])
+
+append :: Region r ⇒ DList r t ⊸ t ⊸ DList r t
+append dlist x = dlist &extend @'(:) @1 (¤MkSolo x)
+
+-------------------------------------------------------------------------------
+
+data EffQueue r t = ¤EffQueue [t] (DList r t)
+
+newEffQueue :: Region r ⇒ Token ⊸ EffQueue r t
+newEffQueue tok = ¤EffQueue [] (newDList tok)
+
+singleton :: Region r ⇒ Token ⊸ t ⊸ EffQueue r t
+singleton tok x = ¤EffQueue [x] (newDList tok)
+
+queueToList :: Region r ⇒ EffQueue r t ⊸ [t]
+queueToList (¤EffQueue front back) = front ++ dListToList back
+
+enqueue :: Region r ⇒ EffQueue r t ⊸ t ⊸ EffQueue r t
+enqueue (¤EffQueue front back) x = ¤EffQueue front (back `append` x)
+
+dequeue :: Region r ⇒ EffQueue r t ⊸ Maybe (t, EffQueue r t)
+dequeue (¤EffQueue front back) = case front of
+  [] → case tokenBesides back of (back, tok) → case (toList back) of
+    [] → drop tok ; Nothing
+    (x : xs) → Just (x, (¤EffQueue xs (newDList tok)))
+  (x : xs) → Just (x, (¤EffQueue xs back))
+\end{minted}
+\caption{Efficient queue for linear data}
+\label{table:eff-queue-lin}
+\end{listing}
+
+\begin{listing}[p]
+\figtextsize
+\begin{minted}[linenos]{haskellc}
+data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)
+
+relabelDPS ⩴ Region r ⇒ Token ⊸ Tree t → Tree Int
+relabelDPS tree = fst (mapAccumBFS (\st _ → (st + 1, st)) 1 tree)
+
+mapAccumBFS ⩴ ∀ r s t u. Region r ⇒ Token ⊸ (s → t → (s, u)) → s → Tree t → (Tree u, s)
+mapAccumBFS tok f s0 tree =
+  case fromAmpar (newAmpar @(Ur (Tree u)) tok `updWith` \du → go s0 (singleton (¤Ur tree, du &fillUr)))
+  of (¤Ur outTree, ¤Ur st) → (outTree, st)
+  where
+    go ⩴ s → EffQueue r (Ur (Tree t), Dest r ω (Tree u)) ⊸ Ur s
+    go st q = case dequeue q of
+      ¤Nothing → ¤Ur st
+      ¤Just ((utree, dtree), q') → case utree of
+        ¤Ur ¤Nil → dtree &fill @'Nil ; go st q'
+        ¤Ur (¤Node x tl tr) → case (dtree &fill @'Node) of
+          (dy, dtl, dtr) →
+            let q'' = q' `enqueue` (¤Ur tl, dtl) `enqueue` (¤Ur tr, dtr)
+                (st', y) = f st x
+              in dy &fillLeaf y ; go st' q''
+\end{minted}
+\caption{Breadth-first tree traversal revisited, with efficient queue for storing destinations}
+\label{table:impl-bfs-tree-traversal-v2}
+\end{listing}
+
+There is no real surprise in these implementations; they derive directly from the various iterations and improvements we've made over the different lists, efficient queues and breadth-first traversal examples all along this document.
+
+The only notable thing, maybe, it that we reuse the implementation of difference lists presented in \cref{sec:single-hole}, for which we don't need the flexibility brought by \mintinline{haskellc}/updWith/, and instead rely on the \mintinline{haskellc}/extend/ functions so that we can store linear data in the difference lists (very similarly to what is presented in \cite{minamide_functional_1998,lorenzen_searchtree_2024}).
+
+The implementation of efficient queues displayed here, on the other hand, is very similar to the one described ealier in \cref{ssec:efficient-queue,sec:api}, except that we are using \mintinline{haskellc}/Ampar/ instead of \mintinline{haskellc}/UAmpar/ to reflect the fact that we can now store linear elements inside the queue.
+
+\paragraph{Full, final API for DPS Haskell with linear destination support}
+
+In \cref{table:destination-api-regions-v2}, we sum up all the functions we've encountered in this chapter, that are needed to create an Haskell API as flexible as possible, while still being safe, to perform destination passing.
+
+At the time of writing the thesis, we have not implemented this whole API yet, but we envision that there shouldn't be any particular technical issue to do so. Indeed, the behavior of the \mintinline{haskellc}/extend/ operators derives directly from the corresponding \mintinline{haskellc}/fill/ functions, that already have a concrete implementation in \cite{linear_dest}.
 
 \begin{listing}[t]
 \figtextsize
@@ -328,86 +438,18 @@ extendComp ⩴ ∀ r s t u. Region r ⇒ Ampar r t u ⊸ Ampar r s (Dest r Ⴈ t
 -- with arbitrary type on the right; destination focused with a linear lens
 extendFocused ⩴ ∀ lCtor r u t1 t2 s m.
                     (Region r, OnlyLinear lCtor u) ⇒
-                    Lens t1 t2 (Dest r m u) (DestsOf lCtor r m u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
+                    Lens t1 t2 (Dest r m u) (DestsOf lCtor r m u) → Ampar r s t1 ⊸ Ampar r s t2
 extendFocusedUr ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
-                       Lens t1 t2 (Dest r m (Ur u)) (Dest r ω u) ⊸ Ampar r s t1 ⊸ Ampar r s t2
+                       Lens t1 t2 (Dest r m (Ur u)) (Dest r ω u) → Ampar r s t1 ⊸ Ampar r s t2
 extendFocusedLeaf ⩴ ∀ r u t1 t2 s m. (Region r) ⇒
-                          u %m→ Lens t1 t2 (Dest r m u) () ⊸ Ampar r s t1 ⊸ Ampar r s t2
+                          u %m→ Lens t1 t2 (Dest r m u) () → Ampar r s t1 ⊸ Ampar r s t2
 extendFocusedComp ⩴ ∀ r u t1 t2 s u1 u2. (Region r) ⇒
-                          Ampar r u1 u2 ⊸ Lens t1 t2 (Dest r Ⴈ u1) u2 ⊸ Ampar r s t1 ⊸ Ampar r s t2
+                          Ampar r u1 u2 ⊸ Lens t1 t2 (Dest r Ⴈ u1) u2 → Ampar r s t1 ⊸ Ampar r s t2
 
 \end{minted}
-\caption{Destination-passing API allowing linear destinations}
+\caption{Destination-passing API for Haskell with support for linear destinations}
 \label{table:destination-api-regions-v2}
 \end{listing}
-
-\begin{listing}[p]
-\figtextsize
-\begin{minted}[linenos]{haskellc}
-type DList r t = Ampar r [t] (Dest r 1 [t])
-
-newDList :: Region r ⇒ Token ⊸ DList r t
-newDList = newAmpar @[t]
-
-dListToList :: Region r ⇒ DList r t ⊸ [t]
-dListToList dlist = fromAmpar' (dlist &extendLeaf [])
-
-append :: Region r ⇒ DList r t ⊸ t ⊸ DList r t
-append dlist x = dlist &extend @'(:) @1 (¤MkSolo x)
-
--------------------------------------------------------------------------------
-
-data EffQueue r t = ¤EffQueue [t] (DList r t)
-
-newEffQueue :: Region r ⇒ Token ⊸ EffQueue r t
-newEffQueue tok = ¤EffQueue [] (newDList tok)
-
-singleton :: Region r ⇒ Token ⊸ t ⊸ EffQueue r t
-singleton tok x = ¤EffQueue [x] (newDList tok)
-
-queueToList :: Region r ⇒ EffQueue r t ⊸ [t]
-queueToList (¤EffQueue front back) = front ++ dListToList back
-
-enqueue :: Region r ⇒ EffQueue r t ⊸ t ⊸ EffQueue r t
-enqueue (¤EffQueue front back) x = ¤EffQueue front (back `append` x)
-
-dequeue :: Region r ⇒ EffQueue r t ⊸ Maybe (t, EffQueue r t)
-dequeue (¤EffQueue front back) = case front of
-  [] -> case tokenBesides back of (back, tok) -> case (toList back) of
-    [] -> drop tok ; Nothing
-    (x : xs) -> Just (x, (¤EffQueue xs (newDList tok)))
-  (x : xs) -> Just (x, (¤EffQueue xs back))
-
--------------------------------------------------------------------------------
-
-data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)
-
-relabelDPS ⩴ Region r ⇒ Token ⊸ Tree t → Tree Int
-relabelDPS tree = fst (mapAccumBFS (\st _ → (st + 1, st)) 1 tree)
-
-mapAccumBFS ⩴ ∀ r s t u. Region r ⇒ Token ⊸ (s → t → (s, u)) → s → Tree t → (Tree u, s)
-mapAccumBFS tok f s0 tree =
-  case fromAmpar (newAmpar @(Ur (Tree u)) tok `updWith` \du → go s0 (singleton (¤Ur tree, du &fillUr)))
-  of (¤Ur outTree, ¤Ur st) → (outTree, st)
-  where
-    go ⩴ s → EffQueue r (Ur (Tree t), Dest r ω (Tree u)) ⊸ Ur s
-    go st q = case dequeue q of
-      ¤Nothing → ¤Ur st
-      ¤Just ((utree, dtree), q') → case utree of
-        ¤Ur ¤Nil → dtree &fill @'Nil ; go st q'
-        ¤Ur (¤Node x tl tr) → case (dtree &fill @'Node) of
-          (dy, dtl, dtr) →
-            let q'' = q' `enqueue` (¤Ur tl, dtl) `enqueue` (¤Ur tr, dtr)
-                (st', y) = f st x
-              in dy &fillLeaf y ; go st' q''
-\end{minted}
-\caption{Revisit of breadth-first tree traversal, with efficient queue storing destinations, in DPS Haskell}
-\label{table:impl-bfs-tree-traversal-v2}
-\end{listing}
-
-The implementation of difference lists here is very different from the one from \cref{ssec:dpshaskell-dlist}, because we are no longer using the full flexibility of destinations and \mintinline{haskellc}/updWith/, and instead, use primitives very similar in behavior to the ones from \citet{minamide_functional_1998,lorenzen_searchtree_2024}.
-
-On the other hand, the implementation of efficient queues displayed here is very similar to the one described in \cref{sec:api}, except that we are using \mintinline{haskellc}/Ampar/ instead of \mintinline{haskellc}/UAmpar/ so we can store linear elements inside the queue (but this almost doesn't affect the implementation).
 
 % TODO: On perd en généralité car on n'a plus fillComp
 
@@ -419,7 +461,8 @@ On the other hand, the implementation of efficient queues displayed here is very
 
 % Sinon on peut faire :
 
-% ampar1 `updWith` \d1 ->
-% 	ampar2 `updWith` \d2 ->
-% 		(ampar3 `updWith` \d3 -> (d1, d3)) & (fst & extendFocusedLeaf d2)
+% ampar1 `updWith` \d1 →
+% 	ampar2 `updWith` \d2 →
+% 		(ampar3 `updWith` \d3 → (d1, d3)) & (fst & extendFocusedLeaf d2)
 
+\section{Conclusion}

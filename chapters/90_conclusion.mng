@@ -40,14 +40,6 @@ Nevertheless, we still retain the main restrictions that \citet{minamide_functio
 
 The ability to manipulate destinations, and in particular, store them, does come at a cost though: the system needs this additional notion of ages to ensure that destinations are used soundly. On the other hand, our system is strictly more general, in \citet{minamide_functional_1998}'s system can be embedded in \destcalculus{}, and if one stays in this fragment, we're never confronted with ages.
 
-\section{Destination-passing style programming: a Haskell implementation}\label{ssec:dps-haskell}
-
-\citet{bagrel_destination-passing_2024} proposes a system much like ours: it has a destination type, and a \emph{par}-like construct (that they call $\ottstype{Incomplete}$), where only the right-hand side can be modified; together these elements give extra expressiveness to the language compared to~\cite{minamide_functional_1998}.
-
-In their system, $[[d ◀ t]]$ requires $[[t]]$ to be unrestricted, while in \destcalculus{}, $[[t]]$ can be linear. The consequence is that in~\cite{bagrel_destination-passing_2024}, destinations can be stored in data structures but not in data structures with holes; so in a breadth-first search algorithm like in~\cref{sec:bft}, they have to build the queue using normal constructors, and cannot use destination-filling primitives. Therefore both normal constructors and DPS primitives must coexist in their work, while in \destcalculus{}, only DPS primitives are required to bootstrap the system, as we later derive normal constructors from them. In exchange, they don't need a system of ages to make their system safe; just linearity is enough.
-
-A more profound difference between their work and ours is that they describe a practical implementation of destination-passing style for an existing functional language, while we present a slightly more general theoretical framework that is meant to justify safety of DPS implementations (such as \cite{bagrel_destination-passing_2024} itself), so goals are quite different.
-
 \section{Semi-axiomatic sequent calculus}\label{ssec:sax}
 
 In~\cite{deyoung_sax_2020} constructors return to a destination rather than allocating memory. It is very unlike the other systems described in this section in that it's completely founded in the Curry-Howard isomorphism. Specifically it gives an interpretation of a sequent calculus which mixes Gentzen-style deduction rules and Hilbert-style axioms. As a consequence, the \emph{par} connective is completely symmetric, and, unlike our $[[⌊ T ⌋ ¹ν]]$ type, their dualization connective is involutive.
@@ -74,3 +66,7 @@ However, such a simplified system would be a bit too weak to track the scope of 
 \chapter{Conclusion}\label{chap:global-conclusion}
 
 TBD.
+
+Pistes: DPS en dehors des compacts regions
+
+utiliser lambda d pour prouver formellement la safety du système haskell
