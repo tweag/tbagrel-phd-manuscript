@@ -1,5 +1,4 @@
-\DontNumberThisInToc
-\SpecialSection{Introduction}\label{chap:global-intro}
+\chapter*{Introduction}\addcontentsline{toc}{chapter}{Introduction}\label{chap:global-intro}
 
 \section{Memory management: a core design axis for programming languages}
 

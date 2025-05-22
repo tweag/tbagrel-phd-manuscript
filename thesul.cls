@@ -771,7 +771,7 @@
         \refstepcounter{#1}%
         \typeout{\@chapapp\space\thechapter.}%
         \addcontentsline{toc}{chapter}%
-             {\protect\numberline{\@chapter@title\thechapter}#2}%
+             {\protect\numberline{\@chapter@title\thechapter~{}~--~}#2}%
     \else
         \addcontentsline{toc}{chapter}{#2}
     \fi
@@ -825,10 +825,10 @@
     \@division@inc@hook
     \@spart@hook{#1}%
     \ifnum \c@secnumdepth >-2\relax
-      \addcontentsline{toc}{starpart}{%\protect\numberline{}
+      \addcontentsline{toc}{part}{%\protect\numberline{}
                                       #1}%
     \else
-      \addcontentsline{toc}{starpart}{#1}%
+      \addcontentsline{toc}{part}{#1}%
     \fi
     \@fr@mew@rning{part}{part}%
     \@number@w@rning{part}%
@@ -846,10 +846,10 @@
 \newcommand\DontWriteStarChaptersInToc{\global\@st@rch@ptersintocfalse}
 \newcommand\@in@toc@contents[1]{%
    \ifnum \c@secnumdepth >\m@ne
-       \addcontentsline{toc}{tulstarchapter}{%\protect\numberline{}
+       \addcontentsline{toc}{chapter}{%\protect\numberline{}
                                           #1}%
    \else
-       \addcontentsline{toc}{tulstarchapter}{#1}
+       \addcontentsline{toc}{chapter}{#1}
    \fi
  }%
 \renewcommand\@schapter[1]{\@generic@schapter{chapter}[#1]}
@@ -867,17 +867,17 @@
                       the entry was going
                       to be put in the toc.\MessageBreak
                       You can safely remove it,}%
-                 \@in@toc@contents{#2}%
+                 %\@in@toc@contents{#2}%
             \else % \DontWriteThisInToc
             \fi
         \else
             \if@intoc  % \WriteThisInToc
-                 \@in@toc@contents{#2}%
+                 %\@in@toc@contents{#2}%
             \fi
         \fi
     \else
         \if@st@rch@ptersintoc
-            \@in@toc@contents{#2}%
+            %\@in@toc@contents{#2}%
         \fi
     \fi
     \@fr@mew@rning{chapter}{#1}%
@@ -893,6 +893,7 @@
     \setcounter{equation}{0}
     \setcounter{figure}{0}
     \setcounter{table}{0}
+    \setcounter{listing}{0}
     \if@twocolumn
         \if@notop@page
            \@makeschapterhead{#2}%
@@ -1018,7 +1019,7 @@
 \newcommand{\ChapterPageStyle}[1]{\renewcommand\@chapter@ps{#1}}
 \newcommand\@part@ps{plain}
 \newcommand{\PartPageStyle}[1]{\renewcommand\@part@ps{#1}}
-\newcommand{\@empty@ps@cmd}{}
+\newcommand{\@empty@ps@cmd}{\thispagestyle{empty}}
 \newcommand{\EmptyPageStyle}[1]{%
       \renewcommand\@empty@ps@cmd{\thispagestyle{#1}}}
 \newcommand{\EmptyNewPage}{\newpage\hbox{}\@empty@ps@cmd\newpage}
@@ -1161,14 +1162,14 @@
      \pagestyle{\abs@ps}
      \markboth{}{}
      \def\@abstr@ct@beginning##1##2{%
-         \section*{\@title@lignment ##1}
+         \@makeschapterhead{\@title@lignment ##1}
          \@abstract@hook{##1}%
          \if@tocswitch
             \DontFrameThisInToc
             \if@classic@section
-               \addcontentsline{toc}{tulstarchapter}{##1}
+               \addcontentsline{toc}{chapter}{##1}
             \else
-               \addcontentsline{toc}{spsection}{##1}
+               \addcontentsline{toc}{chapter}{##1}
             \fi
          \fi
          \reset@numbertocswitch
@@ -1223,15 +1224,15 @@
 \newcommand{\@acknowledgment@hook}{}
 \newenvironment{ThesisAcknowledgments}
     {\@newdoublepage
-     \section*{\@title@lignment\AcknowledgmentName}
+     \chapter*{\@title@lignment\AcknowledgmentName}
      \@acknowledgment@hook
      \@mkboth{}{}%
      \if@tocswitch
         \if@classic@section
            \global\@classic@sectionfalse
-           \addcontentsline{toc}{tulstarchapter}{\AcknowledgmentName}
+           \addcontentsline{toc}{chapter}{\AcknowledgmentName}
         \else
-           \addcontentsline{toc}{spsection}{\AcknowledgmentName}
+           \addcontentsline{toc}{chapter}{\AcknowledgmentName}
         \fi
      \fi
      \reset@numbertocswitch
@@ -1239,13 +1240,13 @@
      \global\@tocswitchfalse
     }
     {\par\@newdoublepage}
-\newcommand{\@dedication@hook}{}
+\newcommand{\@dedication@hook}{\thispagestyle{empty}}
 \newenvironment{ThesisDedication}
     {\@newdoublepage
      \@dedication@hook
      \@mkboth{}{}
      \vglue0pt plus.5fil
-     \fontfamily{\sfdefault}\fontseries{m}\fontshape{sl}\selectfont
+     \fontfamily{\rmdefault}\fontseries{m}\fontshape{sl}\selectfont
      \begin{flushright}
      }
     {\end{flushright}
@@ -1344,10 +1345,10 @@
   \@spsection@hook{#1}{#2}%
     \if@tocswitch
        \if@intoc
-          \addcontentsline{toc}{spsection}{#1}%
+          %\addcontentsline{toc}{chapter}{#1}%
        \fi
     \else
-       \addcontentsline{toc}{spsection}{#1}%
+       %\addcontentsline{toc}{chapter}{#1}%
     \fi
     \reset@numbertocswitch
     \reset@frame@switch
@@ -1393,7 +1394,7 @@
     \edef\baselinestretch{\sav@baselinestretch}\small\normalsize
     \if@restonecol\twocolumn\fi
     }
-\newcommand\@tocstretch{1.3}
+\newcommand\@tocstretch{1}
 \newcommand\SetTocSpacing[1]{\renewcommand\@tocstretch{#1}}
 \newcommand{\@toc@line}{\hbox to\hsize{\hbox to.25\hsize{}%
                                        \hrulefill
@@ -1574,7 +1575,7 @@
     \def\@chapapp{\appendixname}\def\thechapter{\Alph{annex}}%
     \cleardoublepage
     \@tulann@hook{#1}%
-    \addcontentsline{toc}{tulstarchapter}{\protect#1}%
+    \addcontentsline{toc}{chapter}{\protect#1}%
     \@tulann@lasthook{#1}%
     }%
 \newcommand{\ThesisDraft}{%

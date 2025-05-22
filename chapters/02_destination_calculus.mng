@@ -188,7 +188,7 @@ The problem is that in the functional implementation, each concatenation still a
 
 % Piggyback
 
-\sidebysidecodefig{\caption{Difference list and queue implementation in equirecursive \destcalculus{}}\label{fig:impl-dlist-queue}}{t}{0.49}{
+\sidebysidecodefig{\caption{Difference list and queue implementation in equirecursive \destcalculus{}}\label{fig:impl-dlist-queue}}{t}{0.47}{
 \newtype{[[DList T]]}{[[(List T) ⧔ ⌊ List T ⌋ ¹ν]]}
 \newoperatorb
   {\ottkw{append}}{[[DList T ¹ν → T ¹ν → DList T]]}
@@ -332,68 +332,19 @@ mapAccumBFS (ˢλ st ω∞ ⟼ ˢλ un ¹ν ⟼ un ; ˢ(ˢᴇ ω∞ (succ st), s
 
 \section{Type system}\label{sec:syntax-type-system}
 
-\begin{ottfig}{\caption{Terms, types and modes of \destcalculus{}}\label{fig:grammar}\label{fig:sterm}\label{fig:mul-age-tables}}
+\begin{ottfig}{\caption{Terms, types and modes of \destcalculus{}}\label{fig:grammar}\label{fig:mul-age-tables}}\bgroup
 
 \begin{minipage}{\linewidth}\figtextsize\textit{Core grammar of terms:}\end{minipage}
 
 \smallskip
 
-\begin{minipage}{\linewidth}\codehere{\setlength{\arraycolsep}{0.6ex}\!\begin{array}{rrl}
+\begin{minipage}{\linewidth}\[{\setlength{\arraycolsep}{0.6ex}\begin{array}{rrl}
 [[t]], [[u]] &\grammdef& [[x]] \grammsep [[t' t]] \grammsep [[t ; t']] \\
              &|\,& [[ t ►case m { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[t ►case m ( x1 , x2 ) ⟼ u]] \grammsep [[t ►case m ᴇ n x ⟼ u]] \\
              &|\,& [[t ►map x ⟼ t']] \grammsep [[ to⧔ t ]] \grammsep [[ from⧔ t ]] \grammsep [[ alloc ]] \\
              &|\,& [[ t ⨞ () ]] \grammsep [[ t ⨞ Inl ]] \grammsep [[t ⨞ Inr]] \grammsep [[t ⨞ (,)]] \grammsep [[t ⨞ ᴇ m]] \grammsep [[t ⨞ ( λ x m ⟼ u )]] \grammsep [[t ⨞· t']] \grammsep [[t ◀ t']]
-\end{array}}\end{minipage}
+\end{array}}\]\end{minipage}
 
-\bigskip
-
-\begin{minipage}{\linewidth}\figtextsize\textit{Syntactic sugar for terms:}\end{minipage}
-
-\smallskip
-
-\begin{minipage}{\linewidth}\sidebysidecodehere{t}{0.46}{
-[[ˢInl t]] \btriangleq \!\!\!\begin{array}[t]{l}[[
-from⧔' (alloc ►map d ⟼⮒
-‥‥‥‥‥‥d ⨞ Inl ◀ t)
-]]\end{array}\\[\interdefskip]
-[[ˢInr t]] \btriangleq \!\!\!\begin{array}[t]{l}[[
-from⧔' (alloc ►map d ⟼⮒
-‥‥‥‥‥‥d ⨞ Inr ◀ t)
-]]\end{array}\\[\interdefskip]
-[[ˢᴇ m t]] \btriangleq \!\!\!\begin{array}[t]{l}[[
-from⧔' (alloc ►map d ⟼⮒
-‥‥‥‥‥‥d ⨞ ᴇ m ◀ t)
-]]\end{array}\\[\interdefskip]
-[[ˢλ x m ⟼ u]] \btriangleq \!\!\!\begin{array}[t]{l}[[
-from⧔' (alloc ►map d ⟼⮒
-‥‥‥‥‥‥d ⨞ ( λ x m ⟼ u ))
-]]\end{array}
-}{
-[[from⧔' t]] \btriangleq \\
-\myspace{1}\!\!\!\begin{array}[t]{l}[[
-(from⧔ (t ►map un ⟼ un ; ᴇ ¹∞ () )) ►case ¹ν⮒
-‥‥( st , ex ) ⟼ ༼ex ►case ¹ν⮒
-‥‥‥‥ᴇ ¹∞ un ⟼ un ; st༽
-]]\end{array}\\[\interdefskip]
-[[ˢ()]] \btriangleq \!\!\!\begin{array}[t]{l}[[
-from⧔' (alloc ►map d ⟼ d ⨞ () )
-]]\end{array}\\[\interdefskip]
-[[ˢ( t1 , t2 )]] \btriangleq \!\!\!\begin{array}[t]{l}[[
-from⧔' (alloc ►map d ⟼ (d ⨞ (,)) ►case ¹ν⮒
-‥‥‥‥‥‥( d1 , d2 ) ⟼ d1 ◀ t1 ; d2 ◀ t2)
-]]\end{array}
-}\end{minipage}
-
-\bgroup\renewcommand{\ottdruleTyXXtermXXVal}{}
-
-\renewcommand\ottaltinferrule[4]{
-  \inferrule*[narrower=0.3,lab=#1,#2]
-    {#3}
-    {#4}
-}
-
-\bigskip
-\hrule
 \bigskip
 
 \begin{minipage}{\linewidth}\figtextsize\textit{Grammar of types, modes and contexts:}\end{minipage}
@@ -495,7 +446,7 @@ $[[(p a) + (p' a')]] \btriangleq [[(p + p') (a + a')]]$
   $[[n]]$ &$\cdot$& $[[{}]]$ & $\btriangleq$ & $[[{}]]$\\
   $[[n]]$ &$\cdot$& $[[({ x : m T },P)]]$ & $\btriangleq$ & $[[({ x : n · m T }),n·P]]$\\
 \end{tabular}
-\hfill\hspace*{0.02cm}
+\hfill\hspace*{-1cm}
 \vrule width 0.5pt % Vertical rule of 1pt width
 \hfill
 \begin{tabular}[c]{rclcc@{\qquad}l}
@@ -509,13 +460,50 @@ $[[(p a) + (p' a')]] \btriangleq [[(p + p') (a + a')]]$
 \egroup
 \end{ottfig}
 
+\begin{codefig}{\caption{Syntactic sugar definitions for terms}\label{fig:sterm}}
+\begin{minipage}{\linewidth}
+\sidebysidecodehere{t}{0.42}{
+[[ˢInl t]] \btriangleq \!\!\!\begin{array}[t]{l}[[
+from⧔' (alloc ►map d ⟼⮒
+‥‥‥‥‥‥d ⨞ Inl ◀ t)
+]]\end{array}\\[\interdefskip]
+[[ˢInr t]] \btriangleq \!\!\!\begin{array}[t]{l}[[
+from⧔' (alloc ►map d ⟼⮒
+‥‥‥‥‥‥d ⨞ Inr ◀ t)
+]]\end{array}\\[\interdefskip]
+[[ˢᴇ m t]] \btriangleq \!\!\!\begin{array}[t]{l}[[
+from⧔' (alloc ►map d ⟼⮒
+‥‥‥‥‥‥d ⨞ ᴇ m ◀ t)
+]]\end{array}\\[\interdefskip]
+[[ˢλ x m ⟼ u]] \btriangleq \!\!\!\begin{array}[t]{l}[[
+from⧔' (alloc ►map d ⟼⮒
+‥‥‥‥‥‥d ⨞ ( λ x m ⟼ u ))
+]]\end{array}
+}{
+[[from⧔' t]] \btriangleq \\
+\myspace{1}\!\!\!\begin{array}[t]{l}[[
+(from⧔ (t ►map un ⟼ un ; ᴇ ¹∞ () )) ►case ¹ν⮒
+‥‥( st , ex ) ⟼ ༼ex ►case ¹ν⮒
+‥‥‥‥ᴇ ¹∞ un ⟼ un ; st༽
+]]\end{array}\\[\interdefskip]
+[[ˢ()]] \btriangleq \!\!\!\begin{array}[t]{l}[[
+from⧔' (alloc ►map d ⟼ d ⨞ () )
+]]\end{array}\\[\interdefskip]
+[[ˢ( t1 , t2 )]] \btriangleq \!\!\!\begin{array}[t]{l}[[
+from⧔' (alloc ►map d ⟼ (d ⨞ (,)) ►case ¹ν⮒
+‥‥‥‥‥‥( d1 , d2 ) ⟼ d1 ◀ t1 ; d2 ◀ t2)
+]]\end{array}
+}
+\end{minipage}
+\end{codefig}
+
 \destcalculus{} is a simply typed $\lambda$-calculus with unit ($[[①]]$), product ($\ottstype{\otimes}$) and sum ($\ottstype{\oplus}$) types, inspired from \CLdm{} described in \cref{chap:preli}. It also features a mode-polymorphic function arrow $_{[[m]]}\!\ottstype{\multimap}$. Its most distinctive features however are the destination $[[⌊ T ⌋ m]]$ and ampar $[[S ⧔ T]]$ types which we've introduced in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}. Don't pay too much attention to the mode annotation on the destination type; so far it was hidden in the examples because we only considered linear destinations.
 
 To ensure that destinations are used soundly, we need both to enforce the linearity of destinations but also to prevent destinations from escaping their scope, as discussed in \cref{sec:scope-escape-dests}. To that effect, \destcalculus{} tracks the \emph{age} of destinations, that is how many nested scopes have been open between the current expression and the scope from which a destination originates. We'll see in \cref{ssec:ty-term} that scopes are introduced by the $[[t ►map x ⟼ t']]$ construct. For instance, if we have a term $[[t1 ►map x1 ⟼ t2 ►map x2 ⟼ t3 ►map x3 ⟼ x1]]$, then we say that the innermost occurrence of $[[x1]]$ has age $[[↑]]^{\ottsmodee{2}}$ because two nested $\ottkw{upd}_{\ottkw{\ltimes} }$ separate the definition and use site of $[[x1]]$.
 
 For \destcalculus{}, we take the same modal approach as for \CLdm{}, but we enrich our mode ringoid to have an \emph{age} axis. Thanks to the algebraic nature of the modal approach, for most typing rules, we'll be able to reuse those of \CLdm{} without any modification as just the elements of the ringoid change, not the properties nor the structure of the ringoid.
 
-The syntax of \destcalculus{} terms is presented in~\cref{fig:grammar}, including the syntactic sugar that we used in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft}.
+The syntax of \destcalculus{} terms is presented in~\cref{fig:grammar}, and the syntactic sugar that we used in \cref{sec:working-with-dests,sec:scope-escape-dests,sec:bft} is presented in \cref{fig:sterm}.
 
 \subsection{Modes and the age ringoid}\label{ssec:age-control}
 
@@ -776,32 +764,30 @@ But first, we need a class of runtime values (we'll often just say \emph{values}
 \subsection{Runtime values and new typing context forms}\label{ssec:runtime-values}
 
 \begin{ottfig}{\caption{Runtime values, new typing context forms, and operators}\label{fig:grammar-val}}
-\sidebysidecodehere{c}{0.39}{\begin{minipage}{\linewidth}
 \begin{minipage}{\linewidth}\figtextsize\textit{Grammar extended with values:}\end{minipage}
 
 \bigskip
 
-$\setlength{\arraycolsep}{0.6ex}\newlength\myskip\setlength{\myskip}{2.38ex}\!\begin{array}{rrl}
+\[\setlength{\arraycolsep}{0.6ex}\newlength\myskip\setlength{\myskip}{2.38ex}\begin{array}{rrl}
   [[t]], [[u]] &\grammdef& \ldots \grammsep [[v]] \\
   \\
        [[v]] &\grammdef& [[+ h]] \hspace*{\widthof{$[[H ⟨ v2 ❟ v1 ⟩]]$}-\widthof{$[[+ h]]$}}\quad\quad\textit{(hole)} \\
              &|\,& [[- h]] \hspace*{\widthof{$[[H ⟨ v2 ❟ v1 ⟩]]$}-\widthof{$[[- h]]$}}\quad\quad\textit{(destination)} \\
              &|\,& [[H ⟨ v2 ❟ v1 ⟩]] \quad\quad\textit{(ampar value)} \\
-             &|\,& [[()]] \grammsep [[ᵛλ x m ⟼ u]] \grammsep [[Inl v]] \\
-             &|\,& [[Inr v]] \grammsep [[ᴇ m v]] \grammsep [[( v1 , v2 )]] \\
-\end{array}$
+             &|\,& [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[ᴇ m v]] \grammsep [[( v1 , v2 )]] \grammsep [[ᵛλ x m ⟼ u]] \\
+\end{array}\]
 
-\end{minipage}}{\begin{minipage}{\linewidth}
+\bigskip
 
 \begin{minipage}{\linewidth}\figtextsize\textit{Extended grammar of typing contexts:}\end{minipage}
 
 \smallskip
 
-$\setlength{\myskip}{2.38ex}\!\begin{array}{rrlcccc}
+\[\setlength{\myskip}{2.38ex}\begin{array}{rrlcccc}
 [[D]] &\grammdef& [[{ }]] \grammsep [[{ - h : m ⌊ T ⌋ n }]] &|& [[D1 , D2]] \\% &|& [[D1 + D2]] &|& [[m · D]] \\
 [[P]] &\grammdef& [[{ }]] \grammsep [[{ - h : m ⌊ T ⌋ n }]] \grammsep [[{ x : m T }]] &|& [[P1 , P2]] \\% &|& [[P1 + P2]] &|& [[m · P]] \\
 \hskip \myskip [[G]] &\grammdef& [[{ }]] \grammsep [[{ - h : m ⌊ T ⌋ n }]] \grammsep [[{ + h : T n }]] &|& [[G1 , G2]] % &|& [[G1 + G2]] &|& [[m · G]]
-\end{array}$
+\end{array}\]
 
 \bigskip
 
@@ -811,49 +797,50 @@ $\setlength{\myskip}{2.38ex}\!\begin{array}{rrlcccc}
 
 {\figtextsize
 \bgroup
-\renewcommand\tabcolsep{2pt}
+\renewcommand\arraycolsep{2pt}
 %\hfill
-% \begin{tabular}[c]{rclcc@{\quad}l}
+\[\begin{array}[c]{rclcc@{\quad}ll}
+  [[n']] &\cdot& [[({ + h : T n },G)]] & \btriangleq & [[({ + h : T n' · n }),n'·G]]\\
+  [[n']] &\cdot& [[({ - h : m ⌊ T ⌋ n },P)]] & \btriangleq & [[({ - h : n' · m ⌊ T ⌋ n }),n'·P]]&& \phantom{.}^{\dagger}\\
+  \\
+  [[({ + h : T n }, G1)]] &+& [[G2]] & \btriangleq & [[{ + h : T n },(G1+G2)]] & \textrm{if $[[h]]\notin[[G2]]$}\\
+  [[({ + h : T n }, G1)]] &+& [[({ + h : T n' }, G2)]] & \btriangleq & [[{ + h : T n+n' }, (G1+G2)]]\\
+  [[({ - h : m ⌊ T ⌋ n }, P1)]] &+& [[P2]] & \btriangleq & [[{ - h : m ⌊ T ⌋ n },(P1+P2)]] & \textrm{if $[[h]]\notin[[P2]]$}&\phantom{.}^{\dagger}\\
+  [[({ - h : m ⌊ T ⌋ n }, P1)]] &+& [[({ - h : m' ⌊ T ⌋ n }, P2)]] & \btriangleq & [[{ - h : m+m' ⌊ T ⌋ n }, (P1+P2)]] &&\phantom{.}^{\dagger}\\
+  \\
+    &&[[-⁻¹({})]] &\btriangleq&  [[{}]]\\
+  &&[[-⁻¹({ - h : ¹ν ⌊ T ⌋ n }, D)]] &\btriangleq& [[({ + h : T n }), -⁻¹(D)]] \\
+\end{array}\]
+% \begin{tabular}[c]{rclcc}
 %   $[[n']]$ &$\cdot$& $[[({ + h : T n },G)]]$ & $\btriangleq$ & $[[({ + h : T n' · n }),n'·G]]$\\
-%   $[[n']]$ &$\cdot$& $[[({ - h : m ⌊ T ⌋ n },P)]]$ & $\btriangleq$ & $[[({ - h : n' · m ⌊ T ⌋ n }),n'·P]]$& $\phantom{.}^{\dagger}$\\
-%   \\
+%   $[[n']]$ &$\cdot$& $[[({ - h : m ⌊ T ⌋ n },P)]]$ & $\btriangleq$ & $[[({ - h : n' · m ⌊ T ⌋ n }),n'·P]]$ ~~$\phantom{.}^{\dagger}$\\
+% \end{tabular}
+
+% \bigskip
+
+% \begin{tabular}[c]{rclcc@{\quad}l}
 %   $[[({ + h : T n }, G1)]]$ &$+$& $[[G2]]$ & $\btriangleq$ & $[[{ + h : T n },(G1+G2)]]$ & \textrm{if $[[h]]\notin[[G2]]$}\\
 %   $[[({ + h : T n }, G1)]]$ &$+$& $[[({ + h : T n' }, G2)]]$ & $\btriangleq$ & $[[{ + h : T n+n' }, (G1+G2)]]$\\
-%   $[[({ - h : m ⌊ T ⌋ n }, P1)]]$ &$+$& $[[P2]]$ & $\btriangleq$ & $[[{ - h : m ⌊ T ⌋ n },(P1+P2)]]$ & \textrm{if $[[h]]\notin[[P2]]$}~~$\phantom{.}^{\dagger}$\\
-%   $[[({ - h : m ⌊ T ⌋ n }, P1)]]$ &$+$& $[[({ - h : m' ⌊ T ⌋ n }, P2)]]$ & $\btriangleq$ & $[[{ - h : m+m' ⌊ T ⌋ n }, (P1+P2)]]$ &$\phantom{.}^{\dagger}$\\
 % \end{tabular}
-\begin{tabular}[c]{rclcc}
-  $[[n']]$ &$\cdot$& $[[({ + h : T n },G)]]$ & $\btriangleq$ & $[[({ + h : T n' · n }),n'·G]]$\\
-  $[[n']]$ &$\cdot$& $[[({ - h : m ⌊ T ⌋ n },P)]]$ & $\btriangleq$ & $[[({ - h : n' · m ⌊ T ⌋ n }),n'·P]]$ ~~$\phantom{.}^{\dagger}$\\
-\end{tabular}
 
-\bigskip
+% \smallskip % N.B.: alignment is not pretty for this last tabular, but we cannot afford more space
 
-\begin{tabular}[c]{rclcc@{\quad}l}
-  $[[({ + h : T n }, G1)]]$ &$+$& $[[G2]]$ & $\btriangleq$ & $[[{ + h : T n },(G1+G2)]]$ & \textrm{if $[[h]]\notin[[G2]]$}\\
-  $[[({ + h : T n }, G1)]]$ &$+$& $[[({ + h : T n' }, G2)]]$ & $\btriangleq$ & $[[{ + h : T n+n' }, (G1+G2)]]$\\
-\end{tabular}
-
-\smallskip % N.B.: alignment is not pretty for this last tabular, but we cannot afford more space
-
-\begin{tabular}[c]{rcl}
-  $[[({ - h : m ⌊ T ⌋ n }, P1)]]$ &$+$& $[[P2]]$  $\btriangleq$  $[[{ - h : m ⌊ T ⌋ n },(P1+P2)]]$  \quad\textrm{if $[[h]]\notin[[P2]]$}~~$\phantom{.}^{\dagger}$\\
-  $[[({ - h : m ⌊ T ⌋ n }, P1)]]$ &$+$& $[[({ - h : m' ⌊ T ⌋ n }, P2)]]$  $\btriangleq$  $[[{ - h : m+m' ⌊ T ⌋ n }, (P1+P2)]]$ ~~$\phantom{.}^{\dagger}$\\
-\end{tabular}
+% \begin{tabular}[c]{rcl}
+%   $[[({ - h : m ⌊ T ⌋ n }, P1)]]$ &$+$& $[[P2]]$  $\btriangleq$  $[[{ - h : m ⌊ T ⌋ n },(P1+P2)]]$  \quad\textrm{if $[[h]]\notin[[P2]]$}~~$\phantom{.}^{\dagger}$\\
+%   $[[({ - h : m ⌊ T ⌋ n }, P1)]]$ &$+$& $[[({ - h : m' ⌊ T ⌋ n }, P2)]]$  $\btriangleq$  $[[{ - h : m+m' ⌊ T ⌋ n }, (P1+P2)]]$ ~~$\phantom{.}^{\dagger}$\\
+% \end{tabular}
 \egroup
 
 \smallskip
 
-\smallskip
-
-\begin{tabular}[c]{rcl}
-  $[[-⁻¹({})]]$ &$\btriangleq$&  $[[{}]]$\\
-  $[[-⁻¹({ - h : ¹ν ⌊ T ⌋ n }, D)]]$ &$\btriangleq$& $[[({ + h : T n }), -⁻¹(D)]]$ \\
-\end{tabular}
+% \begin{tabular}[c]{rcl}
+%   $[[-⁻¹({})]]$ &$\btriangleq$&  $[[{}]]$\\
+%   $[[-⁻¹({ - h : ¹ν ⌊ T ⌋ n }, D)]]$ &$\btriangleq$& $[[({ + h : T n }), -⁻¹(D)]]$ \\
+% \end{tabular}
 
 \begin{center}$\phantom{.}^{\dagger}$ : \textit{same rule is also true for $[[G]]$ or $[[D]]$ replacing $[[P]]$}\end{center}
 
-}\end{minipage}}
+}
 \end{ottfig}
 
 \begin{ottfig}{\caption{Typing rules for runtime values (\rref*{\CTyVal})\label{fig:ty-val}}}
@@ -920,21 +907,16 @@ The grammar of evaluation contexts is given in~\cref{fig:grammar-ectxs}. As for 
 
 It's important to note, however, that unlike in \CLdm{}, command $[[ C[t] ]]$ of \destcalculus{} won't always have a corresponding term. The reason is that the focusing components are all directly derived from the term syntax, except for the \emph{open ampar} focusing component $[[H ᵒᵖ⟨ v2 ❟ ⬜ ⟩]]$ that doesn't have a corresponding term construct. This focusing component indicates that an ampar is currently being processed by $\ottkw{upd}_{\ottkw{\ltimes} }$, with its left-hand side $[[v2]]$ (the structure being built) being attached to the open ampar focusing component, while its right-hand side (containing destinations) is either in subsequent focusing components, or in the term under focus. Ampars being open during the evaluation of $\ottkw{upd}_{\ottkw{\ltimes} }$'s body and closed back afterwards is counterpart to the notion of scopes in typing rules.
 
-\begin{ottfig}{\caption{Evaluation contexts}\label{fig:grammar-ectxs}}{\setlength{\arraycolsep}{1ex}
-\codehere{\begin{minipage}{\linewidth}
-\begin{minipage}{\linewidth}\figtextsize\textit{Grammar of evaluation contexts:}\end{minipage}
-
-\smallskip
-
-\hspace*{-0.15cm}$\!\begin{array}{rrl}
+\begin{ottfig}{\caption{Grammar of evaluation contexts}\label{fig:grammar-ectxs}}\[{\setlength{\arraycolsep}{1ex}
+\begin{array}{rrl}
 [[c]] &\grammdef& [[t' ⬜]] \grammsep [[⬜ v]] \grammsep [[⬜ ; u]] \\
       &|\,& [[ ⬜ ►case m { Inl x1 ⟼ u1 , Inr x2 ⟼ u2 } ]] \grammsep [[⬜ ►case m ( x1 , x2 ) ⟼ u]] \grammsep [[⬜ ►case m ᴇ n x ⟼ u]] \\
       &|\,& [[⬜ ►map x ⟼ t']] \grammsep [[ to⧔ ⬜ ]] \grammsep [[ from⧔ ⬜ ]] \grammsep [[⬜ ⨞· t']] \grammsep [[v ⨞· ⬜]] \grammsep [[⬜ ◀ t']] \grammsep [[v ◀ ⬜]] \\
       &|\,& [[ ⬜ ⨞ () ]] \grammsep [[ ⬜ ⨞ Inl ]] \grammsep [[⬜ ⨞ Inr]] \grammsep [[⬜ ⨞ (,)]] \grammsep [[⬜ ⨞ ᴇ m]] \grammsep [[⬜ ⨞ ( λ x m ⟼ u )]] \\
       &|\,& [[ H ᵒᵖ⟨ v2 ❟ ⬜ ⟩ ]] \quad\quad\textit{(open ampar focusing component)} \\
 [[C]] &\grammdef& [[ ⬜ ]] \grammsep [[C ∘ c]] % \grammsep [[C [ h ≔ H v ] ]]
-\end{array}$\end{minipage}}
-}\end{ottfig}
+\end{array}
+}\]\end{ottfig}
 
 \begin{ottfig}{\caption{Typing rules of evaluation contexts (\rref*{\CTyEctxs}) and commands (\rref*{\CTyCmd})}\label{fig:ty-ectxs}}\begin{minipage}{\linewidth}\begin{augmentwidth}{2cm}
   

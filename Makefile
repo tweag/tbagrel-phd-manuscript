@@ -1,5 +1,5 @@
 OTT_OPTS = -tex_show_meta true -tex_wrap false -picky_multiple_parses false -tex_suppress_ntr Q
-PDF_ARXIV_DEPENDENCIES = *.sty *.tikzstyles *.bst graphics/* schemas/*
+PDF_ARXIV_DEPENDENCIES = *.sty *.tikzstyles *.bst graphics/* schemas/* *.cls
 PDF_OTHER_DEPENDENCIES = *.bib *.py pygmentize_local shell.nix nix/*
 
 CHAPTERS_MNG := $(wildcard chapters/*.mng)

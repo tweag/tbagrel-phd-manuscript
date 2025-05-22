@@ -103,6 +103,7 @@ pkgs.mkShell
           mdframed
           zref
           needspace
+          chngcntr
           ;
       })
 

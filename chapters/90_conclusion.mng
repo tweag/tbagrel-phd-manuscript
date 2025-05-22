@@ -1,4 +1,4 @@
-\chapter{Related work}\label{chap:related-work}
+\chapter*{Related Work}\label{sec:related-work}\addcontentsline{toc}{chapter}{Related Work}\markboth{Related Work}{Related Work}
 
 \section{Destination-passing style for efficient memory management}\label{ssec:shaikhha-dps}
 
@@ -63,8 +63,8 @@ Locality tracks scope. There are two locality modes, \verb|local| (doesn't escap
 
 However, such a simplified system would be a bit too weak to track the scope of destinations. The observation is that if destinations from two nested scopes are given the same mode, then we can't safely do anything with them, as it would be enough to reproduce the counterexamples of \cref{sec:scope-escape-dests}. So in order to type the breadth-first traversal example of \cref{sec:bft}, where destinations are stored in a structure, we need at least $[[ν]]$ (for the current scope), $[[↑]]$ (for the previous scope exactly), plus at least one extra mode for the rest of the scopes (destinations of this generic age cannot be safely used). It turns out that such systems with finitely many ages are incredibly easy to get wrong, and it was in fact much simpler to design a system with infinitely many ages.
 
-\chapter{Conclusion}\label{chap:global-conclusion}
-
+\clearpage\phantomsection
+\chapter*{Conclusion and future work}\label{chap:global-conclusion}\addcontentsline{toc}{chapter}{Conclusion and future work}\markboth{Conclusion and future work}{Conclusion and future work}
 TBD.
 
 Pistes: DPS en dehors des compacts regions

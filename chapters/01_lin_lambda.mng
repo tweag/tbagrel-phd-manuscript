@@ -73,7 +73,7 @@ We use dereliction and identity rules in both branches of the pair, to transform
 
 There exists several possible interpretations of linear logic as a linear $\lambda$-calculus. The first one, named \emph{monadic} presentation of linear $\lambda$-calculus in~\cite{andreoli_linlog_1992}, and denoted \CLOne{} in this document, is a direct term assignment of the natural deduction rules of \CILL{} given in \cref{fig:linlog}. The syntax and typing rules of this presentation, inspired greatly from the work of~\cite{bierman_linlog_phd_1994}, are given in \cref{fig:linmon-grammar,fig:linmon-ty-term}.
 
-\begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in monadic presentation (\CLOne)}\label{fig:linmon-grammar}}{\setlength{\arraycolsep}{1ex}
+\begin{ottfig}{\caption{Grammar of linear $\lambda$-calculus in monadic presentation (\CLOne)}\label{fig:linmon-grammar}}\[{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
        [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[( v1 , v2 )]] \grammsep [[ᴇ v]] \\
 [[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ˢ( t1 , t2 )]] \grammsep [[ᴇ t]] \grammsep [[t t']] \grammsep [[t ; t']] \\
@@ -83,7 +83,7 @@ There exists several possible interpretations of linear logic as a linear $\lamb
 &&\\
 [[P]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[P1 , P2]] \\
 \end{array}
-}\end{codefig}
+}\]\end{ottfig}
 
 \begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in monadic presentation (\rref*{\CLOne\CTy})}\label{fig:linmon-ty-term}}
 \bgroup\renewcommand{\ottdrulename}[1]{}
@@ -123,7 +123,7 @@ This translation is very direct. The only change is that we have to give distinc
 
 In the monadic presentation \CLOne, the use of unrestricted terms can become very verbose and unhandy because of the need for explicit contraction, weakening and dereliction. A second and equivalent presentation of the linear $\lambda$-calculus, named \emph{dyadic} presentation or \CLTwo, tends to alleviate this burden by using two typing contexts on each judgment, one for linear variables and one for unrestricted variables. The syntax and typing rules of \CLTwo{} are given in \cref{fig:lindya-grammar,fig:lindya-ty-term}.
 
-\begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in dyadic presentation (\CLTwo)}\label{fig:lindya-grammar}}{\setlength{\arraycolsep}{1ex}
+\begin{ottfig}{\caption{Grammar of linear $\lambda$-calculus in dyadic presentation (\CLTwo)}\label{fig:lindya-grammar}}\[{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
        [[v]] &::=& [[λ x ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[( v1 , v2 )]] \grammsep [[ᴇ v]] \\
 [[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ˢ( t1 , t2 )]] \grammsep [[ᴇ t]] \grammsep [[t t']] \grammsep [[t ; t']] \\
@@ -134,7 +134,7 @@ In the monadic presentation \CLOne, the use of unrestricted terms can become ver
 [[P]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[P1 , P2]] \\
 [[Ur]] &::=& [[{ }]] \grammsep [[{ x ⫶ T }]] \grammsep [[Ur1 , Ur2]]
 \end{array}
-}\end{codefig}
+}\]\end{ottfig}
 
 \begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in dyadic presentation (\rref*{\CLTwo\CTy})}\label{fig:lindya-ty-term}}
 \bgroup\renewcommand{\ottdrulename}[1]{}
@@ -231,7 +231,6 @@ We then lift the mode operators to variable bindings and typing contexts in the 
 
 We'll now show what the concrete \emph{modal} presentation for intuitionistic $\lambda$-calculus or \CLm{} looks like. We use a very simple ringoid\footnote{We still get all the algebraic benefits of \cite{ghica_bounded_2014} even without a zero for our structure.} for modes, that just models linearity equivalently as the previous presentations \CLOne and \CLTwo{}: $[[˥]]$ for variables that must be managed in a linear fashion, and $[[ɷ]]$ for unrestricted ones. We give the following operation tables:
 
-%\begin{figure}[t]
 \begin{center}
 \begin{tabular}{|c||c|c|}\hline
 $\ottsmode{+}$ & $[[¹]]$ & $[[ω]]$ \\\hhline{|=#=|=|}
@@ -248,7 +247,7 @@ $[[ω]]$        & $[[ω]]$ & $[[ω]]$ \\\hline
 
 Now that we have a completely defined the ringoid for modes, we can move to the grammar and typing rules of \CLm, given in \cref{fig:linmod-grammar,fig:linmod-ty-term}. The main change compared to \CLTwo{} is that the constructor for $[[! m T]]$ is now $[[ˢᴇ m t]]$ (instead of $[[ᴇ t]]$ for $[[! T]]$).
 
-\begin{codefig}{\caption{Grammar of linear $\lambda$-calculus in modal presentation (\CLm)}\label{fig:linmod-grammar}}{\setlength{\arraycolsep}{1ex}
+\begin{ottfig}{\caption{Grammar of linear $\lambda$-calculus in modal presentation (\CLm)}\label{fig:linmod-grammar}}\[{\setlength{\arraycolsep}{1ex}
 \!\!\!\begin{array}{rrl}
        [[v]] &::=& [[ˢλ x m ⟼ u]] \grammsep [[()]] \grammsep [[Inl v]] \grammsep [[Inr v]] \grammsep [[( v1 , v2 )]] \grammsep [[ᴇ n v]] \\
 [[t]], [[u]] &::=& [[v]] \grammsep [[x]] \grammsep [[ˢInl t]] \grammsep [[ˢInr t]] \grammsep [[ˢ( t1 , t2 )]] \grammsep [[ˢᴇ n t]] \grammsep [[t t']] \grammsep [[t ; t']] \\
@@ -259,7 +258,7 @@ Now that we have a completely defined the ringoid for modes, we can move to the 
 &&\\
 [[P]] &::=& [[{ }]] \grammsep [[{ x : m T }]] \grammsep [[P1 , P2]]\\
 \end{array}
-}\end{codefig}
+}\]\end{ottfig}
 
 \begin{ottfig}{\caption{Typing rules for linear $\lambda$-calculus in modal presentation (\rref*{\CLm\CTy})}\label{fig:linmod-ty-term}}
 \bgroup\renewcommand{\ottdrulename}[1]{}

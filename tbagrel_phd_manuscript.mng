@@ -11,6 +11,7 @@
 \usepackage{expl3}
 \usepackage{environ}
 \usepackage{mathtools, amsfonts, amssymb, amsthm}
+\usepackage{chngcntr}
 
 % \usepackage[utf8]{inputenc}
 % \usepackage[T1]{fontenc}
@@ -230,6 +231,10 @@
 %% New listing float
 \newfloat{listing}{htbp}{lop}[chapter]
 \floatname{listing}{Listing}
+\renewcommand{\thelisting}{\thechapter.\arabic{listing}} % chapter-based numbering
+
+% Step 3 (optional): Reset counter per chapter (for books/theses)
+\counterwithin{listing}{chapter}
 
 %% Editing marks
 \usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
@@ -346,9 +351,9 @@
 \end{array}\\[\interdefskip]}
 \newcommand{\figureratio}{1}
 \newcommand{\codehere}[2][t]{\vspace{-0.05cm}\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}{\figtextsize\ensuremath{#2}}\end{minipage}\end{center}\vspace{-0.05cm}}
-\NewEnviron{codefig}[2][tp]{\begin{figure}[#1]
+\NewEnviron{codefig}[2][tp]{\begin{listing}[#1]
 \codehere{\BODY}#2
-\end{figure}}
+\end{listing}}
 \NewEnviron{ottfig}[2][tp]{\begin{figure}[#1]
 \figtextsize\BODY#2
 \end{figure}}
@@ -362,10 +367,10 @@
 }
 
 \newcommand{\sidebysidecodefig}[6][t]{
-\begin{figure}[#1]
+\begin{listing}[#1]
 \sidebysidecodehere{#3}{#4}{#5}{#6}
 #2
-\end{figure}
+\end{listing}
 }
 
 \newenvironment{stretchedarray}[2][1]
@@ -611,7 +616,7 @@
 \EvenHead={{\leftmark}{{\slshape\leftmark}\hfil}}
 \OddFoot={\hfil\thepage}
 \EvenFoot={\thepage\hfil}
-\pagestyle{ThesisHeadingsII}
+\pagestyle{ThesisHeadings}
 
 %-------------------------------------------------------------------
 %                          Encadrements
@@ -683,8 +688,12 @@
 % bibliographie à gauche, c'est sans doute parce que vous avez
 % oublié de générer les fichiers d'index et de glossaire...)
 
+\addcontentsline{toc}{chapter}{Frontmatter}\markboth{Frontmatter}{Frontmatter}\pagestyle{plain}
+
+\clearpage\phantomsection\addcontentsline{toc}{section}{Abstract}\markboth{Frontmatter}{Abstract}
 \NumberAbstractPages
 \begin{ThesisAbstract}
+\pagestyle{plain}
 \begin{FrenchAbstract}
 La programmation par passage de destination introduit le concept de \emph{destination}, qui représente l'adresse d'une cellule mémoire encore vierge sur laquelle on ne peut écrire qu'une fois. Ces destinations peuvent être passées en tant que paramètres de fonction, permettant à l'appelant de garder le contrôle de la gestion mémoire : la fonction appelée se contente de remplir la cellule au lieu d’allouer de l’espace pour une valeur de retour. Bien que principalement utilisé en programmation système, le passage de destination trouve aussi des applications en programmation fonctionnelle pure, où il permet d’écrire des programmes auparavant inexpressibles avec les structures de données immuables usuelles.
 
@@ -695,7 +704,7 @@ Nous montrons ensuite comment le passage de destination ---formalisé dans ce ca
 L'implémentation prototype en Haskell montre des résultats encourageants pour l’adoption du passage de destination pour des parcours ou du mapping de grandes structures de données, telles que les listes ou les arbres.
 
 % \KeyWords{chat, chien, puces.}
-\end{FrenchAbstract}
+\end{FrenchAbstract}\clearpage
 \begin{EnglishAbstract}
 Destination-passing style programming introduces destinations, which represent the address of a write-once memory cell. These destinations can be passed as function parameters, allowing the caller to control memory management: the callee simply fills the cell instead of allocating space for a return value. While typically used in systems programming, destination passing also has applications in pure functional programming, where it enables programs that were previously unexpressible using usual immutable data structures.
 
@@ -712,6 +721,7 @@ The prototype implementation in Haskell shows encouraging results for adopting d
 %-------------------------------------------------------------------
 
 %\DontFrameThisInToc
+\clearpage\phantomsection\addcontentsline{toc}{section}{Acknowledgments}\markboth{Frontmatter}{Acknowledgments}\pagestyle{plain}
 \begin{ThesisAcknowledgments}
 Les remerciements.
 \end{ThesisAcknowledgments}
@@ -720,7 +730,7 @@ Les remerciements.
 %                            dédicace
 %-------------------------------------------------------------------
 
-\begin{ThesisDedication}
+\begin{ThesisDedication}\pagestyle{plain}
 Je dédie cette thèse à TBD.
 \end{ThesisDedication}
 
@@ -737,16 +747,32 @@ Je dédie cette thèse à TBD.
 %                        table des matières
 %-------------------------------------------------------------------
 
+\makeatletter
+\renewcommand{\float@listhead}[1]{%
+\@ifundefined{chapter}{\def\@tempa{\section*}}%
+{\def\@tempa{\chapter*}}%
+\@tempa{#1%
+%\@mkboth{\MakeUppercase{#1}}{\MakeUppercase{#1}}
+}}%
+\makeatother
+
+\clearpage\phantomsection\pagestyle{plain}
+\def\contentsname{Table of Contents}
 \tableofcontents
+\addcontentsline{toc}{section}{Table of Contents}\markboth{Frontmatter}{Table of Contents}\pagestyle{plain}
 
-\clearpage
+\clearpage\phantomsection\addcontentsline{toc}{section}{List of Figures}\markboth{Frontmatter}{List of Figures}\pagestyle{plain}
 \listoffigures
-\clearpage
+\pagestyle{plain}
 
+\clearpage\phantomsection\addcontentsline{toc}{section}{List of Listings}\markboth{Frontmatter}{List of Listings}\pagestyle{plain}
 \listof{listing}{List of Listings}
-% \addcontentsline{toc}{chapter}{List of Listings}
-% \markboth{List of Listings}{}
-\clearpage
+\pagestyle{plain}
+
+\pagestyle{ThesisHeadings}\clearpage\phantomsection
+\mainmatter
+
+\clearpage\phantomsection
 
 \include{chapters/00_introduction}
 
@@ -757,34 +783,43 @@ Je dédie cette thèse à TBD.
 % à la numérotation arabe (ce que fait \pagenumbering{arabic}) 
 % et de faire commencer la nouvelle page 1 sur une page impaire.
 % On évitera donc d'utiliser directement \pagenumbering{arabic}.
-\mainmatter
 
 \include{chapters/01_lin_lambda}
 \include{chapters/02_destination_calculus}
 \include{chapters/03_dps_haskell}
 \include{chapters/04_ext_linear_nonlinear}
+
+\clearpage\phantomsection
 \include{chapters/90_conclusion}
 
-%-------------------------------------------------------------------
-%                         Le glossaire
-%-------------------------------------------------------------------
-\BeginGloWith{Voici un glossaire tout-à-fait fictif,
-              introduit par un texte sur toute la largeur
-              des deux colonnes.}
-\twocolumn
-\PrintGlossary
+% \clearpage\phantomsection\addcontentsline{toc}{chapter}{Backmatter}\markboth{Backmatter}{Backmatter}\pagestyle{plain}
 
-%-------------------------------------------------------------------
-%              L'index (toujours sur deux colonnes)
-%-------------------------------------------------------------------
-\BeginIndWith{Voici un index}
-\PrintIndex
+% %-------------------------------------------------------------------
+% %                         Le glossaire
+% %-------------------------------------------------------------------
+% \clearpage\phantomsection\addcontentsline{toc}{section}{Glossary}\markboth{Backmatter}{Glossary}\pagestyle{plain}
+% \BeginGloWith{Voici un glossaire tout-à-fait fictif,
+%               introduit par un texte sur toute la largeur
+%               des deux colonnes.}
+% \twocolumn
+% \PrintGlossary
 
-\onecolumn
+% %-------------------------------------------------------------------
+% %              L'index (toujours sur deux colonnes)
+% %-------------------------------------------------------------------
+% \clearpage\phantomsection\addcontentsline{toc}{section}{Index}\markboth{Backmatter}{Index}\pagestyle{plain}
+% \BeginIndWith{Voici un index}
+% \PrintIndex
+
+% \onecolumn
 
 %-------------------------------------------------------------------
 %                       La bibliographie
 %-------------------------------------------------------------------
+
+% \clearpage\phantomsection\addcontentsline{toc}{section}{Bibliography}\markboth{Backmatter}{Bibliography}\pagestyle{plain}
+
+\clearpage\phantomsection\addcontentsline{toc}{chapter}{Bibliography}\markboth{Backmatter}{Bibliography}\pagestyle{plain}
 
 % Bibliography doesn't count in the page limit
 \printbibliography
