@@ -2,7 +2,7 @@
 
 In the previous chapter we laid out important building blocks for the functional language that we develop here, namely \destcalculus{}. Let's see why destination passing is valuable in a pure functional programming context, and how \destcalculus{} constitutes a good foundational layer for this.
 
-The results presented in this chapter have also been published at OOPSLA1 2025 conference\cite{bagrel_destination_2025}.
+The results presented in this chapter have also been published at OOPSLA1 2025 conference~\cite{bagrel_destination_2025}.
 
 % TODO: Context
 % TODO: Contributions
@@ -26,7 +26,7 @@ More precisely, there are two key elements that contribute to the extra expressi
 
 In this chapter, we introduce \destcalculus{}, a pure functional calculus that is based on the very concept of destinations at its core. We intend \destcalculus{} to serve as a foundational, theoretical calculus to reason about safe destinations in a functional setting; thus, we will only cover very briefly the implementation concerns in this chapter, as \destcalculus{} is not really meant to be implemented as a real programming language. Actual implementation of destination passing in an existing functional language will be the focus of the next chapters. 
 
-\destcalculus{} subsumes all the functional systems with destinations from the literature, from \cite{minamide_functional_1998} to \cite{lorenzen_searchtree_2024}. As such we expect that these systems or their extensions can be justified simply by giving them a translation into \destcalculus{}, in order to get all the safety results and metatheory of \destcalculus{} for free. Indeed, we proved type safety theorems for \destcalculus{} with the Coq proof assistant, as described in \cref{sec:formal-proof}.
+\destcalculus{} subsumes all the functional systems with destinations from the literature, from~\cite{minamide_functional_1998} to~\cite{lorenzen_searchtree_2024}. As such we expect that these systems or their extensions can be justified simply by giving them a translation into \destcalculus{}, in order to get all the safety results and metatheory of \destcalculus{} for free. Indeed, we proved type safety theorems for \destcalculus{} with the Coq proof assistant, as described in \cref{sec:formal-proof}.
 
 \section{Working with destinations in \destcalculus{}}\label{sec:working-with-dests}
 
@@ -70,7 +70,7 @@ It is crucial to note that while a destination is used to build a structure, the
 Thus, we still need a type to tie the structure under construction --- left implicit by destination-filling primitives --- with the destinations representing its holes. To represent this, \destcalculus{} introduces a type $[[S ⧔ ⌊ T ⌋ ¹ν]]$ for a structure of type $[[S]]$ missing a value of type $[[T]]$ to be complete. There can be several holes in $[[S]]$ --- resulting in several destinations on the right hand side --- and as long as there remain holes in $[[S]]$, it cannot be read. For instance, $[[S ⧔ (⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν)]]$ represents an $[[S]]$ that misses both a $[[T]]$ and a $[[U]]$ to be complete (thus to be readable). The right hand side of $\ottstype{\ltimes}$ is not restricted to pair and destination types only; it can be of arbitrarily complex type.
 
 The general form $[[S ⧔ T ]]$ is read “$[[S]]$ ampar $[[T]]$”. The name “ampar” stands for “asymmetric memory par”. The “par” $\ottstype{\parr}$ operator originally comes from (classical) linear logic, and is an associative and commutative operator that can be used in place of linear implication and is slightly more flexible: $[[T ⊸ S]]$ is equivalent to $\ottstype{T^\perp \parr S}$ or $\ottstype{S \parr T^\perp}$. Similarly, $[[T1 ⊸ T2 ⊸ S]]$ is equivalent to $\ottstype{T1^\perp \parr T2^\perp \parr S}$. Function input's types ---which are in negative position--- are wrapped in the dualizing operator $\ottstype{\smallbullet^\perp}$ when a function is put into ``par'' form.
-Here we take a similar approach: \citet{minamide_functional_1998} first observed that structures with holes are akin to linear functions $[[T ⊸ S]]$, where $[[T]]$ represents the missing part; so we decide to represent them in a more flexible fashion under the form $[[S ⧔ ⌊ T ⌋ ¹ν]]$. In this presentation, the \emph{missing part of type $[[T]]$} appears as a first-class type $[[⌊ T ⌋ ¹ν]]$, a.k.a the \emph{destination} type. The asymmetric nature of our memory par is a bit disappointing, compared to usual linear logic, but it comes from limitations that we are working in an intuitionistic setting, not a classical one like $\ottstype{\parr}$ needs.
+Here we take a similar approach:~\citet{minamide_functional_1998} first observed that structures with holes are akin to linear functions $[[T ⊸ S]]$, where $[[T]]$ represents the missing part; so we decide to represent them in a more flexible fashion under the form $[[S ⧔ ⌊ T ⌋ ¹ν]]$. In this presentation, the \emph{missing part of type $[[T]]$} appears as a first-class type $[[⌊ T ⌋ ¹ν]]$, a.k.a the \emph{destination} type. The asymmetric nature of our memory par is a bit disappointing, compared to usual linear logic, but it comes from limitations that we are working in an intuitionistic setting, not a classical one like $\ottstype{\parr}$ needs.
 
 Destinations, albeit being first-class, always exist within the context of a structure with holes. A destination is both a witness of a hole present in the structure, and a handle to write to it. Crucially, destinations are otherwise ordinary values that lives in the right side of the corresponding ampar. To access the destinations of an ampar, \destcalculus{} provides a $\ottkw{upd}_{\ottkw{\ltimes} }$ construction, which lets us apply a function to the right-hand side of the ampar. It is in the body of $\ottkw{upd}_{\ottkw{\ltimes} } \pmb{:} [[S ⧔ T ¹ν → (T ¹ν → U) ¹ν → S ⧔ U]]$ that functions operating on destinations can be called to update the structure:
 
@@ -288,7 +288,7 @@ Given a tree, create a new one of the same shape, but with the values at the nod
 
 This isn't a very natural problem for functional programming, as breadth-first traversal implies that the order in which the structure must be built (left-to-right, top-to-bottom) is not the same as the structural order of a functional tree --- building the leaves first and going up to the root. So it usually requires fancy functional workarounds~\cite{okasaki_bfs_2000,jones_gibbons_linearbfs_93,gibbons_phases_2023}.
 
-It's very tempting to solve this exercise in an efficient imperative-like fashion, where a queue drives the processing order. That's the standard algorithm taught at university, where the next node to process is dequeued from the front of the queue, and its children nodes are enqueued at the back of the queue for later processing, achieving breadth-first traversal. For that, Minamide's system\cite{minamide_functional_1998} where structures with holes are represented as linear functions cannot help. We really need destinations as first-class values to borrow from this imperative power.
+It's very tempting to solve this exercise in an efficient imperative-like fashion, where a queue drives the processing order. That's the standard algorithm taught at university, where the next node to process is dequeued from the front of the queue, and its children nodes are enqueued at the back of the queue for later processing, achieving breadth-first traversal. For that, Minamide's system~\cite{minamide_functional_1998} where structures with holes are represented as linear functions cannot help. We really need destinations as first-class values to borrow from this imperative power.
 
 \Cref{fig:impl-bfs} presents how we can implement this breadth-first tree traversal in \destcalculus{}, thanks to first-class destinations. We assume the data type $[[Tree T]]$ has been defined, unsurprisingly, as $[[Tree T]]\btriangleq [[① ⨁ (T ⨂ ((Tree T) ⨂ (Tree T)))]]$; and we refer to the constructors of $[[Tree T]]$ as $\ottsctor{Nil}$ and $\ottsctor{Node}$, defined as syntactic sugar as we did for the other constructors before. We also assume some encoding of the type $[[Nat]]$ of natural numbers. Remember that $[[Queue T]]$ is the efficient queue type from \cref{ssec:efficient-queue}.
 
@@ -520,7 +520,7 @@ The operations or order on ages aren't the usual ones on natural numbers though.
 
 The unit of the new mode ringoid is the pair of the units from the multiplicity and age ringoids, ie. $[[¹ν]]$. We will usually omit the mode annotations when the mode is that unit.
 
-Finally, as in \CLm{} and \CLdm{} from \cref{chap:preli}, operations on modes are lifted to typing contexts, still following the insights from \cite{ghica_bounded_2014} (see \cref{fig:mul-age-tables}).
+Finally, as in \CLm{} and \CLdm{} from \cref{chap:preli}, operations on modes are lifted to typing contexts, still following the insights from~\cite{ghica_bounded_2014} (see \cref{fig:mul-age-tables}).
 
 Anticipating on next section, let's see how \emph{plus} works on context, modes, and especially ages. Let's type the expression $[[d ◀ x ; x]]$. Most of the typing here behaves the same as \rref*{\CLdm{}\CTy{}}, the only particularity is that the operator $[[◀]]$ scales the typing context of its right operand by $[[↑]]$ (which corresponds to asking it to be from the previous scope, to prevent scope escape of destinations). We have the following typing tree:
 
@@ -1264,7 +1264,7 @@ We announced in \cref{sec:destcalc-intro} that \destcalculus{} subsumes existing
 
 \paragraph{A Functional Representation of Data Structures with a Hole}
 
-Minamide's system\cite{minamide_functional_1998} introduces two primitives, $\ottkw{happ}$ and $\ottkw{hcomp}$, as well as the hole abstraction form, $\lamh{[[x]]}{[[t]]}$, representing structures with (a) hole, where $[[x]]$ appears exactly once in $[[t]]$.
+Minamide's system~\cite{minamide_functional_1998} introduces two primitives, $\ottkw{happ}$ and $\ottkw{hcomp}$, as well as the hole abstraction form, $\lamh{[[x]]}{[[t]]}$, representing structures with (a) hole, where $[[x]]$ appears exactly once in $[[t]]$.
 
 The paper indicates that hole abstractions cannot have lambda abstraction, application, or case expression operating on the variable of the abstraction, but otherwise allow these constructs to appear in the body of the hole abstraction if they are operating on other variables or values.
 
@@ -1296,7 +1296,7 @@ alloc ►map d ⟼⮒
 
 Once $[[(f ˢ2)]]$ has reduced to a value $[[v]]$, the \destcalculus{}'s version will be evaluated to the promised ampar form $[[H ˢ⟨ˢ0 ˢ:: +h ˢ:: v ❟ -h ⟩]]$.
 
-Because destinations aren't part of \cite{minamide_functional_1998}, any variable in a program from Minamide's system can be given age $[[∞]]$ (so mode $[[¹∞]]$ or $[[ω∞]]$ depending on whether it is linear or not), except of course the variables bound by hole abstractions.
+Because destinations aren't part of~\cite{minamide_functional_1998}, any variable in a program from Minamide's system can be given age $[[∞]]$ (so mode $[[¹∞]]$ or $[[ω∞]]$ depending on whether it is linear or not), except of course the variables bound by hole abstractions.
 
 The translation of $\ottkw{happ}$ and $\ottkw{hcomp}$ is even more direct:
 
@@ -1312,9 +1312,9 @@ With this translation we can completly express Minamide's system in \destcalculu
 
 \paragraph{The Functional Essence of Imperative Binary Search Trees}
 
-The portion of the work from \citet{lorenzen_searchtree_2024,leijen_tail_2025} about \emph{first-class constructor contexts} is fairly similar, in both expressiveness and presentation, to Minamide's \emph{hole abstractions}. A hole abstraction $\lamh{[[x]]}{[[t]]}$ is written $\ottkw{ctx}~[[t]] [ [[x]] \assigneq \_ ]$, whose body is the same as $[[t]]$ but with an underscore $\_$ (or a square $\square$ in some versions of their work) in place of the named hole variable $[[x]]$. Similarly, $\ottkw{happ}$ is replaced by the $\mathop{+\!+\!.}$ operator, and $\ottkw{hcomp}$ by the $\mathop{+\!+}$ operator. Consequently, the translation for terms from \cite{lorenzen_searchtree_2024,leijen_tail_2025} system to ours is the same as for Minamide's system.
+The portion of the work from~\citet{lorenzen_searchtree_2024,leijen_tail_2025} about \emph{first-class constructor contexts} is fairly similar, in both expressiveness and presentation, to Minamide's \emph{hole abstractions}. A hole abstraction $\lamh{[[x]]}{[[t]]}$ is written $\ottkw{ctx}~[[t]] [ [[x]] \assigneq \_ ]$, whose body is the same as $[[t]]$ but with an underscore $\_$ (or a square $\square$ in some versions of their work) in place of the named hole variable $[[x]]$. Similarly, $\ottkw{happ}$ is replaced by the $\mathop{+\!+\!.}$ operator, and $\ottkw{hcomp}$ by the $\mathop{+\!+}$ operator. Consequently, the translation for terms from~\cite{lorenzen_searchtree_2024,leijen_tail_2025} system to ours is the same as for Minamide's system.
 
-For types, \cite{lorenzen_searchtree_2024,leijen_tail_2025} only define $\ottstype{\mathop{ctx\!<\!}[[T]]\mathop{\!>}}$, where the hole and the resulting structure (once the hole will be filled) are of the same type $[[T]]$. This translates to $[[T ⧔ ⌊ T ⌋ ¹ν]]$ in \destcalculus{}.
+For types,~\cite{lorenzen_searchtree_2024,leijen_tail_2025} only define $\ottstype{\mathop{ctx\!<\!}[[T]]\mathop{\!>}}$, where the hole and the resulting structure (once the hole will be filled) are of the same type $[[T]]$. This translates to $[[T ⧔ ⌊ T ⌋ ¹ν]]$ in \destcalculus{}.
 
 \section{Implementation of \destcalculus{} using in-place memory mutations}\label{sec:implem-destcalculus}
 
@@ -1333,11 +1333,11 @@ Secondly, ampars are not managed linearly in \destcalculus{}; only destinations 
 
 It may seem counter-intuitive at first, but this program is valid and safe in \destcalculus{}. Thanks to the renaming discipline we detailed in~\cref{ssec:sem}, every time an ampar is operated over with $\ottkw{upd}_{\ottkw{\ltimes} }$, its hole names are renamed to fresh ones. One way we can implement this in practice is to allocate a fresh copy of $[[x]]$ every time we call $\ottkw{upd}_{\ottkw{\ltimes} }$ on it (recall that $\ottkw{append}$ is implemented in terms of $\ottkw{upd}_{\ottkw{\ltimes} }$), in a \emph{copy-on-write} fashion. This way filling destinations is still implemented as mutation.
 
-However, this is a long way from the efficient implementation promised in \cref{sec:working-with-dests}. Copy-on-write can be optimized using fully-in-place functional programming ~\cite{lorenzen_fp_2023}, where, thanks to reference counting, we don't need to perform a copy when the difference list isn't aliased. This idea is further explored, for structure with holes specifically, in Chapter 7 of their more recent work\cite{leijen_tail_2025}. But that won't be the direction we will follow in the following development, as we don't want to deal explicitly with reference counting.
+However, this is a long way from the efficient implementation promised in \cref{sec:working-with-dests}. Copy-on-write can be optimized using fully-in-place functional programming ~\cite{lorenzen_fp_2023}, where, thanks to reference counting, we don't need to perform a copy when the difference list isn't aliased. This idea is further explored, for structure with holes specifically, in Chapter 7 of their more recent work~\cite{leijen_tail_2025}. But that won't be the direction we will follow in the following development, as we don't want to deal explicitly with reference counting.
 
 An alternative is to refine the linear type system further in order to guarantee that ampars are unique and avoid copy-on-write altogether. We held back from doing that in the formalization of \destcalculus{} as, again, it obfuscates the presentation of the system without adding much in return.
 
-To make ampars linear, we follow the recipe we developed in \cref{sec:linear-scopes}, highly inspired from \cite{ spiwack_linearly_2022,spiwack_linear_scopes_2023}, and introduce a new built-in type $[[Token]]$, together with the primitive $\ottkw{dup}$, $\ottkw{drop}$, and $\ottkw{withToken}$. We also switch $[[alloc]]$ for $[[allocIP]]$:% :
+To make ampars linear, we follow the recipe we developed in \cref{sec:linear-scopes}, highly inspired from~\cite{ spiwack_linearly_2022,spiwack_linear_scopes_2023}, and introduce a new built-in type $[[Token]]$, together with the primitive $\ottkw{dup}$, $\ottkw{drop}$, and $\ottkw{withToken}$. We also switch $[[alloc]]$ for $[[allocIP]]$:% :
 
 \codehere{\phantom{a}\!\!\!\!\!\!\begin{array}[t]{l}%
 \ottkw{dup} ~\pmb{:}~ [[Token ¹ν → Token ⨂ Token]]\\

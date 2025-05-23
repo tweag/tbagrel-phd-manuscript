@@ -2,7 +2,7 @@
 
 The main issue with the approach of the previous chapter is that we are not able to build data structures with a destination-based approach to linear data. This is the consequence of having a lot of flexibility in the way destinations can be used, without a system of ages to prevent scope escape in a fine-grained manner. So we had to use \emph{unrestrictedness} as a barrier so that destinations cannot escape their scope.
 
-Previous works however, such as \cite{minamide_functional_1998}, or \cite{lorenzen_searchtree_2024}, would allow for efficient queues (see \cref{ssec:efficient-queue}) or any structure with holes to store linear data, without issues with scope escape. Mainly because they don't have a concept of destinations; in these works we can only fill holes in a structure by interacting with the incomplete structure itself (the ampar). So we ought to find a way for our Haskell implementation to be at least as expressive as these works.
+Previous works however, such as~\cite{minamide_functional_1998}, or~\cite{lorenzen_searchtree_2024}, would allow for efficient queues (see \cref{ssec:efficient-queue}) or any structure with holes to store linear data, without issues with scope escape. Mainly because they don't have a concept of destinations; in these works we can only fill holes in a structure by interacting with the incomplete structure itself (the ampar). So we ought to find a way for our Haskell implementation to be at least as expressive as these works.
 
 \section{Challenges of destinations for linear data -- scope escape, updated}\label{sec:dps-lin-challenges}
 
@@ -10,7 +10,7 @@ Starting from this point, we will say \emph{linear destination} for an object of
 
 If we want to allow destinations to be filled with linear data, we have to be extremely careful about potential scope escape (see \cref{sec:scope-escape-dests}). One observation is that scope escape can only happen when we let the user fill an older linear destination in a newer scope. Because only linear destinations can be filled with another destination; and we've seen in \cref{sec:scope-escape-dests} that filling a newer destination with an older one doesn't cause scope escape; only filling an older one with a newer one does.
 
-A potential remedy would be to not allow linear destinations to be filled using \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ functions. Instead, linear destinations could only be filled by operating on the ampar they come from, as in \cite{minamide_functional_1998,lorenzen_searchtree_2024}. That way, we're sure we can only fill the freshest linear destinations (as destinations start to age when they are made accessible in a new scope with \mintinline{haskellc}/updWith/; so destinations still on the right side of a closed ampar are the fresher than any other destination in the context). We will use the base name \mintinline{haskellc}/extend/ for this new family of operators that operate directly on an ampar to fill its destinations. Unrestricted destinations, on the other hand, can still be used with the various \mintinline{haskellc}/fill/ functions. We should note that filling a destination with a hollow constructor cannot cause any scope escape issues, so it's safe to use \mintinline{haskellc}/fill @'Ctor/ on both linear and unrestricted destinations. Let's see what this updated API would look like:
+A potential remedy would be to not allow linear destinations to be filled using \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ functions. Instead, linear destinations could only be filled by operating on the ampar they come from, as in~\cite{minamide_functional_1998,lorenzen_searchtree_2024}. That way, we're sure we can only fill the freshest linear destinations (as destinations start to age when they are made accessible in a new scope with \mintinline{haskellc}/updWith/; so destinations still on the right side of a closed ampar are the fresher than any other destination in the context). We will use the base name \mintinline{haskellc}/extend/ for this new family of operators that operate directly on an ampar to fill its destinations. Unrestricted destinations, on the other hand, can still be used with the various \mintinline{haskellc}/fill/ functions. We should note that filling a destination with a hollow constructor cannot cause any scope escape issues, so it's safe to use \mintinline{haskellc}/fill @'Ctor/ on both linear and unrestricted destinations. Let's see what this updated API would look like:
 
 \begin{unbreakable}
 {\figtextsize
@@ -74,7 +74,7 @@ So far we hadn't spoke about this danger, because the mechanisms used to prevent
 
 \section{\mintinline{haskellc}/extend/ functions for ampars with a single hole}\label{sec:single-hole}
 
-We've just seen that to use linear destinations safely, we need operators that work on closed ampars directly, instead of destinations. In fact, that is exactly what happens in \cite{minamide_functional_1998}, or \cite{lorenzen_searchtree_2024}: they only allow incomplete structures with one hole, and extending the structure happens by manipulating the whole incomplete structure itself, not destinations (as they don't exist in these works).
+We've just seen that to use linear destinations safely, we need operators that work on closed ampars directly, instead of destinations. In fact, that is exactly what happens in~\cite{minamide_functional_1998}, or~\cite{lorenzen_searchtree_2024}: they only allow incomplete structures with one hole, and extending the structure happens by manipulating the whole incomplete structure itself, not destinations (as they don't exist in these works).
 
 Let's start by designing new operators for ampars with only one hole, so exactly one (linear) destination on their right-hand side. This restriction implies that when plugging a new hollow constructor into the existing hole, we must fill all of the new fields of the hollow constructor except one, so that only one new hole remains in the structure.
 
@@ -112,7 +112,7 @@ dlist `append` x = dlist &extend @'(:) @1 x
 }
 \end{unbreakable}
 
-We can also use \mintinline{haskellc}/extend/ to define and use \emph{zipper} trees (in the light of \cite{huet_zipper_1997,lorenzen_searchtree_2024}) that can hold linear data:
+We can also use \mintinline{haskellc}/extend/ to define and use \emph{zipper} trees (in the light of~\cite{huet_zipper_1997,lorenzen_searchtree_2024}) that can hold linear data:
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
@@ -384,7 +384,7 @@ mapAccumBFS tok f s0 tree =
 
 There is no real surprise in these implementations; they derive directly from the various iterations and improvements we've made over the different lists, efficient queues and breadth-first traversal examples all along this document.
 
-The only notable thing, maybe, it that we reuse the implementation of difference lists presented in \cref{sec:single-hole}, for which we don't need the flexibility brought by \mintinline{haskellc}/updWith/, and instead rely on the \mintinline{haskellc}/extend/ functions so that we can store linear data in the difference lists (very similarly to what is presented in \cite{minamide_functional_1998,lorenzen_searchtree_2024}).
+The only notable thing, maybe, it that we reuse the implementation of difference lists presented in \cref{sec:single-hole}, for which we don't need the flexibility brought by \mintinline{haskellc}/updWith/, and instead rely on the \mintinline{haskellc}/extend/ functions so that we can store linear data in the difference lists (very similarly to what is presented in~\cite{minamide_functional_1998,lorenzen_searchtree_2024}).
 
 The implementation of efficient queues displayed here, on the other hand, is very similar to the one described ealier in \cref{ssec:efficient-queue,sec:api}, except that we are using \mintinline{haskellc}/Ampar/ instead of \mintinline{haskellc}/UAmpar/ to reflect the fact that we can now store linear elements inside the queue.
 
@@ -392,7 +392,7 @@ The implementation of efficient queues displayed here, on the other hand, is ver
 
 In \cref{table:destination-api-regions-v2}, we sum up all the functions we've encountered in this chapter, that are needed to create an Haskell API as flexible as possible, while still being safe, to perform destination passing.
 
-At the time of writing the thesis, we have not implemented this whole API yet, but we envision that there shouldn't be any particular technical issue to do so. Indeed, the behavior of the \mintinline{haskellc}/extend/ operators derives directly from the corresponding \mintinline{haskellc}/fill/ functions, that already have a concrete implementation in \cite{linear_dest}.
+At the time of writing the thesis, we have not implemented this whole API yet, but we envision that there shouldn't be any particular technical issue to do so. Indeed, the behavior of the \mintinline{haskellc}/extend/ operators derives directly from the corresponding \mintinline{haskellc}/fill/ functions, that already have a concrete implementation in~\cite{linear_dest}.
 
 \begin{listing}[t]
 \figtextsize
@@ -469,7 +469,7 @@ extendFocusedComp ⩴ ∀ r u t1 t2 s u1 u2. (Region r) ⇒
 
 In this chapter we took time to explore what happens when we relax the drastic restriction we had imposed in \cref{chap:dps-haskell}, namely, that destinations could only be filled with non-linear data (which, consequently, meant that ampars could only be used to store non-linear data).
 
-In several careful steps, avoiding scope escape and similar dangers at every corner, we refined our DPS Haskell API to lift this limitation. First, by allowing the user to build ampars to store linear data, but only if they have only one hole each, in the light of the foundational works \cite{minamide_functional_1998,lorenzen_searchtree_2024}. This gave birth to the family of \mintinline{haskellc}/extend/ functions, that operate on ampars directly instead of destinations.
+In several careful steps, avoiding scope escape and similar dangers at every corner, we refined our DPS Haskell API to lift this limitation. First, by allowing the user to build ampars to store linear data, but only if they have only one hole each, in the light of the foundational works~\cite{minamide_functional_1998,lorenzen_searchtree_2024}. This gave birth to the family of \mintinline{haskellc}/extend/ functions, that operate on ampars directly instead of destinations.
 
 In a second time, we released yet another set of functions, denoted by \mintinline{haskellc}/extendFocused/, that let the user fill ampars of arbitrary shapes, with no limit on the number of holes or destinations, with linear data. These functions also operate directly on an ampar, and let the user select the destination they want to focus on, inside the ampar, with a \emph{linear lens} ---that is, a convenient object that acts as both a getter and setter for immutable functional data structures.
 

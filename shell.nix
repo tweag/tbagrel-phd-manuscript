@@ -104,6 +104,7 @@ pkgs.mkShell
           zref
           needspace
           chngcntr
+          csquotes
           ;
       })
 

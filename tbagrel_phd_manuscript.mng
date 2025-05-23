@@ -12,6 +12,7 @@
 \usepackage{environ}
 \usepackage{mathtools, amsfonts, amssymb, amsthm}
 \usepackage{chngcntr}
+\usepackage{csquotes}
 
 % \usepackage[utf8]{inputenc}
 % \usepackage[T1]{fontenc}
@@ -132,12 +133,33 @@
 \usepackage[
   backend=biber,
   natbib=true,
-  style=alphabetic,
+  bibstyle=authoryear,
+  citestyle=authoryear-comp,
   sorting=ynt]{biblatex}
 \addbibresource{bibliography.bib}
 
 %% General document setup
 \setmainlanguage{english}
+
+\makeatletter
+
+\newrobustcmd*{\parentexttrack}[1]{%
+  \begingroup
+  \blx@blxinit
+  \blx@setsfcodes
+  \blx@bibopenparen#1\blx@bibcloseparen
+  \endgroup}
+
+\AtEveryCite{%
+  \let\parentext=\parentexttrack%
+  \let\bibopenparen=\bibopenbracket%
+  \let\bibcloseparen=\bibclosebracket}
+
+\makeatother
+
+\let\cite\parencite
+\let\citet\textcite
+
 % \setmainfont{Tinos}[
 %   Path=./fonts/,
 %   Extension=.ttf,
