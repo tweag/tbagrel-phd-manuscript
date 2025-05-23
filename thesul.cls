@@ -1334,7 +1334,7 @@
     \renewcommand{\@title@lignment}{\raggedleft}}
 \newif\if@classic@section
 \newcommand{\NormalSection}{\@classic@sectiontrue}
-\newcommand{\SpecialSection}{\if@openright\cleardoublepage\else\clearpage\fi
+\newcommand{\SpecialSection}{
                     \thispagestyle{\@chapter@ps}%
                     \global\@topnum\z@
                     \@afterindentfalse

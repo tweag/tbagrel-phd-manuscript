@@ -276,7 +276,7 @@
     \newcommand{\resolved}[2]{}
 \fi
 
-\usepackage{hyperref}
+\usepackage[hypertexnames=false]{hyperref}
 \usepackage[capitalize, noabbrev]{cleveref}
 
 %% User defined commands
@@ -756,24 +756,23 @@ Je dédie cette thèse à TBD.
 }}%
 \makeatother
 
-\clearpage\phantomsection\pagestyle{plain}
+\clearpage\pagestyle{plain}\phantomsection
 \def\contentsname{Table of Contents}
 \tableofcontents
 \addcontentsline{toc}{section}{Table of Contents}\markboth{Frontmatter}{Table of Contents}\pagestyle{plain}
 
-\clearpage\phantomsection\addcontentsline{toc}{section}{List of Figures}\markboth{Frontmatter}{List of Figures}\pagestyle{plain}
-\listoffigures
+\clearpage\pagestyle{plain}\phantomsection
+\listoffigures\addcontentsline{toc}{section}{List of Figures}\markboth{Frontmatter}{List of Figures}
 \pagestyle{plain}
 
-\clearpage\phantomsection\addcontentsline{toc}{section}{List of Listings}\markboth{Frontmatter}{List of Listings}\pagestyle{plain}
-\listof{listing}{List of Listings}
+\clearpage\pagestyle{plain}\phantomsection
+\listof{listing}{List of Listings}\addcontentsline{toc}{section}{List of Listings}\markboth{Frontmatter}{List of Listings}
 \pagestyle{plain}
 
-\pagestyle{ThesisHeadings}\clearpage\phantomsection
+\clearpage\pagestyle{ThesisHeadings}\phantomsection
 \mainmatter
 
-\clearpage\phantomsection
-
+\cleardoublepage\phantomsection
 \include{chapters/00_introduction}
 
 % \aliaspagestyle{chapter}{headings}
@@ -789,7 +788,7 @@ Je dédie cette thèse à TBD.
 \include{chapters/03_dps_haskell}
 \include{chapters/04_ext_linear_nonlinear}
 
-\clearpage\phantomsection
+\cleardoublepage\phantomsection
 \include{chapters/90_conclusion}
 
 % \clearpage\phantomsection\addcontentsline{toc}{chapter}{Backmatter}\markboth{Backmatter}{Backmatter}\pagestyle{plain}
@@ -819,7 +818,7 @@ Je dédie cette thèse à TBD.
 
 % \clearpage\phantomsection\addcontentsline{toc}{section}{Bibliography}\markboth{Backmatter}{Bibliography}\pagestyle{plain}
 
-\clearpage\phantomsection\addcontentsline{toc}{chapter}{Bibliography}\markboth{Backmatter}{Bibliography}\pagestyle{plain}
+\cleardoublepage\phantomsection\addcontentsline{toc}{chapter}{Bibliography}\markboth{Backmatter}{Bibliography}\pagestyle{plain}
 
 % Bibliography doesn't count in the page limit
 \printbibliography
