@@ -359,11 +359,11 @@ dequeue (¤EffQueue front back) = case front of
 \begin{minted}[linenos]{haskellc}
 data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)
 
-relabelDPS ⩴ Region r ⇒ Token ⊸ Tree t → Tree Int
-relabelDPS tree = fst (mapAccumBFS (\st _ → (st + 1, st)) 1 tree)
+relabelDps ⩴ Region r ⇒ Token ⊸ Tree t → Tree Int
+relabelDps tree = fst (macAccumBfs (\st _ → (st + 1, st)) 1 tree)
 
-mapAccumBFS ⩴ ∀ r s t u. Region r ⇒ Token ⊸ (s → t → (s, u)) → s → Tree t → (Tree u, s)
-mapAccumBFS tok f s0 tree =
+macAccumBfs ⩴ ∀ r s t u. Region r ⇒ Token ⊸ (s → t → (s, u)) → s → Tree t → (Tree u, s)
+macAccumBfs tok f s0 tree =
   case fromAmpar (newAmpar @(Ur (Tree u)) tok `updWith` \du → go s0 (singleton (¤Ur tree, du &fillUr)))
   of (¤Ur outTree, ¤Ur st) → (outTree, st)
   where

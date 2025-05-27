@@ -294,7 +294,7 @@ It's very tempting to solve this exercise in an efficient imperative-like fashio
 
 The core idea of our algorithm is that we hold a queue of pairs, storing each an input subtree and (a destination to) its corresponding output subtree. When the element $[[ˢ(tree, dtree)]]$ at the front of the queue has been processed, the children nodes of $[[tree]]$ and children destinations of $[[dtree]]$ are enqueued to be processed later, much as the original imperative algorithm.
 
-We implement the actual breadth-first relabeling $\ottkw{relabelDPS}$ as an instance of a more general breadth-first traversal function $\ottkw{mapAccumBFS}$, which applies any state-passing style transformation of labels in breadth-first order. In $\ottkw{mapAccumBFS}$, we create a new destination $[[dtree]]$ into which we will write the result of the traversal, then call $\ottkw{go}$. The $\ottkw{go}$ function is in destination-passing style, but what's remarkable is that $\ottkw{go}$ takes an unbounded number of destinations as arguments, since there are as many destinations as items in the queue. This is where we use the fact that destinations are ordinary values.
+We implement the actual breadth-first relabeling $\ottkw{relabelDps}$ as an instance of a more general breadth-first traversal function $\ottkw{macAccumBfs}$, which applies any state-passing style transformation of labels in breadth-first order. In $\ottkw{macAccumBfs}$, we create a new destination $[[dtree]]$ into which we will write the result of the traversal, then call $\ottkw{go}$. The $\ottkw{go}$ function is in destination-passing style, but what's remarkable is that $\ottkw{go}$ takes an unbounded number of destinations as arguments, since there are as many destinations as items in the queue. This is where we use the fact that destinations are ordinary values.
 
 % The implementation of \cref{fig:impl-bfs} is very close to the one found in~\cite{bagrel_destination-passing_2024}. The difference is that, because they can't store destinations in structures with holes (see the discussion in \cref{sec:scope-escape-dests}), their implementation can't use the efficient queue implementation from \cref{ssec:efficient-queue}. So they have to revert to using a Hood-Melville queue for breadth-first traversal.
 
@@ -315,15 +315,15 @@ This freshly gained expressivity has a cost though: we need a type system that c
 ‥‥‥‥‥‥‥‥‥‥go f st' (q' enqueue ˢ(tl, dtl) enqueue ˢ(tr, dtr))༽༽}}
 ]]\end{array}}
 \newoperator
-{\ottkw{mapAccumBFS}}{[[(S ω∞ → T1 ¹ν → (! ω∞ S) ⨂ T2) ω∞→ S ω∞ → Tree T1 ¹∞ → Tree T2]]}
-{[[mapAccumBFS f st tree]]}{\!\!\!\begin{array}[t]{l}[[
+{\ottkw{macAccumBfs}}{[[(S ω∞ → T1 ¹ν → (! ω∞ S) ⨂ T2) ω∞→ S ω∞ → Tree T1 ¹∞ → Tree T2]]}
+{[[macAccumBfs f st tree]]}{\!\!\!\begin{array}[t]{l}[[
 from⧔' ((alloc @ (Tree T2) ⧔ ⌊ Tree T2 ⌋ ¹ν) ►map dtree ⟼⮒
 ‥‥‥‥‥‥༼go f st (singleton ˢ(tree, dtree))༽)
 ]]\end{array}}
 \newoperator
-{\ottkw{relabelDPS}}{[[Tree ① ¹∞ → Tree Nat]]}
-{[[relabelDPS tree]]}{\!\!\!\begin{array}[t]{l}[[
-mapAccumBFS (ˢλ st ω∞ ⟼ ˢλ un ¹ν ⟼ un ; ˢ(ˢᴇ ω∞ (succ st), st)) ˢ1 tree
+{\ottkw{relabelDps}}{[[Tree ① ¹∞ → Tree Nat]]}
+{[[relabelDps tree]]}{\!\!\!\begin{array}[t]{l}[[
+macAccumBfs (ˢλ st ω∞ ⟼ ˢλ un ¹ν ⟼ un ; ˢ(ˢᴇ ω∞ (succ st), st)) ˢ1 tree
 ]]\end{array}}
 \end{codefig}
 

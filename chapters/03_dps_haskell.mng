@@ -233,11 +233,11 @@ dequeue (¤HMQueue front backRev) = case front of
 \begin{minted}[linenos]{haskellc}
 data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)
 
-relabelDPS ⩴ Token ⊸ Tree t → Tree Int
-relabelDPS tree = fst (mapAccumBFS (\st _ → (st + 1, st)) 1 tree)
+relabelDps ⩴ Token ⊸ Tree t → Tree Int
+relabelDps tree = fst (macAccumBfs (\st _ → (st + 1, st)) 1 tree)
 
-mapAccumBFS ⩴ ∀ s t u. Token ⊸ (s → t → (s, u)) → s → Tree t → Ur (Tree u, s)
-mapAccumBFS tok f s0 tree =
+macAccumBfs ⩴ ∀ s t u. Token ⊸ (s → t → (s, u)) → s → Tree t → Ur (Tree u, s)
+macAccumBfs tok f s0 tree =
   fromUAmpar (newUAmpar @(Tree u) tok `updWith` \dtree → go s0 (singleton (¤Ur tree, dtree)))
   where
     go ⩴ s → Queue (Ur (Tree t), UDest (Tree u)) ⊸ Ur s
@@ -509,15 +509,15 @@ The implementation presented in \cref{table:impl-parser-naive} is quite standard
 % \begin{listing}[t]
 % \figtextsize
 % \begin{minted}[linenos,escapeinside=°°]{haskellc}
-% parseSExprDPS ⩴ ByteString → Int → UDest SExpr ⊸ Either Error Int
-% parseSExprDPS bs i d = case bs !? i of
+% parseSExprDps ⩴ ByteString → Int → UDest SExpr ⊸ Either Error Int
+% parseSExprDps bs i d = case bs !? i of
 %   ¤Nothing → °\mnew{fillLeaf defaultSExpr d}° ; ¤Left (¤UnexpectedEOFSExpr i)
 %   ¤Just x → case x of
 %     ')' → °\mnew{fillLeaf defaultSExpr d}° ; ¤Left (¤UnexpectedClosingParen i)
 %     '(' → parseSListDPS bs (i + 1) °\mnew{(fill @'SList d)}°
 %     '"' → parseSStringDPS bs (i + 1) ¤False °\mnew{(fill @'SString d)}°
 %     _ → let tok = extractNextToken bs i -- take chars until delimiter/space
-%         in if null tok then parseSExprDPS bs (i + 1) d else case parseInt tok of
+%         in if null tok then parseSExprDps bs (i + 1) d else case parseInt tok of
 %               ¤Just int → let °\mnew{!dint = fill @'SInteger d}°
 %                           in °\mnew{fillLeaf int dint}° ; ¤Right (i + length tok - 1)
 %               _ → let °\mnew{!dsym = fill @'SSymbol d}°
@@ -529,7 +529,7 @@ The implementation presented in \cref{table:impl-parser-naive} is quite standard
 %     | x == ')' → °\mnew{fill @'[] d}° ; ¤Right i
 %     | isSpace x → parseSListDPS bs (i + 1) d
 %     | otherwise → let !(dh, dt) = °\mnew{fill @'(:) d}°
-%                    in case parseSExprDPS bs i °\mnew{dh}° of
+%                    in case parseSExprDps bs i °\mnew{dh}° of
 %                         ¤Left err → fill @'[] dt ; ¤Left err
 %                         ¤Right endPos → parseSListDPS bs (endPos + 1) °\mnew{dt}°
 % parseSStringDPS ⩴ ByteString → Int → Bool → UDest [Char] ⊸ Either Error Int
@@ -575,7 +575,7 @@ parseSListDPS bs i d = case bs !? i of
     | isSpace x → parseSListDPS bs (i + 1) d
     | otherwise →
         case °\mnew{d &fill @'(:)}° of
-          (dh, dt) → case parseSExprDPS bs i °\mnew{dh}° of
+          (dh, dt) → case parseSExprDps bs i °\mnew{dh}° of
               ¤Left err → dt &fill @'[] ; ¤Left err
               ¤Right endPos → parseSListDPS bs (endPos + 1) °\mnew{dt}°
 \end{minted}
@@ -589,7 +589,7 @@ Code for \mintinline{haskellc}/parseSListDPS/ is presented in \cref{table:impl-p
 
 \begin{itemize}
   \item even for error cases, we are forced to consume the destination that we receive as an argument (to stay linear), hence we write some sensible default data to it (see line 3);
-  \item the \mintinline{haskellc}/SExpr/ value resulting from \mintinline{haskellc}/parseSExprDPS/ is not collected by \mintinline{haskellc}/parseSListDPS/ but instead written directly into its final location by \mintinline{haskellc}/parseSExprDPS/ through the passing and filling of destination \mintinline{haskellc}/dh/ (see line 9);
+  \item the \mintinline{haskellc}/SExpr/ value resulting from \mintinline{haskellc}/parseSExprDps/ is not collected by \mintinline{haskellc}/parseSListDPS/ but instead written directly into its final location by \mintinline{haskellc}/parseSExprDps/ through the passing and filling of destination \mintinline{haskellc}/dh/ (see line 9);
   \item adding an element of type \mintinline{haskellc}/SExpr/ to the accumulator \mintinline{haskellc}/[SExpr]/ is replaced with writing a new cons cell with \mintinline{haskellc}/fill @'(:)/ into the hole represented by the \mintinline{haskellc}/UDest [SExpr]/, writing an element to the new \emph{head} destination, and then doing a recursive call with the new \emph{tail} destination passed as an argument (which has type \mintinline{haskellc}/UDest [SExpr]/ again);
   \item instead of reversing and returning the accumulator at the end of the processing, it is enough to complete the list by writing a nil element to the tail destination (with \mintinline{haskellc}/fill @'[]/, see line 5), as the list has been built in a top-down approach;
   \item ultimately, DPS functions just return the offset of the next character to read instead of returning a parsed value (as the parsed value is written directly into the destination received as a parameter).
@@ -818,10 +818,28 @@ For the naive implementations on the other hand, we have a choice to make on the
 
 That being said, having the result of the function copied into a compact region is only desirable for a handful of programs, for which the result will be held in memory for a long time and used in full (as the unused parts cannot be collected if it is in a compact region). Consequently, we often benchmark the naive implementations with \mintinline{haskellc}/force/ (the associated benchmark names are denoted with a ``*'' suffix), and only benchmark with both \mintinline{haskellc}/force/ and \mintinline{haskellc}/compact/ copy when it seems relevant.
 
-\begin{figure}[t]\centering
-  \hspace*{-1.5cm}\includegraphics[width=16.8cm]{graphics/bench-charts.pdf}
-  \caption{Benchmarks performed on AMD EPYC 7401P @ 2.0 GHz (single core, \texttt{-N1 -O2})}
-  \label{fig:bench-charts}
+\begin{figure}\centering
+  \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-concat.pdf}
+  \caption{Benchmark of iterated concatenations on lists and difference lists}
+  \label{fig:bench-concat}
+\end{figure}
+
+\begin{figure}\centering
+  \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-bft.pdf}
+  \caption{Benchmark of breadth-first tree relabeling}
+  \label{fig:bench-bft}
+\end{figure}
+
+\begin{figure}\centering
+  \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-parser.pdf}
+  \caption{Benchmark of S-expression parser}
+  \label{fig:bench-parser}
+\end{figure}
+
+\begin{figure}\centering
+  \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-map.pdf}
+  \caption{Benchmark of map function on list}
+  \label{fig:bench-map}
 \end{figure}
 
 \subsection{Concatenating lists and difference lists}
@@ -832,7 +850,7 @@ The first one, \mintinline{haskellc}/foldr (++)/*, has calls to \mintinline{hask
 
 Hence, for the two other implementations, the calls to concat nested to the left. The implementation \mintinline[escapeinside=°°]{haskellc}/foldl' concat°$\lambda$°/* uses function-backed difference lists, and \mintinline{haskellc}/foldl' concatDPS/ uses destin\-ation-backed ones (from \cref{ssec:dpshaskell-dlist}). They should still run in $\mathcal{O}(n)$ however, thanks to difference list magic.
 
-We see in part \textbf{A} of \cref{fig:bench-charts} that the destination-backed difference lists have a comparable memory use as the two other implementations, while being quite slower (by a factor 2-4) on all datasets. It's still unclear where the performance loss comes from. We tried to profile the program but we couldn't identify clear culprit that would cause a particular slowdown. We must admit that programming with destinations and linear types in general still require a bit of embarassing boilerplate compared to naive versions, where some performance might be lost. These tests would need to be redone though in a more recent version of GHC, as performance of linear types has been improved in GHC 9.8.
+We see in \cref{fig:bench-concat} that the destination-backed difference lists have a comparable memory use as the two other implementations, while being quite slower (by a factor 2-4) on all datasets. It's still unclear where the performance loss comes from. We tried to profile the program but we couldn't identify clear culprit that would cause a particular slowdown. We must admit that programming with destinations and linear types in general still require a bit of embarassing boilerplate compared to naive versions, where some performance might be lost. These tests would need to be redone though in a more recent version of GHC, as performance of linear types has been improved in GHC 9.8.
 
 \subsection{Breadth-first relabeling}\label{par:benchmark-bf-tree-traversal}
 
@@ -865,17 +883,17 @@ traverseBFS _ Nil = pure Nil
 traverseBFS f (Node x tl tr) =
   pure Node <*> now (f x) <*> later ((traverseBFS f) tl) <*> later ((traverseBFS f) tr)
 
-relabelPhases :: BinTree () → (BinTree Int, Int)
-relabelPhases tree = runState (runPhases $ traverseBFS (\_ → state (\s → (s, s + 1))) tree) 0
+relabelPh :: BinTree () → (BinTree Int, Int)
+relabelPh tree = runState (runPhases $ traverseBFS (\_ → state (\s → (s, s + 1))) tree) 0
 \end{minted}
 }
 \end{unbreakable}
 
-We see in part \textbf{B} of \cref{fig:bench-charts} that the destination-based tree traversal is almost one order of magnitude more efficient, both time-wise and memory-wise, compared to the implementation from~\citet{gibbons_phases_2023}. We must admit though that we didn't particularly try to optimize the performance of the \emph{Phases} implementation as much as we did for our DPS framework in general.
+We see in part \cref{fig:bench-bft} that the destination-based tree traversal is almost one order of magnitude more efficient, both time-wise and memory-wise, compared to the implementation from~\citet{gibbons_phases_2023}. We must admit though that we didn't particularly try to optimize the performance of the \emph{Phases} implementation as much as we did for our DPS framework in general.
 
 \subsection{Parsing S-expressions}
 
-In part \textbf{C} of \cref{fig:bench-charts}, we compare the naive and DPS implementations of the S-expression parser presented in \cref{ssec:parser-sexpr}. For this particular program, using compact regions is interesting even without destination-passing considerations, as it will reduce the GC load of the application as long as the data is held in memory (which is quite usual with parsed documents). Thus, we benchmark the naive version twice: once where the results stays in the GC heap and is evaluated with \mintinline{haskellc}/force/ (its name is suffixed with a star), and once to produce a result that we copy in a compact region using \mintinline{haskellc}/compact/.
+In \cref{fig:bench-parser}, we compare the naive and DPS implementations of the S-expression parser presented in \cref{ssec:parser-sexpr}. For this particular program, using compact regions is interesting even without destination-passing considerations, as it will reduce the GC load of the application as long as the data is held in memory (which is quite usual with parsed documents). Thus, we benchmark the naive version twice: once where the results stays in the GC heap and is evaluated with \mintinline{haskellc}/force/ (its name is suffixed with a star), and once to produce a result that we copy in a compact region using \mintinline{haskellc}/compact/.
 
 The DPS implementation starts by being less efficient than the naive versions for small inputs, but gets an edge as soon as garbage collection kicks in (on datasets of size $\leq 2^{16}$, no garbage collection cycle is required as the heap size stays small).
 
@@ -885,24 +903,24 @@ On the largest dataset ($2^{22} \simeq 4$\,MiB file), the DPS implementation sti
 
 In a strict functional language such as OCaml, the choice of implementation for the \emph{map} function on lists is crucial as the naive, non tail-recursive one (further referred to as \mintinline{haskellc}/map/) makes the stack grow linearly with the size of the processed list. To alleviate the issue, a strict tail-recursive implementation is possible (\mintinline{haskellc}/mapTR'/), but it requires an extra $\mathcal{O}(n)$ operation at the end of the processing to reverse the accumulator. In Haskell, the issue is of a lesser importance perhaps, as the lazy-by-default evaluation strategy makes the naive \mintinline{haskellc}/map/ perform quite well in most real-world programs. Still, let see what our DPS API brings to the table.
 
-With destinations, \emph{map} can be implemented in a tail-recursive fashion too (\mintinline{haskellc}/mapDPS'/), as explained in \cref{ssec:map-tr}, without requiring the reverse operation that \mintinline{haskellc}/mapTR'/ needs, as the list is built directly in a top-down approach. It can alternatively be implemented as a fold (\mintinline{haskellc}/mapDPSFold'/), as we also show below. Here, the \mintinline{haskellc}/!/ in front of a variable name denotes a (weakly) strict binding, so the expression assigned to the variable will be partially evaluated before the body of the \mintinline{haskellc}/let/ is evaluated:
+With destinations, \emph{map} can be implemented in a tail-recursive fashion too (\mintinline{haskellc}/mapDpsTRS/), as explained in \cref{ssec:map-tr}, without requiring the reverse operation that \mintinline{haskellc}/mapTR'/ needs, as the list is built directly in a top-down approach. It can alternatively be implemented as a fold (\mintinline{haskellc}/mapDpsFoldS/), as we also show below. Here, the \mintinline{haskellc}/!/ in front of a variable name denotes a (weakly) strict binding, so the expression assigned to the variable will be partially evaluated before the body of the \mintinline{haskellc}/let/ is evaluated:
 {\figtextsize
 \begin{minted}[linenos]{haskellc}
 append ⩴ UDest [t] ⊸ t → UDest [t]
 d `append` x = case d &fill @'(:) of (dh, dt) → dh &fillLeaf x ; dt
 
-mapDPS' _ [] d = d &fill @'[]
-mapDPS' f (x : xs) d = let !y = f x ; !d' = d `append` y in mapDPS' f xs d'
+mapDpsTRS _ [] d = d &fill @'[]
+mapDpsTRS f (x : xs) d = let !y = f x ; !d' = d `append` y in mapDpsTRS f xs d'
 
-mapDPSFold' f l dl = fill @'[] (foldl' (\d x → let !y = f x in d `append` y) d l)
+mapDpsFoldS f l dl = fill @'[] (foldl' (\d x → let !y = f x in d `append` y) d l)
 \end{minted}
 }
 
 % TODO: update figure
 
-We see in part 4 of \cref{fig:bench-charts} that the destination-based implementations \mintinline{haskellc}/mapDPS'/ and \mintinline{haskellc}/mapDPSFold'/ takes 1.5-4$\times$ more time than the naive \mintinline{haskellc}/map/ and \mintinline{haskellc}/mapTR'/ (depending on the dataset size), but memory-wise both \mintinline{haskellc}/mapDPS'/ and \mintinline{haskellc}/mapDPSFold'/ are more efficient than \mintinline{haskellc}/map/; and \mintinline{haskellc}/mapDPS'/ even manage to make 13\% fewer allocs than \mintinline{haskellc}/mapTR'/ on the largest dataset.
+We see in \cref{fig:bench-map} that the destination-based implementations \mintinline{haskellc}/mapDpsTRS/ and \mintinline{haskellc}/mapDpsFoldS/ takes 1.5-4$\times$ more time than the naive \mintinline{haskellc}/map/ and \mintinline{haskellc}/mapTR'/ (depending on the dataset size), but memory-wise both \mintinline{haskellc}/mapDpsTRS/ and \mintinline{haskellc}/mapDpsFoldS/ are more efficient than \mintinline{haskellc}/map/; and \mintinline{haskellc}/mapDpsTRS/ even manage to make 13\% fewer allocs than \mintinline{haskellc}/mapTR'/ on the largest dataset.
 
-In OCaml, the equivalent of \mintinline{haskellc}/mapDPS'/ is always more performant time-wise ($0.5-0.85\times$) than the equivalent of \mintinline{haskellc}/mapTR'/, even for small lists, as detailed in benchmarks of~\cite{bour_tmc_2021}.
+In OCaml, the equivalent of \mintinline{haskellc}/mapDpsTRS/ is always more performant time-wise ($0.5-0.85\times$) than the equivalent of \mintinline{haskellc}/mapTR'/, even for small lists, as detailed in benchmarks of~\cite{bour_tmc_2021}.
 
 \section{Conclusion}
 
