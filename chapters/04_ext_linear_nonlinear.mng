@@ -325,7 +325,7 @@ dListToList :: Region r ⇒ DList r t ⊸ [t]
 dListToList dlist = fromAmpar' (dlist &extendLeaf [])
 
 append :: Region r ⇒ DList r t ⊸ t ⊸ DList r t
-append dlist x = dlist &extend @'(:) @1 (¤MkSolo x)
+append dlist x = dlist &extend @'(:) @1 x
 
 -------------------------------------------------------------------------------
 

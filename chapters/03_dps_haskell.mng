@@ -816,7 +816,7 @@ In every DPS implementation that we'll benchmark, the output produced by the pro
 
 For the naive implementations on the other hand, we have a choice to make on the way we fully evaluate the result. We can either keep the result inside the GC heap, and use the function \mintinline{haskellc}/Control.DeepSeq.force/ to recursively force each thunk of the GC heap into an evaluated form; or we can use \mintinline{haskellc}/Data.Compact.compact/ to copy the result from the GC heap to a compact region, that is strict by default and thus will force evaluation. 
 
-That being said, having the result of the function copied into a compact region is only desirable for a handful of programs, for which the result will be held in memory for a long time and used in full (as the unused parts cannot be collected if it is in a compact region). Consequently, we often benchmark the naive implementations with \mintinline{haskellc}/force/ (the associated benchmark names are denoted with a ``*'' suffix), and only benchmark with both \mintinline{haskellc}/force/ and \mintinline{haskellc}/compact/ copy when it seems relevant.
+That being said, having the result of the function copied into a compact region is only desirable for a handful of programs, for which the result will be held in memory for a long time and used in full (as the unused parts cannot be collected if it is in a compact region). Consequently, we often benchmark the naive implementations with \mintinline{haskellc}/force/, and only benchmark with both \mintinline{haskellc}/force/ and \mintinline{haskellc}/compact/ copy (denoted by the \mintinline{haskellc}/.copyCR/ suffix) when it seems relevant.
 
 \begin{figure}\centering
   \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-concat.pdf}
