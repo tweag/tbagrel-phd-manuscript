@@ -2,37 +2,41 @@
 
 This chapter situates \emph{functional destination passing} within the broader landscape of related approaches to safe and controlled memory updates in functional programming. A particularly close and relevant theme is that of \emph{functional data structures with holes}, since \emph{destination passing} provides a flexible and principled way to manipulate such structures. However, despite their conceptual overlap, \emph{functional destination passing} and \emph{functional data structures with holes} remain slightly distinct in their nature.
 
-\emph{Functional destination passing} encompasses techniques where updates to write-once memory cells are exposed through a safe or at least controlled interface. In fact, in previous work, this interface has not often been directly exposed to programmers; instead, in these cases, \emph{destination passing} is employed internally by compilers to optimize functional programs. This includes performance improvements for functional linked data structures (\cref{ssec:tmc}) and functional arrays (\cref{ssec:shaikhha-dps}), which are written in the usual purely functional style but benefit from behind-the-scenes mutation to reduce allocations and improve performance, with no explicit user control.
+\emph{Functional destination passing} encompasses techniques where updates to write-once memory cells are exposed through a safe or at least controlled interface. In fact, in previous work, this interface has not often been directly exposed to programmers; instead, in these cases, \emph{destination passing} is employed internally by compilers to optimize functional programs. This includes performance improvements for functional linked data structures (\cref{ssec:tmc}) and functional arrays (\cref{ssec:shaikhha-dps}), which are written in the usual purely functional style but benefit from behind-the-scenes mutations to reduce allocations and improve performance, with no explicit user control. Ultimately, destinations can also be used in the operational semantics of a theoretical lambda-calculus (\cref{ssec:sax}).
 
-In contrast, \emph{functional structures with holes} focus on allowing incomplete data structures, a.k.a. structures with holes, to exist as first-class values ---that the user can manipulate explicitely--- in a purely functional setting, and be completed or refined later. Completing these structures necessarily involves some form of memory update, but many systems (\cref{ssec:minamide}) do not include an explicit notion of first-class write pointer (\emph{destination}) to do the mutation. In contrast, this thesis explores how both \emph{functional structures with holes} and \emph{functional destination passing} can be combined effectively, leveraging the strengths of each to achieve more expressive manipulation patterns of functional data, always in a safe manner.
+In contrast, \emph{functional structures with holes} focus on allowing incomplete data structures, a.k.a. structures with holes, to exist as first-class values ---that the user can manipulate explicitely--- in a purely functional setting, and be completed or refined later. Completing these structures necessarily involves some form of memory update, but many systems (\cref{ssec:minamide,ssec:lorenzen-searchtree}) do not include an explicit notion of first-class write pointer (\emph{destination}) to do the mutation. In contrast, this thesis explores how both \emph{functional structures with holes} and \emph{functional destination passing} can be combined effectively, leveraging the strengths of each to achieve more expressive manipulation patterns of functional data, always in a safe manner.
 
-Both of these notions inherently involve mutation and uninitialized data and therefore require robust static guarantees to ensure safety. \emph{Linear} and \emph{uniqueness type systems} are thus commonly employed to enforce strict control over destinations or structures with holes, preventing unsafe updates and premature reads on incomplete structures. However, as demonstrated in this work, \emph{linearity} alone is insufficient to capture the full range of safety and expressiveness we needed. Modal type systems (\cref{ssec:oxidizing}) are in that case particularly helpful to let us design a coherent and ergonomic type system, easily, for our specific needs. Complementary approaches such as \emph{permission-based type systems} (\cref{ssec:mezzo}) and resource lifetime management techniques \emph{à la} Rust also play an important role to enforce fine-grained control over resources, which may be leveraged to control our destinations or structures with holes.
-
-\section{Destination-passing style for efficient memory management}\label{ssec:shaikhha-dps}
-
-~\citet{shaikhha_destination-passing_2017} present a destination-based intermediate language for a functional array programming language, with destination-specific optimizations, that boasts near-C performance.
-
-This is the most comprehensive evidence to date of the benefits of destination-passing style for performance in functional languages, although their work is on array programming, while this article focuses on linked data structures. They can therefore benefit from optimizations that are perhaps less valuable for us, such as allocating one contiguous memory chunk for several arrays.
-
-The main difference between their work and ours is that their language is solely an intermediate language: it would be unsound to program in it manually. We, on the other hand, are proposing a type system to make it sound for the programmer to program directly with destinations.
-
-We see these two aspects as complementing each other: good compiler optimizations are important to alleviate the burden from the programmer and allow high-level abstraction; having the possibility to use destinations in code affords the programmer more control, should they need it.
-
-\section{Programming with Permissions in Mezzo}\label{ssec:mezzo}
-
-~\citet{protzenko_mezzo_2013} introduced the Mezzo programming language, in which mutable data structures can be freezed into immutable ones after having been completed. This principle is used to some extend in their list standard library module, to mimic a form of DPS programming. An earlier appearance of DPS programming as a mean to achieve better performance in a mutable language can also be seen in~\cite{larus_restructuring_1989}.
+Both of these notions inherently involve mutation and uninitialized data and therefore require robust static guarantees to ensure safety. \emph{Linear} and \emph{uniqueness type systems} are thus commonly employed to enforce strict control over destinations or structures with holes, preventing unsafe updates and premature reads on incomplete structures. However, as demonstrated in this work, \emph{linearity} alone is insufficient to capture the full range of safety and expressiveness we needed. Modal type systems (\cref{ssec:oxidizing}) are in that case particularly helpful to let us design a coherent and ergonomic type system, easily, for our specific needs. Complementary approaches such as \emph{permission-based type systems} (\cref{ssec:mezzo}) and resource lifetime management techniques \emph{à la} Rust (\cref{ssec:rust-lifetimes}) also play an important role to enforce fine-grained control over resources, which may be leveraged to control our destinations or structures with holes.
 
 \section{Tail modulo constructor}\label{ssec:tmc}
 
-Another example of destinations in a compiler's optimizer is~\cite{bour_tmc_2021}. It's meant to address the perennial problem that the map function on linked lists isn't tail-recursive, hence consumes stack space. The observation is that there's a systematic transformation of functions where the only recursive call is under a constructor to a destination-passing tail-recursive implementation.
+\cite{bour_tmc_2021} focuses on the perennial problem that the map function on linked lists isn't tail-recursive, hence consumes stack space. The map function can be made tail recursive, but at the cost of an extra reverse operation on the list. Their observation is that there's a systematic transformation of functions where the only recursive call is under a data constructor application (e.g. \emph{cons} in the map instance) to a destination-passing tail-recursive implementation.
 
 Here again, there's no destination in user land, only in the intermediate representation. However, there is a programmatic interface: the programmer annotates a function like
 \begin{verbatim}
 let[@tail_mod_cons] rec map =
 \end{verbatim}
-to ask the compiler to perform the translation. The compiler will then throw an error if it can't. This way, contrary to the optimizations in~\cite{shaikhha_destination-passing_2017}, it is entirely predictable.
+to ask the compiler to perform the translation. The compiler will then throw an error if it can't, making the optimization behavior entirely predictable. This has been included in the OCaml compiler since version 4.14, and is the one example we know of destinations built in a production-grade functional compiler.
 
-This has been available in OCaml since version 4.14. This is the one example we know of of destinations built in a production-grade compiler. Our \destcalculus{} makes it possible to express the result tail-modulo-constructor in a typed language. It can be used to write programs directly in that style,  or it could serve as a typed target language for an automatic transformation. On the flip-side, tail modulo constructor is too weak to handle our difference lists or breadth-first traversal examples.
+Both our \destcalculus{} and DPS Haskell API allow to write the result of a tail-modulo-constructor transformation (that is, the destination-passing tail-recursive program) as a well-typed program in userland, which isn't possible in OCaml. However, we don't provide a way to do a similar automatic transformation itself.
+
+On the flip-side, tail modulo constructor is too weak to handle our difference lists or breadth-first traversal examples. For the former, it misses first-class support for structure with holes; they can only exist in the background for the duration of a function being transformed. For breadth-first tree traversal, there is no obvious implementation in functional style with only one recursive call, so the tail modulo constructor transformation cannot be applied.
+
+\section{Destination-passing style for efficient memory management}\label{ssec:shaikhha-dps}
+
+~\citet{shaikhha_destination-passing_2017} present a destination-based intermediate language for a functional array programming language, with destination-specific optimizations, that boasts near-C performance.
+
+This another significant evidence to date of the benefits of destination-passing style for performance in functional languages, although their work is on array programming, while this PhD thesis focuses on linked data structures. They can therefore benefit from optimizations that are perhaps less valuable for us, such as allocating one contiguous memory chunk for several arrays.
+
+The other difference between their work and ours is that their language is solely an intermediate language: it would be unsound to program in it manually. We, on the other hand, are proposing a type system to make it sound for the programmer to program directly with destinations.
+
+We see these two aspects as complementing each other: good compiler optimizations are important to alleviate the burden from the programmer and allow high-level abstraction; having the possibility to use destinations in code affords the programmer more control, should they need it.
+
+\section{Semi-axiomatic sequent calculus}\label{ssec:sax}
+
+In~\cite{deyoung_sax_2020} constructors return to a destination rather than allocating memory. It is very unlike the other systems described in this section in that it's completely founded in the Curry-Howard isomorphism. Specifically it gives an interpretation of a sequent calculus which mixes Gentzen-style deduction rules and Hilbert-style axioms. As a consequence, the \emph{par} connective is completely symmetric, and, unlike our $[[⌊ T ⌋ ¹ν]]$ type, their dualization connective is involutive.
+
+The cost of this elegance is that computations may try to pattern-match on a hole, in which case they must wait for the hole to be filled. So the semantics of holes is that of a future or a promise. In turns this requires the semantics of their calculus to be fully concurrent, which is a very different point in the design space.
 
 \section{A functional representation of data structures with a hole}\label{ssec:minamide}\label{ssec:ampar-motivation}
 
@@ -42,25 +46,17 @@ In~\cite{minamide_functional_1998}, it's only ever possible to represent structu
 
 The more important difference is that while their system is based on a type of linear functions, ours is based on the linear logic's ``par'' type. In classical linear logic, linear implication $\ottstype{[[T]] \multimap [[S]]}$ is reinterpreted as $\ottstype{[[S]]\mathop{\parr}[[T]]^{\perp}}$. We, likewise, reinterpret $\ottstype{([[T]], [[S]]) hfun}$ as $[[S ⧔ ⌊ T ⌋ ¹ν]]$ (a sort of weak ``par'').
 
-A key consequence is that destinations ---as first-class representations of holes--- appear naturally in \destcalculus{}, while~\cite{minamide_functional_1998} doesn't have them. This means that using~\cite{minamide_functional_1998}, or the more recent but similarly expressive system from~\cite{lorenzen_searchtree_2024}, one can implement the examples with difference lists and queues from~\cref{ssec:efficient-queue}, but couldn't do our breadth-first traversal example from~\cref{sec:bft}, since it requires to be able to store destinations in a structure.
+A key consequence is that destinations ---as first-class representations of holes--- appear naturally in \destcalculus{}, while~\cite{minamide_functional_1998} doesn't have them. This means that using~\cite{minamide_functional_1998}, one can implement the examples with difference lists and queues from~\cref{ssec:efficient-queue}, but couldn't do our breadth-first traversal example from~\cref{sec:bft}, since it requires to be able to store destinations in a structure.
 
 Nevertheless, we still retain the main restrictions that~\citet{minamide_functional_1998} places on hole abstractions. For instance, we can't pattern-match on $[[S]]$ in (unapplied) $\ottstype{([[T]], [[S]]) hfun}$; so in \destcalculus{}, we can't act directly on the left-hand side $[[S]]$ of $[[S ⧔ T]]$, only on the right-hand side $[[T]]$. Similarly, hole variables can only be used as arguments of constructors or hole abstractions; it's reflected in \destcalculus{} by the fact that the only way to act on destinations is via fill operations, with either hollow constructors or another ampar.
 
 The ability to manipulate destinations, and in particular, store them, does come at a cost though: the system needs this additional notion of ages to ensure that destinations are used soundly. On the other hand, our system is strictly more general, in~\citet{minamide_functional_1998}'s system can be embedded in \destcalculus{}, and if one stays in this fragment, we're never confronted with ages.
 
-\section{Semi-axiomatic sequent calculus}\label{ssec:sax}
+\section{Tail Recursion Modulo Context and The Functional Essence of Imperative Binary Search Trees}\label{ssec:lorenzen-searchtree}
 
-In~\cite{deyoung_sax_2020} constructors return to a destination rather than allocating memory. It is very unlike the other systems described in this section in that it's completely founded in the Curry-Howard isomorphism. Specifically it gives an interpretation of a sequent calculus which mixes Gentzen-style deduction rules and Hilbert-style axioms. As a consequence, the \emph{par} connective is completely symmetric, and, unlike our $[[⌊ T ⌋ ¹ν]]$ type, their dualization connective is involutive.
+TODO
 
-The cost of this elegance is that computations may try to pattern-match on a hole, in which case they must wait for the hole to be filled. So the semantics of holes is that of a future or a promise. In turns this requires the semantics of their calculus to be fully concurrent, which is a very different point in the design space.
-
-\section{Rust lifetimes}\label{ssec:rust-lifetimes}
-
-Rust uses a system of lifetimes (see e.g.~\cite{pearce_lifetime_2021}) to ensure that borrows don't live longer than what they reference. It plays a similar role as our system of ages.
-
-Rust lifetimes are symbolic. Borrows and moves generate constraints (inequalities of the form $\alpha\leqslant\beta$) on the symbolic lifetimes. For instance, that a the lifetime of a reference is larger than the lifetime of any structure the reference is stored in. Without such constraints, Rust would have similar problems to those of \cref{sec:scope-escape-dests}. The borrow checker then checks that the constraints are solvable. This contrasts with \destcalculus{} where ages are set explicitly, with no analysis needed.
-
-Another difference between the two systems is that \destcalculus{}'s ages (and modes in general) are relative. An explicit modality $\ottstype{!}_{[[¹↑^ka]]}$ must be used when a part has an age different than its parent, and means that the part is $[[ka]]$ scope older than the parent. On the other hand, Rust's lifetimes are absolute, the lifetime of a part is tracked independently of the lifetime of its parent.
+\cite{lorenzen_searchtree_2024,leijen_tail_2025}
 
 \section{Oxidizing OCaml}\label{ssec:oxidizing}
 
@@ -71,13 +67,25 @@ Locality tracks scope. There are two locality modes, \verb|local| (doesn't escap
 
 However, such a simplified system would be a bit too weak to track the scope of destinations. The observation is that if destinations from two nested scopes are given the same mode, then we can't safely do anything with them, as it would be enough to reproduce the counterexamples of \cref{sec:scope-escape-dests}. So in order to type the breadth-first traversal example of \cref{sec:bft}, where destinations are stored in a structure, we need at least $[[ν]]$ (for the current scope), $[[↑]]$ (for the previous scope exactly), plus at least one extra mode for the rest of the scopes (destinations of this generic age cannot be safely used). It turns out that such systems with finitely many ages are incredibly easy to get wrong, and it was in fact much simpler to design a system with infinitely many ages.
 
+\section{Programming with Permissions in Mezzo}\label{ssec:mezzo}
+
+~\citet{protzenko_mezzo_2013} introduced the Mezzo programming language, in which mutable data structures can be freezed into immutable ones after having been completed. This principle is used to some extend in their list standard library module, to mimic a form of DPS programming. An earlier appearance of DPS programming as a mean to achieve better performance in a mutable language can also be seen in~\cite{larus_restructuring_1989}.
+
+\section{Rust lifetimes}\label{ssec:rust-lifetimes}
+
+Rust uses a system of lifetimes (see e.g.~\cite{pearce_lifetime_2021}) to ensure that borrows don't live longer than what they reference. It plays a similar role as our system of ages.
+
+Rust lifetimes are symbolic. Borrows and moves generate constraints (inequalities of the form $\alpha\leqslant\beta$) on the symbolic lifetimes. For instance, that a the lifetime of a reference is larger than the lifetime of any structure the reference is stored in. Without such constraints, Rust would have similar problems to those of \cref{sec:scope-escape-dests}. The borrow checker then checks that the constraints are solvable. This contrasts with \destcalculus{} where ages are set explicitly, with no analysis needed.
+
+Another difference between the two systems is that \destcalculus{}'s ages (and modes in general) are relative. An explicit modality $\ottstype{!}_{[[¹↑^ka]]}$ must be used when a part has an age different than its parent, and means that the part is $[[ka]]$ scope older than the parent. On the other hand, Rust's lifetimes are absolute, the lifetime of a part is tracked independently of the lifetime of its parent.
+
 \cleardoublepage\phantomsection\chapter*{Conclusion and future work}\label{chap:global-conclusion}\addcontentsline{toc}{chapter}{Conclusion and future work}\markboth{Conclusion and future work}{Conclusion and future work}
 
 Destination passing is not a novel concept in programming language design. It was used early on ---when manual memory management was essential even for simple programs--- as a means to avoid unnecessary memory allocations for intermediate results.
 
 It was then partially abandoned during the rise of object-oriented programming, which brought widespread adoption of automatic memory management. Today, however, we reexamine destination passing in the context of functional programming languages, with slightly different expectations.
 
-For instance, we do not advocate a return to full manual memory management, as it was the case when destination passing was used in the past. Indeed, the ability to ignore memory concerns is, in most cases, a key benefit of modern languages. Rather, functional destination passing can pursue two goals: to allow compilers to optimize code by transforming it into destination-passing style automatically at compile time~\cite{bour_tmc_2021,leijen_trmc_2023}; or, as demonstrated in this thesis, to provide programmers with the ability to manually opt in to destination passing for specific sections of functional code where improved performance or expressivity is needed.
+For instance, we do not advocate a return to full manual memory management, as it was the case when destination passing was used in the past. Indeed, the ability to ignore memory concerns is, in most cases, a key benefit of modern languages. Rather, functional destination passing can pursue two goals: to allow compilers to optimize code by transforming it into destination-passing style automatically at compile time~\cite{bour_tmc_2021,leijen_tail_2025}; or, as demonstrated in this thesis, to provide programmers with the ability to manually opt in to destination passing for specific sections of functional code where improved performance or expressivity is needed.
 
 Because destination passing is inherently imperative, it must be carefully adapted for use in functional programming languages, particularly when aiming to preserve the principles of immutability and purity that are central in such settings.
 

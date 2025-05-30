@@ -82,7 +82,7 @@ In Minamide's work, incomplete structures, or \emph{structures with a hole}, are
 
 In Minamide’s system, the (pointer to the) hole and the structure containing it are indissociable. One interacts with the hole in the structure by interacting with the structure itself, which limits an incomplete structure to having only a single hole. For these reasons, I would argue that Minamide’s approach does not yet qualify as destination-passing style programming. Nonetheless, it is one of the earliest examples of a pure functional language allowing data structures to be passed with write permissions while preserving key language guarantees such as memory safety and purity.
 
-This idea has been refreshed and extended more recently with~\cite{leijen_trmc_2023} and~\cite{lorenzen_searchtree_2024}, where structures with holes are referred to as \emph{first-class contexts}.
+This idea has been refreshed and extended more recently with~\cite{leijen_tail_2025} and~\cite{lorenzen_searchtree_2024}, where structures with holes are referred to as \emph{first-class contexts}.
 
 To reach true destination-passing style programming however, we need a way to refer to the hole(s) of the incomplete structure without having to pass around the structure that has the hole(s). This in fact hasn't been explored much in functional settings so far.~\cite{bour_tmc_2021} is probably the closest existing work on this matter, but destination-passing style is only used at the intermediary language level, in the compiler, to do optimizations, so the user can't make use of DPS in their code.
 
@@ -90,7 +90,7 @@ To reach true destination-passing style programming however, we need a way to re
 
 What I'll develop on in this thesis is a functional language in which \emph{structures with holes} are a first-class type in the language, as in~\cite{minamide_functional_1998}, but that also integrate first-class \emph{pointers to these holes}, aka. \emph{destinations}, as part of the user-facing language.
 
-We'll see that combining these two features gives us performance improvement for some functional algorithms like in~\cite{bour_tmc_2021} or~\cite{leijen_trmc_2023}, but we also get some extra expressiveness that is usually a privilege of imperative languages only. It should be indeed the first instance of a functional language that supports write pointers in the frontend (and not only in intermediate representation like~\cite{bour_tmc_2021,leijen_trmc_2023}) to make flexible and efficient data structure building!
+We'll see that combining these two features gives us performance improvement for some functional algorithms like in~\cite{bour_tmc_2021} or~\cite{leijen_tail_2025}, but we also get some extra expressiveness that is usually a privilege of imperative languages only. It should be indeed the first instance of a functional language that supports write pointers in the frontend (and not only in intermediate representation like~\cite{bour_tmc_2021,leijen_tail_2025}) to make flexible and efficient data structure building!
 
 In fact, I'll design a formal language in which \emph{structures with holes} are the core component for building any data structure, breaking from the traditional way of building structures in functional languages using data constructor. I'll also demonstrate how these ideas can be implemented in a practical functional language, namely Haskell, and that predicted benefits of the approach are mostly preserved in the prototype Haskell implementation.
 

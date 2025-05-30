@@ -174,7 +174,7 @@ l ►case ¹ν {⮒
 
 \subsection{Functional queues, with destinations}\label{ssec:efficient-queue}
 
-Implementations for a tail-recursive map are present in most of the previous works, from~\cite{minamide_functional_1998}, to recent work~\cite{bour_tmc_2021,leijen_trmc_2023}. Tail-recursive map doesn't need the full power of \destcalculus{}'s first-class destinations: it just needs a notion of structure with a (single) hole. We'll slowly works towards an example which uses first-class destinations at their full potential.
+Implementations for a tail-recursive map are present in most of the previous works, from~\cite{minamide_functional_1998}, to recent work~\cite{bour_tmc_2021,leijen_tail_2025}. Tail-recursive map doesn't need the full power of \destcalculus{}'s first-class destinations: it just needs a notion of structure with a (single) hole. We'll slowly works towards an example which uses first-class destinations at their full potential.
 
 % STOPPED THERE
 
