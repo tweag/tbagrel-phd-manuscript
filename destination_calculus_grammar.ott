@@ -149,8 +149,8 @@ term, t, u :: 'term_' ::= {{ com Term }}
   | t ⨞ Nil :: S :: SugarFillNil {{ coq (term_Val val_Unit) }} {{ tex [[t]]\triangleleft\ottsctor{Nil} }}
   | t ⨞ Node :: S :: SugarFillNode {{ coq (term_Val val_Unit) }} {{ tex [[t]]\triangleleft\ottsctor{Node} }}
   | go t1 t2 t3 :: S :: SugarGo {{ coq (term_Val val_Unit) }} {{ tex \ottkw{go}~[[t1]]~[[t2]]~[[t3]] }}
-  | mapAccumBFS t1 t2 t3 :: S :: SugarMapAccumBFS {{ coq (term_Val val_Unit) }} {{ tex \ottkw{mapAccumBFS}~[[t1]]~[[t2]]~[[t3]] }}
-  | relabelDPS t :: S :: SugarRelabelDPS {{ coq (term_Val val_Unit) }} {{ tex \ottkw{relabelDPS}~[[t]] }}
+  | mapAccumBfs t1 t2 t3 :: S :: SugarMapAccumBFS {{ coq (term_Val val_Unit) }} {{ tex \ottkw{mapAccumBfs}~[[t1]]~[[t2]]~[[t3]] }}
+  | relabelDps t :: S :: SugarRelabelDPS {{ coq (term_Val val_Unit) }} {{ tex \ottkw{relabelDps}~[[t]] }}
   | dup t :: S :: Dup {{ coq (term_Val val_Unit) }} {{ tex \ottkw{dup}~[[t]] }}
   | drop t :: S :: Drop {{ coq (term_Val val_Unit) }} {{ tex \ottkw{drop}~[[t]] }}
   | allocIP :: S :: SugarNewAIP {{ coq (term_Val val_Unit) }} {{ tex \ottkw{new}_{\ottkw{\ltimes IP} } }}

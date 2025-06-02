@@ -4,7 +4,7 @@ The main issue with the approach of the previous chapter is that we are not able
 
 Previous works however, such as~\cite{minamide_functional_1998}, or~\cite{lorenzen_searchtree_2024}, would allow for efficient queues (see \cref{ssec:efficient-queue}) or any structure with holes to store linear data, without issues with scope escape. Mainly because they don't have a concept of destinations; in these works we can only fill holes in a structure by interacting with the incomplete structure itself (the ampar). So we ought to find a way for our Haskell implementation to be at least as expressive as these works.
 
-\section{Challenges of destinations for linear data -- scope escape, updated}\label{sec:dps-lin-challenges}
+\section{Challenges of destinations for linear data~---scope escape, updated}\label{sec:dps-lin-challenges}
 
 Starting from this point, we will say \emph{linear destination} for an object of type $[[⌊ T ⌋ ˥]]$ or corresponding \mintinline{haskellc}/Dest Ⴈ t/, that is, a destination that can host linear data. Similarly, an \emph{unrestricted destination} is an object of type $[[⌊ T ⌋ ɷ]]$ or \mintinline{haskellc}/Dest ω t/. Regardless, a destination is always, itself, a resource that must be managed linearly. Finally, in the main part of this section, we omit compact region details, for clarity of exposition.
 
@@ -70,7 +70,7 @@ fromAmpar' (
 \end{unbreakable}
 Here, we create a new ampar for a pair of a \mintinline{haskellc}/t/ and a \mintinline{haskellc}/Dest Ⴈ t/. After filling the root destination \mintinline{haskellc}/d/ with a hollow pair constructor, we get two destinations, \mintinline{haskellc}/dt/ and \mintinline{haskellc}/ddt/. If we have access to a \mintinline{haskellc}/fillLeaf/ function operating with a linear destination on the left, we can actually put \mintinline{haskellc}/dt/ into \mintinline{haskellc}/ddt/. Because we've consumed the two destinations and unit is returned, it seems that the ampar is complete, while in fact we've never provided a value of type \mintinline{haskellc}/t/ for the first field of the pair! So the structure is still incomplete while we are allowed to call \mintinline{haskellc}/fromAmpar'/ on it and read it!
 
-So far we hadn't spoke about this danger, because the mechanisms used to prevent scope escape in \cref{chap:dest-calculus,chap:dps-haskell} ---that is, either the age system, or the absence of linear destinations--- are enough to also prevent sibling destinations from interacting with one another. But here, the limitation put on \mintinline{haskellc}/updWith/ (not allowing capture of linear resources) only stops scope escape, but not this other issue, because both sibling destinations are coming from the same, freshest scope. Hence, it still wouldn't be safe to have a function \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ operating on linear destinations.
+So far we hadn't spoke about this danger, because the mechanisms used to prevent scope escape in \cref{chap:dest-calculus,chap:dps-haskell}~---that is, either the age system, or the absence of linear destinations---~are enough to also prevent sibling destinations from interacting with one another. But here, the limitation put on \mintinline{haskellc}/updWith/ (not allowing capture of linear resources) only stops scope escape, but not this other issue, because both sibling destinations are coming from the same, freshest scope. Hence, it still wouldn't be safe to have a function \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/ operating on linear destinations.
 
 \section{\mintinline{haskellc}/extend/ functions for ampars with a single hole}\label{sec:single-hole}
 
@@ -186,7 +186,7 @@ extendComp ⩴ ∀ s t u. Ampar t u ⊸ Ampar s (Dest Ⴈ t) ⊸ Ampar s u
 \end{minted}
 }
 \end{unbreakable}
-In \mintinline{haskellc}/extendComp/, we need the destination in the parent ampar to be a linear destination, for two reasons. First, we fill the destination from the parent ampar with the child ampar \mintinline{haskellc}/Ampar t u/, which is itself a linear resource. Secondly, even in a world where ampars wouldn't have to be linear ---like in the theoretical presentation of \destcalculus{}--- the destination used for composition using $\mathop{\triangleleft\mycirc}$ / \mintinline{haskellc}/fillComp/ / \mintinline{haskellc}/extendComp/ should still be linear. Indeed, the ampar resulting from the composition inherits whatever was on the right of the child ampar (represented by \mintinline{haskellc}/u/ here), which in particular contains the remaining destination(s) from the child ampar. If we were to write the child ampar into an unrestricted destination of the parent ampar, then we would need to update the multiplicity of the remaining destinations of this child ampar, inside \mintinline{haskellc}/u/, to be unrestricted too, and this is not easily expressible.
+In \mintinline{haskellc}/extendComp/, we need the destination in the parent ampar to be a linear destination, for two reasons. First, we fill the destination from the parent ampar with the child ampar \mintinline{haskellc}/Ampar t u/, which is itself a linear resource. Secondly, even in a world where ampars wouldn't have to be linear~---like in the theoretical presentation of \destcalculus{}---~the destination used for composition using $\mathop{\triangleleft\mycirc}$ / \mintinline{haskellc}/fillComp/ / \mintinline{haskellc}/extendComp/ should still be linear. Indeed, the ampar resulting from the composition inherits whatever was on the right of the child ampar (represented by \mintinline{haskellc}/u/ here), which in particular contains the remaining destination(s) from the child ampar. If we were to write the child ampar into an unrestricted destination of the parent ampar, then we would need to update the multiplicity of the remaining destinations of this child ampar, inside \mintinline{haskellc}/u/, to be unrestricted too, and this is not easily expressible.
 
 % STOPPED HERE%
 
@@ -194,7 +194,7 @@ In \mintinline{haskellc}/extendComp/, we need the destination in the parent ampa
 
 Being limited to only one destination on the right-hand side of ampars is not ideal. Indeed, we stay at the same expressivity level as existing work, and we loose part of the flexibility that made \destcalculus{} innovative in the first place.
 
-Supporting multiple linear destinations on the right-hand side of ampars introduces significant complexity however. In the previous section, with only one destination per ampar, we avoided scope escape by requiring the user to interact with the ampar directly, rather than with the destination itself. This was straightforward, as there was no ambiguity ---the single destination was the only possible target of the \mintinline{haskellc}/extend/ operation. By contrast, if we now allow arbitrary types on the right-hand side, but still aim to restrict direct user access to destinations (for the same reasons as above; \mintinline{haskellc}/updWith/ is now non-capturing, and we want to prevent scope escape and malicious interaction between sibling destinations), we must introduce a mechanism for users to indicate which specific destination they intend to operate on.
+Supporting multiple linear destinations on the right-hand side of ampars introduces significant complexity however. In the previous section, with only one destination per ampar, we avoided scope escape by requiring the user to interact with the ampar directly, rather than with the destination itself. This was straightforward, as there was no ambiguity~---the single destination was the only possible target of the \mintinline{haskellc}/extend/ operation. By contrast, if we now allow arbitrary types on the right-hand side, but still aim to restrict direct user access to destinations (for the same reasons as above; \mintinline{haskellc}/updWith/ is now non-capturing, and we want to prevent scope escape and malicious interaction between sibling destinations), we must introduce a mechanism for users to indicate which specific destination they intend to operate on.
 
 One idea for that is to ask the user for a linear lens. First, let's define what a lens is.
 
@@ -309,7 +309,7 @@ Both of these functions are very similar to their respective one-hole versions \
 
 \section{Breadth-first tree traversal, updated, and final API}\label{sec:bf-api-final}
 
-The family of \mintinline{haskellc}/extendFocused/ functions, based on linear lenses, addresses the core challenge of safely filling destinations with linear data. Although the resulting interface is not entirely satisfactory ---particularly from an ergonomic standpoint--- it still strikes a reasonable compromise between expressiveness and complexity of the interface (given the constraint of working with the existing Haskell type system).
+The family of \mintinline{haskellc}/extendFocused/ functions, based on linear lenses, addresses the core challenge of safely filling destinations with linear data. Although the resulting interface is not entirely satisfactory~---particularly from an ergonomic standpoint---~it still strikes a reasonable compromise between expressiveness and complexity of the interface (given the constraint of working with the existing Haskell type system).
 
 For instance, the DPS system supports two usable levels of nesting for destinations, allowing us to construct and use linear destinations of destinations (type \mintinline{haskellc}/Dest Ⴈ (Dest m t)/). This is in fact perfectly sufficient to implement non-trivial examples, such as the breadth-first traversal of a tree, but this time using the efficient, destination-based queues in Haskell! Let's revisit these examples one last time. For the final part of this chapter, we also take compact region considerations into account (this mostly consists in adding \mintinline{haskellc}/r/ and \mintinline{haskellc}/Region r/ all over the function's signatures). The code of efficient queues (and difference lists for linear data, that they are made of) is presented in \cref{table:eff-queue-lin}, and the code for updated breadth-first tree traversal is given in \cref{table:impl-bfs-tree-traversal-v2}.
 
@@ -360,10 +360,10 @@ dequeue (¤EffQueue front back) = case front of
 data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)
 
 relabelDps ⩴ Region r ⇒ Token ⊸ Tree t → Tree Int
-relabelDps tree = fst (macAccumBfs (\st _ → (st + 1, st)) 1 tree)
+relabelDps tree = fst (mapAccumBfs (\st _ → (st + 1, st)) 1 tree)
 
-macAccumBfs ⩴ ∀ r s t u. Region r ⇒ Token ⊸ (s → t → (s, u)) → s → Tree t → (Tree u, s)
-macAccumBfs tok f s0 tree =
+mapAccumBfs ⩴ ∀ r s t u. Region r ⇒ Token ⊸ (s → t → (s, u)) → s → Tree t → (Tree u, s)
+mapAccumBfs tok f s0 tree =
   case fromAmpar (newAmpar @(Ur (Tree u)) tok `updWith` \du → go s0 (singleton (¤Ur tree, du &fillUr)))
   of (¤Ur outTree, ¤Ur st) → (outTree, st)
   where
@@ -471,7 +471,7 @@ In this chapter we took time to explore what happens when we relax the drastic r
 
 In several careful steps, avoiding scope escape and similar dangers at every corner, we refined our DPS Haskell API to lift this limitation. First, by allowing the user to build ampars to store linear data, but only if they have only one hole each, in the light of the foundational works~\cite{minamide_functional_1998,lorenzen_searchtree_2024}. This gave birth to the family of \mintinline{haskellc}/extend/ functions, that operate on ampars directly instead of destinations.
 
-In a second time, we released yet another set of functions, denoted by \mintinline{haskellc}/extendFocused/, that let the user fill ampars of arbitrary shapes, with no limit on the number of holes or destinations, with linear data. These functions also operate directly on an ampar, and let the user select the destination they want to focus on, inside the ampar, with a \emph{linear lens} ---that is, a convenient object that acts as both a getter and setter for immutable functional data structures.
+In a second time, we released yet another set of functions, denoted by \mintinline{haskellc}/extendFocused/, that let the user fill ampars of arbitrary shapes, with no limit on the number of holes or destinations, with linear data. These functions also operate directly on an ampar, and let the user select the destination they want to focus on, inside the ampar, with a \emph{linear lens}~---that is, a convenient object that acts as both a getter and setter for immutable functional data structures.
 
 In the end, we recover a system that is as close as possible to \destcalculus{} (\cref{chap:dest-calculus}), in terms of flexibility and expressiveness, while still conforming itself to the existing type system of Haskell. Of course, the ergonomics for filling linear destinations are not as smooth as in \destcalculus{}, but our newly gained flexibility let us implemented a revised version of breadth-first tree traversal in Haskell, that this time, uses exactly the same algorithm and underlying data structures as the initial version provided for \destcalculus{} in \cref{sec:bft}.
 
