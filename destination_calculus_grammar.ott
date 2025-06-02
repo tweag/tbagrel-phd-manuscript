@@ -79,7 +79,7 @@ hnames, H :: 'hnames_' ::= {{ com Set of hole names }} {{ coq HNames.t }} {{ tex
 % LANGUAGE SYNTAX (STATIC)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-term, t, u :: 'term_' ::= {{ com Term }}
+term, t, u, B :: 'term_' ::= {{ com Term }}
   | v :: :: Val {{ com Value }}
   | x :: :: Var {{ com Variable }}
   | t' t :: :: App {{ com Application }} {{ tex [[t']]~[[t]] }}
@@ -129,7 +129,7 @@ term, t, u :: 'term_' ::= {{ com Term }}
   | ˢ0 :: S :: SugarZero {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{0} }} % Coq translation is a placeholder 
   | ˢ1 :: S :: SugarOne {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{1} }} % Coq translation is a placeholder
   | ˢ2 :: S :: SugarTwo {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{2} }} % Coq translation is a placeholder
-  | H ˢ⟨ t2 ❟ t1 ⟩ :: S :: SugarAmpar {{ coq (term_Val val_Unit) }} {{ tex _{[[H]]\!}\ottsctor{\langle}[[t2]]\,\ottsctor{\bbcomma}~[[t1]]\ottsctor{\rangle} }} % Coq translation is a placeholder
+  | H ˢ⟨ t2 ❟ t1 ⟩ :: S :: SugarAmpar {{ coq (term_Val val_Unit) }} {{ tex _{[[H]]}\ottsctor{/}[[t2]]\,\ottsctor{\bbcomma}~[[t1]]\ottsctor{/} }} % Coq translation is a placeholder
   | ˢNil :: S :: SugarNil {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{Nil} }}
   | ˢNode t1 t2 t3 :: S :: SugarNode {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{Node}~[[t1]]~[[t2]]~[[t3]] }}
   | true :: S :: SugarTrue {{ coq (term_Val val_Unit) }} {{ tex \ottsctor{true} }}
@@ -190,7 +190,7 @@ val, v, vd :: 'val_' ::= {{ com Value }}
   | Inr v :: :: Right {{ com Right variant for sum }}
   | ᴇ m v :: :: Exp {{ tex \expcons{[[m]]}[[v]] }} {{ com Exponential }}
   | ( v1 , v2 ) :: :: Prod {{ tex \ottsctor{(}[[v1]]\,\ottsctor{,}~[[v2]]\ottsctor{)} }} {{ com Product }}
-  | H ⟨ v2 ❟ v1 ⟩ :: :: Ampar {{ com Ampar }} {{ tex _{[[H]]\!}\ottsctor{\langle}[[v2]]\,\ottsctor{\bbcomma}~[[v1]]\ottsctor{\rangle} }}
+  | H ⟨ v2 ❟ v1 ⟩ :: :: Ampar {{ com Ampar }} {{ tex _{[[H]]}\ottsctor{/}[[v2]]\,\ottsctor{\bbcomma}~[[v1]]\ottsctor{/} }}
   | v [ H ⩲ h' ] :: M :: Cshift {{ com Shift hole names inside $[[v]]$ by $[[h']]$ if they belong to $[[H]]$. }} {{ coq (val_cshift [[v]] [[H]] [[h']]) }} {{ tex [[v]]\ottshname{[}[[H]][[⩲]][[h']]\ottshname{]} }}
   | ( v ) :: S :: Paren {{ coq [[v]] }} {{ tex ([[v]]) }}
   | v [ h ≔ H' v' ] :: M :: Fill {{ tex [[v]]\hspace*{0.11em}\llparenthesis [[h]]\assigneq_{[[H']]}\,[[v']]\hspace*{0.11em}\rrparenthesis }} {{ coq (val_fill [[v]] [[h]] [[H']] [[v']]) }}
@@ -229,7 +229,7 @@ ectx, c {{ tex \ottnt{e} }} :: 'ectx_' ::= {{ com Evaluation context component }
   | v ⨞· ⬜ :: :: FillComp2 {{ tex [[v]]\mathop{\triangleleft\mycirc}[[⬜]] }}
   | ⬜ ◀ t' :: :: FillLeaf1 {{ tex [[⬜]][[◀]][[t']] }}
   | v ◀ ⬜ :: :: FillLeaf2 {{ tex [[v]][[◀]][[⬜]] }}
-  | H ᵒᵖ⟨ v2 ❟ ⬜ ⟩ :: :: OpenAmpar {{ tex ^{\text{op}\!}_{[[H]]\!}\ottsctor{\langle}[[v2]]\,\ottsctor{\bbcomma}~[[⬜]]\ottsctor{\rangle} }} {{ com Open ampar, binding hole names in the next components }}
+  | H ᵒᵖ⟨ v2 ❟ ⬜ ⟩ :: :: OpenAmpar {{ tex ^{\text{op}\!}_{[[H]]}\ottsctor{/}[[v2]]\,\ottsctor{\bbcomma}~[[⬜]]\ottsctor{/} }} {{ com Open ampar, binding hole names in the next components }}
   | ( c ) :: S :: Paren {{ coq [[c]] }} {{ tex [[c]] }} % {{ tex \biggerparenl[[c]]\biggerparenr }}
   | ˢInl ⬜ :: S :: SugarLeft {{ tex \ottsctor{Inl}\,[[⬜]] }} {{ coq ectx_FillU }}
   | ˢInr ⬜ :: S :: SugarRight {{ tex \ottsctor{Inr}\,[[⬜]] }} {{ coq ectx_FillU }}

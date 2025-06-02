@@ -14,9 +14,9 @@
 \newcommand{\biggerparenr}{{\scriptstyle\bigr)}}
 
 % Big comma for Ampar
-% \DeclareSymbolFont{bbsymbol}{U}{bbold}{m}{n}
-% \DeclareMathSymbol{\bbcomma}{\mathbin}{bbsymbol}{"2C}
-\newcommand{\bbcomma}{\mathrel{\hspace*{-0.2ex}\raisebox{-1.3ex}{\textasciicircum}}\hspace*{-0.5ex}}
+\DeclareSymbolFont{bbsymbol}{U}{bbold}{m}{n}
+\DeclareMathSymbol{\bbcommaraw}{\mathbin}{bbsymbol}{"2C}
+\newcommand{\bbcomma}{\mathrel{\hspace*{0.2ex}\raisebox{-0.3ex}{\ensuremath{\bbcommaraw}}}\hspace*{-0.4ex}}
 
 % Allow sans-serif + bold font in math mode
 

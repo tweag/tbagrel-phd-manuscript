@@ -601,7 +601,7 @@ As destinations always exist in the context of a structure with holes, and must 
   \scalebox{0.85}{\tikzfig{schemas/mapscopes}}
 \end{ottfig}
 
-\Cref{fig:scope-rules} illustrates scopes introduced by $\ottkw{upd}_{\ottkw{\ltimes} }$, and how the typing rules for $\ottkw{upd}_{\ottkw{\ltimes} }$ and $\blacktriangleleft$ interact. For the first time here we see ampar values $\ottsctor{\langle}[[v2]]\,\ottsctor{\bbcomma}~[[v1]]\ottsctor{\rangle}$, represented as pair-like objects with a structure with holes $[[v2]]$ on the left, and an arbitrary structure $[[v1]]$ containing destinations on the right (ampar values will be formally introduced in \cref{ssec:runtime-values}). With $\ottkw{upd}_{\ottkw{\ltimes} }$ we enter a new scope where the destinations are accessible, but the structure with holes remains in the outer scope. As a result, when filling a destination with \rref*{\CTyTerm\CSep\CFillLeaf}, for instance $[[d11 ◀ x0]]$ in \cref{fig:scope-rules}, we type $[[d11]]$ in the new scope, while we type $[[x0]]$ in the outer scope, as it’s being moved to the structure with holes on the left of the ampar, which lives in the outer scope too. This is the opposite of the scaling that $\ottkw{upd}_{\ottkw{\ltimes} }$ does: while $\ottkw{upd}_{\ottkw{\ltimes} }$ creates a new scope for its body, operator $\blacktriangleleft$, and similarly, $\triangleleft\mycirc$ and $[[⨞]](\lamnt{[[x]]}{[[m]]}{[[u]]})$, transfer their right operand to the outer scope. In other words, the right-hand side of $[[◀]]$ or $[[⨞]]$ is an enclave for the parent scope.
+\Cref{fig:scope-rules} illustrates scopes introduced by $\ottkw{upd}_{\ottkw{\ltimes} }$, and how the typing rules for $\ottkw{upd}_{\ottkw{\ltimes} }$ and $\blacktriangleleft$ interact. For the first time here we see ampar values $\ottsctor{/}[[v2]]\,\ottsctor{\bbcomma}~[[v1]]\ottsctor{/}$, represented as pair-like objects with a structure with holes $[[v2]]$ on the left, and an arbitrary structure $[[v1]]$ containing destinations on the right (ampar values will be formally introduced in \cref{ssec:runtime-values}). With $\ottkw{upd}_{\ottkw{\ltimes} }$ we enter a new scope where the destinations are accessible, but the structure with holes remains in the outer scope. As a result, when filling a destination with \rref*{\CTyTerm\CSep\CFillLeaf}, for instance $[[d11 ◀ x0]]$ in \cref{fig:scope-rules}, we type $[[d11]]$ in the new scope, while we type $[[x0]]$ in the outer scope, as it’s being moved to the structure with holes on the left of the ampar, which lives in the outer scope too. This is the opposite of the scaling that $\ottkw{upd}_{\ottkw{\ltimes} }$ does: while $\ottkw{upd}_{\ottkw{\ltimes} }$ creates a new scope for its body, operator $\blacktriangleleft$, and similarly, $\triangleleft\mycirc$ and $[[⨞]](\lamnt{[[x]]}{[[m]]}{[[u]]})$, transfer their right operand to the outer scope. In other words, the right-hand side of $[[◀]]$ or $[[⨞]]$ is an enclave for the parent scope.
 
 When using $\ottkw{from}_{\ottkw{\ltimes} }'$ (rule \rref*{\CTySTerm\CSep\CFromA'}), the left of an ampar is extracted to the current scope. This is the fundamental reason why the left of an ampar has to ``take place'' in the current scope. We know the structure is complete and can be extracted because the right-hand side is of type unit ($[[①]]$) and thus, no destination on the right-hand side means no hole can remain on the left. $\ottkw{from}_{\ottkw{\ltimes} }'$ is implemented in terms of $\ottkw{from}_{\ottkw{\ltimes} }$ in \cref{fig:sterm} to keep the core calculus tidier (and limit the number of typing rules, evaluation contexts, etc), but it can be implemented much more efficiently in a real-world implementation.
 
@@ -613,7 +613,7 @@ The remaining operators $[[⨞]][[()]], [[⨞]][[Inl]], [[⨞]][[Inr]], [[⨞]]\
 
 \paragraph{Putting into practice}
 
-As an exercise, now that we have all the typing rules in place, we can work out the typing tree for the synthetic destination-filling operator $\ottsctor{[[⨞]] (::)}$ and the corresponding synthetic constructor $\ottsctor{(::)}$ that we used since \cref{ssec:map-tr}. Starting with $\ottsctor{[[⨞]] (::)}$, we have the following definition.
+As an exercise, now that we have all the typing rules in place, we can work out the typing tree for the synthetic destination-filling operator $\ottsctor{[[⨞]] (::)}$ and the corresponding synthetic constructor $\ottsctor{(::)}$ that we used since \cref{ssec:map-tr}. We recall that $[[List T]] \btriangleq [[① ⨁ (T ⨂ (List T))]]$. Let's start with the definition and then the typing tree of $\ottsctor{[[⨞]] (::)}$:
 
 \codehere{
 \newoperator
@@ -621,9 +621,7 @@ As an exercise, now that we have all the typing rules in place, we can work out 
   {[[d ⨞(::)]]}{[[d ⨞ Inr ⨞ (,)]]}
 }
 
-We recall that $[[List T]] \btriangleq [[① ⨁ (T ⨂ (List T))]]$. Let's see the typing tree:
-
-\rref*{A-ty}:
+\noindent\rref*{$\ottnt{A}$-ty}:
 \[
 \inferrule*[right=\CTySTerm\CSep\CFun]{
   \inferrule*[right=\CFillP]{
@@ -636,7 +634,7 @@ We recall that $[[List T]] \btriangleq [[① ⨁ (T ⨂ (List T))]]$. Let's see 
 }{[[{} ⊢ ˢλ d ¹ν ⟼ d ⨞ Inr ⨞ (,) : ⌊ List T ⌋ m ¹ν → ⌊T⌋ m ⨂ ⌊List T⌋ m]]}
 \]
 
-Now, let's move on to $\ottsctor{(::)}$ synthetic constructor:
+\noindent{}Now, let's move on to $\ottsctor{(::)}$ synthetic constructor:
 
 \codehere{
 \newoperator
@@ -644,14 +642,14 @@ Now, let's move on to $\ottsctor{(::)}$ synthetic constructor:
   {[[x ˢ:: xs ]]}{[[from⧔' (alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs)]]}
 }
 
-We will first type the subexpression $B \btriangleq [[(d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs]]$, then type the whole expression corresponding to operator $\ottsctor{(::)}$.
+\noindent{}Given that the typing tree will grow very large, we will first type the subexpression $[[B]] \btriangleq [[(d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs]]$, then type the whole expression corresponding to operator $\ottsctor{(::)}$.
 
-\noindent\rref*{B-ty}:
+\noindent\rref*{$\ottnt{B}$-ty}:
 
 \noindent\begin{augmentwidth}{8cm}
 \[
   \inferrule*[Right=\CPatP]{
-    \inferrule*[right=A-ty]{
+    \inferrule*[right=$\ottnt{A}$-ty]{
       \inferrule*[right=\CVar]{[[¹ν]] ⥶ [[¹ν]]}{[[{ d : ¹ν ⌊ List T ⌋ ¹ν } ⊢ d : ⌊ List T ⌋ ¹ν]]}
     }{[[{ d : ¹ν ⌊ List T ⌋ ¹ν } ⊢ d ⨞(::) : ⌊T⌋ ¹ν ⨂ ⌊List T⌋ ¹ν]]}\quad
     \inferrule*[Right=\CPatU]{
@@ -668,7 +666,7 @@ We will first type the subexpression $B \btriangleq [[(d ⨞(::)) ►case ¹ν (
 \]
 \end{augmentwidth}
 
-\noindent\rref*{C-ty}:
+\noindent\rref*{$\ottnt{C}$-ty}:
 
 \noindent\begin{augmentwidth}{8cm}
 \[
@@ -677,18 +675,18 @@ We will first type the subexpression $B \btriangleq [[(d ⨞(::)) ►case ¹ν (
     \inferrule*[Right=\CFromA']{
       \inferrule*[Right=\CUpdA]{
         \inferrule*[right=\CNewA]{\phantom{a}}{[[{} ⊢ alloc : List T ⧔ ⌊List T⌋ ¹ν]]}\quad
-        % \inferrule*[Right=(B)]{}{[[{ d : ¹ν ⌊ List T ⌋ ¹ν },¹↑·({ x : ¹ν T },{ xs : ¹ν List T }) ⊢ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs : ①]]}
-        \inferrule*[Right=B-ty]{\phantom{a}}{[[{ d : ¹ν ⌊ List T ⌋ ¹ν },¹↑·({ x : ¹ν T },{ xs : ¹ν List T })]][[⊢]]B\pmb{:}[[①]]}
-      }{[[{ x : ¹ν T },{ xs : ¹ν List T }⊢alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs : List T ⧔ ①]]}
-    }{[[{ x : ¹ν T },{ xs : ¹ν List T }⊢from⧔' (alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs): List T]]}
-  }{[[{ x : ¹ν T }⊢ˢλ xs ¹ν ⟼ from⧔' (alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs): List T ¹ν → List T]]}
-}{[[{}⊢ˢλ x ¹ν ⟼ ˢλ xs ¹ν ⟼ from⧔' (alloc ►map d ⟼ (d ⨞(::)) ►case ¹ν (dx, dxs) ⟼ dx ◀ x; dxs ◀ xs): T ¹ν → List T ¹ν → List T]]}
+        % \inferrule*[Right=(B)]{}{[[{ d : ¹ν ⌊ List T ⌋ ¹ν },¹↑·({ x : ¹ν T },{ xs : ¹ν List T }) ⊢ B : ①]]}
+        \inferrule*[Right=$\ottnt{B}$-ty]{\phantom{a}}{[[{ d : ¹ν ⌊ List T ⌋ ¹ν },¹↑·({ x : ¹ν T },{ xs : ¹ν List T }) ⊢ B : ①]]}
+      }{[[{ x : ¹ν T },{ xs : ¹ν List T }⊢alloc ►map d ⟼ B : List T ⧔ ①]]}
+    }{[[{ x : ¹ν T },{ xs : ¹ν List T }⊢from⧔' (alloc ►map d ⟼ B): List T]]}
+  }{[[{ x : ¹ν T }⊢ˢλ xs ¹ν ⟼ from⧔' (alloc ►map d ⟼ B): List T ¹ν → List T]]}
+}{[[{}⊢ˢλ x ¹ν ⟼ ˢλ xs ¹ν ⟼ from⧔' (alloc ►map d ⟼ B): T ¹ν → List T ¹ν → List T]]}
 \]
 \end{augmentwidth}
 
 \bigskip
 
-If look at the typing tree $\rref*{C-ty}$ from the root to the leaves, we see that when going under $\ottkw{upd}_{\ottkw{\ltimes} }$, variable bindings for $[[x]]$ and $[[xs]]$ are multiplied by $[[¹↑]]$ (their age is increased by one). But this is not an issue; in fact, it's required by the typing rule \rref*{\CTyTerm\CSep\CFillLeaf} that the right operand is of age $[[↑]]$ (as always, to prevent scope escape), as we see in typing tree $\rref*{B-ty}$.
+If look at the typing tree $\rref*{$\ottnt{C}$-ty}$ from the root to the leaves, we see that when going under $\ottkw{upd}_{\ottkw{\ltimes} }$, variable bindings for $[[x]]$ and $[[xs]]$ are multiplied by $[[¹↑]]$ (their age is increased by one). But this is not an issue; in fact, it's required by the typing rule \rref*{\CTyTerm\CSep\CFillLeaf} that the right operand is of age $[[↑]]$ (as always, to prevent scope escape), as we see in typing tree $\rref*{$\ottnt{B}$-ty}$.
 
 Also, as in a regular functional programming language, modes and more specifically ages do \emph{not} show up in the signature of synthetic constructor $\ottsctor{(::)}$; only in its internal typing derivations, because the use of destinations to define $\ottsctor{(::)}$ is, from this point of view, just implementation details hidden to the user.
 
@@ -1271,7 +1269,7 @@ Minamide's system~\cite{minamide_functional_1998} introduces two primitives, $\o
 
 The paper indicates that hole abstractions cannot have lambda abstraction, application, or case expression operating on the variable of the abstraction, but otherwise allow these constructs to appear in the body of the hole abstraction if they are operating on other variables or values.
 
-In a well-typed, closed program, we can evaluate the body of the hole abstraction (under the $\pmb{\hat{\lambda}}$) as far as possible, until it is almost a value except for the single occurence of $[[x]]$ (we know $[[x]]$ cannot cause this reduction to be stuck, as it cannot appear in the evaluation path of an application or case expression). At that point hole abstractions directly translate to our ampar value form: we transform $\lamh{[[x]]}{[[t]]}$ to $_{[[ {h} ]]\!}\ottsctor{\langle}[[t]][ [[x]] \assigneq [[+h]] ]\,\ottsctor{\bbcomma}~[[-h]]\ottsctor{\rangle}$. In other terms, we take the body of the hole abstraction as the left-hand side of the ampar, with the single occurrence of the variable replaced by a hole $[[+h]]$, and just use the corresponding destination $[[-h]]$ as the right-hand side. The type of hole abstractions, $\ottstype{([[T]], [[S]]) hfun}$, is translated as $[[S ⧔ ⌊ T ⌋ ¹ν]]$.
+In a well-typed, closed program, we can evaluate the body of the hole abstraction (under the $\pmb{\hat{\lambda}}$) as far as possible, until it is almost a value except for the single occurence of $[[x]]$ (we know $[[x]]$ cannot cause this reduction to be stuck, as it cannot appear in the evaluation path of an application or case expression). At that point hole abstractions directly translate to our ampar value form: we transform $\lamh{[[x]]}{[[t]]}$ to $_{[[ {h} ]]}\ottsctor{/}[[t]][ [[x]] \assigneq [[+h]] ]\,\ottsctor{\bbcomma}~[[-h]]\ottsctor{/}$. In other terms, we take the body of the hole abstraction as the left-hand side of the ampar, with the single occurrence of the variable replaced by a hole $[[+h]]$, and just use the corresponding destination $[[-h]]$ as the right-hand side. The type of hole abstractions, $\ottstype{([[T]], [[S]]) hfun}$, is translated as $[[S ⧔ ⌊ T ⌋ ¹ν]]$.
 
 If we don't allow for this eager evaluation of the hole abstraction's body to happen before the translation, we need to encode an hole abstraction by:
 
