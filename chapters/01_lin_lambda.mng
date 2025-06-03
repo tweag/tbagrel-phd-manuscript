@@ -347,7 +347,7 @@ Let's say we want to write the $\ottkw{fst}$ function, that extracts the first e
   {\ottkw{fst}_{\ottkw{nl}}}{[[λ x ⟼ x ►case ¹ν (x1, x2) ⟼ x1]]}
 }
 
-But in \CLm{}, or even \CLOneOrTwo{}, we are not allowed to do this. A naive idea would be to give the function the signature $[[T⨂U ɷ → T]]$, but that still doesn't help: as we just said, even with an unrestricted pair, we have to consume both elements of the pair the same number of times. The only valid solution is to indicate, in the signature, that the second element of the pair~---that we discard---~will not be used linearly:
+But in \CLm{}, or even \CLOneOrTwo{}, we are not allowed to do this. A naive idea would be to give the function the signature $[[T⨂U ɷ → T]]$, but that still doesn't help: as we just said, even with an unrestricted pair, we have to consume both elements of the pair the same number of times. The only valid solution is to indicate, in the signature, that the second element of the pair~---that we discard---~will not be used linearly, by wrapping it in a $\ottstype{!}_{[[ɷ]]}$ modality:
 
 \codehere{
 \newoperator
@@ -358,9 +358,19 @@ But in \CLm{}, or even \CLOneOrTwo{}, we are not allowed to do this. A naive ide
 ]]\end{array}}
 }
 
-It's often desirable to lift this limitation in a real programming language, and let the $\ottstype{!}_{[[m]]}$ modality, and more generally, the modes of variables, distribute over the other connectives like $\ottstype{\otimes}$ or $\ottstype{\oplus}$. The main motivation for \emph{deep modes} (in the sense that they propagate throughout a data structure) is that they make it more convenient to write non-linear programs in a linear language.
+In a real programming context, where linearity is not always the main concern, it gets quite tiresome to have to insert $\ottstype{!}_{[[ɷ]]}$ modalities everywhere in the types, and $\ottkw{case}\,[[t]]~\ottkw{of}~\expcons{[[m]]}[[x]]\,[[⟼]]\ldots$ everywhere in the terms. Ideally we would like programs valid in the usual $\lambda$-calculus to have a valid interpretation in our linear $\lambda$-calculus with almost no change required, especially to the syntax.
 
-Indeed, in a modal linear $\lambda$-calculus with deep modes (further denoted \CLdm), functions of type $[[T ɷ → U]]$ gain exactly the same expressive power as the ones with type $[[T → U]]$ in STLC. In other terms, any program that is valid in STLC but doesn't abide by linearity can still type in \CLdm{} without any restructuration needed, we just need to add the proper mode annotations! This was clearly not the case in a faithful interpretation of Girard's linear logic, like we just showed before with limitations of \CLm{} when implementing $\ottkw{fst}_{\ottkw{m}}$.
+We can do that with \emph{deep modes}. Deep modes is a common feature in practical modal languages, that consists in allowing modes or their corresponding graded modalities to commute with other data types such as sums and products. It has, for instance, been implemented in Linear Haskell~\cite{bernardy_linear_2018}, Granule~\cite{orchard_graded_modal_2019}, and the more recent Modal OCaml~\cite{lorenzen_oxidizing_2024}.
+
+With deep modes, we obtain the following equivalences:
+
+\codehere{\!\!\!\begin{array}[t]{rcl}
+[[!m (T⨂U)]] &\simeq& [[(!m T) ⨂ (!m U)]] \\
+[[!m (T⨁U)]] &\simeq& [[(!m T) ⨁ (!m U)]] \\
+[[!m (!n T)]] &\simeq& [[!(m·n) T]]
+\end{array}}
+
+In our modal linear $\lambda$-calculus extended with deep modes (further denoted \CLdm), functions of type $[[T ɷ → U]]$ can represent all the ones having type $[[T → U]]$ in STLC. If we conveniently use compatible syntax for terms and types in both systems, then there is almost no change required to go from a function valid in STLC to one valid in \CLdm{}; we just need to add a few modes annotations (both in terms and types). This contrasts with a faithful interpretation of Girard's linear logic, like we just showed before with \CLm{}, where we need to introduce (and then destruct) modalities explicitly whenever a non-linear control flow occurs (as in $\ottkw{fst}_{\ottkw{m}}$).
 
 Revisiting this $\ottkw{fst}$ function, with deep modes in \CLdm{}, we are able to write:
 
@@ -372,14 +382,7 @@ Revisiting this $\ottkw{fst}$ function, with deep modes in \CLdm{}, we are able 
 
 This is precisely the same implementation as $\ottkw{fst}_{\ottkw{nl}}$, with just extra mode annotations!
 
-Having deep modes in a practical modal language~---that is, allowing modes or their corresponding graded modalities to commute with other data types such as sums and products~---is not a particularly novel idea; it has, for instance, been implemented in Linear Haskell~\cite{bernardy_linear_2018}, Granule~\cite{orchard_graded_modal_2019}, and the more recent Modal OCaml~\cite{lorenzen_oxidizing_2024}.
-With deep modes, we obtain the following equivalences:
-
-\codehere{\!\!\!\begin{array}[t]{rcl}
-[[!m (T⨂U)]] &\simeq& [[(!m T) ⨂ (!m U)]] \\
-[[!m (T⨁U)]] &\simeq& [[(!m T) ⨁ (!m U)]] \\
-[[!m (!n T)]] &\simeq& [[!(m·n) T]]
-\end{array}}
+\paragraph{Formal changes in the grammar and typing rules for deep modes}
 
 The only change needed on the grammar between \CLm{} and \CLdm{} is that the $\ottkw{case}$ constructs in \CLdm{} take a mode $[[m]]$ to which they consume the scrutinee , which is propagated to the variable bindings for the field(s) of the scrutinee in the body of the $\ottkw{case}$. The new typing rules for $\ottkw{case}$ are presented in \cref{fig:lindeepmod-ty-term}, all the other rules of linear $\lambda$-calculus with deep modes, \CLdm, are identical to those of \cref{fig:linmod-ty-term}.
 
