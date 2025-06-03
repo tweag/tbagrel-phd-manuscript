@@ -464,7 +464,7 @@ Small-step evaluation rules are of three kinds:
 \begin{itemize}
 \item focusing rules (F) that split the current term under focus in two parts: an evaluation context component that is pushed on the stack $[[C]]$ for later use, and a subterm that is put under focus;
 \item unfocusing rules (U) that recreate a larger term once the term under focus is a value, by popping the most recent evaluation component from the stack and merging it with the value;
-\item contraction rules (C) that do not operate on the stack $[[C]]$ but just transform the term under focus when it's a redex.
+\item contraction rules (C) that do not operate on the stack $[[C]]$ but just transform the term under focus when it's a redex (following a terminology introduced in \cite{danvy_refocusing_2004,biernacka_syntactic_2007}).
 \end{itemize}
 
 To have a fully deterministic and straightforward reduction system, focusing rules can only trigger when the subterm that would be focused is not already a value (denoted by $\star$ in \cref{fig:linsem}).

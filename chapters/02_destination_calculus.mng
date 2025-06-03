@@ -885,7 +885,7 @@ One of the main goals of \destcalculus{} is to ensure that a hole value is never
 Specifically, holes come from the operator $\ottshname{\destminus^{\scriptscriptstyle\text{-}1} }$, which represents the hole bindings matching the specified set of destination bindings. It's a partial, pointwise operation on typing contexts $[[D]]$, as defined in \cref{fig:grammar-val}.
 Note that $[[-⁻¹D]]$ is undefined if any destination binding in $[[D]]$ has a mode other than $[[¹ν]]$.
 
-Furthermore, in \rref*{\CTyVal\CSep\CAmpar}, the holes $[[-⁻¹D3]]$ and the corresponding destinations $[[D3]]$ of the ampar are bound together and consequently removed from the ampar's typing context: this is how we ensure that, indeed, there's one destination per hole and one hole per destination. We annotate, with subscript $[[H]]$, the set of hole names that an ampar $[[H ⟨ v2 ❟ v1 ⟩]]$ bounds. That's why, in rule \rref*{\CTyVal\CSep\CAmpar}, the resulting ampar carries the set of hole names $[[hnames(D3)]]$ (we use operator $\ottshname{\mathbf{hnames}(}\smallbullet\ottshname{)}$ to denote the holes names present in a given typing context).
+Furthermore, in \rref*{\CTyVal\CSep\CAmpar}, the holes $[[-⁻¹D3]]$ and the corresponding destinations $[[D3]]$ of the ampar are bound together and consequently removed from the ampar's typing context: this is how we ensure that, indeed, there's one destination per hole and one hole per destination. We annotate, with subscript $[[H]]$, the set of hole names that an ampar $[[H ⟨ v2 ❟ v1 ⟩]]$ bounds. That's why, in rule \rref*{\CTyVal\CSep\CAmpar}, the resulting ampar carries the set of hole names $[[hnames(D3)]]$ (we use the operator $\ottshname{\mathbf{hnames}(}\smallbullet\ottshname{)}$ to denote the holes names present in a given typing context).
 
 That being said, an ampar can also store destinations that aren't its own, from other scopes; they are represented by $[[¹↑·D1]]$ and $[[D2]]$ in the respective typing contexts of $[[v1]]$ and $[[v2]]$ in\rref*{\CTyVal\CSep\CAmpar}.
 
@@ -1004,7 +1004,7 @@ We think of the typing rule for an evaluation context as a rotation of the typin
 % \bgroup\SetPrefix{\CRed\CSep}
 
 
-Now that every piece is in place, let's focus on the reduction rules of \destcalculus{}, displayed in \cref{fig:sem-full1,fig:sem-full2}. As in \CLdm{}, focus (F suffix), unfocus (U suffix) and contraction (C suffix) rules of \destcalculus{} are triggered in a purely deterministic fashion. Once a subterm is a value, it cannot be focused on again.
+Now that every piece is in place, let's focus on the reduction rules of \destcalculus{}, displayed in \cref{fig:sem-full1,fig:sem-full2}. As in \cref{sec:lincalc-sem} for \CLdm{}, focus (F suffix), unfocus (U suffix) and contraction (C suffix) rules of \destcalculus{} are triggered in a purely deterministic fashion. Once a subterm is a value, it cannot be focused on again.
 
 \begin{ottfig}{\caption{Small-step reduction of commands for \destcalculus{} (\rref*{\CSem}, part 1)}\label{fig:sem-full1}}
 \begin{minipage}{\linewidth}
@@ -1171,7 +1171,7 @@ Rules of \cref{fig:sem-full2} are all related to $\ottkw{upd}_{\ottkw{\ltimes} }
 
 \rref*{\CSem\CSep\CFillU\CRed} and \rref*{\CSem\CSep\CFillF\CRed} of \cref{fig:sem-full2} do not create any new hole; they only write a value to an existing one. On the other hand, rules \rref*{\CSem\CSep\CFillL\CRed}, \rref*{\CSem\CSep\CFillR\CRed}, \rref*{\CSem\CSep\CFillE\CRed} and \rref*{\CSem\CSep\CFillP\CRed} all write a hollow constructor to the hole $[[+h]]$ that contains new holes. Thus, we need to generate fresh names for these new holes, and also return a destination for each new hole with a matching name.
 
-The substitution $[[ C[h ≔ H v] ]]$ should only be performed if $[[h]]$ is a globally unique name; otherwise we break the promise of a write-once memory model. To this effect, we allow name shadowing while an ampar is in value form (which is why $\ottkw{new}_{\ottkw{\ltimes} }$ is allowed to reduce to the same $[[{1}⟨+1 ❟ -1⟩]]$ every time), but as soon as an ampar is open (when it becomes an open ampar focusing component), it should have globally unique hole names. This restriction is enforced in rule \rref*{\CTyEctxs\CSep\COpenAmpar} by premise $[[hnames(C)]] ~\mathtt{\#\#}~ [[hnames(D3)]]$, requiring hole name sets from $[[C]]$ and $[[D3]]$ to be disjoint when an open ampar focusing component is created during reduction of $\ottkw{upd}_{\ottkw{\ltimes} }$. Likewise, any hollow constructor written to a hole should have globally unique hole names. We assume that hole names are natural numbers for simplicity's sake.
+The substitution $[[ C[h ≔ H v] ]]$ should only be performed if $[[h]]$ is a globally unique name; otherwise we break the promise of a write-once memory model. To this effect, we allow name shadowing while an ampar is in value form (which is why $\ottkw{new}_{\ottkw{\ltimes} }$ is allowed to reduce to the same $[[{1}⟨+1 ❟ -1⟩]]$ every time), but as soon as an ampar is open (when it becomes an open ampar focusing component), it should have globally unique hole names. This restriction is enforced in rule \rref*{\CTyEctxs\CSep\COpenAmpar} by the premise $[[hnames(C)]] ~\mathtt{\#\#}~ [[hnames(D3)]]$, requiring hole name sets from $[[C]]$ and $[[D3]]$ to be disjoint when an open ampar focusing component is created during reduction of $\ottkw{upd}_{\ottkw{\ltimes} }$. Likewise, any hollow constructor written to a hole should have globally unique hole names. We assume that hole names are natural numbers for simplicity's sake.
 
 To obtain globally fresh names, in the premises of the corresponding rules, we first set\\ $[[h']] = [[max(hnames(C) ∪ {h}) + 1]]$ or similar definitions for $[[h'']]$ and $[[h''']]$ (see at the bottom of \cref{fig:sem-full2}) to find a new unused name\footnote{Sometimes we don't take the smallest unused name possible; it's mostly the result of using whatever made the formal proofs easier. For instance, in the formal proofs with Coq, renaming is implemented in terms of more general permutations, which make it more easily interoperable with typing contexts, represented as functions, but adds a few extra requirements to make lemma hold}. Then we use either the \emph{shifted set} $[[H ⩲ h']]$ or the \emph{conditional shift operator} $[[h [H ⩲ h'] ]]$ as defined at the bottom of \cref{fig:sem-full1} to replace all names or just a specific one with fresh unused name(s).
 We extend \emph{conditional shift} $\smallbullet\ottshname{[}[[H ⩲ h']]\ottshname{]}$ to arbitrary values, terms, and typing contexts in the obvious way (keeping in mind that $[[H' ⟨ v2 ❟ v1 ⟩]]$ binds the names in $[[H']]$).
@@ -1182,7 +1182,7 @@ In rule \rref*{\CSem\CSep\CFillComp\CRed}, we write the left-hand side $[[v2]]$ 
 
 \paragraph{Putting into practice}
 
-Let's reuse the example from \cref{ssec:ty-term} with the synthetic $\ottsctor(::)$ \emph{cons} constructor, and see the reduction of expression $[[() ˢ:: Inl ()]]$. Here, $[[Inl ()]]$ is the value form corresponding to \emph{nil} (given our encoding of lists), and we also assume that $[[()]]$ in the expression is the value form of \cref{fig:grammar-val}, not the syntactic constructor defined in \cref{fig:sterm}. Finally, we consider $\ottkw{from}_{\ottkw{\ltimes} }'$ to be a primitive (for brevity) with its contraction rule \rref*{\CSem\CSep\CFromA'\CRed} : $[[C [ from⧔' ({} ⟨ v2 ❟ () ⟩) ] ⟶ C [ v2 ] ]]$ and trivial focus and unfocus rules.
+Let's reuse the example from \cref{ssec:ty-term} with the synthetic $\ottsctor{(::)}$ \emph{cons} constructor, and see the reduction of expression $[[() ˢ:: Inl ()]]$. Here, $[[Inl ()]]$ is the value form corresponding to \emph{nil} (given our encoding of lists), and we also assume that $[[()]]$ in the expression is the value form of \cref{fig:grammar-val}, not the syntactic constructor defined in \cref{fig:sterm}. Finally, we consider $\ottkw{from}_{\ottkw{\ltimes} }'$ to be a primitive (for brevity) with its contraction rule \rref*{\CSem\CSep\CFromA'\CRed} : $[[C [ from⧔' ({} ⟨ v2 ❟ () ⟩) ] ⟶ C [ v2 ] ]]$ and trivial focus and unfocus rules.
 
 \begin{augmentwidth}{8cm}
 \[\bgroup\renewcommand{\arraystretch}{1.5}\begin{array}{cll}
@@ -1233,31 +1233,124 @@ As seen in the example above, a command of the form $[[ ⬜[v] ]]$ cannot be red
 
 We've proved type preservation and progress theorems with the Coq proof assistant. The artifact containing the formalization of \destcalculus{} and the machine-verified proofs of type-safety (\cref{thm:preservation,thm:progress}) is available at \url{https://doi.org/10.5281/zenodo.14534423}.
 
-Turning to a proof assistant was a pragmatic choice: typing context handling in \destcalculus{} can be quite finicky, and it was hard, without computer assistance, to make sure that we hadn't made mistakes in our proofs. The version of \destcalculus{} that we've proved is written in Ott~\cite{sewell_ott_2007}, the same Ott file is used as a source for this article, making sure that we've proved the same system as we're presenting; though some visual simplification is applied by a script to produce the version in the article.
+Turning to a proof assistant was a pragmatic choice: typing context handling in \destcalculus{} can be quite finicky, and it was hard, without computer assistance, to make sure that we hadn't made mistakes in our proofs. The version of \destcalculus{} that we've proved is written in Ott~\cite{sewell_ott_2007}, and the same Ott file is used as a source for the typing rules displayed in this document, making sure that we've proved the same system as we're presenting; though some simplifications are applied by a script during compilation for visual clarity.
 
 Most of the proof was done by myself with little prior experience with Coq. However the development sped up dramatically thanks to the help of my industrial advisor, who was able to use his long prior experience with Coq to introduce the good core lemmas upon which we could easily base many others.
 
 In total the proof is about 7000 lines long, and contains nearly 500 lemmas. Many of the cases of the type preservation and progress lemmas are similar. To handle such repetitive cases, the use of a large-language-model based autocompletion system has proven quite effective, at the detriment of elegance of the proofs. For instance, we don't have any abstract formalization of semirings: it was more expedient to brute-force the properties we needed by hand.
 
-There are nonetheless a few points of interest in our Coq development. First, we represent contexts as finite-domain functions, rather than as syntactic lists. This works much better when defining sums of context. There are a handful of finite-function libraries in the ecosystem, but we needed finite dependent functions (because the type of binders depend on whether we're binding a variable name or a hole name). This didn't exist, but for our limited purpose, it ended up not being too costly rolling our own (about 1000 lines of proofs). The underlying data type is actual functions: this was simpler to develop, but in exchange equality gets more complex than with a bespoke data type.
+There are nonetheless a few points of interest in our Coq development, that we present in the next paragraphs.
 
-Secondly, addition of contexts is partial since we can only add two binding of the same name if they also have the same type. Instead of representing addition as a binary function to an optional context, we represent addition as a total function to contexts, but we change contexts to allow faulty bindings on some names. This works well better for our Ott-written rules, at the cost of needing well-formedness preconditions in the premises of typing rules as well as some lemmas.
+\paragraph{Representation of typing contexts}
 
-Finally, we decided to assume a few axioms. The issue we encountered was that the inference rules produced by Ott weren't conducive to using setoid equality, which turned out to be problematic with our type for finite function:
+We represent contexts as finite-domain functions, rather than syntactic lists, as this works much better when defining sums of contexts. While there are a handful of finite function libraries in the ecosystem, we needed \emph{finite dependent functions} (because the type of binders depends on whether we're binding a variable name or a hole name). This did not exist, but for our limited purposes, it turned out to be feasible to roll our own (about 1000 lines of proofs). The underlying data type is actual functions: this was simpler to develop, but, as we'll see soon, it makes equality more complex than with a bespoke data type. The definitions of the finite function and context types are provided below:
 
-\begin{verbatim}
+\begin{unbreakable}
+\begin{minted}[linenos,escapeinside=°°]{coq}
+Definition Support {A B} (l : list A) (f : forall x:A, option (B x)) : Prop
+  := forall (x:A) (y:B x), f x = Some y -> List.In x l.
+
 Record T A B := {
-    underlying :> forall x:A, option (B x);
-    supported : exists l : list A, Support l underlying;
-  }.
-\end{verbatim}
-where \verb+Support l f+ means that \verb+l+ contains the domain of \verb+f+. To make the equality of finite function be strict equality \verb+eq+, we assumed functional extensionality and proof irrelevance. In some circumstances, we've also needed to list the finite functions' domains. But in the definition, the domain is sealed behind a proposition, so we also assumed classical logic as well as indefinite description:
+  underlying :> forall x:A, option (B x);
+  supported : exists l : list A, Support l underlying;
+}.
 
-\begin{verbatim}
-Axiom constructive_indefinite_description :
-    forall (A : Type) (P : A->Prop), (exists x, P x) -> { x : A | P x }.
-\end{verbatim}
-Together, they let us extract the domain from the proposition.
+Inductive name : Type :=
+  | name_Var (x:var)
+  | name_DH (h:hname).
+
+Definition binding_type_of (n : name) : Type :=
+match n with
+  | name_Var _ => binding_var
+  | name_DH _ => binding_dh
+end.
+
+Inductive binding_var : Type :=
+  | binding_Var (m:mode) (T:type).
+
+Inductive binding_dh : Type :=
+  | binding_Dest (m:mode) (T:type) (n:mode)
+  | binding_Hole (T:type) (n:mode).
+
+Definition ctx : Type := T name binding_type_of.
+\end{minted}
+\end{unbreakable}
+
+\noindent{}The \mintinline{coq}/Support/ predicate indicates that a list is an over-approximation of the effective domain of our partial function. We then use the classical \emph{constructive indefinite description} axiom to retrieve a suitable support list for a given context when needed:
+\begin{unbreakable}
+\begin{minted}[linenos,escapeinside=°°]{coq}
+(* Axiom *)
+ClassicalEpsilon.constructive_indefinite_description
+  : forall (A : Type) (P : A -> Prop), (exists x : A, P x) -> {x : A | P x}
+
+Definition a_support {A B} (f : T A B) : list A
+  := constructive_indefinite_description _ f.(supported).
+\end{minted}
+\end{unbreakable}
+\noindent{}We also introduce \mintinline{coq}/dom ctx/ as a filter over \mintinline{coq}/a_support ctx/ to retain only the elements in the effective domain of our partial function \mintinline{coq}/ctx/.
+
+We also need to reason about equality of typing contexts in proofs. The definition of our partial function type would naturally lend itself well to setoid equality, but unfortunately this is not supported by the inference rules we generate through Ott. As a workaround, we assume the classical \emph{functional extensionality} and \emph{proof irrelevance} axioms, allowing us to state that two contexts are equal as long as they assign the same binding to all variable and hole names:
+\begin{unbreakable}
+\begin{minted}[linenos,escapeinside=°°]{coq}
+(* Axioms *)
+ProofIrrelevance.proof_irrelevance : forall (P : Prop) (p1 p2 : P), p1 = p2
+FunctionalExtensionality.functional_extensionality_dep
+  : forall (A : Type) (B : A -> Type) (f g : forall x : A, B x),
+    (forall x : A, f x = g x) -> f = g
+
+Lemma ext_eq' : forall {A B} (f g : T A B), f.(underlying) = g.(underlying) -> f = g.
+Proof. intros A B [f f_supp] [g g_supp] h_ext. cbn in *. subst g. f_equal.
+  apply proof_irrelevance.
+Qed.
+
+Lemma ext_eq : forall {A B} (f g : T A B), (forall x, f x = g x) -> f = g.
+Proof. intros * h_ext. apply ext_eq'.
+  apply functional_extensionality_dep.
+  assumption.
+Qed.
+\end{minted}
+\end{unbreakable}
+
+In effect, we recover a form of extensional equality that behaves morally like setoid equality, but integrates smoothly with the infrastructure we generate through Ott.
+
+\paragraph{Partial addition of contexts}
+
+As seen in \cref{ssec:ty-term,ssec:runtime-values}, addition of contexts is highly partial. For example, two bindings with the same name can only be combined if they also have the same type, and we can't combine a hole binding with a destination binding for the same hole name.
+
+Rather than encoding addition as a binary function returning an optional context~---which would integrate poorly with the rules generated by Ott---~we model it as a total function to contexts. Instead, to capture failure cases, we introduce a special error mode in our mode ringoid. A binding carrying this error mode signals that the whole context is considered invalid:
+
+\begin{unbreakable}
+\begin{minted}[linenos,escapeinside=°°]{coq}
+Definition mode : Type := option (mul * age).
+Notation "'☠'" := None.
+Notation "'¹ν'" := (Some (pair Lin (Fin 0))).
+Notation "'¹↑'" := (Some (pair Lin (Fin 1))).
+Notation "'¹∞'" := (Some (pair Lin Inf)).
+...
+
+Definition mode_plus (m1 m2: mode) : mode :=
+match m1, m2 with
+  | None, _ => None
+  | _, None => None
+  | Some (p1, a1), Some (p2, a2) => Some (mul_plus p1 p2, age_plus a1 a2)
+end.
+
+Inductive IsValid : mode -> Prop
+  := IsValidProof : forall (pa : mul * age), IsValid (Some pa).
+
+Definition ValidOnly (G: ctx) : Prop
+  := forall (n : name) (binding: binding_type_of n), G n = Some binding -> IsValid (mode_of binding).
+...
+
+Lemma ValidOnly_union_forward
+  : forall (G1 G2 : ctx), ValidOnly G1 -> ValidOnly G2 -> G1 # G2 -> ValidOnly (G1 + G2).
+Lemma ValidOnly_union_backward
+  : forall (G1 G2 : ctx), ValidOnly (G1 + G2) -> ValidOnly G1 /\ ValidOnly G2.
+...
+\end{minted}
+\end{unbreakable}
+
+The cost of this approach is that most typing rules must now include explicit well-formedness conditions~---such as \mintinline{coq}/IsValid/ and \mintinline{coq}/ValidOnly/~---to ensure that the input contexts do not contain any faulty bindings. Additional lemmas are required to propagate these validity conditions through context operations, using properties such as disjointness to guarantee the absence of errors in the resulting contexts.
 
 \section{Translation of prior work into \destcalculus{} terms and types}
 
@@ -1269,9 +1362,9 @@ Minamide's system~\cite{minamide_functional_1998} introduces two primitives, $\o
 
 The paper indicates that hole abstractions cannot have lambda abstraction, application, or case expression operating on the variable of the abstraction, but otherwise allow these constructs to appear in the body of the hole abstraction if they are operating on other variables or values.
 
-In a well-typed, closed program, we can evaluate the body of the hole abstraction (under the $\pmb{\hat{\lambda}}$) as far as possible, until it is almost a value except for the single occurence of $[[x]]$ (we know $[[x]]$ cannot cause this reduction to be stuck, as it cannot appear in the evaluation path of an application or case expression). At that point hole abstractions directly translate to our ampar value form: we transform $\lamh{[[x]]}{[[t]]}$ to $_{[[ {h} ]]}\ottsctor{/}[[t]][ [[x]] \assigneq [[+h]] ]\,\ottsctor{\bbcomma}~[[-h]]\ottsctor{/}$. In other terms, we take the body of the hole abstraction as the left-hand side of the ampar, with the single occurrence of the variable replaced by a hole $[[+h]]$, and just use the corresponding destination $[[-h]]$ as the right-hand side. The type of hole abstractions, $\ottstype{([[T]], [[S]]) hfun}$, is translated as $[[S ⧔ ⌊ T ⌋ ¹ν]]$.
+In a well-typed, closed program, we can evaluate the body of the hole abstraction (under the $\pmb{\hat{\lambda}}$) as far as possible, until it is almost a value except for the single occurence of $[[x]]$ (we know $[[x]]$ cannot cause this reduction to be stuck, as it cannot appear in the evaluation path of an application or case expression). Fully evaluated hole abstractions then directly translate to our ampar value form: we interpret $\lamh{[[x]]}{[[t]]}$ as $_{[[ {h} ]]}\ottsctor{/}[[t]][ [[x]] \assigneq [[+h]] ]\,\ottsctor{\bbcomma}~[[-h]]\ottsctor{/}$. In other terms, we take the body of the hole abstraction as the left-hand side of the ampar, with the single occurrence of the variable replaced by a hole $[[+h]]$, and just use the corresponding destination $[[-h]]$ as the right-hand side. The type of hole abstractions, $\ottstype{([[T]], [[S]]) hfun}$, is translated as $[[S ⧔ ⌊ T ⌋ ¹ν]]$.
 
-If we don't allow for this eager evaluation of the hole abstraction's body to happen before the translation, we need to encode an hole abstraction by:
+In the general case, where the hole abstraction may not be fully evaluated, we interpret it by the following sequence of operations:
 
 \begin{itemize}
 \item spawning a new ampar with $[[alloc]]$;
@@ -1281,7 +1374,7 @@ If we don't allow for this eager evaluation of the hole abstraction's body to ha
 \item other constructs, like case expressions or applications related to other variables or values are transposed untouched into the body of $\ottkw{upd}_{\ottkw{\ltimes} }$.
 \end{itemize}
 
-It's rather hard to give a formal description of the translation, but it's quite clear on an example, with Minamide's term on the right, and \destcalculus{} one on the left:
+It's a bit tedious to give a formal description of the translation, but the process is nonetheless systematic, and becomes quite clear on an example, with Minamide's term on the right, and \destcalculus{} one on the left:
 
 \sidebysidecodehere{t}{0.35}{
 \newoperator{\ottkw{ha}}{\ottstype{([[T]], [[List T]]) hfun}}
@@ -1313,7 +1406,7 @@ With this translation we can completly express Minamide's system in \destcalculu
 
 \paragraph{The Functional Essence of Imperative Binary Search Trees}
 
-The portion of the work from~\citet{lorenzen_searchtree_2024,leijen_tail_2025} about \emph{first-class constructor contexts} is fairly similar, in both expressiveness and presentation, to Minamide's \emph{hole abstractions}. A hole abstraction $\lamh{[[x]]}{[[t]]}$ is written $\ottkw{ctx}~[[t]] [ [[x]] \assigneq \_ ]$, whose body is the same as $[[t]]$ but with an underscore $\_$ (or a square $\square$ in some versions of their work) in place of the named hole variable $[[x]]$. Similarly, $\ottkw{happ}$ is replaced by the $\mathop{+\!+\!.}$ operator, and $\ottkw{hcomp}$ by the $\mathop{+\!+}$ operator. Consequently, the translation for terms from~\cite{lorenzen_searchtree_2024,leijen_tail_2025} system to ours is the same as for Minamide's system.
+The portion of the work from~\citet{lorenzen_searchtree_2024,leijen_tail_2025} about \emph{first-class constructor contexts} is fairly similar, in both expressiveness and presentation, to Minamide's \emph{hole abstractions}. A hole abstraction $\lamh{[[x]]}{[[t]]}$ is written $\ottkw{ctx}~[[t]] [ [[x]] \assigneq \_ ]$, whose body is the same as $[[t]]$ but with an underscore $\_$ (or a square $\square$ in some versions of their work) in place of the named hole variable $[[x]]$. Similarly, $\ottkw{happ}$ is replaced by the $\mathop{+\!+\!.}$ operator (notice the period), and $\ottkw{hcomp}$ by the $\mathop{+\!+}$ operator. Consequently, the translation for terms from~\cite{lorenzen_searchtree_2024,leijen_tail_2025} system to ours is the same as for Minamide's system.
 
 For types,~\cite{lorenzen_searchtree_2024,leijen_tail_2025} only define $\ottstype{\mathop{ctx\!<\!}[[T]]\mathop{\!>}}$, where the hole and the resulting structure (once the hole will be filled) are of the same type $[[T]]$. This translates to $[[T ⧔ ⌊ T ⌋ ¹ν]]$ in \destcalculus{}.
 
@@ -1358,21 +1451,19 @@ Now that ampars are managed linearly, we can change the allocation and renaming 
 
 In \cref{chap:dps-haskell,chap:ext-linear-nonlinear}, dedicated to the implementation of DPS in a functional setting, we will treat ampars as linear resources, in the same style as \destcalculus{} extended with $[[Token]]$s and $[[allocIP]]$.
 
-\paragraph{From purely linked structures to more efficient memory forms}
+\paragraph{From binary products and sums to more efficient memory forms}
 
-In \destcalculus{} we only have binary product in sum types. However, it's very straightforward to extend the language and implement destination-based building for n-ary sums of n-ary products, with constructors for each variant having multiple fields directly, instead of each field needing an extra indirection as in the binary sum of products $[[① ⨁ (S ⨂ (T ⨂ U))]]$. We will do that as soon as next chapter.
-
-However, we require field's values to still be represented by pointers. Indeed, composition of incomplete structures relies on the idea that destinations pointing to holes of a structure $[[v]]$ will still be valid if $[[v]]$ get assigned to a field $[[f]]$ of a bigger structure $[[v']]$ (through operator $\mathop{\triangleleft\mycirc}$). That's true indeed if just the address of $[[v]]$ is written to $[[v']].[[f]]$. However, if $[[v]]$ is moved into $[[v']]$ completly (i.e. if $[[f]]$ is an in-place/unpacked field), then the pointers representing destinations of $[[v]]$ are now invalid.
+In \destcalculus{} we only have binary product in sum types. However, it's very straightforward to extend the language and implement destination-based building for n-ary sums of n-ary products, with constructors for each variant having multiple fields directly, instead of each field needing an extra indirection as in the binary sum of products $[[① ⨁ (S ⨂ (T ⨂ U))]]$. In fact, we will do that as soon as next chapter. However, we still require field's values to be represented by pointers. It's a crucial for the semantics of the $\triangleleft\mycirc$ operator.
 
 % TODO: Conclusion
 % TODO: utile au rapporteur pour faire son rapport
 
 \section{Conclusion}\label{sec:destcalc-conclusion}
 
-\destcalculus{} is a purely functional calculus which supports destinations in an extremely flexible way. It supports data structures with multiple holes, and allows both composition of data structures with holes and storing destinations in data structures that, themselves, have holes.
+\destcalculus{} is a purely functional calculus which treats destinations as first class values that can be passed around and used in very flexible ways. It supports data structures with multiple holes, and allows both composition of data structures with holes and storing destinations in data structures that, themselves, have holes.
 
-With this, \destcalculus{} let us implement easily imperative-like algorithms in a functional setting, without sacrificing safety. Indeed, thanks to a linear type system augmented with a system of ages, the mutations introduced by destination use are opaque and controlled.
+With \destcalculus{}, we can now apply some techniques and algorithms traditionally confined to imperative languages within a purely functional setting, all while preserving safety guarantees. Indeed, thanks to a linear type system augmented with a system of ages, the mutations introduced by destination use are opaque and controlled.
 
 However, we don't anticipate that a system of ages like the one of \destcalculus{} will actually be used in a programming language: it's unlikely that destinations are so central to the design of a programming language that it's worth baking them so deeply in the type system. Perhaps a compiler that makes heavy use of destinations in its optimizer could use \destcalculus{} as a typed intermediate representation. But, more realistically, our expectation is that \destcalculus{} can be used as a theoretical framework to analyze destination-passing systems: if a destination passing system can be expressed in terms of \destcalculus{} primitives, then it is sound.
 
-Our path forward, in next chapters, is to see which small restrictions we can impose on \destcalculus{}'s flexiblity to make it possible to port most of its core ideas in a real-world functional programming language, namely, Haskell.
+In the chapters ahead, we aim to determine which (hopefully moderate) restrictions we have to impose on \destcalculus{}'s flexiblity to port most of its fundamental concepts safely into a real-world functional programming language, namely, Haskell~---whose type system is not as rich as \destcalculus{}'s one, designed on purpose for destination control.

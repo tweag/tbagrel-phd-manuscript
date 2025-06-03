@@ -415,6 +415,7 @@
 \newunicodechar{∀}{\ensuremath{\pmb{\forall}}}
 \newunicodechar{⩴}{\hspace{-0.2ex}:\hspace{-0.4ex}:\hspace{-0.2ex}}
 \newunicodechar{Ⴈ}{1}
+\newunicodechar{☠}{$\skull$}
 
 \newlength{\widthaugment}
 \NewEnviron{augmentwidth}[1]
@@ -721,7 +722,7 @@ La programmation par passage de destination introduit le concept de \emph{destin
 
 Dans cette thèse, nous développons un $\lambda$-calcul avec destinations, \destcalculus{}. Ce nouveau système théorique est plus expressif que les travaux similaires existants, le passage de destination y étant conçu pour être aussi flexible que possible. Cette expressivité est rendue possible par un système de types modaux combinant types linéaires et un système d’âges pour gérer le contrôle lexical des ressources, afin de garantir la sûreté du passage de destination. Nous avons prouvé la sûreté de notre système via les théorèmes habituels de progression et de préservation des types, de façon mécanisée, avec l’assistant de preuve Coq.
 
-Nous montrons ensuite comment le passage de destination~---formalisé dans ce calcul théorique---~peut être intégré à un langage fonctionnel pur existant, Haskell, dont le système de types est moins puissant que notre système théorique. Préserver la sûreté nécessite alors de restreindre la flexibilité dans la gestion des destinations. Nous affinons par la suite l’implémentation pour retrouver une grande partie de cette flexibilité, au prix d’une complexité accrue pour l’utilisateur.
+Nous montrons ensuite comment le passage de destination, formalisé dans ce calcul théorique, peut être intégré à un langage fonctionnel pur existant, Haskell, dont le système de types est moins puissant que notre système théorique. Préserver la sûreté nécessite alors de restreindre la flexibilité dans la gestion des destinations. Nous affinons par la suite l’implémentation pour retrouver une grande partie de cette flexibilité, au prix d’une complexité accrue pour l’utilisateur.
 
 L'implémentation prototype en Haskell montre des résultats encourageants pour l’adoption du passage de destination pour des parcours ou du mapping de grandes structures de données, telles que les listes ou les arbres.
 
