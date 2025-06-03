@@ -373,10 +373,10 @@
 \end{array}\\[\interdefskip]}
 \newcommand{\figureratio}{1}
 \newcommand{\codehere}[2][t]{\vspace{-0.05cm}\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}{\figtextsize\ensuremath{#2}}\end{minipage}\end{center}\vspace{-0.05cm}}
-\NewEnviron{codefig}[2][tp]{\begin{listing}[#1]
+\NewEnviron{codefig}[2][tbp]{\begin{listing}[#1]
 \codehere{\BODY}#2
 \end{listing}}
-\NewEnviron{ottfig}[2][tp]{\begin{figure}[#1]
+\NewEnviron{ottfig}[2][tbp]{\begin{figure}[#1]
 \figtextsize\BODY#2
 \end{figure}}
 \newcommand{\sidebysidecodehere}[4]{\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}
