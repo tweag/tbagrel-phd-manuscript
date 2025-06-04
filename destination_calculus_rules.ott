@@ -117,7 +117,7 @@ P ⊢ t : U ⧔ (! ¹∞ T) [[:Tyt]]
 P ⊢ from⧔ t : U ⨂ (! ¹∞ T)
 
 -------------------- :: NewA {{ com \CNewA }}
-ων·P ⊢ alloc : T ⧔ ⌊ T ⌋ ¹ν
+ων·P ⊢ alloc : T ⧔ ⌊ T ⌋ \¹ν/
 
 {{ IsValid [[n]] }} [[:Validn]]
 P ⊢ t : ⌊①⌋n [[:Tyt]]
@@ -153,7 +153,7 @@ P2 + { x : m T } ⊢ u : U [[:Tyu]]
 ---------------------------------------- :: FillF {{ com \CFillF }}
 P1 + (¹↑·n)·P2 ⊢ t ⨞(λ x m ⟼ u) : ①
 
-P1 ⊢ t : ⌊U⌋¹ν [[:Tyt]]
+P1 ⊢ t : ⌊U⌋ \¹ν/ [[:Tyt]]
 P2 ⊢ t' : U ⧔ T [[:Tytp]]
 ----------------------------- :: FillComp {{ com \CFillComp }}
 P1 + ¹↑·P2 ⊢ t ⨞· t' : T
@@ -341,14 +341,14 @@ D1 ⊣ C ∘ (⬜ ⨞(λ x m ⟼ u)) : ⌊T m → U⌋n ↣ U0
 D1 + ¹↑·D2 ⊣ C : T ↣ U0 [[:TyC]]
 D2 ⊢ t' : U ⧔ T [[:Tytp]]
 ----------------------------- :: FillComp1 {{ com \CFillComp\textsubscript{1} }}
-D1 ⊣ C ∘ (⬜ ⨞· t') : ⌊U⌋¹ν ↣ U0
+D1 ⊣ C ∘ (⬜ ⨞· t') : ⌊U⌋\¹ν/ ↣ U0
 
 {{ [[D1]] # [[D2]] }} [[:DisjointD1D2]]
 {{ DestOnly [[D1]] }} [[:DestOnlyD1]]
 {{ DestOnly [[D2]] }} [[:DestOnlyD2]]
 {{ ValidOnly [[D1]] }} [[:ValidOnlyD1]]
 D1 + ¹↑·D2 ⊣ C : T ↣ U0 [[:TyC]]
-D1 ⊢ v : ⌊U⌋¹ν [[:Tyt]]
+D1 ⊢ v : ⌊U⌋\¹ν/ [[:Tyt]]
 ----------------------------- :: FillComp2 {{ com \CFillComp\textsubscript{2} }}
 D2 ⊣ C ∘ (v ⨞· ⬜) : U ⧔ T ↣ U0
 

@@ -46,7 +46,7 @@ newAmpar tok0 `updWith` \(d0 ⩴ Dest Ⴈ (Dest Ⴈ t)) →
 
 In this particularly convoluted example~---which nonetheless typechecks given the API described above\footnote{It would, however, be rejected by \destcalculus{}, as \mintinline{haskellc}/d0/ would have age $[[↑^2]]$ when used as a variable in the innermost scope, which is disallowed by rule \rref*{\CTyTerm\CSep\CId}.}---~ an old destination \mintinline{haskellc}/d0/ is hidden inside the nest of a fresher one \mintinline{haskellc}/d2/ that we've just consumed. So we have an ampar \mintinline{haskellc}/(newAmpar `updWith` \d2 → d2 &fillLeaf () ; d0)/ whose right-hand side contains a destination \mintinline{haskellc}/d0/ which isn't its own, but comes from a previous scope. However, it is indistinguishable from an ampar whose right side contains only its own destinations, if we just look at the types. So we are allowed to use \mintinline{haskellc}/extendLeaf/ on the cursed ampar, which causes scope escape (as \mintinline{haskellc}/d1/ get stored in the outermost ampar)!
 
-There seems to be an inevitable friction between having a flexible \mintinline{haskellc}/updWith/ function, and having safe linear destinations, when we don't have a proper age system to ensure there is no cheating with scopes.
+There seems to be an inevitable friction between having a capturing \mintinline{haskellc}/updWith/ function, and having safe linear destinations, when we don't have a proper age system to ensure there is no cheating with scopes.
 
 \paragraph{Restricting \mintinline{haskellc}/updWith/}
 
@@ -189,7 +189,7 @@ extendComp ⩴ ∀ s t u. Ampar t u ⊸ Ampar s (Dest Ⴈ t) ⊸ Ampar s u
 \end{minted}
 }
 \end{unbreakable}
-In \mintinline{haskellc}/extendComp/, the destination in the parent ampar must be linear. Otherwise, the following exploit becomes possible:
+In \mintinline{haskellc}/extendComp/, the destination in the parent ampar must be linear, as we already mentioned in \cref{ssec:ty-term}. Otherwise, the following exploit becomes possible:
 \begin{unbreakable}
 {\figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
@@ -211,7 +211,7 @@ let Ur (linearRes') = resAmpar &fromAmparWithLeaf linearResourceDoNotDuplicate i
 \end{unbreakable}
 
 With the code above, we create an ampar \mintinline{haskellc}/resAmpar/ with a linear destination pointing to an unrestricted hole. This happens because the ampar resulting from a composition inherits whatever was on the right of the child ampar (here a linear destination \mintinline[escapeinside=°°]{haskellc}/¤Dest °$\ottshname{\to h'}$° :: Dest Ⴈ Int/). But the left side of the child ampar has been grafted into the unrestricted hole $
-\ottshname{\fbox{h}}$ of the parent ampar. As a result, $\ottshname{\fbox{h'}}$ becomes transitively unrestricted, while its corresponding destination remains linear. This enables the duplication of linear resources, as shown in the last line. For the same reason, we cannot define a function \mintinline{haskellc}/fillComp ⩴ Ampar t u ⊸ Dest ω t ⊸ u/ in this setting.\footnote{Recall that we already ruled out defining \mintinline{haskellc}/fill/-like functions for linear destinations since the first section of this chapter.} In \cref{chap:dps-haskell}, this issue did not arise because all destinations were unrestricted by design.
+\ottshname{\fbox{h}}$ of the parent ampar. As a result, $\ottshname{\fbox{h'}}$ becomes transitively unrestricted, while its corresponding destination remains linear. This enables the duplication of linear resources, as shown in the last line, so we must prevent it. For the same reason, we cannot define a function \mintinline{haskellc}/fillComp ⩴ Ampar t u ⊸ Dest ω t ⊸ u/ in this setting.\footnote{Recall that we already ruled out defining \mintinline{haskellc}/fill/-like functions for linear destinations since the first section of this chapter.} In \cref{chap:dps-haskell}, this issue did not arise because all destinations were unrestricted by design.
 
 What we can do, however, is define alternative versions of \mintinline{haskellc}/extendComp/ and \mintinline{haskellc}/fillComp/ that operate on unrestricted destinations, with a slightly modified signature, that makes them safe this time:
 
@@ -326,7 +326,7 @@ extendWithValOnFst x ampar = ampar &extendFocusedLeaf fst x
 
 No scope escape can happen here. As \mintinline{haskellc}/updWith/ is non-capturing, we're sure that the destinations on the right-hand side of an ampar are the ones pointing to the holes on its left-hand side (eliminating the issue presented at the end of \cref{sec:dps-lin-challenges}). So like \mintinline{haskellc}/extendLeaf/, the \mintinline{haskellc}/extendFocusedLeaf/ function can only be used to fill a newer destination with existing (thus, older) values. Likewise, we cannot have sibling destinations interacting with one another. Which means, we've reached our goal for this chapter!
 
-For completeness, we finally define \mintinline{haskellc}/extendFocusedUr/ and \mintinline{haskellc}/extendFocusedComp/, following the same pattern as for \mintinline{haskellc}/extendFocusedLeaf/:
+For completeness, we finally define \mintinline{haskellc}/extendFocusedUr/, \mintinline{haskellc}/extendFocusedComp/ and \mintinline{haskellc}/extendFocusedUComp/, following the same pattern as for \mintinline{haskellc}/extendFocusedLeaf/:
 
 \begin{unbreakable}
 {\figtextsize
@@ -335,6 +335,8 @@ extendFocusedUr ⩴ ∀ u t1 t2 s m.
                        Lens t1 t2 (Dest m (Ur u)) (Dest ω u) → Ampar s t1 ⊸ Ampar s t2
 extendFocusedComp ⩴ ∀ u t1 t2 s u1 u2.
                           Ampar u1 u2 ⊸ Lens t1 t2 (Dest Ⴈ u1) u2 → Ampar s t1 ⊸ Ampar s t2
+extendFocusedUComp ⩴ ∀ u t1 t2 s u1 u2.
+                           Ampar (Ur u1) u2 ⊸ Lens t1 t2 (Dest ω u1) u2 → Ampar s t1 ⊸ Ampar s t2
 \end{minted}
 }
 \end{unbreakable}

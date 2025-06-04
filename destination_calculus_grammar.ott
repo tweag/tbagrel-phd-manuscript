@@ -275,6 +275,7 @@ mode, m, n :: 'mode_' ::= {{ tex \ottsmode{[[mode]]} }} {{ com Mode (Semiring) }
   | ( m ) :: S :: Paren {{ tex \ottsmode{(}[[m]]\ottsmode{)} }} {{ coq [[m]] }}
   | ɷ :: S :: Urr {{ tex \ottsmode{\omega} }} {{ coq (Some (pair Ur (Fin 0))) }}
   | ˥ :: S :: Linn {{ tex \ottsmode{1} }} {{ coq (Some (pair Lin (Fin 0))) }}
+  | \ m / :: S :: ForceShow {{ tex \,\![[m]]\,\! }}
 
 mul, p :: 'mul_' ::= {{ tex \ottsmode{[[mul]]} }} {{ com Multiplicity (Semiring, first component of mode) }} {{ coq _mul }}
   | ¹ :: :: Lin {{ tex \ottsmode{1} }} {{ com Linear use }} {{ coq Lin }}
