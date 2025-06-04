@@ -266,10 +266,25 @@ However, when $[[lbd]]$'s scope is parent to $[[lb]]$'s, i.e. when a newer desti
 [[⟶]] & [[ { lbd ≔ +hd , lb ≔ +h } ]] &|& [[(-hd ◀ -h ; deref lb) ►case ¹ν { true ⟼ (), false ⟼ () } ; deref lbd]] \\
 [[⟶]] & [[ { lbd ≔ -h , lb ≔ +h } ]] &|& [[ (deref lb) ►case ¹ν { true ⟼ (), false ⟼ () } ; deref lbd]] \\
 [[⟶]] & [[ { lbd ≔ -h } ]] &|& [[ +h ►case ¹ν { true ⟼ (), false ⟼ () } ; deref lbd]] \qquad\qquad \raisebox{-0.8ex}{\scalebox{0.35}{\bcbombe\bcbombe\bcbombe}}
-\end{array}}\egroup
+\end{array}}
 \noindent{}Here the expression $[[dd ◀ d]]$ results in $[[d]]$ escaping its scope for the parent one, so $[[lb]]$ is just uninitialized memory (the hole $[[+h]]$) when we dereference it. This example must be rejected by our type system.
 
-Again, the problem is that, using purely a linear type system, we can only reject this example if we also reject the first, sound example. In this case, the type $[[⌊ ⌊ T⌋ ¹ν⌋ ¹ν]]$ would become practically useless: such destinations can never be filled. This isn't the direction we want to take: we really want to be able to store destinations in data structures with holes. So we want $[[t]]$ in $[[d ◀ t]]$ to be allowed to be linear. Without further restrictions, it wouldn't be sound, so to address this, we need an extra control system to prevent scope escape; it can't be just linearity. For \destcalculus{}, we decided to use a system of \emph{ages} to represent which scope a resource originates from. Ages are described in detail in \cref{sec:syntax-type-system}; but first, let's see an exemple where storing destinations in data structures really matters.
+A neighboring issue is when sibling destinations interact with one another:
+\codehere{\!\!\!\begin{array}{crcl}
+       & $\{ \}$ &|& [[alloc' (ˢλ d ¹ν ⟼ (d ⨞ (::)) ►case ¹ν (d' @ ⌊ Bool ⌋ ¹ν, dd' @ ⌊⌊ Bool ⌋ ¹ν ⌋ ¹ν) ⟼ dd' ◀ d') @ Bool ⨂ ⌊ Bool ⌋ ¹ν]] \\
+[[⟶]] & [[ { lb ≔ +h } ]] &|& [[(-h ⨞ (::)) ►case ¹ν (d' @ ⌊ Bool ⌋ ¹ν, dd' @ ⌊⌊ Bool ⌋ ¹ν ⌋ ¹ν) ⟼ dd' ◀ d' ; deref lb]] \\
+[[⟶]] & [[ { lb ≔ ˢ(+h', +hd') } ]] &|& [[ˢ(-h', -hd') ►case ¹ν (d' @ ⌊ Bool ⌋ ¹ν, dd' @ ⌊⌊ Bool ⌋ ¹ν ⌋ ¹ν) ⟼ dd' ◀ d' ; deref lb]] \\
+[[⟶]] & [[ { lb ≔ ˢ(+h', +hd') } ]] &|& [[-hd' ◀ -h' ; deref lb]] \\
+[[⟶]] & [[ { lb ≔ ˢ(+h', -h') } ]] &|& [[deref lb]] \\
+[[⟶]] & $\{ \}$ &|& [[ˢ(+h', -h')]] \qquad\qquad \raisebox{-0.8ex}{\scalebox{0.35}{\bcbombe\bcbombe\bcbombe}}
+\end{array}}
+\egroup
+
+Here also, we have a hole $[[+h']]$ escaping from the store, which means that if we pattern-match on the result of the code block above, we will also end up reading uninitialized memory!
+
+Again, the problem is that, using purely a linear type system, we can only reject the two last examples if we also reject the first, sound one. In this case, the type $[[⌊ ⌊ T⌋ ¹ν⌋ ¹ν]]$ would become practically useless: such destinations could never be filled. This isn't the direction we want to take: we really want to be able to store destinations in data structures with holes. So we want $[[t]]$ in $[[d ◀ t]]$ to be allowed to be linear. Without further restrictions, it wouldn't be sound, so to address this, we need an extra control system to prevent scope escape; it can't be just linearity. More specifically, we must ensure that if a destination $[[d]]$ is stored inside another destination $[[dd]]$, then $[[d]]$ originates from a scope that is strictly older—that is, one that was opened strictly before the scope of $[[dd]]$. This condition rules out the two problematic examples we have just discussed.
+
+For \destcalculus{}, we decided to use a system of \emph{ages} to represent which scope a resource originates from. Ages are described in detail in \cref{sec:syntax-type-system}. In the rest of this document, we often refer to \emph{scope escape} to indistinctly designate the two issues presented above: either the case $[[dd ◀ d]]$ where $[[d]]$ comes from a strictly younger scope, or the case where $[[d]]$ comes from the same scope as $[[dd]]$, as both are often avoided using the same techniques or tricks.
 
 % TODO: raconter ce qu'on a compris sur l'intéraction entre ref, linéarité, escape, dests
 
@@ -282,7 +297,7 @@ Linear interfaces typically rely on the fact that there is a specific set of des
 
 \section{Breadth-first tree traversal}\label{sec:bft}
 
-As a full-fledged example, which uses the full expressive power of \destcalculus{}, we focus on breadth-first tree relabeling:
+Before turning to the formal details, let us look at a full-fledged example, which uses the whole expressive power of \destcalculus{}. We focus here on breadth-first tree relabeling:
 % \begin{quote}
 \emph{``
 Given a tree, create a new one of the same shape, but with the values at the nodes replaced by the numbers $1\ldots|T|$ in breadth-first order.

@@ -114,6 +114,7 @@ term, t, u, B :: 'term_' ::= {{ com Term }}
   | t ►case m b sp ᴇ n x ⟼ u :: S :: PatEsp {{ tex \ottkw{case}_{\mycasem{[[m]]} }\,[[t]]~\ottkw{of}~[[b]][[sp]]\expcons{[[n]]}[[x]][[⟼]][[u]] }} {{ coq (term_PatE [[t]] [[m]] [[n]] [[x]] [[u]]) }} % (+ bind x in u +)
   | t ►case m { t1 ⟼ u1 , t2 ⟼ u2 b sp } :: S :: SugarPatNestedSsp2 {{ com Pattern-match on nested structure }} {{ coq (term_Val val_Unit) }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }\,[[t]]~\ottkw{of}~\{[[t1]][[⟼]][[u1]]\,,~[[t2]][[⟼]][[u2]][[b]][[sp]]\} }} % Coq translation is a placeholder
   | t ►case m { t1 ⟼ u1 , t2 ⟼ u2 b } :: S :: SugarPatNestedSsp1 {{ com Pattern-match on nested structure }} {{ coq (term_Val val_Unit) }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }\,[[t]]~\ottkw{of}~\{[[t1]][[⟼]][[u1]]\,,~[[t2]][[⟼]][[u2]][[b]]\} }} % Coq translation is a placeholder
+  | t ►case m ( t1 , t2 ) ⟼ u :: S :: SugarPatS {{ com Pattern-match on nested structure }} {{ coq (term_Val val_Unit) }} {{ tex \ottkw{case}_{\mycasem{[[m]]} }\,[[t]]~\ottkw{of}~\ottsctor{(}[[t1]]\,\ottsctor{,}~[[t2]]\ottsctor{)}[[⟼]][[u]] }} % Coq translation is a placeholder
 
   % Here we have to redefined all sugar construct in the same way as in sterm
   | from⧔' t :: S :: SugarFromA' {{ coq (sterm_FromA' [[t]]) }} {{ tex \ottkw{from}_{\ottkw{\ltimes} }' [[t]] }}

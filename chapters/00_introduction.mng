@@ -88,11 +88,11 @@ To reach true destination-passing style programming however, we need a way to re
 
 \section{Unifying and formalizing Functional DPS frameworks}
 
-What I'll develop on in this thesis is a functional language in which \emph{structures with holes} are a first-class type in the language, as in~\cite{minamide_functional_1998}, but that also integrate first-class \emph{pointers to these holes}, aka. \emph{destinations}, as part of the user-facing language.
+What we'll develop on in this thesis is a functional language in which \emph{structures with holes} are a first-class type in the language, as in~\cite{minamide_functional_1998}, but that also integrate first-class \emph{pointers to these holes}, aka. \emph{destinations}, as part of the user-facing language.
 
 We'll see that combining these two features gives us performance improvement for some functional algorithms like in~\cite{bour_tmc_2021} or~\cite{leijen_tail_2025}, but we also get some extra expressiveness that is usually a privilege of imperative languages only. It should be indeed the first instance of a functional language that supports write pointers in the frontend (and not only in intermediate representation like~\cite{bour_tmc_2021,leijen_tail_2025}) to make flexible and efficient data structure building!
 
-In fact, I'll design a formal language in which \emph{structures with holes} are the core component for building any data structure, breaking from the traditional way of building structures in functional languages using data constructor. I'll also demonstrate how these ideas can be implemented in a practical functional language, namely Haskell, and that predicted benefits of the approach are mostly preserved in the prototype Haskell implementation.
+In fact, we will design a formal language in which \emph{structures with holes} serve as the core abstraction for constructing data structures, departing from the traditional use of data constructors in functional programming. Later, we will demonstrate how many of the ideas and features from this theoretical calculus can be implemented in a practical functional language~---namely Haskell---~while retaining as much expressivity as possible. We will also show that the predicted benefits of the approach are effectively observed in the prototype Haskell implementation.
 
 The formal language will also aim at providing a theoretical framework that encompasses most existing work on functional DPS and can be used to reason about safety and correctness properties of earlier works.
 
