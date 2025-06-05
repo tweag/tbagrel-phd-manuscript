@@ -1371,7 +1371,7 @@ Lemma ValidOnly_union_backward
 
 The cost of this approach is that most typing rules must now include explicit well-formedness conditions---such as \mintinline{coq}/IsValid/ and \mintinline{coq}/ValidOnly/---to ensure that the input contexts do not contain any faulty bindings. Additional lemmas are required to propagate these validity conditions through context operations, using properties such as disjointness to guarantee the absence of errors in the resulting contexts.
 
-\section{Translation of prior work into \destcalculus{} terms and types}
+\section{Translation of prior work into \destcalculus{} terms and types}\label{sec:transl-minamide}
 
 We announced in \cref{sec:destcalc-intro} that \destcalculus{} subsumes existing systems. Let's see how.
 
