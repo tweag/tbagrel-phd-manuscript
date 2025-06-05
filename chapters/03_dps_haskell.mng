@@ -787,7 +787,13 @@ axLCtorToSymbolDef =
 
 \paragraph{Putting it all together, and further evolutions}
 
-All these elements combined provide the low-level backbone needed to implement our \mintinline{haskellc}/fill/ function. The implementations presented above were designed to minimize changes to GHC itself, based on the idea that the fewer modifications required, the more realistic it would be for this feature to work well and be accepted into the main version of GHC, especially since destination-passing remains a relatively niche concern for such an industrial-grade compiler.
+\begin{figure}\centering
+  \scalebox{1.5}{\tikzfig{schemas/implem-recap}}
+  \caption{Schematic overview of the implementation architecture for \mintinline{haskellc}/fill/}
+  \label{fig:implem-recap}
+\end{figure}
+
+All these elements combined provide the low-level backbone needed to implement our \mintinline{haskellc}/fill/ function. They are summarized in \cref{fig:implem-recap}. The implementations presented above were designed to minimize changes to GHC itself, based on the idea that the fewer modifications required, the more realistic it would be for this feature to work well and be accepted into the main version of GHC, especially since destination-passing remains a relatively niche concern for such an industrial-grade compiler.
 
 However, since this initial experimentation~\cite{custom_ghc}, a pull request has been opened~\cite{bagrel_primitives_2024} to gather community input on the topic, and we now appear to be moving toward a slightly more complete set of primitives than the three previously mentioned. In particular, primitive support for \mintinline{haskellc}/fill/ will likely be included in GHC itself (rather than existing solely in library code, as it does currently). At the time of writing, the interface design is still under discussion, and much of the implementation remains to be done (or be adapted from earlier experiments).
 
