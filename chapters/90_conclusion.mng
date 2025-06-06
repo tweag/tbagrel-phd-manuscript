@@ -137,8 +137,94 @@ We hope that, by now, the reader has got a clear and enjoyable overview of funct
 
 \phantomsection\section*{Future perspectives}\addcontentsline{toc}{section}{Future perspectives}\markboth{Conclusion}{Future perspectives}
 
-Further work would consist in verifying the safety of both the original and extended DPS Haskell APIs developed in \cref{chap:dps-haskell,chap:ext-linear-nonlinear}. We have argued that \destcalculus{} provides a framework to reason about the safety and correctness of destination-passing systems---now would be the time to put that claim to the test.
+\paragraph{Proof of safety for the practical DPS Haskell APIs}
 
-A second direction for improvement is to implement DPS support for Haskell within the garbage-collected heap (that is, the standard memory region where most Haskell data resides) rather than relying on the protective shell of compact regions. The challenge here lies in the tight coupling between memory safety and the garbage collector internals, particularly those concerning when and where immutability assumptions are used.
+By the end of this PhD, we achieved our two main goals: demonstrating that functional destination passing can be made safe, and providing evidence that practical implementations of destination passing in an industrial-grade functional language are feasible and can deliver performance benefits.
 
-Finally, a third possible improvement would be to extend destination-passing structure building to data structures with unpacked fields---that is, structures where some fields directly embed child elements rather than storing pointers to them. So far, we have only considered destination passing for purely linked structures, and for good reason: this allows efficient composition (i.e., merging) of structures with holes, by simply writing the address of the child structure into the appropriate field of the parent one, in a single memory operation. In contrast, for structures with unpacked fields, the situation is more delicate. A naive deep copy of the child structure would invalidate any existing destinations pointing to it, requiring careful tracking and potentially more complex mechanisms. Supporting such structures would therefore not come for free.
+The next natural step is to reconcile these two strands of work, by using the theoretical framework developed in \destcalculus{} (\cref{chap:dest-calculus}) to prove that the practical implementations introduced in \cref{chap:dps-haskell,chap:ext-linear-nonlinear} are indeed safe.
+
+Such a proof would involve translating each operator from the DPS Haskell APIs into their counterparts in \destcalculus{}, and showing that for any well-typed DPS Haskell program, there exists a suitable age assignment that makes the translated \destcalculus{} program typecheck.
+
+The main obstacle—beyond the lack of time to pursue this work in depth—is that, despite their common roots, there are subtle but key differences between \destcalculus{} and the various DPS Haskell APIs. For example, in the version from \cref{chap:dps-haskell}, the absence of linear destinations has wide-reaching implications: it allows destinations of heterogeneous ages to be safely stored in usual Haskell data structures like standard library lists. This flexibility would be difficult to justify in \destcalculus{}, which lacks any notion of non-destination-based data structures. Similarly, in the API from \cref{chap:ext-linear-nonlinear}, we rely both on a non-capturing \mintinline{haskellc}/updWith/ operator (unlike the original $\ottkw{upd}{\ottkw{\ltimes}}$), and on the \mintinline{haskellc}/extend/ functions, which would effectively translate to a controlled yet capturing version of $\ottkw{upd}{\ottkw{\ltimes}}$.
+
+Altogether, these differences mean that formally proving the safety of our practical DPS Haskell APIs within the framework of \destcalculus{} remains a challenging---but exciting---direction for future work.
+
+\paragraph{DPS Haskell, outside of compact regions}
+
+A second direction for future work is to implement destination-passing support directly within Haskell’s standard garbage-collected heap, rather than relying on the protective boundary of compact regions.
+
+The main challenge lies in the close interaction between memory safety and the internals of GHC’s garbage collector, particularly regarding when and where immutability assumptions are relied upon. GHC uses a copying collector with a variety of performance-critical optimizations, and violating its expectations about immutability could lead to subtle and potentially catastrophic bugs. Moreover, GHC’s runtime system is complex and actively evolving, with key implementation details often spread across various documents---some of which may be outdated or not precise enough. Acquiring a complete and up-to-date understanding would likely require input from experienced contributors to the compiler and runtime.
+
+An equally serious concern is that, if structures with holes are moved by the GC, any live destination referring to them must be updated accordingly to avoid dangling pointers---a nontrivial task either.
+
+For these reasons, this path remains technically demanding and uncertain. It is not yet clear whether implementing destination passing within the GC-managed heap would yield significant performance benefits over our current approach using compact regions---especially since doing so would likely interfere with the garbage collector’s operation, introducing barriers or constraints that could hinder its efficiency.
+
+\paragraph{Destination passing support for data structures with unpacked fields}
+
+A final direction for improvement would be to extend destination-passing support to data structures with unpacked fields---that is, fields that embed child elements directly instead of pointing to them.
+
+Until now, we have restricted our attention to purely linked structures, and for good reason: they allow efficient composition (i.e., merging) of structures with holes.
+
+Throughout both our theoretical work and implementations, our goal has been to perform destination filling as simple, single memory write. Also, since Minamide's foundational work, composability has been a key feature of structures with holes, crucial for building constructs like ampar-based difference lists.
+
+When composing two ampars using \mintinline{haskellc}/extendComp/ (or filling a parent ampar's destination with a child ampar using \mintinline{haskellc}/fillComp/), if the involved fields are indirected, then composition boils down to writing the address of the child into the hole of the parent. See below (we annotate memory locations with \mintinline{text}/@addr=/ syntax, and use standard notation for holes and destinations):
+
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+extendComp ⩴ ∀ s t u. Ampar t u ⊸ Ampar s (Dest Ⴈ t) ⊸ Ampar s u
+
+parentAmpar :: Ampar [t] (Dest Ⴈ [t]) = newAmpar tok1 &extend @'(:) @1 "first"
+-- in memory:  ¤Ampar 0x05ba (¤Dest °$\ottshname{\to{}\!\!0x05ca}$°)
+-- @0x05ba=    0xcb1e : °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+-- @0xcb1e=   "first"
+
+childAmpar :: Ampar [t] (Dest Ⴈ [t]) = newAmpar tok2 &extend @'(:) @1 "second"
+-- in memory:  ¤Ampar 0x0840 (¤Dest °$\ottshname{\to{}\!\!0x0850}$°)
+-- @0x0840=    0xbc4e : °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+-- @0xbc4e=   "second"
+
+resAmpar :: Ampar [t] (Dest Ⴈ [t]) = parentAmpar &extendComp childAmpar
+-- in memory:  ¤Ampar () (¤Dest °$\ottshname{\to{}\!\!0x0850}$°)
+-- @0x05ba=    0xcb1e : 0x0840
+-- @0xcb1e=   "first"
+-- @0x0840=    0xbc4e : °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+-- @0xbc4e=   "second"
+\end{minted}
+}
+\end{unbreakable}
+
+In this case, only the second field of the \emph{cons} constructor at \mintinline{haskellc}/0x05ba/ needs to be updated. The resulting ampar inherits the destination from \mintinline{haskellc}/childAmpar/, which still correctly points to the hole at \mintinline{haskellc}/0x0850/.
+
+However, things become more complicated when unpacked fields are involved:
+\begin{unbreakable}
+{\figtextsize
+\begin{minted}[linenos,escapeinside=°°]{haskellc}
+extendComp ⩴ ∀ s t u. Ampar t u ⊸ Ampar s (Dest Ⴈ t) ⊸ Ampar s u
+
+data UPair a b = ¤UPair
+  {-# UNPACK #-} !a
+  {-# UNPACK #-} !b
+
+parentAmpar :: Ampar (UPair Int (UPair Int Int)) (Dest Ⴈ (UPair Int Int))
+  = newAmpar tok1 &extend @'UPair @1 1
+-- in memory:  ¤Ampar 0x05ba (¤Dest °$\ottshname{\to{}\!\!0x05ca}$°)
+-- @0x05ba=    ¤UPair 1# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+
+childAmpar :: Ampar (UPair Int Int) (Dest Ⴈ Int) = newAmpar tok2 &extend @'UPair @1 2
+-- in memory:  ¤Ampar 0x0840 (¤Dest °$\ottshname{\to{}\!\!0x0850}$°)
+-- @0x0840=    ¤UPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+
+resAmpar :: Ampar (UPair Int (UPair Int Int)) (Dest Ⴈ Int) = parentAmpar &extendComp childAmpar
+-- in memory:  ¤Ampar 0x05ba (¤Dest °$\ottshname{\to{}\!\!0x0850}$°)
+-- @0x05ba=    ¤UPair 1# (¤UPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°)
+-- @0x0840=    ¤UPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+\end{minted}
+}
+\end{unbreakable}
+
+Now, to perform composition, we must copy the child structure into the hole of the parent. For instance, the unpacked value \mintinline[escapeinside=°°]{haskellc}/¤UPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°/ must be deep-copied, because the parent expects an unpacked field. But doing so invalidates the destination from the child: it still points to \mintinline{haskellc}/0x0850/, while the actual hole now lives at \mintinline[escapeinside=°°]{haskellc}/0x5d2/!
+
+Addressing this would require tracking and updating destination pointers dynamically whenever composition happens throughout an unpacked field. But such a mechanism would impose significant overhead and undermine the simplicity and efficiency of our current model.
+
+A more realistic path forward is to distinguish destinations pointing to unpacked fields from those pointing to indirected ones\footnote{We can know whether a field is unpacked or indirected using \mintinline{haskellc}/GHC.Generics/.}, and to restrict use of \mintinline{haskellc}/fillComp/ and \mintinline{haskellc}/extendComp/ to cases where the destination targets an indirected field.
