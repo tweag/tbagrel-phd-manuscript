@@ -8,7 +8,7 @@ The results presented in this chapter have also been published at the OOPSLA 202
 % TODO: Contributions
 % TODO: Plan du chapitre
 
-\section{Destination-passing style programming, in a functional setting}\label{sec:destcalc-intro}
+\section{Destination passing in a functional setting}\label{sec:destcalc-intro}
 
 In destination-passing style, a function doesn't return a value: it takes as an argument a location---named \emph{destination}---where the output of the function ought to be written. In this chapter, we will denote destinations by $[[⌊ T ⌋ ¹ν]]$ where $[[T]]$ is the type of what can be stored in the destination. A function of type $[[T → U]]$ would have signature $[[T → ⌊ U ⌋ ¹ν → ①]]$ when transformed into destination-passing style. Instead of returning an $[[U]]$, it consumes a destination of type $[[⌊U⌋ ¹ν]]$ and returns just \emph{unit} (type $[[①]]$). This style is common in systems programming, where destinations $[[⌊ U ⌋ ¹ν]]$ are more commonly known as \emph{out parameters} (in C, $[[⌊ U ⌋ ¹ν]]$ would typically be a pointer of type $\ottstype{U*}$).
 
@@ -160,7 +160,7 @@ $\footnote{In fact, we'll develop a more complex system of modes starting from \
 
 To obtain the regular $\ottkw{map}$ function, all is left to do is to call $[[alloc]]$ to create an initial destination, and $\ottkw{from}_{\ottkw{\ltimes} }'$ when all destinations have been filled to extract the completed list; much like when we make constructors out of filling operators, like $\ottsctor{(::)}$ above.
 
-\begin{codefig}{\caption{Tail-recursive $\ottkw{map}$ function on lists}\label{fig:impl-map-tr}}
+\begin{codefig}{\caption{Tail-recursive $\ottkw{map}$ function on lists in \destcalculus{}}\label{fig:impl-map-tr}}
 \newtype{[[List T]]}{[[① ⨁ (T ⨂ (List T))]]}
 \newoperatorb
   {\ottkw{map'}}{[[(T ¹ν → U) ɷ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
@@ -190,7 +190,7 @@ The problem is that in the functional implementation, each concatenation still a
 
 % Piggyback
 
-\sidebysidecodefig{\caption{Difference list and queue implementation in equirecursive \destcalculus{}}\label{fig:impl-dlist-queue}}{t}{0.47}{
+\sidebysidecodefig{\caption{Difference list and queue implementation in \destcalculus{}}\label{fig:impl-dlist-queue}}{t}{0.47}{
 \newtype{[[DList T]]}{[[(List T) ⧔ ⌊ List T ⌋ ¹ν]]}
 \newoperatorb
   {\ottkw{append}}{[[DList T ¹ν → T ¹ν → DList T]]}
@@ -318,7 +318,7 @@ We implement the actual breadth-first relabeling $\ottkw{relabelDps}$ as an inst
 
 This freshly gained expressivity has a cost though: we need a type system that combines linearity control \emph{and} age control to make the system sound, otherwise we run into the issues of scope escape described in the previous section. We'll combine both linearity and the aforementioned ages system in the same \emph{mode ringoid}\footnote{We said in \cref{sec:modal-lin} that the modal approach with ringoids would make the type system easier to extend, here is the proof.}. You already know the linearity annotations $[[¹]]$ and $[[ω]]$ from \cref{chap:preli}; here we also introduce the new age annotation $[[∞]]$, that indicates that the associated argument cannot carry destinations. Arguments with no modes displayed on them, or function arrows with no modes, default to the unit of the ringoid; in particular they are linear, and can capture destinations.
 
-\begin{codefig}{\caption{Breadth-first tree traversal in destination-passing style}\label{fig:impl-bfs}}
+\begin{codefig}{\caption{Breadth-first tree traversal using destination passing in \destcalculus{}}\label{fig:impl-bfs}}
 \newoperator[~\mathbf{rec}]
 {\ottkw{go}}{[[(S ω∞ → T1 ¹ν → (! ω∞ S) ⨂ T2) ω∞→ S ω∞ → Queue (Tree T1 ⨂ ⌊ Tree T2 ⌋ ¹ν) ¹ν → ①]]}
 {[[go f st q]]}{\!\!\!\begin{array}[t]{l}[[
@@ -478,7 +478,7 @@ $[[(p a) + (p' a')]] \btriangleq [[(p + p') (a + a')]]$
 \egroup
 \end{ottfig}
 
-\begin{codefig}{\caption{Syntactic sugar definitions for terms}\label{fig:sterm}}
+\begin{codefig}{\caption{Desugaring rules for terms in \destcalculus{}}\label{fig:sterm}}
 \begin{minipage}{\linewidth}
 \sidebysidecodehere{t}{0.42}{
 [[ˢInl t]] \btriangleq \!\!\!\begin{array}[t]{l}[[
@@ -1025,7 +1025,7 @@ We think of the typing rule for an evaluation context as a rotation of the typin
 
 Now that every piece is in place, let's focus on the reduction rules of \destcalculus{}, displayed in \cref{fig:sem-full1,fig:sem-full2}. As in \cref{sec:lincalc-sem} for \CLdm{}, focus (F suffix), unfocus (U suffix) and contraction (C suffix) rules of \destcalculus{} are triggered in a purely deterministic fashion. Once a subterm is a value, it cannot be focused on again.
 
-\begin{ottfig}{\caption{Small-step reduction of commands for \destcalculus{} (\rref*{\CSem}, part 1)}\label{fig:sem-full1}}
+\begin{ottfig}{\caption{Small-step semantics for \destcalculus{} (\rref*{\CSem}), part 1}\label{fig:sem-full1}}
 \begin{minipage}{\linewidth}
 
 \bgroup
@@ -1111,7 +1111,7 @@ $\!\begin{array}{rcl}
 \end{minipage}
 \end{ottfig}
 
-\begin{ottfig}{\caption{Small-step reduction of commands for \destcalculus{} (\rref*{\CSem}, part 2)}\label{fig:sem-full2}}\begin{augmentwidth}{2.5cm}\bgroup\renewcommand{\drulesectionhead}[2]{}
+\begin{ottfig}{\caption{Small-step semantics for \destcalculus{} (\rref*{\CSem}), part 2}\label{fig:sem-full2}}\begin{augmentwidth}{2.5cm}\bgroup\renewcommand{\drulesectionhead}[2]{}
 \renewcommand{\ottdrulename}[1]{}
 \renewcommand\arraystretch{1.5}
 \renewcommand\ottaltinferrule[4]{

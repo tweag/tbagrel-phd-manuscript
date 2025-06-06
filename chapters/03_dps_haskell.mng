@@ -1,16 +1,16 @@
-\chapter{A first implementation of first-class destination passing in Haskell}\label{chap:dps-haskell}
+\chapter{A first implementation of destination passing in Haskell}\label{chap:dps-haskell}
 
 In the previous chapter, we saw how we can build a $\lambda$-calculus from the ground up with first-class support for destination passing, and that still achieves memory safety. It's now time to put that into practice in an broadly used programming language.
 
 This chapter revisits and refines the results presented in \cite{bagrel_destination-passing_2024}, which was published at JFLA 2024 prior to the completion of the theoretical work presented in \cref{chap:dest-calculus}.
 
-\section{Linear Haskell is our implementation target}\label{intro-dps-haskell}
+\section{Implementation target: Linear Haskell}\label{intro-dps-haskell}
 
 Designing an industrial-grade programming language \emph{just} to add support for destinations would be a gigantic task, with much risk to fail. Instead, we base our work on an existing functional programming language, for instance, Haskell\footnote{There aren't many other industrial-grade functional programming languages, and most of them don't have support for linear types, which are the first piece required to make a system like \destcalculus{} safe. Thanks to recent work from~\citet{lorenzen_oxidizing_2024}, OCaml will soon have support for \emph{affinity}, but not for \emph{linearity} (despite the aforementioned work using the term linearity). Affinity ensures that a resource can be used at most once, but does not guarantee it will be used exactly once; it may be discarded without use. This would be problematic for us, since we rely on the guarantee that destinations cannot be dropped: it ensures that when an \texttt{ampar} no longer contains destinations on the right, all holes in the corresponding structure have been filled.}, and we aim to implement as many ideas from \destcalculus{} (see \cref{chap:dest-calculus}) as possible in this language. Haskell is equipped with support for linear types through its main compiler, \emph{GHC}, since version 9.0.1~\cite{bernardy_linear_2018}. We kindly redirect the reader to \cref{sec:intro-linearity} for a primer on Linear Haskell and how to use it to control resource use. Moreover, Haskell is a \emph{pure} functional language, which means our destination-passing API will have to be pure, with (naturally impure) memory writes safely encapsulated within it, as explained in the introduction, so that no mutation or incomplete structure can be observed by the user.
 
 The main challenge is that Haskell, albeit incorporating linear types, doesn't have any concept of scope or age control. So we won't be able to avoid the fundamental issues presented in \cref{sec:scope-escape-dests} without imposing limitations on the flexibility of the system.
 
-\section{Restricting \destcalculus{} so that it can be made safe with just linear types}\label{sec:restrict-dps-linhask}
+\section{Safe destination passing with just linear types}\label{sec:restrict-dps-linhask}
 
 As we've seen in \cref{sec:scope-escape-dests}, linear types are not enough, alone, to make \destcalculus{} safe. We definitely need ages and scope control. In this chapter, we will take a radical decision: we restrict destinations to only be used to build non-linear (a.k.a. unrestricted) data structures, so that the issue of scope escape disappears completely. This also rules out the potential interaction between sibling destinations also described in \cref{sec:scope-escape-dests}. In exchange, we won't be able to store destinations inside data structures built using ampars. We further use the name \emph{DPS Haskell} to refer to this prototype destination-passing API we develop in Haskell.
 
@@ -120,25 +120,25 @@ toList dlist = fromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
 % TODO: update syntax
 \begin{figure}\centering
   \scalebox{\figscale}{\tikzfig{schemas/alloc}}
-  \caption{\mintinline{haskellc}/newUAmpar tok/}
+  \caption{Memory representation of \texttt{newUAmpar tok} in DPS Haskell}
   \label{fig:schema-alloc}
 \end{figure}
 
 \begin{figure}\centering
   \scalebox{\figscale}{\tikzfig{schemas/dlist-append}}
-  \caption{Memory behavior of \mintinline{haskellc}/append newUAmpar 1/}
+  \caption{Memory behavior of \texttt{append newUAmpar 1} in DPS Haskell}
   \label{fig:schema-dlist-append}
 \end{figure}
 
 \begin{figure}\centering
   \scalebox{\figscale}{\tikzfig{schemas/dlist-concat}}
-  \caption{Memory behavior of \mintinline{haskellc}/concat dlist1 dlist2/ (based on \mintinline{haskellc}/fillComp/)}
+  \caption{Memory behavior of \texttt{concat dlist1 dlist2} in DPS Haskell (based on \texttt{fillComp})}
   \label{fig:schema-dlist-concat}
 \end{figure}
 
 \begin{figure}\centering
   \scalebox{\figscale}{\tikzfig{schemas/dlist-toList}}
-  \caption{Memory behavior of \mintinline{haskellc}/toList dlist/}
+  \caption{Memory behavior of \texttt{toList dlist} in DPS Haskell}
   \label{fig:schema-dlist-toList}
 \end{figure}
 
@@ -245,7 +245,7 @@ Except from the choice of queue implementation, and the fact that ampars must be
 
 As we will see in \cref{sec:benchmark}, this imperative-style implementation of breadth-first traversal in DPS Haskell, despite not using efficient queue representations such as difference lists, still shows substantial performance gains compared to the functional implementation from~\citet{gibbons_phases_2023}, which we must admit, while pretty elegant, was not designed with performance as a primary focus.
 
-\section{DPS Haskell API and Design concerns}\label{sec:api}
+\section{DPS Haskell API and design concerns}\label{sec:api}
 
 \cref{table:destination-api} presents the pure API of DPS Haskell. This API is sufficient to implement all the examples of \cref{sec:motivating-examples}. This section explains its various parts in detail and how it compares to the calculus of \cref{chap:dest-calculus}.
 
@@ -271,11 +271,11 @@ fill ⩴ ∀ lCtor t. UDest t ⊸ UDestsOf lCtor t
 fillComp ⩴ ∀ s t. UAmpar s t ⊸ UDest s ⊸ t
 fillLeaf ⩴ ∀ t. t → UDest t ⊸ ()
 \end{minted}
-\caption{Destination API for Haskell}
+\caption{DPS Haskell API, initial version}
 \label{table:destination-api}
 \end{listing}
 
-\subsection{The \texttt{UAmpar} type}
+\subsection{The UAmpar type}
 
 As with Ampars from the previous chapter, UAmpar structures, that serve as a wrapper for structures with holes, can be freely passed around and stored, but need to be completed before any reading i.e. pattern-matching can be made on them. As a result, \mintinline{haskellc}/UAmpar s t/ is defined as an opaque data type, with no public constructor.
 
@@ -347,7 +347,7 @@ Here in DPS Haskell, it is actually safe to wrap the structure that has been bui
 
 % Morally, this linear \mintinline{haskellc}/Functor/ instance says that one can temporary forget about the root of the structure being built, and just manipulate the destinations as first-class objects that will produce remote building effects onto the structure that is invisible in the inner scope.
 
-\subsection{Filling functions for destinations}\label{ssec:fill-functions-v1}
+\subsection{Destination-filling functions}\label{ssec:fill-functions-v1}
 
 The last part of the API is the one in charge of actually building the structures in a top-down fashion. To fill a hole represented by \mintinline{haskellc}/UDest t/, three functions are available:
 
@@ -374,23 +374,23 @@ The \mintinline{haskellc}/fill/ function also returns one destination of matchin
 
 \begin{figure}\centering
   \scalebox{\figscale}{\tikzfig{schemas/fillCons}}
-  \caption{Memory behavior of \mintinline{haskellc}/fill @'(:) ⩴ UDest [t] ⊸ (UDest t, UDest [t])/}
+  \caption{Memory behavior of \texttt{fill @'(:) ⩴ UDest [t] ⊸ (UDest t, UDest [t])}}
   \label{fig:schema-fillCons}
 
   \scalebox{\figscale}{\tikzfig{schemas/fillNil}}
-  \caption{Memory behavior of \mintinline{haskellc}/fill @'[] ⩴ UDest [t] ⊸ ()/}
+  \caption{Memory behavior of \texttt{fill @'[] ⩴ UDest [t] ⊸ ()}}
   \label{fig:schema-fillNil}
 
   \scalebox{\figscale}{\tikzfig{schemas/fillLeaf}}
-  \caption{Memory behavior of \mintinline{haskellc}/fillLeaf ⩴ t → UDest [t] ⊸ ()/}
+  \caption{Memory behavior of \texttt{fillLeaf ⩴ t → UDest [t] ⊸ ()}}
   \label{fig:schema-fillLeaf}
 \end{figure}
 
-\section{Compact Regions: a playground to implement the DPS Haskell API}\label{sec:implementation}
+\section{Compact regions: a safe space for implementing DPS Haskell}\label{sec:implementation}
 
 Having incomplete structures in the memory inherently introduces a lot of tension with both the garbage collector and the compiler. Indeed, the garbage collector of GHC assumes that every heap object it traverses is well-formed, whereas UAmpar structures are absolutely ill-formed: they contain uninitialized pointers, which the GC should absolutely not follow. Also, the compiler and GC can make some optimizations because they assume that every object is immutable, while DPS programming breaks that guarantee by mutating constructors after they have been allocated (albeit only one update can happen). Consequently, we looked for an alternative memory management scheme, mostly independent from the garbage collector, that would let us implement the DPS Haskell API without having to change the garbage collector internals or the memory representation used by GHC.
 
-\subsection{Compact Regions}\label{ssec:impl-compact-regions}
+\subsection{Compact regions}\label{ssec:impl-compact-regions}
 
 \emph{Compact regions} from~\citet{yang_efficient_2015} are special memory \emph{arenas} for Haskell. A compact region represents a memory area in the Haskell heap that is almost fully independent from the GC and the rest of the garbage-collected heap. For the GC, each compact region is seen as a single heap object with a single lifetime. The GC can efficiently check whether there is at least one pointer in the garbage-collected heap that points into the region, and while this is the case, the region is kept alive. When this condition is no longer matched, the whole region is discarded. The result is that the GC won't traverse any node from the region: it is treated as one opaque block (even though it is actually implemented as a chain of blocks of the same size, this doesn't change the principle). Also, compact regions are immobile in memory; the GC won't move them, so a destination to a hole in the compact region can just be implemented as a raw pointer (type \mintinline{haskellc}/Addr#/ in Haskell): \mintinline{haskellc}/data UDest r t = ¤UDest Addr#/, as we have the guarantee that the UAmpar containing the pointed hole won't move.
 
@@ -429,11 +429,11 @@ fill ⩴ ∀ lCtor r t. Region r ⇒ UDest r t ⊸ UDestsOf lCtor r t
 fillComp ⩴ ∀ r s t. Region r ⇒ UAmpar r s t ⊸ UDest r s ⊸ t
 fillLeaf ⩴ ∀ r t. Region r ⇒ t → UDest r t ⊸ ()
 \end{minted}
-\caption{Destination API using compact regions}
+\caption{DPS Haskell API for compact regions}
 \label{table:destination-api-regions}
 \end{listing}
 
-\subsection{DPS programming in Compact regions: Deserializing, lifetime, and garbage collection}\label{ssec:parser-sexpr}
+\subsection{Practical DPS programming in compact regions}\label{ssec:parser-sexpr}
 
 We will now study an example, related to implementation concerns, for which DPS programming really shines (and for which compact regions are a really nice fit).
 
@@ -547,7 +547,7 @@ parseSList bs i acc = case bs !? i of
         ¤Left err → ¤Left err
         ¤Right child → parseSList bs (endPos child + 1) (child : acc)
 \end{minted}
-\caption{Implementation of the S-expression parser without destinations}
+\caption{Implementation of the S-expression parser in Haskell (no destinations)}
 \label{table:impl-parser-naive}
 \end{listing}
 
@@ -566,7 +566,7 @@ parseSListDPS bs i d = case bs !? i of
               ¤Left err → dt &fill @'[] ; ¤Left err
               ¤Right endPos → parseSListDPS bs (endPos + 1) °\mnew{dt}°
 \end{minted}
-\caption{Implementation of the S-expression parser with destinations}
+\caption{Implementation of the S-expression parser in DPS Haskell}
 \label{table:impl-parser-dps}
 \end{listing}
 
@@ -586,7 +586,7 @@ Thanks to that new implementation which is barely longer (in terms of lines of c
 
 We see here that compact regions and destination-passing style are quite symbiotic; compact regions makes the DPS Haskell API easy to implement, and destination-passing style makes compact regions more efficient and flexible to use.
 
-\subsection{Memory representation of \texttt{UAmpar} objects in Compact Regions}\label{ssec:repr-ampar}
+\subsection{Memory representation of \texttt{UAmpar}s in Compact regions}\label{ssec:repr-ampar}
 
 As we detailed in \cref{ssec:runtime-values,ssec:dpshaskell-dlist}, we want \mintinline{haskellc}/UAmpar r s t/ to contains a value of type \mintinline{haskellc}/s/ and one of type \mintinline{haskellc}/t/, and let the value of type \mintinline{haskellc}/s/ free when the one of type \mintinline{haskellc}/t/ has been fully consumed (or linearly transformed into \mintinline{haskellc}/Ur t'/).% So the most straightforward implementation for \mintinline{haskellc}/UAmpar/ would be a pair \mintinline{haskellc}/(s, t)/, where \mintinline{haskellc}/s/ in the pair is only partially complete.
 
@@ -599,7 +599,7 @@ Given that UAmpars hold unrestricted data, one potential workaround is to repres
 \begin{figure}
 \centering
 \scalebox{\figscale}{\tikzfig{schemas/alloc-region-notchosen}}
-\caption{Representation of UAmpars in the compact region implementation, using \mintinline{haskellc}/Ur/ (not chosen)}\label{fig:schema-alloc-region-notchosen}
+\caption{Representation of \texttt{UAmpar r} using \texttt{Ur} (not chosen)}\label{fig:schema-alloc-region-notchosen}
 \end{figure}
 
 Another option, that we decided to go for in our real implementation, is to allocate an object inside the compact region to host the root hole of the structure \emph{only} for truly incomplete structures created with \mintinline{haskellc}/newUAmpar/. For already complete structures that are turned into an \mintinline{haskellc}/UAmpar/ with \mintinline{haskellc}/toUAmpar/, we skip this allocation; but we preserve the same underlying types for the fields of the UAmpar in both cases (\mintinline{haskellc}/newUAmpar/ and \mintinline{haskellc}/toUAmpar/). This is made possible by the use of the special indirection object (\mintinline{haskellc}/stg_IND/ in GHC codebase) in the UAmpar returned by \mintinline{haskellc}/newUAmpar/. A \mintinline{haskellc}/stg_IND/ object is a kind of one-field constructor that is considered to have type \mintinline{haskellc}/s/ although its field also has type \mintinline{haskellc}/s/. We illustrate this in \cref{fig:schema-alloc-region}:
@@ -607,7 +607,7 @@ Another option, that we decided to go for in our real implementation, is to allo
 \begin{figure}
 \centering
 \scalebox{\figscale}{\tikzfig{schemas/alloc-region}}
-\caption{Chosen representation for UAmpars in the compact region implementation, using indirections}\label{fig:schema-alloc-region}
+\caption{Representation of \texttt{UAmpar r} using indirections}\label{fig:schema-alloc-region}
 \end{figure}
 
 \begin{itemize}
@@ -706,7 +706,7 @@ case primop of
             mkCmmInfoLabel rtsUnitId (fsLit "stg_" `appendFS` sym)))
       _ → [...] -- error when no pattern matches
 \end{minted}
-\caption{\texttt{reifyInfoPtr\#} implementation in \texttt{compiler/GHC/StgToCmm/Prim.hs}}
+\caption{Implementation of \texttt{reifyInfoPtr\#} in \texttt{compiler/GHC/StgToCmm/Prim.hs}}
 \label{table:impl-reifyInfoPtr}
 \end{listing}
 
@@ -738,7 +738,7 @@ stg_compactAddHollowzh(P_ compact, W_ info) {
     return (P_[pp]);
 }
 \end{minted}
-\caption{\texttt{compactAddHollow\#} implementation in \texttt{rts/Compact.cmm}}
+\caption{Implementation of \texttt{compactAddHollow\#} in \texttt{rts/Compact.cmm}}
 \label{table:impl-compactAddHollow}
 \end{listing}
 
@@ -781,7 +781,7 @@ axLCtorToSymbolDef =
     (\case { ¤TyConApp tyCon _ → isPromotedDataCon_maybe tyCon ; _ → ¤Nothing })
     (\_ dataCon → ¤Just (mkStrLitTy . occNameFS . occName . getName $ dataCon))
 \end{minted}
-\caption{\mintinline{haskellc}/LCtorToSymbol/ implementation in \texttt{compiler/GHC/Builtin/Types/Literal.hs}}
+\caption{Implementation of \texttt{LCtorToSymbol} in \texttt{compiler/GHC/Builtin/Types/Literal.hs}}
 \label{table:impl-LCtorToSymbol}
 \end{listing}
 
@@ -789,7 +789,7 @@ axLCtorToSymbolDef =
 
 \begin{figure}\centering
   \scalebox{1.5}{\tikzfig{schemas/implem-recap}}
-  \caption{Schematic overview of the implementation architecture for \mintinline{haskellc}/fill/}
+  \caption{Schematic overview of the implementation architecture for \texttt{fill}}
   \label{fig:implem-recap}
 \end{figure}
 
@@ -797,7 +797,7 @@ All these elements combined provide the low-level backbone needed to implement o
 
 However, since this initial experimentation~\cite{custom_ghc}, a pull request has been opened~\cite{bagrel_primitives_2024} to gather community input on the topic, and we now appear to be moving toward a slightly more complete set of primitives than the three previously mentioned. In particular, primitive support for \mintinline{haskellc}/fill/ will likely be included in GHC itself (rather than existing solely in library code, as it does currently). At the time of writing, the interface design is still under discussion, and much of the implementation remains to be done (or be adapted from earlier experiments).
 
-\section{Evaluating the performance of DPS programming}\label{sec:benchmark}
+\section{Evaluating the performance of DPS Haskell}\label{sec:benchmark}
 
 It's now time to see if our claims of performance are verified with our prototype destination-passing implementation~\cite{linear_dest}.
 
@@ -851,7 +851,7 @@ We see in \cref{fig:bench-concat} that the destination-backed difference lists h
 
 Compared to the benchmarks initially presented in \cite{bagrel_destination-passing_2024}, it seems that the performance of destination-based difference lists has improved, through more efficient handling of linear programs by the compiler, albeit the difference with naive implementations still isn't substancial enough compared to what we could expect theoretically, especially when other simpler tweaks exist (notably, setting custom GC parameters at program's launch).
 
-\subsection{Breadth-first relabeling}\label{par:benchmark-bf-tree-traversal}
+\subsection{Breadth-first tree relabeling}\label{par:benchmark-bf-tree-traversal}
 
 \begin{figure}\centering
   \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-bft.pdf}

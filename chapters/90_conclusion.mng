@@ -54,7 +54,7 @@ Nevertheless, we still retain the main restrictions that~\citet{minamide_functio
 
 The ability to manipulate and, in particular, to store destinations does come at a cost: \destcalculus{} requires an additional notion of ages to ensure that destinations are used soundly across scopes. In the absence of such a mechanism, as in DPS Haskell, the use of linear destinations must be carefully constrained to preserve soundness. Despite these additional requirements, our systems---both theoretical and practical---are strictly more general than that of \citet{minamide_functional_1998}. Their system can be naturally embedded within \destcalculus{} (see \cref{sec:transl-minamide}) or expressed in DPS Haskell (see \cref{sec:single-hole}).
 
-\section{Tail Recursion Modulo Context and The Functional Essence of Imperative Binary Search Trees}\label{ssec:lorenzen-searchtree}
+\section{Tail recursion modulo context and The functional essence of imperative binary search Trees}\label{ssec:lorenzen-searchtree}
 
 The recent line of work from \citet{lorenzen_searchtree_2024,leijen_tail_2025} develops in two main axes. The first explores a generalization of Work~\labelcref{ssec:tmc}, by considering the \emph{tail-recursion modulo context} transformation, in which the \emph{context} can be instantiated in various forms. For example, when the context is a one-hole data constructor context---equivalent to the hole abstractions from Work~\labelcref{ssec:minamide}---they recover the \emph{tail-recursion modulo constructor} transformation. But the framework extends further: they are able to handle monoids contexts, semirings contexts, exponentials contexts, and more. Hence, it allows the transformation of a broader class of typically non-tail-recursive functions into efficient tail-recursive equivalents, via a formalized and systematic method, surpassing the scope of the transformation described in Work~\labelcref{ssec:tmc}.
 
@@ -75,7 +75,7 @@ However, this system is too limited to track the scope of destinations as precis
 
 That said, if a mechanism could be introduced to prevent discarding resources of mode \verb|once|, then much---if not all---of the destination-passing APIs described in \cref{chap:dps-haskell,chap:dps-haskell} could still be realized in OCaml, as these APIs rely only on linearity, not full age tracking.
 
-\section{Quantitative Program Reasoning with Graded Modal Types}\label{ssec:granule}
+\section{Quantitative program reasoning with graded modal types}\label{ssec:granule}
 
 \citet{granule_2019} present a functional framework with generalized support for \emph{graded modal types}. Graded modal types refer to a type system with graded modalities---that is, modalities indexed with modes, like $\ottstype{!}_{[[m]]}$---in which the mode, here called \emph{coeffect}, belongs to a semiring, as in~\cite{ghica_bounded_2014,bernardy_modality_2020}.
 
@@ -87,7 +87,7 @@ Because of this, Granule appears to be a promising target for functional destina
 
 Their general framework, however, could be instantiated with the semiring we developed in \cref{ssec:age-control}, and be used as a basis for the type system of \destcalculus{}. But we would still need to extend the set of runtime values to account for structure with holes and destinations, and likewise, introduce a mechanism for state update---such as the linear substitutions on the evaluation context we employed in \cref{ssec:sem}.
 
-\section{Programming with Permissions in Mezzo}\label{ssec:mezzo}
+\section{Programming with permissions in Mezzo}\label{ssec:mezzo}
 
 \citet{protzenko_mezzo_2013} introduced the Mezzo programming language, which features user-facing mutable data structures (unlike ours, where mutability is hidden from the user). Mezzo’s soundness is ensured by a powerful capability system, which governs, in particular, how mutable structures or references can be accessed and shared. In this respect, Mezzo bears a strong resemblance to the Rust programming language.
 

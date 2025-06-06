@@ -21,7 +21,7 @@ In contrast, low-level languages like C or Zig tend to provide developers with d
 
 Interestingly, some languages defy these typical categorizations by providing precise memory control in the form of safe, high-level abstractions. Such languages let the user manage resource lifetimes explicitly while taking the responsibility of allocating and deallocating memory at the start and end of each resource's lifetime. The most well-known examples are smart pointers in C++ and the ownership model in Rust, whose founding principles are also known as \emph{Scope-Bound Resource Management} (SBRM) or \emph{Resource Acquisition is Initialization} (RAII). Initially applicable only to stack-allocated objects in early C++, SBRM evolved with the introduction of smart pointers for heap-allocated objects in the early 2000s. These tools have since become fundamental to modern C++ and Rust, significantly improving memory safety. In particular, Rust provides safety guarantees comparable to those of garbage-collected languages but without the garbage collection overhead, at the cost of a steep learning curve. This makes Rust suitable for both high-level application programming and low-level systems development, bridging a gap that was traditionally divided by memory management style.
 
-\section{Destination passing style: taking roots in the old imperative world}
+\section{Destination passing: taking roots in the old imperative world}
 
 In systems programming, where fine control over memory is essential, the same memory buffer is often (re)used several times, in order to save up memory space and decrease the number of costly calls to the memory allocator. As a result, we don't want intermediary functions to allocate memory for the result of their computations. Instead, we want to provide them with a memory address in which to write their result, so that we can decide to reuse an already allocated memory slot or maybe write to a memory-mapped file, or RDMA buffer\ldots{}
 
@@ -70,7 +70,7 @@ There is also another possible solution. We previously mentioned that side effec
 
 This is the path we will adopt---one that others have taken before---allowing for finer-grained memory control while upholding the principles of purity.
 
-\section{Functional structures with holes: pioneered by Minamide and quite active since}
+\section{Functional structures with holes: Minamide's foundational work}
 
 In most contexts, functional languages with garbage collectors efficiently manage memory without requiring programmer intervention. However, a major limitation arises from the \emph{immutability} characteristic common to most functional languages, which restricts us to constructing data structures directly in their final form. That means that the programmer has to give an initial value to every field of the structure, even if no meaningful value for them has been computed yet. And later, any update beyond simply expanding the original structure requires creating a (partial) copy of that structure. This incurs a big load on the allocator and garbage collector.
 
@@ -86,7 +86,7 @@ This idea has been refreshed and extended more recently with~\cite{leijen_tail_2
 
 To reach true destination-passing style programming however, we need a way to refer to the hole(s) of the incomplete structure without having to pass around the structure that has the hole(s). This in fact hasn't been explored much in functional settings so far.~\cite{bour_tmc_2021} is probably the closest existing work on this matter, but destination-passing style is only used at the intermediary language level, in the compiler, to do optimizations, so the user can't make use of DPS in their code.
 
-\section{Unifying and formalizing Functional DPS frameworks}
+\section{Formalizing functional destination passing}
 
 What we'll develop on in this thesis is a functional language in which \emph{structures with holes} are a first-class type in the language, as in~\cite{minamide_functional_1998}, but that also integrate first-class \emph{pointers to these holes}, aka. \emph{destinations}, as part of the user-facing language.
 

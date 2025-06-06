@@ -1,4 +1,4 @@
-\chapter{Extending DPS support in Haskell for linear data structures}\label{chap:ext-linear-nonlinear}
+\chapter{Extending DPS Haskell to support linear data structures}\label{chap:ext-linear-nonlinear}
 
 % \emph{This chapter builds directly on the contents of the previous one and presupposes a detailed understanding of the concepts and results established therein.}
 
@@ -6,7 +6,7 @@ The main issue with the approach of our DPS Haskell API developed in \cref{chap:
 
 Previous works however, such as~\cite{minamide_functional_1998}, or~\cite{lorenzen_searchtree_2024}, would allow for efficient queues (see \cref{ssec:efficient-queue}) or any structure with holes to store linear data, without issues with scope escape. This happens mainly because they don't have a concept of destinations; in these works we can only fill holes in a structure by interacting with the incomplete structure itself (the ampar). So we ought to find a way for our Haskell implementation to be at least as expressive as these works.
 
-\section{Challenges of destinations for linear data---scope escape, updated}\label{sec:dps-lin-challenges}
+\section{Challenges of destinations for linear data: scope escape, updated}\label{sec:dps-lin-challenges}
 
 Starting from this point, we will say \emph{linear destination} for an object of type $[[⌊ T ⌋ ˥]]$ or corresponding \mintinline{haskellc}/Dest Ⴈ t/, that is, a destination that can host linear data. Similarly, an \emph{unrestricted destination} is an object of type $[[⌊ T ⌋ ɷ]]$ or \mintinline{haskellc}/Dest ω t/. Regardless, a destination is always, itself, a resource that must be managed linearly. Finally, for most of this chapter, we omit compact region details, for clarity of exposition.
 
@@ -48,7 +48,7 @@ In this particularly convoluted example---which nonetheless typechecks given the
 
 There seems to be an inevitable friction between having a capturing \mintinline{haskellc}/updWith/ function, and having safe linear destinations, when we don't have a proper age system to ensure there is no cheating with scopes.
 
-\paragraph{Restricting \mintinline{haskellc}/updWith/}
+\paragraph{A non-capturing \texttt{updWith} function}
 
 If we want to prevent older destinations from hiding in newer ampars, we can ask for \mintinline{haskellc}/updWith/ to \emph{not} capture any linear resource. This way, the only destinations accessible and usable in the scope of \mintinline{haskellc}/updWith/ are the ones coming immediately from the ampar being opened.
 
@@ -224,7 +224,7 @@ Here, the child ampar is required to be an unrestricted structure (as indicated 
 
 % STOPPED HERE%
 
-\section{Arbitrary type on the right-hand side of ampars storing linear data}\label{sec:linear-lens}
+\section{Ampars with several holes, storing linear data}\label{sec:linear-lens}
 
 Being limited to only one destination on the right-hand side of ampars is not ideal. Indeed, we stay at the same expressivity level as existing work, and we loose part of the flexibility that made \destcalculus{} innovative in the first place.
 
@@ -341,7 +341,7 @@ extendFocusedUComp ⩴ ∀ u t1 t2 s u1 u2.
 
 Both of these functions are very similar to their respective one-hole versions \mintinline{haskellc}/extendUr/ and \mintinline{haskellc}/extendComp/. In \mintinline{haskellc}/extendFocusedUr/, we consume a destination of type \mintinline{haskellc}/Dest m (Ur u)/ and replace it with a destination of type \mintinline{haskellc}/Dest ω u/. In \mintinline{haskellc}/extendFocusedComp/, we consume a destination of type \mintinline{haskellc}/Dest Ⴈ u1/, to which we write the left-hand side (of type \mintinline{haskellc}/u1/) of the child ampar, and we replace this consumed destination with whatever was on the right-hand side (of type \mintinline{haskellc}/u2/) of the child ampar. The only difference, between the \mintinline{haskellc}/extend/ and the corresponding \mintinline{haskellc}/extendFocused/ functions, is that the filling operation in the latter happens at a focused location on the right-hand side of an ampar instead of being made on the single destination at top level as in the former.
 
-\section{Breadth-first tree traversal, updated, and final API}\label{sec:bf-api-final}
+\section{Final API and breadth-first tree traversal, updated}\label{sec:bf-api-final}
 
 The family of \mintinline{haskellc}/extendFocused/ functions, based on linear lenses, addresses the core challenge of safely filling destinations with linear data. Although the resulting interface is not entirely satisfactory---particularly from an ergonomic standpoint---it still strikes a reasonable compromise between expressiveness and complexity of the interface (given the constraint of working with the existing Haskell type system).
 
@@ -384,7 +384,7 @@ dequeue (¤EffQueue front back) = case front of
     (x : xs) → Just (x, (¤EffQueue xs (newDList tok)))
   (x : xs) → Just (x, (¤EffQueue xs back))
 \end{minted}
-\caption{Efficient queue for linear data}
+\caption{Efficient queue for linear data in extended DPS Haskell}
 \label{table:eff-queue-lin}
 \end{listing}
 
@@ -412,7 +412,7 @@ mapAccumBfs tok f s0 tree =
                 (st', y) = f st x
               in dy &fillLeaf y ; go st' q''
 \end{minted}
-\caption{Breadth-first tree traversal revisited, with efficient queue for storing destinations}
+\caption{Breadth-first tree traversal using efficient queues in extended DPS Haskell}
 \label{table:impl-bfs-tree-traversal-v2}
 \end{listing}
 
@@ -482,7 +482,7 @@ extendFocusedUComp ⩴ ∀ r u t1 t2 s u1 u2. (Region r) ⇒
                            Ampar r (Ur u1) u2 ⊸ Lens t1 t2 (Dest r ω u1) u2 → Ampar r s t1 ⊸ Ampar r s t2
 
 \end{minted}
-\caption{Destination-passing API for Haskell with support for linear destinations}
+\caption{Extended DPS Haskell API with support for linear destinations}
 \label{table:destination-api-regions-v2}
 \end{listing}
 

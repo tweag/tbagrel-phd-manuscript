@@ -129,7 +129,7 @@ The derivation of the linear implication $[[!T ⊸ (T ⨂ T)]]$ from previous se
 
 This translation is very direct. The only change is that we have to give distinct variable names to hypotheses of the same type inside the typing context, while there was no concept of named copies of a same formula in \CILL. We also see that dealing with unrestricted hypotheses can be rather heavyweight because of the need of manual duplication and dereliction. Next section present a way to circumvent this issue.
 
-\section{Implicit structural rules for unrestricted resources}
+\section{Ergonomic handling of unrestricted resources}
 
 % Gentzen, avec le calcul des séquents, on met en évidence le fait que la virgule et le and ne sont pas exactement pareil, et que la virgule à droite est une internalisation du and
 % Avec la présentation dyadique, en quelque sorte, on internalise le bang sous la forme du 2e contexte à gauche.
@@ -386,7 +386,7 @@ This is precisely the same implementation as $\ottkw{fst}_{\ottkw{nl}}$, with ju
 
 The only change needed on the grammar between \CLm{} and \CLdm{} is that the $\ottkw{case}$ constructs in \CLdm{} take a mode $[[m]]$ to which they consume the scrutinee , which is propagated to the variable bindings for the field(s) of the scrutinee in the body of the $\ottkw{case}$. The new typing rules for $\ottkw{case}$ are presented in \cref{fig:lindeepmod-ty-term}, all the other rules of linear $\lambda$-calculus with deep modes, \CLdm, are identical to those of \cref{fig:linmod-ty-term}.
 
-\begin{ottfig}{\caption{Altered typing rules for deep modes in linear $\lambda$-calculus in modal presentation (\rref*{\CLdm\CTy})}\label{fig:lindeepmod-ty-term}}
+\begin{ottfig}{\caption{Typing rules for deep modes in linear $\lambda$-calculus in modal presentation (\rref*{\CLdm\CTy})}\label{fig:lindeepmod-ty-term}}
 \bgroup\renewcommand{\ottdrulename}[1]{}
 \ottdefnLinDeepModXXTyXXterm{}\egroup
 \end{ottfig}
@@ -401,7 +401,7 @@ Many semantics presentations exist for the $\lambda$-calculus. In \cref{fig:lins
 
 We represent a running program by a pair $[[ C[t] ]]$ of an evaluation context $[[C]]$, and a term $[[t]]$ under focus. We call such a pair $[[ C[t] ]]$ a \emph{command}, borrowing the terminology from~\citet{herbelin_curien_2000}.
 
-\begin{ottfig}{\caption{Small-step semantics for \CLdm{} (\CLdm\CSemSuff)}\label{fig:linsem}}
+\begin{ottfig}{\caption{Small-step semantics for \CLdm{} (\rref*{\CLdm\CSemSuff})}\label{fig:linsem}}
 \begin{augmentwidth}{2cm}
 \bgroup
 \renewcommand{\ottdrulename}[1]{}
@@ -487,7 +487,7 @@ Because we have a function in value form already, with simple body, applied to a
 
 A command of the form $[[ ⬜ [ v ] ]]$ with $[[v]]$ a value is the stopping point of the reduction for all well-typed programs. If we have a non-value term $[[t]]$ in $[[⬜ [ t ] ]]$ then a focusing or contraction step should trigger; and if we have a non-empty evaluation context $[[C]]$ in $[[C [ v ] ]]$ then an unfocusing step should trigger. Only ill-shaped term or value can cause the reduction to be stuck, which is a symptom of a wrongly-typed program.
 
-\section{Linear Types in Haskell}\label{sec:intro-linearity}
+\section{Linear types in Haskell}\label{sec:intro-linearity}
 
 As part of this PhD work, we intend to implement prototypes in an industrial functional programming language as we explore the destination-passing world. Haskell is a suitable target for that, thanks to its support for linear types. In what follows, we give the reader a quick overview of Linear Haskell and how the concepts discussed above map into the Haskell world..
 
