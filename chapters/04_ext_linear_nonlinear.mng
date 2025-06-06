@@ -133,7 +133,7 @@ nodeR parent ltree x = parent &extend @'Node @2 (ltree, x)
 }
 \end{unbreakable}
 
-Note that \mintinline{haskellc}/extend/ doesn't support constructors with 0 fields (it would make the signature of the function way to complex). But 0-ary constructors can be written to the structure like any other complete value anyway, with \mintinline{haskellc}/extendLeaf/:
+Note that \mintinline{haskellc}/extend/ doesn't support constructors with 0 fields (it would make the signature of the function way too complex). But 0-ary constructors can be written to the structure like any other complete value anyway, with \mintinline{haskellc}/extendLeaf/:
 
 \begin{unbreakable}
 {\figtextsize

@@ -288,12 +288,12 @@ For \destcalculus{}, we decided to use a system of \emph{ages} to represent whic
 
 % TODO: raconter ce qu'on a compris sur l'intéraction entre ref, linéarité, escape, dests
 
-\paragraph{General considerations on linearity, scopes, and references}
+% \paragraph{General considerations on linearity, scopes, and references}
 
-Scope escape, as just described, is not an issue specific to destinations. In fact, it seems that any form of storage, be it destinations, or \mintinline{haskellc}/ref/s \emph{à la} OCaml, or anything that can be written to, may act as a channel through which scope escape can occur, if it is given a linear interface.
+% Scope escape, as just described, is not an issue specific to destinations. In fact, it seems that any form of storage, be it destinations, or \mintinline{haskellc}/ref/s \emph{à la} OCaml, or anything that can be written to, may act as a channel through which scope escape can occur, if it is given a linear interface.
 
-Conversely, scope escape poses a risk not only to destinations but to most linear resources.
-Linear interfaces typically rely on the fact that there is a specific set of destructor-like functions for a given resource type, and that we want one of them to be called for each resource at some point. Linearity forces us to consume the resource in the scope it is made available, and if the resource type is opaque, then the only way to consume it is by eventually calling one of these destructors, as expected. However, linear storage undermines this assumption by faking resource consumption without immediately invoking a destructor.
+% Conversely, scope escape poses a risk not only to destinations but to most linear resources.
+% Linear interfaces typically rely on the fact that there is a specific set of destructor-like functions for a given resource type, and that we want one of them to be called for each resource at some point. Linearity forces us to consume the resource in the scope it is made available, and if the resource type is opaque, then the only way to consume it is by eventually calling one of these destructors, as expected. However, linear storage undermines this assumption by faking resource consumption without immediately invoking a destructor.
 
 \section{Breadth-first tree traversal}\label{sec:bft}
 
