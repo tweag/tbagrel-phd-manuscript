@@ -104,7 +104,10 @@ For instance, in \mintinline{haskellc}/extend @'(:) @0 @[Int]/, \mintinline{hask
 
 In practice, such a signature means that \mintinline{haskellc}/extend/ takes an ampar whose right side is a destination of type \mintinline{haskellc}/t/, with multiplicity \mintinline{haskellc}/m/\footnote{That way, we can use \mintinline{haskellc}/extend/ on an ampar with either a linear or unrestricted destination on the right, even though unrestricted destinations can be manipulated directly in a more flexible fashion by using the functions from the \mintinline{haskellc}/fill/ family.}. It then allocates a new hollow constructor (specified by \mintinline{haskellc}/lCtor/), consumes \mintinline{haskellc}/othFiTys/ at multiplicity \mintinline{haskellc}/m/ to fill all the fields of the new hollow constructor except the \mintinline{haskellc}/k/\textsuperscript{th} one, and then returns a destination with same multiplicity \mintinline{haskellc}/m/ for that remaining field of type \mintinline{haskellc}/kthFiTy/.
 
-For example, the \mintinline{haskellc}/append ⩴ DList t ⊸ t ⊸ DList t/ function on difference lists can be expressed directly with \mintinline{haskellc}/extend/. So far, \mintinline{haskellc}/DList/ could only store unrestricted elements, but now, we can use difference lists to carry linear elements!\nopagebreak[4]%
+For example, the \mintinline{haskellc}/append ⩴ DList t ⊸ t ⊸ DList t/ function on difference lists can be expressed directly with \mintinline{haskellc}/extend/. So far, \mintinline{haskellc}/DList/ could only store unrestricted elements, but now, we can use difference lists to carry linear elements!
+
+\pagebreak
+
 {\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 type DList t = Ampar [t] (Dest Ⴈ [t])
@@ -215,7 +218,7 @@ fillUComp ⩴ ∀ t u. Ampar (Ur t) u ⊸ Dest ω t ⊸ u
 }
 
 
-Here, the child ampar is required to be an unrestricted structure (as indicated by the leading \mintinline{haskellc}/Ur/). This ensures that any destination appearing in \mintinline{haskellc}/u/ is already unrestricted. As a result, we eliminate the linearity exploit and recover the same composition behavior we had in \cref{chap:dps-haskell} for \mintinline{haskellc}/UAmpar/s.
+Here, the child ampar must be an unrestricted structure (as indicated by the leading \mintinline{haskellc}/Ur/). This ensures that any destination appearing in \mintinline{haskellc}/u/ is already unrestricted. As a result, we eliminate the linearity exploit and recover the same composition behavior we had in \cref{chap:dps-haskell}.
 
 % STOPPED HERE%
 
@@ -225,7 +228,7 @@ Being limited to only one destination on the right-hand side of ampars is not id
 
 Supporting multiple linear destinations on the right-hand side of ampars introduces significant complexity however. In the previous section, with only one destination per ampar, we avoided scope escape by requiring the user to interact with the ampar directly, rather than with the destination itself. This was straightforward, as there was no ambiguity---the single destination was the only possible target of the \mintinline{haskellc}/extend/ operation. By contrast, if we now allow arbitrary types on the right-hand side, but still aim to restrict direct user access to destinations (for the same reasons as above; \mintinline{haskellc}/updWith/ is now non-capturing, and we want to prevent scope escape and malicious interaction between sibling destinations), we must introduce a mechanism for users to indicate which specific destination they intend to operate on. One idea is to ask the user for a linear lens. First, let's define what a lens is.
 
-Lenses are pairs of getters and setters that enable convenient handling of immutable data structures in functional programming languages. A lens of type \mintinline{haskellc}/Lens t1 t2 u1 u2/ has two components (at least conceptually):
+Lenses are pairs of getters and setters that enable convenient handling of immutable data structures in functional programming languages. A lens of type \mintinline{haskellc}/Lens t1 t2 u1 u2/ has two components (at least conceptually):\nopagebreak[4]
 \begin{itemize}
     \item a getter function to access a value of type \mintinline{haskellc}/u1/ somewhere inside a structure of type \mintinline{haskellc}/t1/, which establishes the \emph{focus} of the lens;
     \item a function to transform a structure of type \mintinline{haskellc}/t1/ into a structure of type \mintinline{haskellc}/t2/ by replacing the focused value of type \mintinline{haskellc}/u1/ by a value of type \mintinline{haskellc}/u2/. In particular, when \mintinline{haskellc}/u1/$ = $\mintinline{haskellc}/u2/, then \mintinline{haskellc}/t1/$ = $\mintinline{haskellc}/t2/, and thus this function acts as an setter for the focused value.
@@ -334,7 +337,7 @@ The family of \mintinline{haskellc}/extendFocused/ functions, based on linear le
 
 For instance, the DPS system supports two usable levels of nesting for destinations, allowing us to construct and use linear destinations of destinations (type \mintinline{haskellc}/Dest Ⴈ (Dest m t)/). This is in fact perfectly sufficient to implement non-trivial examples, such as the breadth-first traversal of a tree, but this time using the efficient, destination-based queues in Haskell! Let's revisit these examples one last time. For the final part of this chapter, we also take compact region considerations into account (this mostly consists in adding \mintinline{haskellc}/r/ and \mintinline{haskellc}/Region r/ all over the function's signatures). The code of efficient queues (and difference lists for linear data, that they are made of) is presented in \cref{table:eff-queue-lin}, and the code for updated breadth-first tree traversal is given in \cref{table:impl-bfs-tree-traversal-v2}.
 
-\begin{listing}[p]
+\begin{listing}
 \figtextsize
 \begin{minted}[linenos]{haskellc}
 type DList r t = Ampar r [t] (Dest r 1 [t])
@@ -375,7 +378,7 @@ dequeue (¤EffQueue front back) = case front of
 \label{table:eff-queue-lin}
 \end{listing}
 
-\begin{listing}[p]
+\begin{listing}
 \figtextsize
 \begin{minted}[linenos]{haskellc}
 data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)
@@ -413,7 +416,7 @@ In \cref{table:destination-api-regions-v2}, we sum up all the functions we've en
 
 At the time of writing the thesis, we have not implemented this whole API yet, but we envision that there shouldn't be any particular technical issue to do so. Indeed, the behavior of the \mintinline{haskellc}/extend/ operators derives directly from the corresponding \mintinline{haskellc}/fill/ functions, that already have a concrete implementation in~\cite{linear_dest}.
 
-\begin{listing}[t]
+\begin{listing}
 \figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 data Token
@@ -487,6 +490,7 @@ extendFocusedUComp ⩴ ∀ r u t1 t2 s u1 u2. (Region r) ⇒
 % 	ampar2 `updWith` \d2 →
 % 		(ampar3 `updWith` \d3 → (d1, d3)) & (fst & extendFocusedLeaf d2)
 
+\clearpage
 \section{Conclusion}
 
 In this chapter we took time to explore what happens when we relax the restriction we had imposed in \cref{chap:dps-haskell}, namely, that destinations could only be filled with non-linear data (which, consequently, meant that ampars could only be used to store non-linear data).

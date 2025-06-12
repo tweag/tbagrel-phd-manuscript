@@ -28,12 +28,14 @@
 \SetLanguageKeys{english}{indentfirst=true}
 \SetLanguageKeys{french}{indentfirst=true}
 \usepackage{float}
-\renewcommand{\topfraction}{.85}
-\renewcommand{\bottomfraction}{.7}
-\renewcommand{\textfraction}{.15}
-\renewcommand{\floatpagefraction}{.66}
-\renewcommand{\dbltopfraction}{.66}
-\renewcommand{\dblfloatpagefraction}{.66}
+\renewcommand{\topfraction}{.67}
+\renewcommand{\bottomfraction}{.0}
+\renewcommand{\textfraction}{.33}
+\renewcommand{\floatpagefraction}{.67}
+\renewcommand{\dbltopfraction}{.67}
+% \renewcommand{\dblbottomfraction}{.0}
+% \renewcommand{\dbltextfraction}{.33}
+\renewcommand{\dblfloatpagefraction}{.67}
 \setcounter{topnumber}{9}
 \setcounter{bottomnumber}{9}
 \setcounter{totalnumber}{20}
@@ -674,8 +676,8 @@
 %-------------------------------------------------------------------
 
 \ThesisTitle{Formalization and Implementation of Safe Destination Passing in Pure Functional Programming Settings}
-\ThesisDate{April 2025}
-\ThesisAuthor{Thomas Bagrel}
+\ThesisDate{1\textsuperscript{er} octobre 2025}
+\ThesisAuthor{Thomas \textsc{Bagrel}}
 
 % Type de la these
 \ThesisUL
@@ -686,23 +688,28 @@
 
 % Exemple de création d'une nouvelle catégorie dans le jury:
 
-% \NewJuryCategory{family}{\it Membre de la famille :}
+%\NewJuryCategory{Encadrants}{\it Encadrants :}
 %                         {\it Membres de la famille :}
 
 % \family={Mon frère\\Ma sœur}
 
-\President    = {Le pr\'esident}
-\Rapporteurs  = {Le rapporteur 1&de Paris\\
-                 Le rapporteur 2\\
-                 Le rapporteur 3}
-\Examinateurs = {L'examinateur 1&d'ici\\
-                 L'examinateur 2}
-%\Invites=       {}
+\President    = {\emph{\`a d\'efinir}}
+\Rapporteurs  = {Dominic \textsc{Orchard}&University of Kent\\
+                 Gabriele \textsc{Keller}&Utrecht University\\}
+\Examinateurs = {Delia \textsc{Kesner}&IRIF -- Universit\'e Paris Cit\'e\\
+                 Laurent \textsc{Vigneron}&LORIA -- Universit\'e de Lorraine\\
+                 Gabriel \textsc{Scherer}&IRIF -- Universit\'e Paris Cit\'e}
+\Encadrants = {Horatiu \textsc{Cirstea}&LORIA -- Universit\'e de Lorraine (\emph{directeur de th\`ese})\\
+               Arnaud \textsc{Spiwack}&Tweag (\emph{encadrant industriel})}
 
 % Création de la page de titre:
 \MakeThesisTitlePage
 
 %-------------------------------------------------------------------
+
+\begin{ThesisDedication}\pagestyle{plain}
+%Je dédie cette thèse à TBD.
+\end{ThesisDedication}
 
 %-------------------------------------------------------------------
 %                          Les résumés
@@ -715,6 +722,7 @@
 
 \clearpage\phantomsection\addcontentsline{toc}{section}{Abstract}\markboth{Frontmatter}{Abstract}
 \NumberAbstractPages
+\AbstractsOnEvenPage
 \begin{ThesisAbstract}
 \pagestyle{plain}
 \begin{FrenchAbstract}
@@ -746,16 +754,12 @@ The prototype implementation in Haskell shows encouraging results for adopting d
 %\DontFrameThisInToc
 \clearpage\phantomsection\addcontentsline{toc}{section}{Acknowledgments}\markboth{Frontmatter}{Acknowledgments}\pagestyle{plain}
 \begin{ThesisAcknowledgments}
-Les remerciements.
+\emph{\`A définir.}
 \end{ThesisAcknowledgments}
 
 %-------------------------------------------------------------------
 %                            dédicace
 %-------------------------------------------------------------------
-
-\begin{ThesisDedication}\pagestyle{plain}
-Je dédie cette thèse à TBD.
-\end{ThesisDedication}
 
 
 %-------------------------------------------------------------------
@@ -781,22 +785,33 @@ Je dédie cette thèse à TBD.
 
 \clearpage\pagestyle{plain}\phantomsection
 \def\contentsname{Table of Contents}
-\tableofcontents
 \addcontentsline{toc}{section}{Table of Contents}\markboth{Frontmatter}{Table of Contents}\pagestyle{plain}
+\tableofcontents
 
 \clearpage\pagestyle{plain}\phantomsection
 \listoffigures\addcontentsline{toc}{section}{List of Figures}\markboth{Frontmatter}{List of Figures}
 \pagestyle{plain}
 
-\clearpage\pagestyle{plain}\phantomsection
+\cleardoublepage\pagestyle{plain}\phantomsection
 \listof{listing}{List of Listings}\addcontentsline{toc}{section}{List of Listings}\markboth{Frontmatter}{List of Listings}
 \pagestyle{plain}
 
 \clearpage\pagestyle{ThesisHeadings}\phantomsection
 \mainmatter
 
+\makeatletter
+
+\def\emptypage@emptypage{%
+    \hbox{}%
+    \thispagestyle{empty}   %% or any page style
+    %\blankpage%
+    \newpage%    
+}%
+
+
 \cleardoublepage\phantomsection
 \include{chapters/00_introduction}
+\emptypage@emptypage
 
 % \aliaspagestyle{chapter}{headings}
 % \pagestyle{headings}
@@ -807,9 +822,20 @@ Je dédie cette thèse à TBD.
 % On évitera donc d'utiliser directement \pagenumbering{arabic}.
 
 \include{chapters/01_lin_lambda}
+
+\emptypage@emptypage
+
 \include{chapters/02_destination_calculus}
+
+\emptypage@emptypage
+
 \include{chapters/03_dps_haskell}
+
+\emptypage@emptypage
+
 \include{chapters/04_ext_linear_nonlinear}
+
+\emptypage@emptypage
 
 \cleardoublepage\phantomsection
 \include{chapters/90_conclusion}
@@ -840,6 +866,10 @@ Je dédie cette thèse à TBD.
 %-------------------------------------------------------------------
 
 % \clearpage\phantomsection\addcontentsline{toc}{section}{Bibliography}\markboth{Backmatter}{Bibliography}\pagestyle{plain}
+
+\makeatletter
+\emptypage@emptypage
+\makeatother
 
 \cleardoublepage\phantomsection\addcontentsline{toc}{chapter}{Bibliography}\markboth{Backmatter}{Bibliography}\pagestyle{plain}
 

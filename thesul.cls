@@ -1157,7 +1157,7 @@
 \newcommand{\AbstractsOnEvenPage}{\abstracts@eventrue}
 \newcommand{\@abstract@hook}[1]{}
 \newenvironment{ThesisAbstract}
-    {\ifabstracts@even\@newevendoublepage\else\@newdoublepage\fi
+    {\ifabstracts@even\else\@newdoublepage\fi
      \edef\saved@ps{\current@ps}%
      \pagestyle{\abs@ps}
      \markboth{}{}
@@ -1250,7 +1250,7 @@
      \begin{flushright}
      }
     {\end{flushright}
-     \vglue0pt plus1fil\@newdoublepage}
+     \vglue0pt plus1fil\newpage}
 \newif\if@there@re@p@rts
 \newif\if@there@were@p@rts
 \AtEndDocument{\@see@if@parts}

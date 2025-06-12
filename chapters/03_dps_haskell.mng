@@ -87,7 +87,7 @@ The implementation of destination-backed difference lists is presented in \cref{
 %   \label{fig:schema-fillComp}
 % \end{figure}
 
-\begin{listing}[t]
+\begin{listing}
 \figtextsize
 \begin{minted}[linenos]{haskellc}
 -- we recall here the definition of list type in Haskell
@@ -143,7 +143,7 @@ toList dlist = fromUAmpar' (dlist `updWith` \dt → dt &fill @'[])
 \end{figure}
 
 \begin{itemize}
-  \item \mintinline{haskellc}/newDList/ is just an alias for \mintinline{haskellc}/newUAmpar/, to linearly exchange a token for a new \mintinline{haskellc}/UAmpar [t] (UDest [t])/---that is, exactly \mintinline{haskellc}/DList t/. Recall that UAmpars are treated as linear resources now, and are created in exchange of a linear token, following the principles described in \cref{sec:linear-scopes,sec:implem-destcalculus}. There is no data
+  \item \mintinline{haskellc}/newDList/ is just an alias for \mintinline{haskellc}/newUAmpar @[t]/, to linearly exchange a token for a new\\\mintinline{haskellc}/UAmpar [t] (UDest [t])/---that is, exactly \mintinline{haskellc}/DList t/. Recall that UAmpars are treated as linear resources now, and are created in exchange of a linear token, following the principles described in \cref{sec:linear-scopes,sec:implem-destcalculus}. There is no data
     in this new UAmpar yet, it's just a hole and a destination pointing to it, as we see in \cref{fig:schema-alloc};
 
   \item \mintinline{haskellc}/append/ (\cref{fig:schema-dlist-append}) adds an element at the tail
@@ -249,7 +249,7 @@ As we will see in \cref{sec:benchmark}, this imperative-style implementation of 
 
 \cref{table:destination-api} presents the pure API of DPS Haskell. This API is sufficient to implement all the examples of \cref{sec:motivating-examples}. This section explains its various parts in detail and how it compares to the calculus of \cref{chap:dest-calculus}.
 
-\begin{listing}[t]
+\begin{listing}
 \figtextsize
 \begin{minted}[linenos]{haskellc}
 data Token
@@ -398,7 +398,7 @@ A typeclass \mintinline{haskellc}/Region r/ is also needed to carry around the d
 
 The \mintinline{haskellc}/inRegion/ function is the new addition to the modified API presented in \cref{table:destination-api-regions}. It receives an expression of arbitrary type in which \mintinline{haskellc}/r/ must be a free type variable. Internally, when used, it spawns a new compact region and a rigid type variable \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ (behaving like a fresh, concrete, opaque type) and uses the \mintinline{text}/reflection/ library to provide an instance of \mintinline[escapeinside=°°]{haskellc}/Region °\muline{r}°/ on-the-fly that links \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ and the \mintinline{haskellc}/RegionInfo/ for the new region (through the \mintinline{haskellc}/reflect/ function), and then substitute \mintinline{haskellc}/r/ with \mintinline[escapeinside=°°]{haskellc}/°\muline{r}°/ when evaluating the body of \mintinline{haskellc}/inRegion/, so that any call to \mintinline{haskellc}/reflect @r/ becomes \mintinline[escapeinside=°°]{haskellc}/reflect @°\muline{r}°/ and returns the right \mintinline{haskellc}/RegionInfo/. Actually, \mintinline{haskellc}/inRegion/ is a form of scope function (although this time, it isn't linear).
 
-\begin{listing}[t]
+\begin{listing}
 \figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 data Token
@@ -441,7 +441,7 @@ However, we are still allocating two copies of the deserialized payload. This is
 
 Let's see how using destinations and compact regions for a parser of S-expressions (representing our request payload) can lead to greater performance. S-expressions are parenthesized lists whose elements are separated by spaces. These elements can be of several types: int, string, symbol (a textual token with no quotes around it), or a list of other S-expressions.
 
-Parsing an S-expression can be done naively with mutually recursive functions:
+Parsing an S-expression can be done naively with mutually recursive functions:\nopagebreak[4]
 \begin{itemize}
   \item \mintinline{haskellc}/parseSExpr/ scans the next character, and either dispatches to \mintinline{haskellc}/parseSList/ if it encounters an opening parenthesis, or to \mintinline{haskellc}/parseSString/ if it encounters an opening quote, or eventually parses the string into a number or symbol;
   \item \mintinline{haskellc}/parseSList/ calls \mintinline{haskellc}/parseSExpr/ to parse the next token, and then calls itself again until reaching a closing parenthesis, accumulating the parsed elements along the way.
@@ -451,7 +451,7 @@ Only the implementation of \mintinline{haskellc}/parseSList/ will be presented h
 
 The implementation presented in \cref{table:impl-parser-naive} is quite standard: the accumulator \mintinline{haskellc}/acc/ collects the nodes that are returned by \mintinline{haskellc}/parseSExpr/ in the reverse order (because it's the natural building order for a linked list without destinations). When the end of the list is reached (line 5), the accumulator is reversed, wrapped in the \mintinline{haskellc}/¤SList/ constructor, and returned. We also store, in the parsed result, the index \mintinline{haskellc}/i/ corresponding to the end position of the structure in the input string.
 
-% \begin{listing}[t]
+% \begin{listing}
 % \figtextsize
 % \begin{minted}[linenos,escapeinside=°°]{haskellc}
 % parseSExpr ⩴ ByteString → Int → Either Error SExpr
@@ -487,7 +487,7 @@ The implementation presented in \cref{table:impl-parser-naive} is quite standard
 % \label{table:impl-sexpr-parser-without-dest}
 % \end{listing}
 
-% \begin{listing}[t]
+% \begin{listing}
 % \figtextsize
 % \begin{minted}[linenos,escapeinside=°°]{haskellc}
 % parseSExprDps ⩴ ByteString → Int → UDest SExpr ⊸ Either Error Int
@@ -528,7 +528,7 @@ The implementation presented in \cref{table:impl-parser-naive} is quite standard
 % \label{table:impl-sexpr-parser-with-dest}
 % \end{listing}
 
-\begin{listing}[t]
+\begin{listing}
 \figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 parseSList ⩴ ByteString → Int → [SExpr] → Either Error SExpr
@@ -545,7 +545,7 @@ parseSList bs i acc = case bs !? i of
 \label{table:impl-parser-naive}
 \end{listing}
 
-\begin{listing}[b]
+\begin{listing}
 \figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 parseSListDPS ⩴ ByteString → Int → UDest [SExpr] ⊸ Either Error Int
@@ -566,8 +566,7 @@ parseSListDPS bs i d = case bs !? i of
 
 We will see that destinations can bring very significative performance gains with only very little stylistic changes in the code. Accumulators of tail-recursive functions just have to be changed into destinations. Instead of writing elements into a list that will be reversed at the end as we did before, the program in the destination style will directly write the elements into their final location and in the right order!
 
-Code for \mintinline{haskellc}/parseSListDPS/ is presented in \cref{table:impl-parser-dps}. Let's see what changed compared to the naive implementation:
-
+Code for \mintinline{haskellc}/parseSListDPS/ is presented in \cref{table:impl-parser-dps}. Let's see what changed compared to the naive implementation:\nopagebreak[4]
 \begin{itemize}
   \item even for error cases, we are forced to consume the destination that we receive as an argument (to stay linear), hence we write some sensible default data to it (see line 3);
   \item the \mintinline{haskellc}/SExpr/ value resulting from \mintinline{haskellc}/parseSExprDps/ is not collected by \mintinline{haskellc}/parseSListDPS/ but instead written directly into its final location by \mintinline{haskellc}/parseSExprDps/ through the passing and filling of destination \mintinline{haskellc}/dh/ (see line 9);
@@ -596,7 +595,7 @@ Given that UAmpars hold unrestricted data, one potential workaround is to repres
 \caption{Representation of \texttt{UAmpar r} using \texttt{Ur} (not chosen)}\label{fig:schema-alloc-region-notchosen}
 \end{figure}
 
-Another option, that we decided to go for in our real implementation, is to allocate an object inside the compact region to host the root hole of the structure \emph{only} for truly incomplete structures created with \mintinline{haskellc}/newUAmpar/. For already complete structures that are turned into an \mintinline{haskellc}/UAmpar/ with \mintinline{haskellc}/toUAmpar/, we skip this allocation; but we preserve the same underlying types for the fields of the UAmpar in both cases (\mintinline{haskellc}/newUAmpar/ and \mintinline{haskellc}/toUAmpar/). This is made possible by the use of the special indirection object (\mintinline{haskellc}/stg_IND/ in GHC codebase) in the UAmpar returned by \mintinline{haskellc}/newUAmpar/. A \mintinline{haskellc}/stg_IND/ object is a kind of one-field constructor that is considered to have type \mintinline{haskellc}/s/ although its field also has type \mintinline{haskellc}/s/. We illustrate this in \cref{fig:schema-alloc-region}:
+Another option, that we decided to go for in our real implementation, is to allocate an object inside the compact region to host the root hole of the structure \emph{only} for truly incomplete structures created with \mintinline{haskellc}/newUAmpar/. For already complete structures that are turned into an \mintinline{haskellc}/UAmpar/ with \mintinline{haskellc}/toUAmpar/, we skip this allocation; but we preserve the same underlying types for the fields of the UAmpar in both cases (\mintinline{haskellc}/newUAmpar/ and \mintinline{haskellc}/toUAmpar/). This is made possible by the use of the special indirection object (\mintinline{haskellc}/stg_IND/ in GHC codebase) in the UAmpar returned by \mintinline{haskellc}/newUAmpar/. A \mintinline{haskellc}/stg_IND/ object is a kind of one-field constructor that is considered to have type \mintinline{haskellc}/s/ although its field also has type \mintinline{haskellc}/s/.
 
 \begin{figure}
 \centering
@@ -604,10 +603,12 @@ Another option, that we decided to go for in our real implementation, is to allo
 \caption{Representation of \texttt{UAmpar r} using indirections}\label{fig:schema-alloc-region}
 \end{figure}
 
+We illustrate this in \cref{fig:schema-alloc-region}:\nopagebreak[4]
 \begin{itemize}
   \item in the pair-like structure returned by \mintinline{haskellc}/newUAmpar/, the \mintinline{haskellc}/s/ side points to an indirection object, which is allocated in the region, and serves as the root hole for the incomplete structure (because it is in the compact region, the GC won't follow garbage pointers that it might contain at the moment);
   \item in the pair-like structure returned by \mintinline{haskellc}/toUAmpar/, the \mintinline{haskellc}/s/ side directly points to the object of type \mintinline{haskellc}/s/ that has been copied to the region, without indirection.
 \end{itemize}
+
 Compared to the previous solution, this one is more efficient when using \mintinline{haskellc}/toUAmpar/ (as no long-lived garbage is produced), but does no longer give efficiency benefits for \mintinline{haskellc}/fromUAmpar'/ (as we no longer produce an \mintinline{haskellc}/Ur/ object). This is the solution we with with in the original artifact~\cite{linear_dest}.
 
 In~\cite{linear_dest}, we thus have the following private definitions\footnote{In the sense that they are opaque for the consumer of the API.} for our API types:\nopagebreak[4]%
@@ -631,7 +632,9 @@ To this extent, we create a typeclass \mintinline{haskellc}/Fill lCtor t/, and w
 
 Let's now see how we can use the type-level name of the constructor \mintinline{haskellc}/lCtor/ and its base type \mintinline{haskellc}/t/ to obtain all the information we need to write the concrete implementation of the corresponding \mintinline{haskellc}/fill/ function. The first thing we need to know is the shape of the constructor and more precisely the number and types of its fields, as every data constructor for a linked data type can be seen as an $n$-ary product constructor. So we will leverage \mintinline{haskellc}/GHC.Generics/ to find the required information.
 
-\mintinline{haskellc}/GHC.Generics/ is a built-in Haskell library that provides compile-time inspection of a type metadata through the \mintinline{haskellc}/Generic/ typeclass: list of constructors, their fields, memory representation, etc. And that typeclass can be derived automatically for (almost) any type! Here's, for example, the \mintinline{haskellc}/Generic/ representation of \mintinline{haskellc}/Maybe t/:\nopagebreak[4]%
+\mintinline{haskellc}/GHC.Generics/ is a built-in Haskell library that provides compile-time inspection of a type metadata through the \mintinline{haskellc}/Generic/ typeclass: list of constructors, their fields, memory representation, etc. And that typeclass can be derived automatically for (almost) any type!
+
+Here's, for example, the \mintinline{haskellc}/Generic/ representation of \mintinline{haskellc}/Maybe t/:\nopagebreak[4]%
 {\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 repl> :k! Rep (Maybe a) () -- display the Generic representation of Maybe a
@@ -662,8 +665,7 @@ In Haskell, a heap object is a piece of data in memory, that corresponds to a gi
 
 On the other hand, the RTS is a static piece of code that is compiled once when GHC is built, and is then linked into every executable built by GHC. Only when a program is launched does the RTS run (to oversee the program execution), so the RTS has no direct way to access the information that had been emitted during the compilation of the program. In particular, it has no way to inspect the info table labels have long been replaced by actual pointers (which are indistinguishable in memory from any other data). But on the other hand, the RTS is the one which knows how to allocate space inside a compact region for our new hollow constructor.
 
-As a result, we need a way to pass information, or more precisely, the info table pointer, from compile time to the runtime. Consequently, we manage the creation of a new hollow constructor in a compact region through two new primitives:
-
+As a result, we need a way to pass information, or more precisely, the info table pointer, from compile time to the runtime. Consequently, we manage the creation of a new hollow constructor in a compact region through two new primitives:\nopagebreak[4]
 \begin{itemize}
 \item one \emph{internal primop} which resolves, at compile time, a data constructor into the (static) value representing its info table pointer.
 \item one \emph{external primop}, in the RTS, which allocates space inside a compact region for a hollow constructor, and which sets the info table pointer of the hollow constructor to a value received as an argument, that the developer can provide using the internal primop.
@@ -857,6 +859,7 @@ data Phases m a where
   Pure :: a → Phases m a
   Link :: (a → b → c) → m a → Phases m b → Phases m c
 
+
 instance Functor (Phases m) where ...
 instance (Applicative m) ⇒ Applicative (Phases m) ...
 
@@ -911,7 +914,8 @@ It's slightly surprising to see that for this particular example, the \mintinlin
 
 In a strict functional language such as OCaml, the choice of implementation for the \emph{map} function on lists is crucial as the naive, non tail-recursive one makes the stack grow linearly with the size of the processed list. To alleviate the issue, a strict tail-recursive implementation is possible (\mintinline{haskellc}/mapTRS/), but it requires an extra $\mathcal{O}(n)$ operation at the end of the processing to reverse the accumulator. In Haskell, the issue is of a lesser importance perhaps, as the lazy-by-default evaluation strategy makes the naive \emph{map} (either \mintinline{haskellc}/mapL/ for full lazy behavior, or \mintinline{haskellc}/mapSH/ for strict head but lazy tail) run efficiently in constant space. Still, let see how our DPS versions compare.
 
-With destinations, \emph{map} can be implemented in a tail-recursive fashion too (\mintinline{haskellc}/mapDpsTRS/), as explained in \cref{ssec:map-tr}, without requiring the reverse operation that \mintinline{haskellc}/mapTRS/ needs, as the list is built directly in a top-down approach. Interestingly, thanks to destinations, \emph{map} can alternatively be implemented as a left fold (\mintinline{haskellc}/mapDpsFoldS/), as we also show below! In the following code excerpt, the \mintinline{haskellc}/!/ in front of a variable name denotes a strict binding, so the expression assigned to the variable will be evaluated to weak-head normal form before the body of the \mintinline{haskellc}/let/ is evaluated:
+With destinations, \emph{map} can be implemented in a tail-recursive fashion too (\mintinline{haskellc}/mapDpsTRS/), as explained in \cref{ssec:map-tr}, without requiring the reverse operation that \mintinline{haskellc}/mapTRS/ needs, as the list is built directly in a top-down approach. Interestingly, thanks to destinations, \emph{map} can alternatively be implemented as a left fold (\mintinline{haskellc}/mapDpsFoldS/), as we also show below! In the following code excerpt, the \mintinline{haskellc}/!/ in front of a variable name denotes a strict binding, so the expression assigned to the variable will be evaluated to weak-head normal form before the body of the \mintinline{haskellc}/let/ is evaluated.
+
 {\figtextsize
 \begin{minted}[linenos]{haskellc}
 append ⩴ UDest [t] ⊸ t → UDest [t]

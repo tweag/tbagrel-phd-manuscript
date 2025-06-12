@@ -100,6 +100,10 @@ In Rust, the borrow checker must checks that the constraints are solvable, while
 
 Another difference between the two systems is that \destcalculus{}'s ages (and modes in general) are relative. An explicit modality $\ottstype{!}_{[[¹↑^ka]]}$ must be used when a part has an age different than its parent, and means that the part is $[[ka]]$ scope older than the parent. On the other hand, Rust's lifetimes are absolute, and the lifetime of a part is tracked independently of the lifetime of its parent.
 
+\makeatletter
+\emptypage@emptypage
+\makeatother
+
 \cleardoublepage\phantomsection\chapter*{Conclusion}\label{chap:global-conclusion}\addcontentsline{toc}{chapter}{Conclusion}\markboth{Conclusion}{Conclusion}
 
 \phantomsection\section*{Contributions}\addcontentsline{toc}{section}{Contributions}\markboth{Conclusion}{Contributions}
@@ -116,7 +120,7 @@ In early DPS Haskell, we avoided scope escape by disallowing destinations for li
 
 Yet this restriction limited expressiveness. As shown in the breadth-first traversal example (\cref{chap:dps-haskell}), some patterns could not be expressed without destinations for linear data. It became clear that a more complete solution was needed---one that reconciled destination for linear data with memory safety.
 
-To make progress, we stepped away from implementation concerns and designed a theoretical calculus, \destcalculus{}, so centered around destination passing that conventional functional data constructors are not even necessary. The key achievement was a mechanized proof of soundness for \destcalculus{}. To permit this, our calculus depends on several notable features:
+To make progress, we stepped away from implementation concerns and designed a theoretical calculus, \destcalculus{}, so centered around destination passing that conventional functional data constructors are not even necessary. The key achievement was a mechanized proof of soundness for \destcalculus{}. To permit this, our calculus depends on several notable features:\nopagebreak[4]
 \begin{itemize}
     \item A linear type system, akin to the one from Linear Haskell, ensuring that destinations are neither duplicated nor discarded---letting us know statically when a structure is fully filled (except if scope escape happens);
     \item An age system, that allows precise tracking of scopes in which resources are introduced. The age system is the main technical device used to prevent the scope escape issue;
@@ -135,6 +139,7 @@ Of all the approaches we explored in our journey, the one from \cref{chap:dps-ha
 
 With these reflections in mind, we hope we have presented the reader with a clear and enjoyable overview of functional destination passing, through a journey rooted in type theory, language design, and practical implementation concerns.
 
+\clearpage
 \phantomsection\section*{Future perspectives}\addcontentsline{toc}{section}{Future perspectives}\markboth{Conclusion}{Future perspectives}
 
 There are still many interesting threads that can be pursued to improve this work. The most immediate is probably to further refine the existing DPS Haskell implementation. This involves, in particular, fine-tuning its performance, which remains one of the main selling points of the approach. This is even more important given its dual role as both a destination-passing interface and a better compact region allocation mechanism, as described above.
@@ -175,6 +180,8 @@ resAmpar :: Ampar [t] (Dest Ⴈ [t]) = parentAmpar &extendComp childAmpar
 
 
 To perform the composition, only the second field of the \emph{cons} constructor at \mintinline{text}/0x05ba/ needs to be updated. The resulting ampar inherits the destination from \mintinline{haskellc}/childAmpar/, which still correctly points to the hole at \mintinline{text}/0x0850/.
+
+\pagebreak
 
 However, things become more complicated when unpacked fields are involved:\nopagebreak[4]%
 {\figtextsize%
