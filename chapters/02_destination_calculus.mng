@@ -1250,7 +1250,7 @@ As seen in the example above, a command of the form $[[ ⬜[v] ]]$ cannot be red
 
 \section{Formal proof of type safety}\label{sec:formal-proof}
 
-We've proved type preservation and progress theorems with the Coq proof assistant. The artifact containing the formalization of \destcalculus{} and the machine-verified proofs of type-safety (\cref{thm:preservation,thm:progress}) is available at \url{https://doi.org/10.5281/zenodo.14534423}.
+We've formalized \destcalculus{} and proved type preservation and progress theorems with the Coq proof assistant in \cite{bagrel_proofs_2025}.
 
 Turning to a proof assistant was a pragmatic choice: typing context handling in \destcalculus{} can be quite finicky, and it was hard, without computer assistance, to make sure that we hadn't made mistakes in our proofs. The version of \destcalculus{} that we've proved is written in Ott~\cite{sewell_ott_2007}, and the same Ott file is used as a source for the typing rules displayed in this document, making sure that we've proved the same system as we're presenting; though some simplifications are applied by a script during compilation for visual clarity.
 
@@ -1262,9 +1262,8 @@ There are nonetheless a few points of interest in our Coq development, that we p
 
 \paragraph{Representation of typing contexts}
 
-We represent contexts as finite-domain functions, rather than syntactic lists, as this works much better when defining sums of contexts. While there are a handful of finite function libraries in the ecosystem, we needed \emph{finite dependent functions} (because the type of binders depends on whether we're binding a variable name or a hole name). This did not exist, but for our limited purposes, it turned out to be feasible to roll our own (about 1000 lines of proofs). The underlying data type is actual functions: this was simpler to develop, but, as we'll see soon, it makes equality more complex than with a bespoke data type. The definitions of the finite function and context types are provided below:
-
-\begin{unbreakable}
+We represent contexts as finite-domain functions, rather than syntactic lists, as this works much better when defining sums of contexts. While there are a handful of finite function libraries in the ecosystem, we needed \emph{finite dependent functions} (because the type of binders depends on whether we're binding a variable name or a hole name). This did not exist, but for our limited purposes, it turned out to be feasible to roll our own (about 1000 lines of proofs). The underlying data type is actual functions: this was simpler to develop, but, as we'll see soon, it makes equality more complex than with a bespoke data type. The definitions of the finite function and context types are provided below:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{coq}
 Definition Support {A B} (l : list A) (f : forall x:A, option (B x)) : Prop
   := forall (x:A) (y:B x), f x = Some y -> List.In x l.
@@ -1293,10 +1292,11 @@ Inductive binding_dh : Type :=
 
 Definition ctx : Type := T name binding_type_of.
 \end{minted}
-\end{unbreakable}
+}
 
-\noindent{}The \mintinline{coq}/Support/ predicate indicates that a list is an over-approximation of the effective domain of our partial function. We then use the classical \emph{constructive indefinite description} axiom to retrieve a suitable support list for a given context when needed:
-\begin{unbreakable}
+
+\noindent{}The \mintinline{coq}/Support/ predicate indicates that a list is an over-approximation of the effective domain of our partial function. We then use the classical \emph{constructive indefinite description} axiom to retrieve a suitable support list for a given context when needed:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{coq}
 (* Axiom *)
 ClassicalEpsilon.constructive_indefinite_description
@@ -1305,11 +1305,12 @@ ClassicalEpsilon.constructive_indefinite_description
 Definition a_support {A B} (f : T A B) : list A
   := constructive_indefinite_description _ f.(supported).
 \end{minted}
-\end{unbreakable}
+}
+
 \noindent{}We also introduce \mintinline{coq}/dom ctx/ as a filter over \mintinline{coq}/a_support ctx/ to retain only the elements in the effective domain of our partial function \mintinline{coq}/ctx/.
 
-We also need to reason about equality of typing contexts in proofs. The definition of our partial function type would naturally lend itself well to setoid equality, but unfortunately this is not supported by the inference rules we generate through Ott. As a workaround, we assume the classical \emph{functional extensionality} and \emph{proof irrelevance} axioms, allowing us to state that two contexts are equal as long as they assign the same binding to all variable and hole names:
-\begin{unbreakable}
+We also need to reason about equality of typing contexts in proofs. The definition of our partial function type would naturally lend itself well to setoid equality, but unfortunately this is not supported by the inference rules we generate through Ott. As a workaround, we assume the classical \emph{functional extensionality} and \emph{proof irrelevance} axioms, allowing us to state that two contexts are equal as long as they assign the same binding to all variable and hole names:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{coq}
 (* Axioms *)
 ProofIrrelevance.proof_irrelevance : forall (P : Prop) (p1 p2 : P), p1 = p2
@@ -1328,7 +1329,8 @@ Proof. intros * h_ext. apply ext_eq'.
   assumption.
 Qed.
 \end{minted}
-\end{unbreakable}
+}
+
 
 In effect, we recover a form of extensional equality that behaves morally like setoid equality, but integrates smoothly with the infrastructure we generate through Ott.
 
@@ -1336,9 +1338,8 @@ In effect, we recover a form of extensional equality that behaves morally like s
 
 As seen in \cref{ssec:ty-term,ssec:runtime-values}, addition of contexts is highly partial. For example, two bindings with the same name can only be combined if they also have the same type, and we can't combine a hole binding with a destination binding for the same hole name.
 
-Rather than encoding addition as a binary function returning an optional context---which would integrate poorly with the rules generated by Ott---we model it as a total function to contexts. Instead, to capture failure cases, we introduce a special error mode in our mode ringoid. A binding carrying this error mode signals that the whole context is considered invalid:
-
-\begin{unbreakable}
+Rather than encoding addition as a binary function returning an optional context---which would integrate poorly with the rules generated by Ott---we model it as a total function to contexts. Instead, to capture failure cases, we introduce a special error mode in our mode ringoid. A binding carrying this error mode signals that the whole context is considered invalid:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{coq}
 Definition mode : Type := option (mul * age).
 Notation "'☠'" := None.
@@ -1367,7 +1368,8 @@ Lemma ValidOnly_union_backward
   : forall (G1 G2 : ctx), ValidOnly (G1 + G2) -> ValidOnly G1 /\ ValidOnly G2.
 ...
 \end{minted}
-\end{unbreakable}
+}
+
 
 The cost of this approach is that most typing rules must now include explicit well-formedness conditions---such as \mintinline{coq}/IsValid/ and \mintinline{coq}/ValidOnly/---to ensure that the input contexts do not contain any faulty bindings. Additional lemmas are required to propagate these validity conditions through context operations, using properties such as disjointness to guarantee the absence of errors in the resulting contexts.
 

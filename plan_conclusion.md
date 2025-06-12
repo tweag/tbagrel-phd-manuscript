@@ -36,3 +36,9 @@ Consequently, we iterate over various concrete destination-passing APIs [...]. N
 Another core contribution of our practical work is that the destination-passing API leverages, but also extends what can be done with Compact regions in Haskell. [...]
 
 [INSERT POSSIBLE IMPROVEMENTS]
+
+\\begin\{unbreakable\}\n(.*)\n+\{\\figtextsize\n((?:.*\n)+?)\}\n\\end\{unbreakable\}
+
+to
+
+$1\\nopagebreak[4]%\n{\\figtextsize%\n$2}\n

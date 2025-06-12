@@ -251,7 +251,7 @@
 \arabic{FancyVerbLine}}}}
 
 %% New listing float
-\newfloat{listing}{htbp}{lop}[chapter]
+\newfloat{listing}{tbp}{lop}[chapter]
 \floatname{listing}{Listing}
 \renewcommand{\thelisting}{\thechapter.\arabic{listing}} % chapter-based numbering
 

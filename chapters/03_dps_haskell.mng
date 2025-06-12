@@ -285,10 +285,8 @@ The \mintinline{haskellc}/newUAmpar/ operator is the main way for a user of the 
 
 Also, sometimes, when programming in DPS style, we won't have a \mintinline{haskellc}/Token/ at hand, but only an existing \mintinline{haskellc}/UAmpar/. In this case, we can piggyback on the linearity of that existing UAmpar (as it linearly depends, directly or indirectly, on a token) to get a new linear \mintinline{haskellc}/Token/ so that we can spawn a new UAmpar, or any other linear resource really. This is the goal of the \mintinline{haskellc}/tokenBesides/ function.
 
-The operator \mintinline{haskellc}/tokenBesides/ is particularly useful when implementing efficient queues in DPS Haskell (as in \cref{ssec:efficient-queue}):
-
-\begin{unbreakable}
-{\figtextsize
+The operator \mintinline{haskellc}/tokenBesides/ is particularly useful when implementing efficient queues in DPS Haskell (as in \cref{ssec:efficient-queue}):\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 type DList t = UAmpar [t] (UDest [t])
 data EffQueue t = ¤EffQueue [t] (DList t)
@@ -304,12 +302,10 @@ dequeue (¤EffQueue front back) = case front of
   (x : xs) → Just (x, (¤EffQueue xs back))
 \end{minted}
 }
-\end{unbreakable}
 
-In the second branch of the inner-most \mintinline{haskellc}/case/ in \mintinline{haskellc}/dequeue/, when we have transformed the back difference list (from which we used to write) into the new front list (from which we will now read), we have to create a new back difference list, that is, a new ampar. However, we don't have a token at hand. It would be quite unpractical for a function like \mintinline{haskellc}/dequeue/ to ask for a linear token to be passed; it's better if tokens are only requested when spawning a new data structure, not when operating on one. That's why \mintinline{haskellc}/tokenBesides/ comes handy: we can instead reuse the linearity requirement of the existing UAmpar:
 
-\begin{unbreakable}
-{\figtextsize
+In the second branch of the inner-most \mintinline{haskellc}/case/ in \mintinline{haskellc}/dequeue/, when we have transformed the back difference list (from which we used to write) into the new front list (from which we will now read), we have to create a new back difference list, that is, a new ampar. However, we don't have a token at hand. It would be quite unpractical for a function like \mintinline{haskellc}/dequeue/ to ask for a linear token to be passed; it's better if tokens are only requested when spawning a new data structure, not when operating on one. That's why \mintinline{haskellc}/tokenBesides/ comes handy: we can instead reuse the linearity requirement of the existing UAmpar:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 tokenBesides ⩴ ∀ s t. UAmpar s t ⊸ (UAmpar s t, Token)
 
@@ -321,7 +317,7 @@ dequeue (¤EffQueue front back) = case front of
   (x : xs) → Just (x, (¤EffQueue xs back))
 \end{minted}
 }
-\end{unbreakable}
+
 
 This new version is not perfect either though. We have to create a new token before even knowing if we will need it. Indeed, we can only know if a new token is really needed when we have read the content of the old UAmpar, and we can only read it when it is no longer a UAmpar... so at that point we cannot spawn a new token any longer. So the solution is to always spawn a new token before consuming the old UAmpar, taking the risk that if the queue is really empty, we will have to discard the fresh token immediately (with \mintinline{haskellc}/drop/) before returning \mintinline{haskellc}/Nothing/. Implicit token passing, as proposed by Linear Constraints~\cite{spiwack_linearly_2022,spiwack_linear_prop_2023}, seems to really be the way forward to get rid of this kind of issues altogether.
 
@@ -353,10 +349,8 @@ The last part of the API is the one in charge of actually building the structure
 
 \mintinline{haskellc}/fillLeaf ⩴ ∀ t. t → UDest t ⊸ ()/ uses a value of type \mintinline{haskellc}/t/ to fill the hole represented by the destination, as $[[◀]]$ from \destcalculus{}. However, if the destination is consumed linearly, as in \destcalculus{}, the value to fill the hole isn't (as indicated by the first non-linear arrow). This is key to the fact that UAmpars only host unrestricted data. Memory-wise, when \mintinline{haskellc}/fillLeaf/ is used, the address of the object of type \mintinline{haskellc}/t/ is written into the memory cell pointed to by the destination of type \mintinline{haskellc}/UDest t/ (see \cref{fig:schema-fillLeaf}).
 
-\mintinline{haskellc}/fillComp ⩴ ∀ s t. UAmpar s t ⊸ UDest s ⊸ t/ is used to plug two \mintinline{haskellc}/UAmpar/ objects together. The parent \mintinline{haskellc}/UAmpar/ isn't represented in the signature of the function, as with the similar operator $\mathop{\triangleleft\mycirc}$ from \destcalculus{}. Instead, only the hole of the parent UAmpar that will receive the address of the child UAmpar is represented in the signature of the function by \mintinline{haskellc}/UDest s/; while \mintinline{haskellc}/UAmpar s t/ in the signature refers to the child UAmpar. A call to \mintinline{haskellc}/fillComp/ always takes place in the scope of \mintinline{haskellc}/`updWith`/ over the parent one:
-
-\begin{unbreakable}
-{\figtextsize
+\mintinline{haskellc}/fillComp ⩴ ∀ s t. UAmpar s t ⊸ UDest s ⊸ t/ is used to plug two \mintinline{haskellc}/UAmpar/ objects together. The parent \mintinline{haskellc}/UAmpar/ isn't represented in the signature of the function, as with the similar operator $\mathop{\triangleleft\mycirc}$ from \destcalculus{}. Instead, only the hole of the parent UAmpar that will receive the address of the child UAmpar is represented in the signature of the function by \mintinline{haskellc}/UDest s/; while \mintinline{haskellc}/UAmpar s t/ in the signature refers to the child UAmpar. A call to \mintinline{haskellc}/fillComp/ always takes place in the scope of \mintinline{haskellc}/`updWith`/ over the parent one:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 parent ⩴ UAmpar BigStruct (UDest SmallStruct, UDest OtherStruct)
 child ⩴ UAmpar SmallStruct (UDest Int)
@@ -364,7 +358,7 @@ comp = parent `updWith` \(ds, do) → (ds &fillComp child, do)
        ⩴ UAmpar BigStruct (UDest Int, UDest OtherStruct)
 \end{minted}
 }
-\end{unbreakable}
+
 
 The resulting structure \mintinline{haskellc}/comp/ is morally a \mintinline{haskellc}/BigStruct/ like \mintinline{haskellc}/parent/, that inherited the hole from the child structure (\mintinline{haskellc}/UDest Int/) and still has its other hole (\mintinline{haskellc}/UDest OtherStruct/) waiting to be filled. An example of memory behavior of \mintinline{haskellc}/fillComp/ in action can be seen in \cref{fig:schema-dlist-concat}.
 
@@ -616,9 +610,8 @@ Another option, that we decided to go for in our real implementation, is to allo
 \end{itemize}
 Compared to the previous solution, this one is more efficient when using \mintinline{haskellc}/toUAmpar/ (as no long-lived garbage is produced), but does no longer give efficiency benefits for \mintinline{haskellc}/fromUAmpar'/ (as we no longer produce an \mintinline{haskellc}/Ur/ object). This is the solution we with with in the original artifact~\cite{linear_dest}.
 
-In~\cite{linear_dest}, we thus have the following private definitions\footnote{In the sense that they are opaque for the consumer of the API.} for our API types:
-\begin{unbreakable}
-{\figtextsize
+In~\cite{linear_dest}, we thus have the following private definitions\footnote{In the sense that they are opaque for the consumer of the API.} for our API types:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 data Token = ¤Token  -- same representation as ()
 data UAmpar r s t = ¤UAmpar s t  -- same representation as (s, t),
@@ -626,7 +619,7 @@ data UAmpar r s t = ¤UAmpar s t  -- same representation as (s, t),
 data UDest r t = ¤UDest Addr#  -- boxed Addr#, same representation as Ptr t
 \end{minted}
 }
-\end{unbreakable}
+
 
 \subsection{Deriving \texttt{fill} for all constructors with \texttt{Generics}}\label{ssec:impl-generics}
 
@@ -638,10 +631,8 @@ To this extent, we create a typeclass \mintinline{haskellc}/Fill lCtor t/, and w
 
 Let's now see how we can use the type-level name of the constructor \mintinline{haskellc}/lCtor/ and its base type \mintinline{haskellc}/t/ to obtain all the information we need to write the concrete implementation of the corresponding \mintinline{haskellc}/fill/ function. The first thing we need to know is the shape of the constructor and more precisely the number and types of its fields, as every data constructor for a linked data type can be seen as an $n$-ary product constructor. So we will leverage \mintinline{haskellc}/GHC.Generics/ to find the required information.
 
-\mintinline{haskellc}/GHC.Generics/ is a built-in Haskell library that provides compile-time inspection of a type metadata through the \mintinline{haskellc}/Generic/ typeclass: list of constructors, their fields, memory representation, etc. And that typeclass can be derived automatically for (almost) any type! Here's, for example, the \mintinline{haskellc}/Generic/ representation of \mintinline{haskellc}/Maybe t/:
-
-\begin{unbreakable}
-{\figtextsize
+\mintinline{haskellc}/GHC.Generics/ is a built-in Haskell library that provides compile-time inspection of a type metadata through the \mintinline{haskellc}/Generic/ typeclass: list of constructors, their fields, memory representation, etc. And that typeclass can be derived automatically for (almost) any type! Here's, for example, the \mintinline{haskellc}/Generic/ representation of \mintinline{haskellc}/Maybe t/:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 repl> :k! Rep (Maybe a) () -- display the Generic representation of Maybe a
 M1 D (MetaData "Maybe" "GHC.Maybe" "base" False) (
@@ -649,7 +640,7 @@ M1 D (MetaData "Maybe" "GHC.Maybe" "base" False) (
   :+: M1 C (MetaCons "¤Just" PrefixI False) (M1 S ¤[...¤] (K1 R t)))
 \end{minted}
 }
-\end{unbreakable}
+
 
 We see that there are two different constructors (indicated by \mintinline{haskellc}/M1 C .../ lines): \mintinline{haskellc}/¤Nothing/ has zero fields (indicated by \mintinline{haskellc}/U1/) and \mintinline{haskellc}/¤Just/ has one field of type \mintinline{haskellc}/t/ (indicated by \mintinline{haskellc}/K1 R t/).
 
@@ -744,17 +735,15 @@ stg_compactAddHollowzh(P_ compact, W_ info) {
 
 \paragraph{Combining both primops to obtain a new hollow constructor}
 
-It's time to show the two primops in action. Here is how we could allocate, for example, a hollow \mintinline{haskellc}/¤Just/ in a compact region:
-
-\begin{unbreakable}
-{\figtextsize
+It's time to show the two primops in action. Here is how we could allocate, for example, a hollow \mintinline{haskellc}/¤Just/ in a compact region:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos]{haskellc}
 hollowJust ⩴ Maybe a = compactAddHollow#
   region
   (unsafeCoerceAddr (reifyInfoPtr# (# #) ⩴ InfoPtrPlaceholder# 'Just ))
 \end{minted}
 }
-\end{unbreakable}
+
 
 It's important to note that the expression \mintinline{haskellc}/reifyInfoPtr# (# #)/ will be replaced at compile-time by a static value representing the info table pointer of \mintinline{haskellc}/¤Just/; while the call to \mintinline{haskellc}/compactAddHollow#/ behaves as a normal function call, and will only be executed when the program runs.
 
@@ -859,10 +848,8 @@ Compared to the benchmarks initially presented in \cite{bagrel_destination-passi
   \label{fig:bench-bft}
 \end{figure}
 
-For breadth-first tree traversal, we benchmark the destination-passing implementation of \cref{ssec:bf-tree-traversal} against an implementation based on \emph{Phases} applicatives, presented in~\cite{gibbons_phases_2023}---a similarly concise approach to breadth-first tree traversal in a functional setting:
-
-\begin{unbreakable}
-{\figtextsize
+For breadth-first tree traversal, we benchmark the destination-passing implementation of \cref{ssec:bf-tree-traversal} against an implementation based on \emph{Phases} applicatives, presented in~\cite{gibbons_phases_2023}---a similarly concise approach to breadth-first tree traversal in a functional setting:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos]{haskellc}
 import Control.Monad.State.Lazy (runState, state)
 
@@ -892,7 +879,7 @@ relabelPh :: BinTree () → (BinTree Int, Int)
 relabelPh tree = runState (runPhases $ traverseBFS (\_ → state (\s → (s, s + 1))) tree) 0
 \end{minted}
 }
-\end{unbreakable}
+
 
 We see in part \cref{fig:bench-bft} that the destination-based tree traversal is about five times more efficient, both time-wise and memory-wise, than the implementation from~\citet{gibbons_phases_2023}. We must admit though that we didn't particularly try to optimize the performance of the \emph{Phases} implementation as much as we did for our DPS framework in general.
 

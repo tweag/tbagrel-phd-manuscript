@@ -52,13 +52,13 @@ A key consequence is that destinations---as first-class representations of holes
 
 Nevertheless, we still retain the main restrictions that~\citet{minamide_functional_1998} places on hole abstractions. For instance, we can't pattern-match on $[[S]]$ in (unapplied) $\ottstype{([[T]], [[S]]) hfun}$; so in \destcalculus{}, we can't act directly on the left-hand side $[[S]]$ of $[[S ⧔ T]]$, only on the right-hand side $[[T]]$ (the equivalent restrictions are also in place in DPS Haskell). Similarly, hole variables can only be used as arguments of constructors or hole abstractions; it's reflected in \destcalculus{} by the fact that the only way to act on destinations is via fill operations.
 
-The ability to manipulate and, in particular, to store destinations does come at a cost: \destcalculus{} requires an additional notion of ages to ensure that destinations are used soundly across scopes. In the absence of such a mechanism, as in DPS Haskell, the use of linear destinations must be carefully constrained to preserve soundness. Despite these additional requirements, our systems---both theoretical and practical---are strictly more general than that of \citet{minamide_functional_1998}. Their system can be naturally embedded within \destcalculus{} (see \cref{sec:transl-minamide}) or expressed in DPS Haskell (see \cref{sec:single-hole}).
+The ability to manipulate and, in particular, to store destinations does come at a cost: \destcalculus{} requires an additional notion of ages to ensure that destinations are used soundly across scopes. In the absence of such a mechanism, as in DPS Haskell, the use of destinations for linear data must be carefully constrained to preserve soundness. Despite these additional requirements, our systems---both theoretical and practical---are strictly more general than that of \citet{minamide_functional_1998}. Their system can be naturally embedded within \destcalculus{} (see \cref{sec:transl-minamide}) or expressed in DPS Haskell (see \cref{sec:single-hole}).
 
 \section{Tail recursion modulo context and The functional essence of imperative binary search Trees}\label{ssec:lorenzen-searchtree}
 
 The recent line of work from \citet{lorenzen_searchtree_2024,leijen_tail_2025} develops in two main axes. The first explores a generalization of Work~\labelcref{ssec:tmc}, by considering the \emph{tail-recursion modulo context} transformation, in which the \emph{context} can be instantiated in various forms. For example, when the context is a one-hole data constructor context---equivalent to the hole abstractions from Work~\labelcref{ssec:minamide}---they recover the \emph{tail-recursion modulo constructor} transformation. But the framework extends further: they are able to handle monoids contexts, semirings contexts, exponentials contexts, and more. Hence, it allows the transformation of a broader class of typically non-tail-recursive functions into efficient tail-recursive equivalents, via a formalized and systematic method, surpassing the scope of the transformation described in Work~\labelcref{ssec:tmc}.
 
-The second axis, which is closer to our own, focuses on the semantics and representation of first-class one-hole data constructor contexts, continuing the lineage of Minamide’s work (\labelcref{ssec:minamide}). In particular, they investigate how such one-hole data constructor contexts (i.e. data structure with one hole) behave under various memory models, particularly in settings where the constructor contexts are not managed linearly! This closely echoes the copy-on-write strategy we initially proposed for \destcalculus{} (see the end of \cref{ssec:sem} and beginning of \cref{sec:implem-destcalculus}), when ampars don't have to be managed linearly. However, their approach goes further: they define formal operational semantics over an explicit memory store, incorporating reference counting. They also propose optimizations to reduce copying overhead, by detecting when a structure with a hole is uniquely referenced and can thus be safely mutated in place---reminiscent of techniques in \cite{lorenzen_fp_2023}.
+The second axis, which is closer to our own, focuses on the semantics and representation of first-class one-hole data constructor contexts, continuing the lineage of Minamide’s work (\labelcref{ssec:minamide}). In particular, they investigate how such one-hole data constructor contexts (i.e. data structure with one hole) behave under various memory models, particularly in settings where the constructor contexts are not managed linearly! This closely echoes the copy-on-write strategy that also emerged in our work on \destcalculus{} (see the end of \cref{ssec:sem} and beginning of \cref{sec:implem-destcalculus}), when ampars don't have to be managed linearly. However, their approach goes further: they define formal operational semantics over an explicit memory store, incorporating reference counting. They also propose optimizations to reduce copying overhead, by detecting when a structure with a hole is uniquely referenced and can thus be safely mutated in place---reminiscent of techniques in \cite{lorenzen_fp_2023}.
 
 Furthermore, they implement this \emph{hybrid} strategy---as they call it---in the Koka programming language, and demonstrate performance gains brought by the \emph{tail-recursion modulo context} transformation on various benchmarks. On the \emph{map} example (see \cref{ssec:benchmark-map}), their approach achieves performance on par with, or even superior to, our DPS Haskell implementation.
 
@@ -71,19 +71,17 @@ Like our multiplicities, there are two modes for affinity \verb|once| and \verb|
 
 Locality tracks scope. There are two locality modes, \verb|local| (doesn't escape the function) and \verb|global| (can escape the current function). The authors present their locality mode as a drastic simplification of Rust's lifetime system (see Work~\labelcref{ssec:rust-lifetimes}), which nevertheless fits their need.
 
-However, this system is too limited to track the scope of destinations as precisely as \destcalculus{} does. The key issue is that if destinations from nested scopes are assigned the same mode (which has to happen when mapping an infinity of ages to just two), we lose the ability to safely distinguish their lifetimes---making it possible to reproduce the counterexamples from \cref{sec:scope-escape-dests}. This suggests that implementing \destcalculus{} in its entirety within modal OCaml is likely infeasible.
+However, this system is too limited to track the scope of destinations as precisely as \destcalculus{} needs. The key issue is that if destinations from nested scopes are assigned the same mode (which has to happen when mapping an infinity of ages to just two), we lose the ability to safely distinguish their lifetimes---making it possible to reproduce the counterexamples from \cref{sec:scope-escape-dests}. This suggests that implementing \destcalculus{} in its entirety within modal OCaml is likely infeasible.
 
-That said, if a mechanism could be introduced to prevent discarding resources of mode \verb|once|, then much---if not all---of the destination-passing APIs described in \cref{chap:dps-haskell,chap:dps-haskell} could still be realized in OCaml, as these APIs rely only on linearity, not full age tracking.
+That said, if a mechanism could be introduced to prevent discarding resources of mode \verb|once|, then much---if not all---of the destination-passing APIs described in \cref{chap:dps-haskell,chap:dps-haskell} could still be realized in their version of OCaml, as these APIs rely only on linearity, not full age tracking.
 
 \section{Quantitative program reasoning with graded modal types}\label{ssec:granule}
 
-\citet{granule_2019} present a functional framework with generalized support for \emph{graded modal types}. Graded modal types refer to a type system with graded modalities---that is, modalities indexed with modes, like $\ottstype{!}_{[[m]]}$---in which the mode, here called \emph{coeffect}, belongs to a semiring, as in~\cite{ghica_bounded_2014,bernardy_modality_2020}.
+\citet{orchard_granule_2019} present a functional framework with generalized support for \emph{graded modal types}, and the language \emph{Granule} as an instance of the said framework. Graded modal types refer to a type system with graded modalities---that is, modalities indexed with modes, like $\ottstype{!}_{[[m]]}$---in which the mode, here called \emph{coeffect}, belongs to a semiring, as in~\cite{ghica_bounded_2014,bernardy_modality_2020}.
 
-Their framework can be instantiated with different semirings, and they showcase a practical instance, called \emph{Granule}. This instantiation supports fine-grained linearity (where usage counts come from $\ottsmode{\mathbb{N}} \cup \{\ottsmode{\omega}\}$, rather than the coarser $\{\ottsmode{1}, \ottsmode{\omega}\}$), along with a tagging system for public/private data to enable sensitive dataflow analysis. They furthermore include \emph{mode ranges}, and a suitable ordering/subtyping relation on modes (similar to ours), that gives more flexibility in the way modes can be used and combined.
+Their framework can be instantiated with different semirings, and they showcase a practical instance that supports fine-grained linearity (where usage counts come from $\ottsmode{\mathbb{N}} \cup \{\ottsmode{\omega}\}$, rather than the coarser $\{\ottsmode{1}, \ottsmode{\omega}\}$), along with a tagging system for public/private data to enable sensitive dataflow analysis. They furthermore include \emph{mode ranges}, and a suitable ordering/subtyping relation on modes (similar to ours), that gives more flexibility in the way modes can be used and combined.
 
-A key difference between Granule and \destcalculus{} lies in where linearity is enforced: Granule applies linearity to values, whereas \destcalculus{} enforces it on function arrows. As a result, Granule can express fine-grained linearity on resources directly, without requiring the scope-based techniques described in~\cref{sec:linear-scopes}.
-
-Because of this, Granule appears to be a promising target for functional destination-passing. While their instantiation lacks a notion of ages or explicit scope control, making a full embedding of \destcalculus{} likely infeasible---it seems on the other hand capable of supporting (at type level at least) much, if not all, of the destination-passing APIs we developed for Haskell in \cref{chap:dps-haskell,chap:ext-linear-nonlinear}.
+With this, Granule appears to be a promising target for functional destination-passing. While the instantiation they present lacks a notion of ages or explicit scope control, making a full embedding of \destcalculus{} likely infeasible---it seems on the other hand capable of supporting (at type level at least) much, if not all, of the destination-passing APIs we developed for Haskell in \cref{chap:dps-haskell,chap:ext-linear-nonlinear}.
 
 Their general framework, however, could be instantiated with the semiring we developed in \cref{ssec:age-control}, and be used as a basis for the type system of \destcalculus{}. But we would still need to extend the set of runtime values to account for structure with holes and destinations, and likewise, introduce a mechanism for state update---such as the linear substitutions on the evaluation context we employed in \cref{ssec:sem}.
 
@@ -108,17 +106,17 @@ Another difference between the two systems is that \destcalculus{}'s ages (and m
 
 At the end of this exotic but exciting journey, we can say with confidence: safe, functional destination passing is not an oxymoron---it exists!
 
-Destination passing is, at its core, the act of passing a write pointer so a function can write its result directly into a memory cell instead of returning it. This approach promises performance gains by avoiding intermediate allocations---especially in imperative contexts---and expressiveness gains by enabling novel ways of constructing data---especially in functional contexts. Yet, at first glance, destination passing appears quite impure: tightly coupled with memory mutation, and seemingly at odds with functional purity.
+Destination passing is, at its core, the act of passing a write pointer so that a function can write its result directly into a memory cell, rather than returning it. This approach offers performance gains by avoiding intermediate allocations, and expressiveness gains by enabling novel ways of constructing data---the former primarily in imperative contexts, and the latter in functional ones. Yet, at first glance, destination passing appears quite impure: tightly coupled with memory mutation, and seemingly at odds with functional purity.
 
 Our early experiments in Haskell, actually predating the formal development of \destcalculus{}, gave us the insight that linear types can tame the impure nature of destinations. Linearity can ensure that a destination is used exactly once, guaranteeing that once a value has been written to a memory cell, it won't be overwritten. This makes destination passing compatible with immutability, a cornerstone of functional programming.
 
-However, scope escape was discovered not long after, and with it, we realized that linear destinations posed a significant challenge for type safety, even when a linear discipline is strictly enforced. Scope escape occurs when a linear resource is stored in a linear container that outlives the scope in which the resource was introduced. Linear interfaces typically rely on the assumption that each resource type comes with a specific set of destructor-like functions, and that one of these will eventually be called for each resource. Linearity forces us to consume the resource in the scope where it becomes available, and if the resource type is opaque, then the only way to do so is by calling one of its designated destructors. But if the resource can be stored linearly outside its scope, then no destructor will have been called on the resource when that scope ends---resulting in \emph{scope escape}. In our case, scope escape happens when a destination \mintinline{haskellc}/Dest m t/---the linear resource---is filled into a linear destination \mintinline{haskellc}/Dest Ⴈ (Dest m t)/ from a parent scope---representing the linear container. But scope escape is not an issue specific to destinations: it poses a threat for any kind of resource whose API relies on linearity for safety. Conversely, scope escape can be introduced by any writable form of storage given a linear interface, whether it be destinations, OCaml-style \mintinline{haskellc}/ref/s, etc.
+However, \emph{scope escape} was discovered not long after, and with it, we realized that destinations for linear data would pose a significant challenge for type safety, even with a strict linear discipline being enforced on these destinations. Scope escape occurs when a linear resource is stored in a linear container that outlives the scope in which the resource was introduced. Linear interfaces typically rely on the assumption that each resource type comes with a specific set of destructor-like functions, and that one of these must be called for each resource. If the resource type is opaque, linearity forces us to consume the resource in the scope where it becomes available, and then the only way to do so is by calling one of its designated destructors. But if we can fake the consumption of the resource by storing it linearly outside its scope---performing scope escape---instead of calling a destructor, then we break this expectation. In our case, scope escape happens when a destination \mintinline{haskellc}/Dest m t/---the linear resource---is filled into a destination \mintinline{haskellc}/Dest Ⴈ (Dest m t)/ from a parent scope---representing the linear container. But scope escape is not an issue specific to destinations: it poses a threat for any kind of resource whose API relies on linearity for safety. Conversely, scope escape can be introduced by any writable form of storage given a linear interface, whether it be destinations, OCaml-style \mintinline{haskellc}/ref/s, etc.
 
-In early DPS Haskell, we immediately avoided scope escape by disallowing linear destinations entirely. Even then, we could still reap quite a few benefits of destination passing: implementing tail-recursive \emph{map}, efficient difference lists, and other patterns involving first-class structures with holes.
+In early DPS Haskell, we avoided scope escape by disallowing destinations for linear data entirely. Even then, we could still reap quite a few benefits of destination passing: implementing tail-recursive \emph{map}, efficient difference lists, and other patterns involving first-class structures with holes.
 
-Yet this restriction limited expressiveness. As shown in the breadth-first traversal example (\cref{chap:dps-haskell}), some patterns could not be expressed without linear destinations. It became clear that a more complete solution was needed---one that reconciled linear destinations with memory safety.
+Yet this restriction limited expressiveness. As shown in the breadth-first traversal example (\cref{chap:dps-haskell}), some patterns could not be expressed without destinations for linear data. It became clear that a more complete solution was needed---one that reconciled destination for linear data with memory safety.
 
-To make progress, we stepped away from implementation concerns and designed a theoretical calculus, \destcalculus{}, so centered around destination passing that conventional functional data constructors are no longer necessary. The key achievement was a mechanical proof of soundness for \destcalculus{}. To permit this, our calculus depends on several notable features:
+To make progress, we stepped away from implementation concerns and designed a theoretical calculus, \destcalculus{}, so centered around destination passing that conventional functional data constructors are not even necessary. The key achievement was a mechanized proof of soundness for \destcalculus{}. To permit this, our calculus depends on several notable features:
 \begin{itemize}
     \item A linear type system, akin to the one from Linear Haskell, ensuring that destinations are neither duplicated nor discarded---letting us know statically when a structure is fully filled (except if scope escape happens);
     \item An age system, that allows precise tracking of scopes in which resources are introduced. The age system is the main technical device used to prevent the scope escape issue;
@@ -127,104 +125,108 @@ To make progress, we stepped away from implementation concerns and designed a th
     \item Operational semantics based on the explicit manipulation of an evaluation context. In particular, linear substitutions on the evaluation context are used to model a lightweight form of state update. Compared to store-based semantics, our approach is simpler, while still faithfully capturing the behavior of destination-induced memory mutations;
 \end{itemize}
 
-Armed with this theory, we returned to our original motivation: practical destination passing in Haskell. Haskell's support for linear types made it a natural fit\footnote{Haskell was also chosen due to the industrial context of this PhD, with funding from a company with industrial functional programming in its DNA, and due to my supervisor Arnaud Spiwack’s involvement in Linear Haskell~\cite{bernardy_linear_2018,spiwack_linearly_2022,spiwack_linear_prop_2023}.}, but its lack of age tracking meant we had to explore new trade-offs. In particular, we had to balance the simplicity of the destination-passing API with the expressiveness we desired. In \destcalculus{}, we could have both---but only with the help of a tailored type system featuring ages.
+Armed with this theory, we could return to our original motivation: practical destination passing in Haskell. Haskell's support for linear types made it a natural fit\footnote{Haskell was also chosen due to the industrial context of this PhD, with funding from a company with industrial functional programming in its DNA, and due to my supervisor Arnaud Spiwack’s involvement in Linear Haskell~\cite{bernardy_linear_2018,spiwack_linearly_2022,spiwack_linear_prop_2023}.}, but its lack of age tracking meant we had to explore new trade-offs. In particular, we had to balance the simplicity of the destination-passing API with the expressiveness we desired. In \destcalculus{}, we could have both---but only with the help of a tailored type system featuring ages.
 
 In \cref{chap:dps-haskell,chap:ext-linear-nonlinear}, we iterated through increasingly powerful destination-passing APIs in Haskell, each narrowing the gap with \destcalculus{}. By the end of \cref{chap:ext-linear-nonlinear}, we recovered a system expressive enough to implement all motivating examples from \destcalculus{}, with no adaptations required further than mere translation of a syntax to another.
 
 The last important contribution of our work is practical as well. In the course of developing DPS Haskell, we implemented the API within \emph{Compact regions}---a separate memory space in the Haskell heap that is only loosely overseen by the garbage collector. Our initial motivation was to ensure that memory mutations caused by destination-filling primitives would not interfere with the invariants expected by the garbage collector and the runtime system. But this design choice turned out to bring additional benefits we had not anticipated. \emph{Compact regions} are often used to store long-lived data structures more efficiently by avoiding repeated garbage collection passes over them. Our DPS Haskell API offers, in fact, a more direct and efficient way to allocate such structures in compact regions safely. The benchmarks in \cref{sec:benchmark} support this claim: destination passing---implemented inside compact regions---proves to be a valuable tool in specific scenarios, either enabling more direct, imperative-like programming when desired (without compromising memory safety), or allowing more efficient compact region use, e.g. in the parser example we developed in \cref{ssec:parser-sexpr}.
 
-We hope that, by now, the reader has got a clear and enjoyable overview of functional destination passing: a journey rooted in type theory, language design, but also practical implementation concerns.
+Of all the approaches we explored in our journey, the one from \cref{chap:dps-haskell} is likely the most viable for practical adoption, hitting a good balance between simplicity and usability. The vision behind \destcalculus{}---where every data structure is built through destination passing---diverges radically from conventional functional programming styles. This divergence is justified by the need to rigorously explore the theoretical foundations and safety considerations of destination passing, but it means \destcalculus{} addresses concerns that are rather niche within the broader landscape of everyday programming. Meanwhile, the API developed in \cref{chap:ext-linear-nonlinear} is a significant effort to expand what is achievable relying solely on linearity as a safety mechanism; but its current form is too complex and cluttered to be made into an industrial-grade library. It showcases the extent of what we were able to achieve, yet there's likely room for simplification and refinement.
+
+With these reflections in mind, we hope we have presented the reader with a clear and enjoyable overview of functional destination passing, through a journey rooted in type theory, language design, and practical implementation concerns.
 
 \phantomsection\section*{Future perspectives}\addcontentsline{toc}{section}{Future perspectives}\markboth{Conclusion}{Future perspectives}
 
-\paragraph{Proof of safety for the practical DPS Haskell APIs}
+There are still many interesting threads that can be pursued to improve this work. The most immediate is probably to further refine the existing DPS Haskell implementation. This involves, in particular, fine-tuning its performance, which remains one of the main selling points of the approach. This is even more important given its dual role as both a destination-passing interface and a better compact region allocation mechanism, as described above.
 
-By the end of this PhD, we achieved our two main goals: demonstrating that functional destination passing can be made safe, and providing evidence that practical implementations of destination passing in an industrial-grade functional language are feasible and can deliver performance benefits.
-
-The next natural step is to reconcile these two strands of work, by using the theoretical framework developed in \destcalculus{} (\cref{chap:dest-calculus}) to prove that the practical implementations introduced in \cref{chap:dps-haskell,chap:ext-linear-nonlinear} are indeed safe.
-
-Such a proof would involve translating each operator from the DPS Haskell APIs into their counterparts in \destcalculus{}, and showing that for any well-typed DPS Haskell program, there exists a suitable age assignment that makes the translated \destcalculus{} program typecheck.
-
-The main obstacle—beyond the lack of time to pursue this work in depth—is that, despite their common roots, there are subtle but key differences between \destcalculus{} and the various DPS Haskell APIs. For example, in the version from \cref{chap:dps-haskell}, the absence of linear destinations has wide-reaching implications: it allows destinations of heterogeneous ages to be safely stored in usual Haskell data structures like standard library lists. This flexibility would be difficult to justify in \destcalculus{}, which lacks any notion of non-destination-based data structures. Similarly, in the API from \cref{chap:ext-linear-nonlinear}, we rely both on a non-capturing \mintinline{haskellc}/updWith/ operator (unlike the original $\ottkw{upd}{\ottkw{\ltimes}}$), and on the \mintinline{haskellc}/extend/ functions, which would effectively translate to a controlled yet capturing version of $\ottkw{upd}{\ottkw{\ltimes}}$.
-
-Altogether, these differences mean that formally proving the safety of our practical DPS Haskell APIs within the framework of \destcalculus{} remains a challenging---but exciting---direction for future work.
-
-\paragraph{DPS Haskell, outside of compact regions}
-
-A second direction for future work is to implement destination-passing support directly within Haskell’s standard garbage-collected heap, rather than relying on the protective boundary of compact regions.
-
-The main challenge lies in the close interaction between memory safety and the internals of GHC’s garbage collector, particularly regarding when and where immutability assumptions are relied upon. GHC uses a copying collector with a variety of performance-critical optimizations, and violating its expectations about immutability could lead to subtle and potentially catastrophic bugs. Moreover, GHC’s runtime system is complex and actively evolving, with key implementation details often spread across various documents---some of which may be outdated or not precise enough. Acquiring a complete and up-to-date understanding would likely require input from experienced contributors to the compiler and runtime.
-
-An equally serious concern is that, if structures with holes are moved by the GC, any live destination referring to them must be updated accordingly to avoid dangling pointers---a nontrivial task either.
-
-For these reasons, this path remains technically demanding and uncertain. It is not yet clear whether implementing destination passing within the GC-managed heap would yield significant performance benefits over our current approach using compact regions---especially since doing so would likely interfere with the garbage collector’s operation, introducing barriers or constraints that could hinder its efficiency.
+With a longer time frame, we can envision other improvements on both the practical and theoretical sides, as we detail below.
 
 \paragraph{Destination passing support for data structures with unpacked fields}
 
-A final direction for improvement would be to extend destination-passing support to data structures with unpacked fields---that is, fields that embed child elements directly instead of pointing to them.
+A first direction for improvement would be to extend destination-passing support to data structures with unpacked fields---that is, fields that embed child elements directly instead of pointing to them.
 
 Until now, we have restricted our attention to purely linked structures, and for good reason: they allow efficient composition (i.e., merging) of structures with holes.
 
 Throughout both our theoretical work and implementations, our goal has been to perform destination filling as simple, single memory write. Also, since Minamide's foundational work, composability has been a key feature of structures with holes, crucial for building constructs like ampar-based difference lists.
 
-When composing two ampars using \mintinline{haskellc}/extendComp/ (or filling a parent ampar's destination with a child ampar using \mintinline{haskellc}/fillComp/), if the involved fields are indirected, then composition boils down to writing the address of the child into the hole of the parent. See below (we annotate memory locations with \mintinline{text}/@addr=/ syntax, and use standard notation for holes and destinations):
-
-\begin{unbreakable}
-{\figtextsize
+When composing two ampars using \mintinline{haskellc}/extendComp/ (or filling a parent ampar's destination with a child ampar using \mintinline{haskellc}/fillComp/), if the involved fields are indirected, then composition boils down to writing the address of the child into the hole of the parent. See below (we annotate memory locations with \mintinline{text}/@addr =/ syntax, and denote holes by $\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$):\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendComp ⩴ ∀ s t u. Ampar t u ⊸ Ampar s (Dest Ⴈ t) ⊸ Ampar s u
 
-parentAmpar :: Ampar [t] (Dest Ⴈ [t]) = newAmpar tok1 &extend @'(:) @1 "first"
--- in memory:  ¤Ampar 0x05ba (¤Dest °$\ottshname{\to{}\!\!0x05ca}$°)
--- @0x05ba=    0xcb1e : °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
--- @0xcb1e=   "first"
+parentAmpar :: Ampar [t] (Dest Ⴈ [t]) = newAmpar tok1 &extend @'(:) @1 1
+-- in memory:  ¤Ampar 0x05ba (¤Dest °$\ottshname{0x05ca}$°)
+-- @0x05ba =   0xcb1e : °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+-- @0xcb1e =   I# 1#
 
-childAmpar :: Ampar [t] (Dest Ⴈ [t]) = newAmpar tok2 &extend @'(:) @1 "second"
--- in memory:  ¤Ampar 0x0840 (¤Dest °$\ottshname{\to{}\!\!0x0850}$°)
--- @0x0840=    0xbc4e : °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
--- @0xbc4e=   "second"
+childAmpar :: Ampar [t] (Dest Ⴈ [t]) = newAmpar tok2 &extend @'(:) @1 2
+-- in memory:  ¤Ampar 0x0840 (¤Dest °$\ottshname{0x0850}$°)
+-- @0x0840 =   0xbc4e : °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+-- @0xbc4e =   I# 2#
 
 resAmpar :: Ampar [t] (Dest Ⴈ [t]) = parentAmpar &extendComp childAmpar
--- in memory:  ¤Ampar () (¤Dest °$\ottshname{\to{}\!\!0x0850}$°)
--- @0x05ba=    0xcb1e : 0x0840
--- @0xcb1e=   "first"
--- @0x0840=    0xbc4e : °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
--- @0xbc4e=   "second"
+-- in memory:  ¤Ampar () (¤Dest °$\ottshname{0x0850}$°)
+-- @0x05ba =   0xcb1e : 0x0840
+-- @0xcb1e =   I# 1#
+-- @0x0840 =   0xbc4e : °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+-- @0xbc4e =   I# 2#
 \end{minted}
 }
-\end{unbreakable}
 
-In this case, only the second field of the \emph{cons} constructor at \mintinline{haskellc}/0x05ba/ needs to be updated. The resulting ampar inherits the destination from \mintinline{haskellc}/childAmpar/, which still correctly points to the hole at \mintinline{haskellc}/0x0850/.
 
-However, things become more complicated when unpacked fields are involved:
-\begin{unbreakable}
-{\figtextsize
+To perform the composition, only the second field of the \emph{cons} constructor at \mintinline{text}/0x05ba/ needs to be updated. The resulting ampar inherits the destination from \mintinline{haskellc}/childAmpar/, which still correctly points to the hole at \mintinline{text}/0x0850/.
+
+However, things become more complicated when unpacked fields are involved:\nopagebreak[4]%
+{\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendComp ⩴ ∀ s t u. Ampar t u ⊸ Ampar s (Dest Ⴈ t) ⊸ Ampar s u
 
-data UPair a b = ¤UPair
-  {-# UNPACK #-} !a
-  {-# UNPACK #-} !b
+-- GHC doesn't support UNPACK for polymorphic fields so we can't do:
+-- data Pair a b = Pair {-# UNPACK #-} !a {-# UNPACK #-} !b
+data IntPair = ¤IntPair {-# UNPACK #-} !Int {-# UNPACK #-} !Int
+data NestedPair = ¤NestedPair {-# UNPACK #-} !Int {-# UNPACK #-} !IntPair
 
-parentAmpar :: Ampar (UPair Int (UPair Int Int)) (Dest Ⴈ (UPair Int Int))
-  = newAmpar tok1 &extend @'UPair @1 1
--- in memory:  ¤Ampar 0x05ba (¤Dest °$\ottshname{\to{}\!\!0x05ca}$°)
--- @0x05ba=    ¤UPair 1# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+parentAmpar :: Ampar NestedPair (Dest Ⴈ IntPair)
+  = newAmpar tok1 &extend @'NestedPair @1 1
+-- in memory:  ¤Ampar 0x05ba (¤Dest °$\ottshname{0x05ca}$°)
+-- @0x05ba =   ¤NestedPair 1# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
 
-childAmpar :: Ampar (UPair Int Int) (Dest Ⴈ Int) = newAmpar tok2 &extend @'UPair @1 2
--- in memory:  ¤Ampar 0x0840 (¤Dest °$\ottshname{\to{}\!\!0x0850}$°)
--- @0x0840=    ¤UPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+childAmpar :: Ampar IntPair (Dest Ⴈ Int) = newAmpar tok2 &extend @'IntPair @1 2
+-- in memory:  ¤Ampar 0x0840 (¤Dest °$\ottshname{0x0850}$°)
+-- @0x0840 =   ¤IntPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
 
-resAmpar :: Ampar (UPair Int (UPair Int Int)) (Dest Ⴈ Int) = parentAmpar &extendComp childAmpar
--- in memory:  ¤Ampar 0x05ba (¤Dest °$\ottshname{\to{}\!\!0x0850}$°)
--- @0x05ba=    ¤UPair 1# (¤UPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°)
--- @0x0840=    ¤UPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+resAmpar :: Ampar NestedPair (Dest Ⴈ Int) = parentAmpar &extendComp childAmpar
+-- in memory:  ¤Ampar 0x05ba (¤Dest °$\ottshname{0x0850}$°)
+-- @0x05ba =   ¤NestedPair 1# 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
+-- @0x0840 =   ¤IntPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°
 \end{minted}
 }
-\end{unbreakable}
 
-Now, to perform composition, we must copy the child structure into the hole of the parent. For instance, the unpacked value \mintinline[escapeinside=°°]{haskellc}/¤UPair 2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°/ must be deep-copied, because the parent expects an unpacked field. But doing so invalidates the destination from the child: it still points to \mintinline{haskellc}/0x0850/, while the actual hole now lives at \mintinline[escapeinside=°°]{haskellc}/0x5d2/!
+
+Now, to perform composition, we must copy the fields of the child structure into the hole of the parent, as the parent field is annotated as unpacked. For instance, here the payload \mintinline[escapeinside=°°]{haskellc}/¤2# °$\ottshname{\fbox{$\ottshname{\phantom{a}}$}}$°/ is copied into the hole at \mintinline{text}/0x05ca/. But doing so invalidates the destination inherited from the child: it still points to \mintinline{text}/0x0850/, while the remaining hole in \mintinline{haskellc}/resAmpar/ now lives at \mintinline[escapeinside=°°]{text}/0x5d2/!
 
 Addressing this would require tracking and updating destination pointers dynamically whenever composition happens throughout an unpacked field. But such a mechanism would impose significant overhead and undermine the simplicity and efficiency of our current model.
 
-A more realistic path forward is to distinguish destinations pointing to unpacked fields from those pointing to indirected ones\footnote{We can know whether a field is unpacked or indirected using \mintinline{haskellc}/GHC.Generics/.}, and to restrict use of \mintinline{haskellc}/fillComp/ and \mintinline{haskellc}/extendComp/ to cases where the destination targets an indirected field.
+A more realistic path forward---one we are likely to adopt in \cite{bagrel_primitives_2024}---is to distinguish destinations that point to unpacked fields from those that point to indirected ones.\footnote{Whether a field is unpacked or indirected can be determined using \mintinline{haskellc}/GHC.Generics/.} We would then restrict the use of \mintinline{haskellc}/fillComp/ and \mintinline{haskellc}/extendComp/ to cases where the destination targets an indirected field. This approach preserves much of the expressiveness of destination-passing and the composition of incomplete structures, while still supporting unpacked fields. The new restrictions would apply only to those unpacked fields (that weren't supported before) and wouldn't compromise the rest of the system, allowing destinations to remain simple pointers, with no need for complex update mechanisms.
+
+\paragraph{DPS Haskell, outside of compact regions}
+
+A second direction for future work is to implement destination-passing support directly within Haskell’s standard garbage-collected heap, rather than relying on the protective boundary of compact regions.
+
+The main challenge lies in the close interaction between memory safety and the internals of GHC’s garbage collector, particularly regarding when and where immutability assumptions are relied upon. GHC uses a copying collector with a variety of performance-critical optimizations, and violating its expectations about immutability could lead to subtle and potentially catastrophic bugs. For instance, if structures with holes are moved by the GC, then any live destination referring to them must be updated accordingly to avoid dangling pointers.
+
+Another challenge is that GHC’s runtime system is complex and actively evolving, with key implementation details often spread across various documents, so acquiring a complete and up-to-date understanding of this system would likely require input from experienced contributors to the compiler and runtime.
+
+Still, adapting the DPS Haskell implementation to run directly on the standard GC heap could significantly lower the barrier to adoption. Programmers would be able to use destination-passing selectively, without the overhead and constraints associated with compact regions. It would likely bring substantial performance improvements as well, by avoiding the need to copy data into compact regions. For example, in our \emph{map} function using destinations, every value in the input list must currently be copied into the region, even though destination-passing is only needed for the spine. This direction remains uncertain---the runtime implications are subtle and the engineering effort nontrivial---but if achievable, the payoff could be great.
+
+\paragraph{Proof of safety for the practical DPS Haskell APIs}
+
+By the end of this PhD, we achieved our two main goals: demonstrating that functional destination passing can be made safe, and providing evidence that practical implementations of destination passing in an industrial-grade functional language are feasible and can deliver performance benefits.
+
+The last natural step is to reconcile these two strands of work, by using the theoretical framework developed in \destcalculus{} (\cref{chap:dest-calculus}) to prove that the practical implementations introduced in \cref{chap:dps-haskell,chap:ext-linear-nonlinear} are indeed safe.
+
+Such a proof would involve translating each operator from the DPS Haskell APIs into their counterparts in \destcalculus{}, and showing that for any well-typed DPS Haskell program, there exists a suitable age assignment that makes the translated \destcalculus{} program typecheck.
+
+The main obstacle is that despite their common roots, there are subtle but key differences between \destcalculus{} and the various DPS Haskell APIs. For example, in the version from \cref{chap:dps-haskell}, the absence of destinations for linear data has wide-reaching implications: it allows destinations of heterogeneous ages to be safely stored in usual Haskell data structures like standard library lists. This flexibility would be difficult to justify in \destcalculus{}, which lacks any notion of non-destination-based data structures. Similarly, in the API from \cref{chap:ext-linear-nonlinear}, we rely both on a non-capturing \mintinline{haskellc}/updWith/ operator (unlike the original $\ottkw{upd}{\ottkw{\ltimes}}$), and on the \mintinline{haskellc}/extend/ functions, which would effectively translate to a controlled yet capturing version of $\ottkw{upd}{\ottkw{\ltimes}}$.
+
+The key, then, may not be to reuse \destcalculus{} exactly as it stands, but to design a slightly adapted formal language tailored to the specific API we aim to verify. Much of the existing formalization---especially the infrastructure for managing typing contexts, hole renaming, and substitution---could likely be reused with minimal changes. While the original proofs (\cref{sec:formal-proof}, \cite{bagrel_proofs_2025}) were not written with reusability in mind (as we expected \destcalculus{} to be general enough in its current form), only a relatively small portion depends directly on the typing rules of individual operators. Adapting these rules to match the ones of the DPS Haskell API from \cref{chap:dps-haskell} for example would be time-consuming, but probably tractable. In return, this path offers a promising opportunity to generalize our formal development and extend its impact.
