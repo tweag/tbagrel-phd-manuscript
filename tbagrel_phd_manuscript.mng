@@ -1,4 +1,15 @@
 \documentclass[nofrench, 11pt]{thesul}
+% \usepackage{xmpincl}
+\usepackage{luatex85}
+\usepackage[a-1b]{pdfx}
+\hypersetup{
+  hypertexnames=false,
+  pdftitle   = {Formalization and Implementation of Safe Destination Passing in Pure Functional Programming Settings},
+  pdfauthor  = {Thomas Bagrel},
+  pdfsubject = {PhD Manuscript},
+  pdfcreator = {Thomas Bagrel},
+  % ...
+}
 
 \usepackage{etoolbox}
 \usepackage{calc}
@@ -20,7 +31,7 @@
 % \usepackage{unicode-math}
 
 \usepackage[activate={true, nocompatibility}, stretch=10, shrink=10]{microtype}
-\usepackage[svgnames]{xcolor}
+%\usepackage[svgnames]{xcolor}
 \usepackage{graphicx}
 \usepackage{polyglossia}
 \setmainlanguage{english}
@@ -300,7 +311,7 @@
     \newcommand{\resolved}[2]{}
 \fi
 
-\usepackage[hypertexnames=false]{hyperref}
+%\usepackage[hypertexnames=false]{hyperref}
 \usepackage[capitalize, noabbrev]{cleveref}
 
 %% User defined commands

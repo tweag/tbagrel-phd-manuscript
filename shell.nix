@@ -105,6 +105,9 @@ pkgs.mkShell
           needspace
           chngcntr
           csquotes
+          pdfx
+          luatex85
+          xmpincl
           ;
       })
 
