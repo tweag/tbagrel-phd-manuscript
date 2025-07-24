@@ -13,11 +13,19 @@ jobs:
         nix_path: nixpkgs=${{ env.nixpkgs-url }}
     - name: Build Nix dependencies
       run: nix-shell --pure --run "echo '=== Nix dependencies installed ==='"
-    - name: Make PDF
-      run: nix-shell --pure --run "make"
-    - name: Upload PDF
+    - name: Make Manuscript PDF
+      run: nix-shell --pure --run "make tbagrel_phd_manuscript.pdf"
+    - name: Make Presentation PDF
+      run: nix-shell --pure --run "make tbagrel_phd_presentation.pdf"
+    - name: Upload Manuscript PDF
       uses: actions/upload-artifact@v4
       with:
         name: tbagrel_phd_manuscript
         path: tbagrel_phd_manuscript.pdf
+        retention-days: 90
+    - name: Upload Presentation PDF
+      uses: actions/upload-artifact@v4
+      with:
+        name: tbagrel_phd_presentation
+        path: tbagrel_phd_presentation.pdf
         retention-days: 90

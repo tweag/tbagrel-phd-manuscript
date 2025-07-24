@@ -108,6 +108,8 @@ pkgs.mkShell
           pdfx
           luatex85
           xmpincl
+          beamertheme-metropolis
+          pgfopts
           ;
       })
 

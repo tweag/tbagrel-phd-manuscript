@@ -1,0 +1,625 @@
+\documentclass[aspectratio=169]{beamer}
+\usepackage{hyperref}
+\usetheme{metropolis}
+\hypersetup{
+  hypertexnames=false,
+  pdftitle   = {Formalization and Implementation of Safe Destination Passing in Pure Functional Programming Settings},
+  pdfauthor  = {Thomas Bagrel},
+  pdfsubject = {PhD Presentation},
+  pdfcreator = {Thomas Bagrel},
+  % ...
+}
+
+\usepackage{etoolbox}
+\usepackage{calc}
+\usepackage{xargs}
+\usepackage{xpatch}
+\usepackage{xkeyval}
+\usepackage{xstring}
+\usepackage{xifthen}
+\usepackage{xparse}
+\usepackage{expl3}
+\usepackage{environ}
+\usepackage{mathtools, amsfonts, amssymb, amsthm}
+\usepackage{chngcntr}
+\usepackage{csquotes}
+
+% \usepackage[utf8]{inputenc}
+% \usepackage[T1]{fontenc}
+\usefonttheme{serif}
+\usepackage{fontspec}
+% \usepackage{unicode-math}
+
+\usepackage[activate={true, nocompatibility}, stretch=10, shrink=10]{microtype}
+%\usepackage[svgnames]{xcolor}
+\usepackage{graphicx}
+\usepackage{polyglossia}
+\setmainlanguage{english}
+\setotherlanguage{french}
+\SetLanguageKeys{english}{indentfirst=true}
+\SetLanguageKeys{french}{indentfirst=true}
+\usepackage{float}
+\renewcommand{\topfraction}{.67}
+\renewcommand{\bottomfraction}{.0}
+\renewcommand{\textfraction}{.33}
+\renewcommand{\floatpagefraction}{.67}
+\renewcommand{\dbltopfraction}{.67}
+% \renewcommand{\dblbottomfraction}{.0}
+% \renewcommand{\dbltextfraction}{.33}
+\renewcommand{\dblfloatpagefraction}{.67}
+\setcounter{topnumber}{9}
+\setcounter{bottomnumber}{9}
+\setcounter{totalnumber}{20}
+\setcounter{dbltopnumber}{9}
+
+
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{refcount}
+\makeatletter
+\providecommand\english@loaded{}
+\providecommand\frensh@loaded{}
+\makeatother
+\usepackage{url}
+\usepackage{lastpage}
+\usepackage{setspace}
+\usepackage{enumitem}\let\newlist\relax\let\renewlist\relax
+\usepackage{fancybox}
+\usepackage{tabularx}
+\usepackage[defaultlines=3,all]{nowidow}
+% \usepackage{fancyhdr}
+
+%% For rendering of JFLA article
+% \usepackage{tipa}
+\usepackage{minted}\usemintedstyle{tango}
+\usepackage{stmaryrd}
+\usepackage{hhline}
+\usepackage[tikz]{bclogo}
+\usepackage[normalem]{ulem}
+\usepackage{newunicodechar}
+
+%% For schemas
+\usepackage{tikzit}
+\input{tikzstyle.tikzstyles}
+%\tikzset{every picture/.style={line width=10pt}}
+\newcommand{\figcomment}[1]{\textcolor{gray}{#1}}
+\newcommand{\smallspc}{\hspace{-0.5em}}
+\def\figscale{1.2}
+\definecolor{sczcolor}{RGB}{0,0,0}
+\definecolor{sczfcolor}{RGB}{128, 128, 128}
+\definecolor{scicolor}{RGB}{199, 22, 6}
+\definecolor{scifcolor}{RGB}{251, 164, 157}
+\definecolor{sciicolor}{RGB}{60, 103, 163}
+\definecolor{sciiicolor}{RGB}{97, 5, 94}
+\newcommand{\scz}[1]{\textcolor{sczcolor}{#1}}
+\newcommand{\sczf}[1]{\textcolor{sczfcolor}{#1}}
+\newcommand{\sci}[1]{\textcolor{scicolor}{#1}}
+\newcommand{\scif}[1]{\textcolor{scifcolor}{#1}}
+\newcommand{\scii}[1]{\textcolor{sciicolor}{#1}}
+\newcommand{\sciii}[1]{\textcolor{sciiicolor}{#1}}
+
+%% For OTT rendering
+\newunicodechar{⥶}{\ensuremath{\raisebox{0.2em}{$\scriptstyle<$}\hspace*{-0.65em}\raisebox{-0.12em}{$\scriptscriptstyle\leftarrow$}}}
+\newcommand{\pleq}{[[⥶]]_{\scriptscriptstyle{\pmb{\mathtt{p}}}}}
+\newcommand{\aleq}{[[⥶]]_{\scriptscriptstyle{\pmb{\mathtt{a}}}}}
+\usepackage[supertabular]{ottalt}
+\inputott{destination_calculus_ott.tex}
+\usepackage{ottstyling}
+% Hide "Index for ranges" from the metavars displayed tabular
+% \patchcmd{\ottmetavars}{$ \ottmv{k} $ & \ottcom{Index for ranges} \\}{}{}{}
+
+% \patchcmd{\ottdruleTyXXectxsXXOpenAmpar}{%
+% \ottpremise{  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{2}}}  \,\pmb{\dashv}\, \ottnt{C} \pmb{:}  \ottstype{(}  \ottstype{U} \,\ottstype{\ltimes}\, \ottstype{T'}  \ottstype{)}  \ottstype{\rightarrowtail} \ottstype{U_{{\mathrm{0}}}} }%
+% \ottpremise{ \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{\ottpremise{  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{2}}}  \,\pmb{\dashv}\, \ottnt{C} \pmb{:}  \ottstype{(}  \ottstype{U} \,\ottstype{\ltimes}\, \ottstype{T'}  \ottstype{)}  \ottstype{\rightarrowtail} \ottstype{U_{{\mathrm{0}}}}
+% \qquad
+% \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
+% }{}{}
+
+% \patchcmd{\ottdruleTyXXvalXXAmpar}{%
+% \ottpremise{   \ottsmode{1}  \hspace{-0.15ex}  \ottsmode{\uparrow}    \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{3}}}   \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{1}}}}  \pmb{:}  \ottstype{T}}%
+% \ottpremise{ \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{
+% \ottpremise{   \ottsmode{1}  \hspace{-0.15ex}  \ottsmode{\uparrow}    \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \Delta_{{\mathrm{1}}} ,~ \Delta_{{\mathrm{3}}}   \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{1}}}}  \pmb{:}  \ottstype{T}
+% \qquad
+% \Delta_{{\mathrm{2}}} ,~  \ottshname{\destminus^{\scriptscriptstyle\text{-}1} } \Delta_{{\mathrm{3}}}    \!\!\pmb{\phantom{a}^{\scriptscriptstyle \mathrm{v} }\!\!\vdash}\,  \ottnt{v_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{}{}
+
+% \patchcmd{\ottdruleTyXXtermXXPatS}{%
+% \ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}}%
+% \ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{\ottpremise{ \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}%
+% \qquad
+% \Gamma_{{\mathrm{2}}} ,~  \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}    \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
+% }{}{}
+
+% \patchcmd{\ottdruleTyXXectxsXXPatS}{%
+% \ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}}%
+% \ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}%
+% }{
+%   \ottpremise{\Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{1}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{1}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{1}}}}  \pmb{:}  \ottstype{U}
+% \qquad
+%   \Delta_{{\mathrm{2}}}  +   \ottmv{x_{{\mathrm{2}}}} :\!_{\! \ottsmode{m} } \ottstype{T_{{\mathrm{2}}}}   \,\pmb{\vdash}\,  \ottnt{u_{{\mathrm{2}}}}  \pmb{:}  \ottstype{U}}
+% }{}{}
+
+% %% Bibliography settings
+% \usepackage[
+%   backend=biber,
+%   natbib=true,
+%   bibstyle=authoryear,
+%   citestyle=authoryear-comp,
+%   sorting=ynt]{biblatex}
+% \addbibresource{bibliography.bib}
+
+%% General document setup
+\setmainlanguage{english}
+
+% \makeatletter
+
+% \newrobustcmd*{\parentexttrack}[1]{%
+%   \begingroup
+%   \blx@blxinit
+%   \blx@setsfcodes
+%   \blx@bibopenparen#1\blx@bibcloseparen
+%   \endgroup}
+
+% \AtEveryCite{%
+%   \let\parentext=\parentexttrack%
+%   \let\bibopenparen=\bibopenbracket%
+%   \let\bibcloseparen=\bibclosebracket}
+
+% \makeatother
+
+% \let\cite\parencite
+% \let\citet\textcite
+
+% \setmainfont{Tinos}[
+%   Path=./fonts/,
+%   Extension=.ttf,
+%   UprightFont=*-Regular,
+%   BoldFont=*-Bold,
+%   ItalicFont=*-Italic,
+%   BoldItalicFont=*-BoldItalic,
+%   Scale=1.033]
+\setmainfont{FiraSans}[
+  Path=./fonts/,
+  Extension=.ttf,
+  UprightFont=*-Light,
+  BoldFont=*-Medium,
+  ItalicFont=*-LightItalic,
+  BoldItalicFont=*-MediumItalic,
+  Scale=0.887]
+% \setmainfont{CMUSerif}[
+%   Path=./fonts/,
+%   Extension=.otf,
+%   UprightFont=*-Roman,
+%   BoldFont=*-Bold,
+%   ItalicFont=*-Italic,
+%   BoldItalicFont=*-BoldItalic,
+%   Scale=1.0]
+\setsansfont{iosevka-quasi-proportional-ss07}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-regular,
+  BoldFont=*-semibold,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-semibolditalic,
+  Scale=0.887]
+\setmonofont{iosevka-quasi-proportional-ss07}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-regular,
+  BoldFont=*-semibold,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-semibolditalic,
+  Scale=0.887]
+% \setmonofont{Iosevka-Term-SS07}[
+%   Path=fonts/,
+%   Extension=.ttf,
+%   UprightFont=*-Regular,
+%   BoldFont=*-Semibold,
+%   ItalicFont=*-Italic,
+%   BoldItalicFont=*-SemiboldItalic,
+%   Scale=0.92]
+\setmathrm{iosevka-quasi-proportional-ss07}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-regular,
+  BoldFont=*-semibold,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-semibolditalic,
+  Scale=0.887]
+\newfontfamily\mymathbffont{iosevka-quasi-proportional-ss07-semibold}[Path=fonts/,
+  Extension=.ttf,Scale=0.887]
+\newcommand{\mymathbf}[1]{\text{\mymathbffont #1}}
+\let\mathbf\mymathbf
+% \setmathsf{Tinos}[
+%   Path=fonts/,
+%   Extension=.ttf,
+%   UprightFont=*-Italic,
+%   BoldFont=*-BoldItalic,
+%   ItalicFont=*-Italic,
+%   BoldItalicFont=*-BoldItalic,
+%   Scale=1.033]
+\setmathsf{CMUSerif}[
+  Path=./fonts/,
+  Extension=.otf,
+  UprightFont=*-Italic,
+  BoldFont=*-BoldItalic,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic,
+  Scale=1.0]
+% \setmonofont{Fira-Code-Nerd-Font-Complete}[
+%   Extension=.otf,
+%   UprightFont=*-Regular,
+%   BoldFont=*-Medium,
+%   Scale=0.887]
+
+\setlength{\parskip}{0.25\baselineskip}
+\setlist[itemize]{topsep=0ex,itemsep=-0.5ex}
+
+\definecolor{mintedframe}{RGB}{100,100,100}
+\setminted{
+    linenos,                       % Enable line numbering
+    xleftmargin=12pt,              % Set left margin to 0
+    frame=leftline,                  % Use a frame around the code
+    framesep=7.5pt,                 % Space between frame and code
+    rulecolor=mintedframe,
+    numbersep=7.5pt,                % Space between line numbers and code
+    numberblanklines=true,
+}
+
+\renewcommand{\theFancyVerbLine}{
+\ttfamily
+\textcolor{mintedframe}{
+\scriptsize{
+\arabic{FancyVerbLine}}}}
+
+% %% New listing float
+% \newfloat{listing}{tbp}{lop}[chapter]
+% \floatname{listing}{Listing}
+% \renewcommand{\thelisting}{\thechapter.\arabic{listing}} % chapter-based numbering
+
+% % Step 3 (optional): Reset counter per chapter (for books/theses)
+% \counterwithin{listing}{chapter}
+
+% %% Editing marks
+% \usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+% % TOGGLE ME to turn off all the commentary:
+% \InputIfFileExists{no-editing-marks}{
+%   \def\noeditingmarks{}
+% }
+% % ^^ Need for pgfsyspdfmark apparently?
+% \ifx\noeditingmarks\undefined
+%     % Adapting to acmart's small margins
+%     \setlength{\marginparsep}{0.3em}
+%     \setlength{\marginparwidth}{1.4cm}
+
+%     \newcommand{\Red}[1]{{\color{red}{#1}}}
+%     \newcommand{\newaudit}[1]{{\color{blue}{#1}}}
+%     \newcommand{\note}[1]{{\color{blue}{\begin{itemize} \item {#1} \end{itemize}}}}
+%     \newenvironment{alt}{\color{red}}{}
+
+%     \newcommandx{\unsure}[2][1=]{\todo[linecolor=orange,backgroundcolor=orange!25,bordercolor=orange,#1]{#2}}
+%     \newcommandx{\info}[2][1=]{\todo[linecolor=green,backgroundcolor=green!25,bordercolor=green,#1]{#2}}
+%     \newcommandx{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+%     \newcommandx{\inconsistent}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+%     \newcommandx{\critical}[2][1=]{\todo[linecolor=purple,backgroundcolor=purple!25,bordercolor=purple,#1]{#2}}
+%     \newcommand{\improvement}[1]{\todo[linecolor=pink,backgroundcolor=pink!25,bordercolor=pink]{#1}}
+%     \newcommandx{\resolved}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}} % use this to mark a resolved question
+% \else
+% %    \newcommand{\Red}[1]{#1}
+%     \newcommand{\Red}[1]{{\color{red}{#1}}}
+%     \newcommand{\newaudit}[1]{#1}
+%     \newcommand{\note}[1]{}
+%     \newenvironment{alt}{}{}
+% %    \renewcommand\todo[2]{}
+%     \newcommand{\unsure}[2][1=]{}
+%     \newcommand{\info}[2][1=]{}
+%     \newcommand{\change}[2]{}
+%     \newcommand{\inconsistent}[2]{}
+%     \newcommand{\critical}[2]{}
+%     \newcommand{\improvement}[1]{}
+%     \newcommand{\resolved}[2]{}
+% \fi
+
+%\usepackage[hypertexnames=false]{hyperref}
+% \usepackage[capitalize, noabbrev]{cleveref}
+
+%% User defined commands
+
+\makeatletter
+\newlength\fake@f
+\newlength\fake@c
+\def\fakesc#1{%
+  \begingroup%
+  \xdef\fake@name{\csname\curr@fontshape/\f@size\endcsname}%
+  \fontsize{\fontdimen8\fake@name}{\baselineskip}\selectfont%
+  \uppercase{#1}%
+  \endgroup%
+}
+\makeatother
+\newcommand\fauxsc[1]{\fauxschelper#1 \relax\relax}
+\def\fauxschelper#1 #2\relax{%
+  \fauxschelphelp#1\relax\relax%
+  \if\relax#2\relax\else\ \fauxschelper#2\relax\fi%
+}
+\def\Hscale{.83}\def\Vscale{.79}\def\Cscale{1.00}
+\def\fauxschelphelp#1#2\relax{%
+  \ifnum`#1>``\ifnum`#1<`\{\scalebox{\Hscale}[\Vscale]{\uppercase{#1}}\else%
+    \scalebox{\Cscale}[1]{#1}\fi\else\scalebox{\Cscale}[1]{#1}\fi%
+  \ifx\relax#2\relax\else\fauxschelphelp#2\relax\fi}
+% \let\textsc\fauxsc
+
+\newcommand{\TODO}[1]{\textnormal{\textcolor{red}{TODO: #1} } }
+\newcommand{\sepimp}{\mathrel{-\mkern-6mu*}}
+\newcommand{\textopname}[1]{``#1''}
+\newcommand{\parr}{\rotatebox[origin=c]{180}{\&}}
+\makeatletter
+\newcommand{\smallbullet}{} % for safety
+\DeclareRobustCommand\smallbullet{%
+\mathord{\mathpalette\smallbullet@{0.5}}%
+}
+\newcommand{\smallbullet@}[2]{%
+\vcenter{\hbox{\scalebox{#2}{$\m@th#1\bullet$}}}%
+}
+\makeatother
+
+\makeatletter
+\newcommand{\oset}[3][0ex]{%
+\mathrel{\mathop{#3}\limits^{
+  \vbox to#1{\kern-2\ex@
+  \hbox{$\scriptstyle#2$}\vss}}}}
+\makeatother
+
+\def\mycasem#1{\ifthenelse{\equal{#1}{[[¹ν]]}}{}{#1}}
+\def\myfunvm#1{\ifthenelse{\equal{#1}{[[¹ν]]}}{\,\,}{#1}}
+\def\myfuntm#1{\ifthenelse{\equal{#1}{[[¹ν]]}}{\,}{#1}}
+\def\mydestm#1{\ifthenelse{\equal{#1}{[[¹ν]]}}{}{#1}}
+\def\mymul#1{\ifthenelse{\equal{#1}{[[¹]]}}{}{#1}}
+
+\let\figtextsize\normalsize
+\newcommand{\destcalculus}{\ensuremath{\lambda_d}}
+\newcommand{\destcalculusinplace}{\ensuremath{\lambda_{d\,\textsc{ip}}}}
+% \newtheorem{lemma}{Lemma}
+% \newtheorem{theorem}{Theorem}
+\newcommand\btriangleq{\pmb{\triangleq}}
+\newcommand\btriangleqrec{\oset{\mathsf{rec}}{\pmb{\triangleq}}}
+\newlength{\interdefskip}
+\setlength{\interdefskip}{0.1cm}
+\newcommand{\newtype}[3][]{#2~\ifthenelse{\equal{#1}{}}{\btriangleq}{\btriangleqrec}~#3\\[\interdefskip]}
+\newcommand{\newoperator}[5][]{\phantom{a}\!\!\!\!\!\!\begin{array}[t]{l}%
+#2 ~\pmb{:}~ #3 \\
+#4 ~\ifthenelse{\equal{#1}{}}{\btriangleq}{\btriangleqrec}~ #5
+\end{array}\\[\interdefskip]}
+\newcommand{\newoperatorb}[5][]{\phantom{a}\!\!\!\!\!\!\begin{array}[t]{l}%
+#2 ~\pmb{:}~ #3 \\
+#4 ~\ifthenelse{\equal{#1}{}}{\btriangleq}{\btriangleqrec}~\\\myspace{1}#5
+\end{array}\\[\interdefskip]}
+\newcommand{\figureratio}{1}
+\newcommand{\codehere}[2][t]{\vspace{-0.05cm}\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}{\figtextsize\ensuremath{#2}}\end{minipage}\end{center}\vspace{-0.05cm}}
+\NewEnviron{codefig}[2][tbp]{\begin{listing}[#1]
+\codehere{\BODY}#2
+\end{listing}}
+\NewEnviron{ottfig}[2][tbp]{\begin{figure}[#1]
+\figtextsize\BODY#2
+\end{figure}}
+\newcommand{\sidebysidecodehere}[4]{\begin{center}\begin{minipage}[#1]{\figureratio\linewidth}
+\noindent\begin{minipage}[#1]{#2\linewidth-0.02\linewidth}{\figtextsize\ensuremath{#3}}\end{minipage}
+\hfill
+\vrule width 0.5pt % Vertical rule of 1pt width
+\hfill
+\begin{minipage}[#1]{\linewidth-#2\linewidth-0.02\linewidth}{\figtextsize\ensuremath{#4}}\end{minipage}
+\end{minipage}\end{center}
+}
+
+\newcommand{\sidebysidecodefig}[6][t]{
+\begin{listing}[#1]
+\sidebysidecodehere{#3}{#4}{#5}{#6}
+#2
+\end{listing}
+}
+
+\newenvironment{stretchedarray}[2][1]
+  {\bgroup\renewcommand*{\arraystretch}{#1}\begin{array}{#2}}
+  {\end{array}\egroup}
+
+\newcommand{\mpar}{\text{\,\textramshorns\,}}
+\newcommand{\dest}{-\prec}
+%\newcommand{\TODO}[1]{{\color{red}\large #1}}
+\newcommand{\mnew}[1]{\colorbox{green!50}{#1}}
+\newcommand{\muline}[1]{\uline{#1}}
+\newcommand{\mold}[1]{\uwave{#1}}
+\newunicodechar{⊸}{\ensuremath{\pmb{\multimap}}}
+\newunicodechar{→}{\ensuremath{\pmb{\to}}}
+\newunicodechar{←}{\ensuremath{\leftarrow}}
+\newunicodechar{⇒}{\ensuremath{\pmb{\Rightarrow}}}
+\newunicodechar{□}{\ensuremath{{\color{hnamecolor} \square}}}
+\newunicodechar{¤}{}
+\newunicodechar{;}{\ensuremath{\fatsemi}}
+\newunicodechar{∀}{\ensuremath{\pmb{\forall}}}
+\newunicodechar{⩴}{\hspace{-0.2ex}:\hspace{-0.2ex}:\hspace{-0.2ex}}
+\newunicodechar{Ⴈ}{1}
+\newunicodechar{☠}{$\skull$}
+
+\newlength{\widthaugment}
+\NewEnviron{augmentwidth}[1]
+  {\setlength{\widthaugment}{#1}
+   \pgfmathsetmacro{\myratio}{\linewidth / (\widthaugment + \linewidth)}
+   \scalebox{\myratio}{\begin{minipage}{\linewidth+\widthaugment}\BODY
+   \end{minipage}}}
+
+\makeatletter
+\AtBeginEnvironment{minted}{\dontdofcolorbox}
+\def\dontdofcolorbox{\renewcommand\fcolorbox[4][]{##4}}
+\xpatchcmd{\inputminted}{\minted@fvset}{\minted@fvset\dontdofcolorbox}{}{}
+\xpatchcmd{\mintinline}{\minted@fvset}{\minted@fvset\dontdofcolorbox}{}{} % see https://tex.stackexchange.com/a/401250/
+\makeatother
+
+\renewcommand{\MintedPygmentize}{./pygmentize_local}
+\newlength{\currentparskip}
+\newenvironment{unbreakable}
+{%
+  \setlength{\currentparskip}{\parskip}% Save current \parskip
+  \setlength{\parskip}{\currentparskip}% Save current \parskip
+  \par\vspace{0.5\baselineskip}% Add possible separation
+  \noindent\begin{minipage}{\textwidth}%
+    \setlength{\parskip}{\currentparskip}% Restore current \parskip
+  %\medskip%
+}
+{%
+  \end{minipage}%
+  \par\vspace{0.5\baselineskip}% Add possible vertical separation
+}
+
+\def\foreverunspace{%
+  \ifnum\lastnodetype=11
+    \unskip\foreverunspace
+  \else
+    \ifnum\lastnodetype=12
+      \unkern\foreverunspace
+    \else
+      \ifnum\lastnodetype=13
+        \unpenalty\foreverunspace
+      \fi
+    \fi
+  \fi
+}
+
+\newcommand{\IfFancyRuleNames}[2]{#1}
+
+\newcommand{\SetPrefix}[1]{\IfFancyRuleNames{\renewcommand{\ottdrulename}[1]{#1}}{}}
+
+\makeatletter
+
+\IfFancyRuleNames{
+  \def\CSep{/}
+  \def\CHole{id\textsubscript{H}}
+  \def\CDest{id\textsubscript{D}}
+  \def\CUnit{$\ottstype{1}$I}
+  \def\CFun{$\ottstype{\multimap}$I}
+  \def\CLeft{$\ottstype{\oplus}$I\textsubscript{1}}
+  \def\CRight{$\ottstype{\oplus}$I\textsubscript{2}}
+  \def\CProd{$\ottstype{\otimes}$I}
+  \def\CExp{$\ottstype{!}$I}
+  \def\CBangProm{$\ottstype{!}$P}
+  \def\CBangDerel{$\ottstype{!}$D}
+  \def\CBangWeak{$\ottstype{!}$W}
+  \def\CBangContr{$\ottstype{!}$C}
+  \def\CAmpar{$\ottstype{\ltimes}$I}
+  \def\CVal{fromVal}
+  \def\CVar{id\textsubscript{V}}
+  \def\CApp{$\ottstype{\multimap}$E}
+  \def\CPatU{$\ottstype{1}$E}
+  \def\CPatS{$\ottstype{\oplus}$E}
+  \def\CPatP{$\ottstype{\otimes}$E}
+  \def\CPatE{$\ottstype{!}$E}
+  \def\CUpdA{$\ottstype{\ltimes}$upd}
+  \def\CToA{$\ottstype{\ltimes}$to}
+  \def\CFromA{$\ottstype{\ltimes}$from}
+  \def\CNewA{$\ottstype{\ltimes}$new}
+  \def\CFillU{$\ottstype{\lfloor 1\rfloor}$E}
+  \def\CFillL{$\ottstype{\lfloor \oplus\rfloor}$E\textsubscript{1}}
+  \def\CFillR{$\ottstype{\lfloor \oplus\rfloor}$E\textsubscript{2}}
+  \def\CFillP{$\ottstype{\lfloor \otimes\rfloor}$E}
+  \def\CFillE{$\ottstype{\lfloor !\rfloor}$E}
+  \def\CFillF{$\ottstype{\lfloor \multimap\rfloor}$E}
+  \def\CFillComp{$\ottstype{\lfloor}$~$\ottstype{\rfloor}$E\textsubscript{c}}
+  \def\CFillLeaf{$\ottstype{\lfloor}$~$\ottstype{\rfloor}$E\textsubscript{l}}
+  \def\CId{id}
+  \def\COpenAmpar{$\ottstype{\ltimes}$op}
+  \def\CAmparOpen{$\ottstype{\ltimes}$op}
+  \def\CAmparClose{$\ottstype{\ltimes}$cl}
+  \def\CFocus{F}
+  \def\CUnfocus{U}
+  \def\CRed{C}
+  \def\CTyTerm{\destcalculus{}--ty}
+  \def\CTySTerm{\destcalculus{}--ty\textsubscript{s}}
+  \def\CTyVal{\destcalculus{}--ty\textsubscript{v}}
+  \def\CTyEctxs{\destcalculus{}--ty\textsubscript{E}}
+  \def\CTyCmd{\destcalculus{}--ty\textsubscript{cmd}}
+  \def\CSem{\destcalculus{}--sem}
+  \def\CLOne{$\lambda_{L1}$}
+  \def\CLTwo{$\lambda_{L2}$}
+  \def\CLm{$\lambda_{Lm}$}
+  \def\CLdm{$\lambda_{Ldm}$}
+  \def\CLOneOrTwo{$\lambda_{L1,2}$}
+  \def\CLTwoOrm{$\lambda_{L2,m}$}
+  \def\CSemSuff{\hspace*{-0.2ex}--sem}
+  \def\CTy{\hspace*{-0.2ex}--ty}
+  \def\CILL{ILL}
+  \def\rref*#1{\textsc{#1}}
+}{
+  \renewcommand{\ottdrulename}[1]{\ottalt@replace@cs\ranchor\_-{}#1\\}\renewcommand{\maybecomm}[1]{\bgroup\def\text##1{}#1\egroup}
+  \def\CSep{-}
+  \def\CHole{Hole}
+  \def\CDest{Dest}
+  \def\CUnit{Unit}
+  \def\CFun{Fun}
+  \def\CLeft{Left}
+  \def\CRight{Right}
+  \def\CProd{Prod}
+  \def\CExp{Exp}
+  \def\CBangProm{Prom}
+  \def\CBangDerel{Derel}
+  \def\CBangWeak{Weak}
+  \def\CBangContr{Contra}
+  \def\CAmpar{Ampar}
+  \def\CVal{Val}
+  \def\CVar{Var}
+  \def\CApp{App}
+  \def\CPatU{PatU}
+  \def\CPatS{PatS}
+  \def\CPatP{PatP}
+  \def\CPatE{PatE}
+  \def\CUpdA{UpdA}
+  \def\CToA{ToA}
+  \def\CFromA{FromA}
+  \def\CNewA{NewA}
+  \def\CFillU{FillU}
+  \def\CFillL{FillL}
+  \def\CFillR{FillR}
+  \def\CFillP{FillP}
+  \def\CFillE{FillE}
+  \def\CFillF{FillF}
+  \def\CFillComp{FillComp}
+  \def\CFillLeaf{FillLeaf}
+  \def\CId{Id}
+  \def\COpenAmpar{OpenAmpar}
+  \def\COpen{Open}
+  \def\CClose{Close}
+  \def\CFocus{Focus}
+  \def\CUnfocus{Unfocus}
+  \def\CRed{Red}
+  \def\CTyTerm{Ty-term}
+  \def\CTySTerm{Ty-sterm}
+  \def\CTyVal{Ty-val}
+  \def\CTyEctxs{Ty-ectxs}
+  \def\CTyCmd{Ty-cmd}
+}
+\makeatother
+
+\makeatletter
+\def\uwave{\bgroup \markoverwith{\lower3.5\p@\hbox{\sixly \textcolor{red}{\char58}}}\ULon}
+\font\sixly=lasy6 % does not re-load if already loaded, so no memory problem.
+\makeatother
+
+\newcommand{\grammsep}{\hspace*{1.8ex}|\hspace*{1.8ex}}
+\newcommand{\grammdef}{\mathrel{\raisebox{0.09ex}{$\mathop{:}$\hspace*{-0.1ex}$\mathop{:}$\hspace*{-0.1ex}}\shorteq}}
+
+\title{Formalization and Implementation of Safe Destination Passing in Pure Functional Programming Settings}
+\date{October 1\textsuperscript{st}, 2025}
+\author{Thomas \textsc{Bagrel}}
+\institute{LORIA/Inria \& Tweag}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Actual presentation content
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+  \maketitle
+  \section{First Section}
+  \begin{frame}{First Frame}
+    Hello, world! $[[alloc]]$ $[[from⧔' t]]$ this is corpus of text for scale purposes.
+  \end{frame}
+\end{document}
