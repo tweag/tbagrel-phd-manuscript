@@ -607,19 +607,51 @@
 \newcommand{\grammsep}{\hspace*{1.8ex}|\hspace*{1.8ex}}
 \newcommand{\grammdef}{\mathrel{\raisebox{0.09ex}{$\mathop{:}$\hspace*{-0.1ex}$\mathop{:}$\hspace*{-0.1ex}}\shorteq}}
 
+\setlist[itemize]{label=\blacktriangleright}
+\setlist[enumerate]{label=\textbf{(\arabic*)}}
+
 \title{Formalization and Implementation of Safe Destination Passing in Pure Functional Programming Settings}
-\date{October 1\textsuperscript{st}, 2025}
+\date{PhD Defense --- October 1\textsuperscript{st}, 2025}
 \author{Thomas \textsc{Bagrel}}
-\institute{LORIA/Inria \& Tweag}
+\institute{LORIA/Inria Nancy \& Tweag}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Actual presentation content
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-  \maketitle
-  \section{First Section}
-  \begin{frame}{First Frame}
-    Hello, world! $[[alloc]]$ $[[from⧔' t]]$ this is corpus of text for scale purposes.
-  \end{frame}
+\maketitle
+
+\section{Getting started with destination passing}
+
+\begin{frame}{Memory management in programming languages}
+
+Computer programs need memory to store the result of computations.
+
+Memory is a limited, physical resource (one transistor per bit to store), and thus, its use needs to be supervised.
+
+\begin{itemize}
+  \item \textbf{Manual memory management}: allocation and deallocating is done by inserting specific instructions in the code (e.g. $\ottkw{malloc}$/$\ottkw{free}$). \textbf{Generally prone to errors}.
+  \item \textbf{Automatic garbage collection}: allocation and deallocation happens automatically, with no explicit mention in the program. \textbf{Less tedious, but performance not always optimal}.
+  \item \textbf{Assisted memory management}: the language provides a (type) system that let the programmer specify how memory should be used while preventing pitfalls of manual memory management. \textbf{Allow for performance tuning while retaining safety}.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Storing results of a function call}
+
+Functions are an ubiquitous way of organizing and reusing code in programming languages.
+
+When a function is called, the result of the computation needs to be stored somewhere in memory.
+
+\begin{itemize}
+  \item primitive data can be pushed directly on the stack
+  \item for complex data, two main strategies exist:
+  \begin{enumerate}
+    \item the function can allocate a new memory cell to store the result
+    \item the function can write to a memory cell that it was given as an argument
+  \end{enumerate}
+\end{itemize}
+\end{frame}
+
 \end{document}
