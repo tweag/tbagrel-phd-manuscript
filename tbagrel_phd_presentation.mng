@@ -628,11 +628,11 @@
 
 Computer programs need memory to store the result of computations.
 
-Memory is a limited, physical resource (one transistor per bit to store), and thus, its use needs to be supervised.
+Runtime memory is a limited resource so its use needs to be supervised.
 
 \begin{itemize}
-  \item \textbf{Manual memory management}: allocation and deallocating is done by inserting specific instructions in the code (e.g. $\ottkw{malloc}$/$\ottkw{free}$). \textbf{Generally prone to errors}.
-  \item \textbf{Automatic garbage collection}: allocation and deallocation happens automatically, with no explicit mention in the program. \textbf{Less tedious, but performance not always optimal}.
+  \item \textbf{Manual memory management}: allocation and deallocating by inserting specific instructions in the code (e.g. $\ottkw{malloc}$/$\ottkw{free}$). \textbf{Prone to errors}.
+  \item \textbf{Automatic garbage collection}: allocation and deallocation happens automatically (no explicit mention in the program). \textbf{Less tedious, but performance unpredictable}.
   \item \textbf{Assisted memory management}: the language provides a (type) system that let the programmer specify how memory should be used while preventing pitfalls of manual memory management. \textbf{Allow for performance tuning while retaining safety}.
 \end{itemize}
 
@@ -646,12 +646,31 @@ When a function is called, the result of the computation needs to be stored some
 
 \begin{itemize}
   \item primitive data can be pushed directly on the stack
-  \item for complex data, two main strategies exist:
+  \item for more complex types (e.g. \mintinline{rust}/struct T { f1: i32, f2: i32 }/), two main strategies exist:
   \begin{enumerate}
-    \item the function can allocate a new memory cell to store the result
-    \item the function can write to a memory cell that it was given as an argument
+    \item the function can allocate a new memory cell in the heap to store the result\\
+    \phantom{aa}\mintinline{rust}/fn fun() -> Box<T> { let mut res = Box::new(); *res.f1 = 1; *res.f2 = 2; res }/
+    \item the function can write to a memory cell that it was given as an argument\\
+    \phantom{aa}\mintinline{rust}/fn fun(dest: &mut T) -> () { *dest.f1 = 1; *dest.f2 = 2; }/
   \end{enumerate}
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Destination-passing-style programming}
+
+Variant \textbf{(2)}: is said to be in \textbf{destination-passing style} (DPS).
+\phantom{aa}\mintinline{rust}/fn fun(dest: &mut T) -> () { *dest.f1 = 1; *dest.f2 = 2; }/
+
+Receives a \textbf{destination} \mintinline{rust}/dest: &mut T/ as an argument: \textbf{write pointer} to a memory cell to be filled with the result.
+
+More flexible:
+\begin{itemize}
+  \item can allocate once for multiple calls\\
+  \phantom{aa}\mintinline{rust}/let mut vec: Vec<T> = Vec::with_capacity(2);/\\\phantom{aa}\mintinline{rust}/fun(&mut vec[0]); fun(&mut vec[1]);/
+  \item can allocate on the stack if it is just needed as a local variable\\
+  \phantom{aa}\mintinline{rust}/let mut res: T; fun(&mut res);/
+\end{itemize}
+
 \end{frame}
 
 \end{document}
