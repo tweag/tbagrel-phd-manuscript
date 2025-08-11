@@ -77,6 +77,7 @@
 \usepackage[tikz]{bclogo}
 \usepackage[normalem]{ulem}
 \usepackage{newunicodechar}
+\usepackage{adjustbox}
 
 %% For schemas
 \usepackage{tikzit}
@@ -84,7 +85,7 @@
 %\tikzset{every picture/.style={line width=10pt}}
 \newcommand{\figcomment}[1]{\textcolor{gray}{#1}}
 \newcommand{\smallspc}{\hspace{-0.5em}}
-\def\figscale{1.2}
+\def\figscale{2}
 \definecolor{sczcolor}{RGB}{0,0,0}
 \definecolor{sczfcolor}{RGB}{128, 128, 128}
 \definecolor{scicolor}{RGB}{199, 22, 6}
@@ -646,11 +647,11 @@ When a function is called, the result of the computation needs to be stored some
 
 \begin{itemize}
   \item primitive data can be pushed directly on the stack
-  \item for more complex types (e.g. \mintinline{rust}/struct T { f1: i32, f2: i32 }/), two main strategies exist:
+  \item for more complex types (e.g. \mintinline{rust}/struct T { f1: int, f2: int }/), two main strategies exist:
   \begin{enumerate}
     \item the function can allocate a new memory cell in the heap to store the result\\
     \phantom{aa}\mintinline{rust}/fn fun() -> Box<T> { let mut res = Box::new(); *res.f1 = 1; *res.f2 = 2; res }/
-    \item the function can write to a memory cell that it was given as an argument\\
+    \item the function can write to a memory cell through a write pointer it was given\\
     \phantom{aa}\mintinline{rust}/fn fun(dest: &mut T) -> () { *dest.f1 = 1; *dest.f2 = 2; }/
   \end{enumerate}
 \end{itemize}
@@ -658,18 +659,71 @@ When a function is called, the result of the computation needs to be stored some
 
 \begin{frame}{Destination-passing-style programming}
 
-Variant \textbf{(2)}: is said to be in \textbf{destination-passing style} (DPS).
+Variant \textbf{(2)} is said to be in \textbf{destination-passing style} (DPS).
 \phantom{aa}\mintinline{rust}/fn fun(dest: &mut T) -> () { *dest.f1 = 1; *dest.f2 = 2; }/
 
-Receives a \textbf{destination} \mintinline{rust}/dest: &mut T/ as an argument: \textbf{write pointer} to a memory cell to be filled with the result.
+Receives a \textbf{destination}\phantom{a}\mintinline{rust}/dest: &mut T/\phantom{a}as an argument: \textbf{write pointer} to a memory cell to be filled with the result.
 
 More flexible:
 \begin{itemize}
   \item can allocate once for multiple calls\\
   \phantom{aa}\mintinline{rust}/let mut vec: Vec<T> = Vec::with_capacity(2);/\\\phantom{aa}\mintinline{rust}/fun(&mut vec[0]); fun(&mut vec[1]);/
-  \item can allocate on the stack if it is just needed as a local variable\\
+  \item can allocate on the stack (no \mintinline{rust}/Box/) if it is just needed as a local variable\\
   \phantom{aa}\mintinline{rust}/let mut res: T; fun(&mut res);/
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Functional DPS}
+
+Data structures are \textbf{linked} and heap-allocated\\
+An instance of a data constructor in the heap (constructor heap object) is represented by:
+  \begin{itemize}
+    \item a pointer to a static struct describing the constructor (info table pointer)\\
+          \textit{(we don't show this pointer on the following schemas, only the constructor name)}
+    \item for each field of the constructor, a pointer to this field's value
+  \end{itemize}
+
+\begin{center}
+\scalebox{1.8}{{\footnotesize \mintinline{haskellc}/1 : 2 : []/} \quad $\rightsquigarrow$ \adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\end{center}
+
+\vspace*{-0.5cm}
+
+{\small\itshape
+\mintinline{haskellc}/(:)/ is list ``cons'' constructor\\[-0.1cm]
+\mintinline{haskellc}/¤I#/ is constructor for boxed integers\\[-0.1cm]
+\mintinline{haskellc}/1#/ is the primitive/unboxed integer ``one''
+}
+
+\end{frame}
+
+\begin{frame}[fragile]{Building order in functional languages}
+
+Data structures are immutable, and built from the leaves up to the root:
+
+\begin{itemize}
+  \item The value of a field must be a must be an existing, fully constructed structure
+\end{itemize}
+
+\begin{center}
+\hspace*{-0.5cm}\scalebox{1.1\figscale}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]{Building order in functional languages - with DPS}
+Destination-passing lift this limitation: structures can be built in \textbf{any order}
+
+\begin{center}
+\hspace*{-0.5cm}\scalebox{1.1\figscale}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-3}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\end{center}
+
+\vspace*{1cm}
+
+{\small\itshape
+\textcolor{hnamecolor}{$\displaystyle\square$} denotes a ``hole'' in the structure (an uninitialized memory cell)
+}
 
 \end{frame}
 

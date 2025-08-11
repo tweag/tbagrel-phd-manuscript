@@ -110,6 +110,7 @@ pkgs.mkShell
           xmpincl
           beamertheme-metropolis
           pgfopts
+          adjustbox
           ;
       })
 
