@@ -85,7 +85,6 @@
 %\tikzset{every picture/.style={line width=10pt}}
 \newcommand{\figcomment}[1]{\textcolor{gray}{#1}}
 \newcommand{\smallspc}{\hspace{-0.5em}}
-\def\figscale{2}
 \definecolor{sczcolor}{RGB}{0,0,0}
 \definecolor{sczfcolor}{RGB}{128, 128, 128}
 \definecolor{scicolor}{RGB}{199, 22, 6}
@@ -674,18 +673,18 @@ More flexible:
 
 \end{frame}
 
-\begin{frame}[fragile]{Functional DPS}
+\begin{frame}[fragile]{Functional data structures}
 
 Data structures are \textbf{linked} and heap-allocated\\
 An instance of a data constructor in the heap (constructor heap object) is represented by:
   \begin{itemize}
     \item a pointer to a static struct describing the constructor (info table pointer)\\
           \textit{(we don't show this pointer on the following schemas, only the constructor name)}
-    \item for each field of the constructor, a pointer to this field's value
+    \item for each field of the constructor, a pointer to this field's value (except for primitive types)
   \end{itemize}
 
 \begin{center}
-\scalebox{1.8}{{\footnotesize \mintinline{haskellc}/1 : 2 : []/} \quad $\rightsquigarrow$ \adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\scalebox{1.6}{{\footnotesize \mintinline{haskellc}/1 : 2 : []/} \quad $\rightsquigarrow$ \adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
 \end{center}
 
 \vspace*{-0.5cm}
@@ -707,7 +706,7 @@ Data structures are immutable, and built from the leaves up to the root:
 \end{itemize}
 
 \begin{center}
-\hspace*{-0.5cm}\scalebox{1.1\figscale}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
 \end{center}
 
 \end{frame}
@@ -716,7 +715,7 @@ Data structures are immutable, and built from the leaves up to the root:
 Destination-passing lift this limitation: structures can be built in \textbf{any order}
 
 \begin{center}
-\hspace*{-0.5cm}\scalebox{1.1\figscale}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-3}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-3}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
 \end{center}
 
 \vspace*{1cm}
@@ -724,6 +723,19 @@ Destination-passing lift this limitation: structures can be built in \textbf{any
 {\small\itshape
 \textcolor{hnamecolor}{$\displaystyle\square$} denotes a ``hole'' in the structure (an uninitialized memory cell)
 }
+
+\end{frame}
+
+\begin{frame}[fragile]{Functional DPS}
+Two new principles:
+\begin{itemize}
+  \item \textbf{Incomplete} data structures can now exist and be passed around (wrapped in \mintinline{haskellc}/Ampar/)
+  \item We can reference the holes of these structures through \textbf{destinations}\\(write-once pointers)
+\end{itemize}
+
+\begin{center}
+\scalebox{1.6}{\adjustbox{valign=c}{\tikzfig{schemas/incomplete}}}
+\end{center}
 
 \end{frame}
 
