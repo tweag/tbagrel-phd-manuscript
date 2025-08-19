@@ -673,6 +673,8 @@ More flexible:
 
 \end{frame}
 
+\section{How does destination passing apply to functional languages?}
+
 \begin{frame}[fragile]{Functional data structures}
 
 Data structures are \textbf{linked} and heap-allocated\\
@@ -709,10 +711,12 @@ Data structures are immutable, and built from the leaves up to the root:
 \scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
 \end{center}
 
+This is very restrictive, and forces to build structures in an order that might not match the input data flow.
+
 \end{frame}
 
-\begin{frame}[fragile]{Building order in functional languages - with DPS}
-Destination-passing lift this limitation: structures can be built in \textbf{any order}
+\begin{frame}[fragile]{Building order in functional languages -- with DPS}
+Why about lifting this limitation, and allowing pieces of data structures to be connected like Lego bricks in \textbf{any order}? This becomes possibles with functional destination-passing!
 
 \begin{center}
 \hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-3}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
@@ -727,16 +731,54 @@ Destination-passing lift this limitation: structures can be built in \textbf{any
 \end{frame}
 
 \begin{frame}[fragile]{Functional DPS}
-Two new principles:
+Now let's see where destinations emerge in this process.
+
 \begin{itemize}
-  \item \textbf{Incomplete} data structures can now exist and be passed around (wrapped in \mintinline{haskellc}/Ampar/)
-  \item We can reference the holes of these structures through \textbf{destinations}\\(write-once pointers)
+\item We need to wrap \textbf{incomplete} data structures in a new type to prevent accidental read on a hole $\to$ \mintinline{haskellc}/Ampar/ type
+\item We need a way to reference the holes safely $\to$ destinations, i.e. the \mintinline{haskellc}/Dest/ type
 \end{itemize}
 
 \begin{center}
-\scalebox{1.6}{\adjustbox{valign=c}{\tikzfig{schemas/incomplete}}}
+\scalebox{1.4}{\adjustbox{valign=c}{\tikzfig{schemas/incomplete}}}
 \end{center}
 
+\end{frame}
+
+\begin{frame}[fragile]{Functional DPS -- API (1/3)}
+Every operation on incomplete data structures is done through the \mintinline{haskellc}/Ampar/ and \mintinline{haskellc}/Dest/ types.
+
+\medskip
+
+\mintinline{haskellc}/data Ampar s t = ¤Ampar s t/
+
+\begin{itemize}
+  \item \mintinline{haskellc}/s/ is the type of the structure being built
+  \item \mintinline{haskellc}/t/ carries all the destinations pointing to the holes in the structure of type \mintinline{haskellc}/s/
+\end{itemize}
+
+E.g. a list of integers with two missing values can have type \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/
+
+\medskip
+
+\mintinline{haskellc}/data Dest t = ¤Dest Addr#/
+
+\begin{itemize}
+  \item \mintinline{haskellc}/t/ is the type of the hole that the destination references
+\end{itemize}
+
+A destination is a typed, boxed wrapper over a raw pointer type \mintinline{haskellc}/Addr#/.
+
+\end{frame}
+
+\begin{frame}[fragile]{Functional DPS -- API (2/3)}
+\begin{itemize}
+\item Plug an incomplete structure into the hole of another one? \mintinline{haskellc}/fillComp/
+
+\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}
+
+\item Fill a hole with an already complete value? \mintinline{haskellc}/fillLeaf/
+\item Allocate a hollow data constructor and plug it into a hole? \mintinline{haskellc}/fill @'Ctor/ 
+\end{itemize}
 \end{frame}
 
 \end{document}
