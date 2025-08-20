@@ -1,0 +1,17 @@
+Virer le DPS impératif historique (juste mention sur une slide)
+
+Dans un langage fonctionnel, on construit les structures comme ça
+Des fois, on aimerait se libérer de ça
+Problème de construire dans l'autre ordre: on n'a pas tout défini dès le départ, donc il faut une forme de mutation
+
+1 slide de contexte (langages fonctionnels vs impératifs)
+Slide 5 en premier -> Slide 6 (problématique)
+Slide ex: ajouter des éléments à la fin d'une liste [Minamide]
+
+Plan des contributions
+
+1. API DPS Haskell (opérer sur les dests -> + loin que Minamide, ex bft)
+2. 
+3. 
+
+1 slide 

@@ -774,7 +774,7 @@ A destination is a typed, boxed wrapper over a raw pointer type \mintinline{hask
 \begin{itemize}
 \item Plug an incomplete structure into the hole of another one? \mintinline{haskellc}/fillComp/
 
-\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}
+\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}
 
 \item Fill a hole with an already complete value? \mintinline{haskellc}/fillLeaf/
 \item Allocate a hollow data constructor and plug it into a hole? \mintinline{haskellc}/fill @'Ctor/ 
