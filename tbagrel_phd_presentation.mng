@@ -622,67 +622,27 @@
 \begin{document}
 \maketitle
 
-\section{Getting started with destination passing}
-
-\begin{frame}{Memory management in programming languages}
-
-Computer programs need memory to store the result of computations.
-
-Runtime memory is a limited resource so its use needs to be supervised.
+\begin{frame}{Programming languages}
 
 \begin{itemize}
-  \item \textbf{Manual memory management}: allocation and deallocating by inserting specific instructions in the code (e.g. $\ottkw{malloc}$/$\ottkw{free}$). \textbf{Prone to errors}.
-  \item \textbf{Automatic garbage collection}: allocation and deallocation happens automatically (no explicit mention in the program). \textbf{Less tedious, but performance unpredictable}.
-  \item \textbf{Assisted memory management}: the language provides a (type) system that let the programmer specify how memory should be used while preventing pitfalls of manual memory management. \textbf{Allow for performance tuning while retaining safety}.
+  \item Imperative languages: instructions step-by-step\\
+  \phantom{aa}\textbf{how?} | mutability | side-effects
+  \item Functional languages: compose expressions\\
+  \phantom{aa}\textbf{what?}| immutability | first-class functions | purity
 \end{itemize}
 
 \end{frame}
 
-\begin{frame}{Storing results of a function call}
-
-Functions are an ubiquitous way of organizing and reusing code in programming languages.
-
-When a function is called, the result of the computation needs to be stored somewhere in memory.
-
-\begin{itemize}
-  \item primitive data can be pushed directly on the stack
-  \item for more complex types (e.g. \mintinline{rust}/struct T { f1: int, f2: int }/), two main strategies exist:
-  \begin{enumerate}
-    \item the function can allocate a new memory cell in the heap to store the result\\
-    \phantom{aa}\mintinline{rust}/fn fun() -> Box<T> { let mut res = Box::new(); *res.f1 = 1; *res.f2 = 2; res }/
-    \item the function can write to a memory cell through a write pointer it was given\\
-    \phantom{aa}\mintinline{rust}/fn fun(dest: &mut T) -> () { *dest.f1 = 1; *dest.f2 = 2; }/
-  \end{enumerate}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Destination-passing-style programming}
-
-Variant \textbf{(2)} is said to be in \textbf{destination-passing style} (DPS).
-\phantom{aa}\mintinline{rust}/fn fun(dest: &mut T) -> () { *dest.f1 = 1; *dest.f2 = 2; }/
-
-Receives a \textbf{destination}\phantom{a}\mintinline{rust}/dest: &mut T/\phantom{a}as an argument: \textbf{write pointer} to a memory cell to be filled with the result.
-
-More flexible:
-\begin{itemize}
-  \item can allocate once for multiple calls\\
-  \phantom{aa}\mintinline{rust}/let mut vec: Vec<T> = Vec::with_capacity(2);/\\\phantom{aa}\mintinline{rust}/fun(&mut vec[0]); fun(&mut vec[1]);/
-  \item can allocate on the stack (no \mintinline{rust}/Box/) if it is just needed as a local variable\\
-  \phantom{aa}\mintinline{rust}/let mut res: T; fun(&mut res);/
-\end{itemize}
-
-\end{frame}
-
-\section{How does destination passing apply to functional languages?}
+\section{Getting familiar with functional languages}
 
 \begin{frame}[fragile]{Functional data structures}
 
-Data structures are \textbf{linked} and heap-allocated\\
-An instance of a data constructor in the heap (constructor heap object) is represented by:
+Data structures are \textbf{linked} and heap-allocated.\\
+Constructor heap object:
   \begin{itemize}
-    \item a pointer to a static struct describing the constructor (info table pointer)\\
-          \textit{(we don't show this pointer on the following schemas, only the constructor name)}
-    \item for each field of the constructor, a pointer to this field's value (except for primitive types)
+    \item a pointer to the info table (static struct describing the constructor)\\
+          \textit{(we just show the constructor name instead of this pointer in the schemas)}
+    \item for each field, a pointer to this field's value (except for primitive types)
   \end{itemize}
 
 \begin{center}
@@ -699,9 +659,9 @@ An instance of a data constructor in the heap (constructor heap object) is repre
 
 \end{frame}
 
-\begin{frame}[fragile]{Building order in functional languages}
+\begin{frame}[fragile]{Building order in functional languages -- current}
 
-Data structures are immutable, and built from the leaves up to the root:
+Data structures: immutable, thus built from the leaves up to the root.
 
 \begin{itemize}
   \item The value of a field must be a must be an existing, fully constructed structure
@@ -711,12 +671,16 @@ Data structures are immutable, and built from the leaves up to the root:
 \scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
 \end{center}
 
-This is very restrictive, and forces to build structures in an order that might not match the input data flow.
+Very restrictive: forces us to build structures in an order different from input data flow.
 
 \end{frame}
 
-\begin{frame}[fragile]{Building order in functional languages -- with DPS}
-Why about lifting this limitation, and allowing pieces of data structures to be connected like Lego bricks in \textbf{any order}? This becomes possibles with functional destination-passing!
+\begin{frame}[fragile]{Building order in functional languages -- goal}
+What about lifting this limitation?
+
+\begin{itemize}
+  \item Allowing pieces of data structures to be connected like Lego bricks in \textbf{any order}
+\end{itemize}
 
 \begin{center}
 \hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-3}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
@@ -730,33 +694,87 @@ Why about lifting this limitation, and allowing pieces of data structures to be 
 
 \end{frame}
 
-\begin{frame}[fragile]{Functional DPS}
-Now let's see where destinations emerge in this process.
+\begin{frame}{Challenges}
 
+Unitialized memory/\textbf{holes}:
 \begin{itemize}
-\item We need to wrap \textbf{incomplete} data structures in a new type to prevent accidental read on a hole $\to$ \mintinline{haskellc}/Ampar/ type
-\item We need a way to reference the holes safely $\to$ destinations, i.e. the \mintinline{haskellc}/Dest/ type
+  \item implies \textbf{mutability}
+  \item no read safety (risk of segfault)
 \end{itemize}
 
+Need proper functional API to manipulate incomplete structures.
+
+\end{frame}
+
+\begin{frame}[fragile]{Here comes destination passing}
+Coming from old C days:
+
+\begin{minipage}[t]{0.6\linewidth}
+\begin{minted}{c}
+MyStruct * fooNaive() {
+  MyStruct *res = malloc(sizeof(MyStruct));
+  res->f1 = 1; res->f2 = 2;
+  return res;
+}
+\end{minted}
+\end{minipage} \hfill \begin{minipage}[t]{0.39\linewidth}
+\begin{minted}{c}
+void fooDps(MyStruct *dest) {
+  dest->f1 = 1; dest->f2 = 2;
+}
+\end{minted}
+\end{minipage}
+
+Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
+\begin{itemize}
+  \item can allocate several slots at once\\
+  \mintinline{c}/MyStruct *vec = malloc(2 * sizeof(MyStruct)); fooDps(&vec[0]); fooDps(&vec[1]);/
+  \item can allocate on the stack\\
+  \mintinline{c}/MyStruct res; fooDps(&res);/
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Functional DPS}
+
+\begin{minipage}{0.60\linewidth}
+\mintinline{haskellc}/Dest/inations: typed wrapper for raw pointer to a \textbf{hole}
+
+\begin{itemize}
+  \item first-class, can be passed around
+  \item only way to act on a hole of an incomplete structure
+\end{itemize}
+
+\medskip
+
+\mintinline{haskellc}/Ampar/: typed wrapper for an \textbf{incomplete structure} and\\\phantom{\mintinline{haskellc}/Ampar/:} its destinations
+\begin{itemize}
+  \item first-class, can be passed around
+  \item only way to pass around an incomplete structure
+\end{itemize}
+\end{minipage} \hfill \begin{minipage}{0.39\linewidth}
+
 \begin{center}
-\scalebox{1.4}{\adjustbox{valign=c}{\tikzfig{schemas/incomplete}}}
+\scalebox{1.2}{\adjustbox{valign=c}{\tikzfig{schemas/incomplete}}}
 \end{center}
+
+\end{minipage}
 
 \end{frame}
 
 \begin{frame}[fragile]{Functional DPS -- API (1/3)}
-Every operation on incomplete data structures is done through the \mintinline{haskellc}/Ampar/ and \mintinline{haskellc}/Dest/ types.
+Every operation on incomplete structures is done through \mintinline{haskellc}/Ampar/ and \mintinline{haskellc}/Dest/s.
 
 \medskip
 
 \mintinline{haskellc}/data Ampar s t = ¤Ampar s t/
 
 \begin{itemize}
-  \item \mintinline{haskellc}/s/ is the type of the structure being built
-  \item \mintinline{haskellc}/t/ carries all the destinations pointing to the holes in the structure of type \mintinline{haskellc}/s/
+  \item \mintinline{haskellc}/s/ is the type of the incomplete structure
+  \item \mintinline{haskellc}/t/ carries all the destinations pointing to the holes in \mintinline{haskellc}/s/
 \end{itemize}
 
-E.g. a list of integers with two missing values can have type \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/
+E.g. list of ints with two missing values is represented by \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/
 
 \medskip
 
@@ -765,8 +783,6 @@ E.g. a list of integers with two missing values can have type \mintinline{haskel
 \begin{itemize}
   \item \mintinline{haskellc}/t/ is the type of the hole that the destination references
 \end{itemize}
-
-A destination is a typed, boxed wrapper over a raw pointer type \mintinline{haskellc}/Addr#/.
 
 \end{frame}
 
