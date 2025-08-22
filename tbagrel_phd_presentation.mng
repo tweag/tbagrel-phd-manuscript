@@ -706,6 +706,10 @@ Need proper functional API to manipulate incomplete structures.
 
 \end{frame}
 
+% TODO: plan
+
+\section{Destination passing}
+
 \begin{frame}[fragile]{Here comes destination passing}
 Coming from old C days:
 
