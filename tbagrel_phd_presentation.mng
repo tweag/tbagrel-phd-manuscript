@@ -626,9 +626,9 @@
 
 \begin{itemize}
   \item Imperative languages: instructions step-by-step\\
-  \phantom{aa}\textbf{how?} | mutability | side-effects
+  \phantom{aa}\textbf{how?} | mutability | untracked side-effects
   \item Functional languages: compose expressions\\
-  \phantom{aa}\textbf{what?}| immutability | first-class functions | purity
+  \phantom{aa}\textbf{what?} | immutability | purity | first-class functions
 \end{itemize}
 
 \end{frame}
@@ -706,7 +706,14 @@ Need proper functional API to manipulate incomplete structures.
 
 \end{frame}
 
-% TODO: plan
+\begin{frame}{Table of Contents}
+
+\begin{itemize}
+  \item Destination passing as the main formalism
+  \item Safety pillar I : Linear Types
+  \item Safety pillar II : Scope Control with Ages system
+\end{itemize}
+\end{frame}
 
 \section{Destination passing}
 
