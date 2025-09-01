@@ -719,7 +719,7 @@
 %-------------------------------------------------------------------
 
 \begin{ThesisDedication}\pagestyle{plain}
-%Je dédie cette thèse à TBD.
+Je dédie cette thèse à Pascal et Gérard, que j'espère rendre fiers aujourd'hui.
 \end{ThesisDedication}
 
 %-------------------------------------------------------------------
@@ -765,12 +765,19 @@ The prototype implementation in Haskell shows encouraging results for adopting d
 %\DontFrameThisInToc
 \clearpage\phantomsection\addcontentsline{toc}{section}{Acknowledgments}\markboth{Frontmatter}{Acknowledgments}\pagestyle{plain}
 \begin{ThesisAcknowledgments}
-\emph{\`A définir.}
+
+C'est avec beaucoup d'émotions que j'arrive au terme de cette aventure qui aura occupée ces trois années et demi de ma vie. Ce parcours a été difficile et exigeant, et j'ai souvent été mon plus redoutable ennemi. Heureusement, j'ai eu l'honneur d'être encadré et soutenu par un très riche entourage, où chacun a contribué, à sa façon, pour que je puisse aujourd'hui déposer le point final sur ce manuscrit. Un entourage plus riche que ce que je peux exprimer sur cette page d'ailleurs; aussi, je dédie mes plus sincères remerciements à ceux que je n'ai pas eu la place de mentionner ici.
+
+Je suis immensément reconnaissant envers mes parents, qui, bien avant même le début de cette thèse, m'ont toujours donné guidé, soutenu, et donné l'amour, pour que je suive la voie de mon choix malgré les difficultés pouvant se présenter. Mon coeur se tourne également vers Marinette, qui suit aujourd'hui une voie proche de la mienne, avec une détermination et une excellence que j'admire, et dont la réussite ne fait aucun doute. Mes pensées vont aussi immédiatement à Julien et Ocelline, qui ont supporté mes états d'âme, mes soucis, et m'auront toujours ouvert leur porte pour repartir plus fort et plus motivé que la veille. \`A Luna également, qui aura été un rayon de soleil pour égayer les moments plus sombres au quotidien, et qui n'aura cessé de croire en moi, même quand l'espoir me quittait. \`A Tim également, dont la vision du monde me redonne un peu d'optimisme, et m'aide à trouver un sens à mon travail.
+
+Je dois aussi tous mes remerciements à Arnaud, qui malgré ses nombreuses responsabilités, aura été présent chaque jour, sans faute, pour répondre à mes interrogations, à mes doutes, et pour suivre avec attention mes élucubrations. Sa passion scientifique rend chacune des interactions avec lui captivante et instructive, et je le remercie pour toutes les connaissances qu'il a partagé avec moi au cours de cette aventure, ainsi que pour sa patience face à mon entêtement régulier. Je remercie également Horatiu, pour son soutien, son aide pour naviguer la bureaucratie académique, et ses conseils avisés pour améliorer mes travaux. Je les remercie tous deux de m'avoir fait confiance et d'avoir accepté d'embarquer dans ce projet avec moi; projet que j'ai entrepris suite aux conseils avisés de Dominique Mery et Clément Hurlin.
+
+Mais de nombreux autres visages m'ont permis, au quotidien, de rester à flot. D'abord, mes joyeux collègues doctorants, Sarah, Vincent, Ghislain, Alessio, dont l'estime que j'ai pour eux est à hauteur de la dureté des réflexions qu'on s'envoyait dans le bureau, et à qui je souhaite la plus sincère réussite dans leurs propres aventures.L'équipe Mosel-Veridis plus généralement, et nos discussions qui alternaient entre sciences et vêtements. Mes \emph{fellow Tweagers} également. \`A Clément (à nouveau), qui m'a pris sous son aile, et avec lequel j'ai la chance de partager la passion pour les Warhammers, en plus d'un certain regard sur notre profession. \`A Camilla, dont la joie de vivre et la bienveillance inonde le bureau parisien, et qui s'est toujours débrouillée pour que je ne manque de rien d'un point de vue logistique sur ces années. \`A Florent, mon partenaire de cynisme préféré; à Alex et Simeon, et nos lunchs très sympas; à Yann, qui m'a aidé à sortir de l'impasse du \emph{scope escape}; à Guillaume, avec son smile et ses pas de danse; à Benjamin, qui supervise ce coin de Paris où il fait bon travailler (et vivre).
+
+Dans mon cercle personnel, je me dois également de remercier Julien, Florian et Alexandre, qui ont suivi mes avancées avec attention, et dont j'ai malheureusement souvent dû refuser les propositions de sorties ou d'activités. Ysaline aussi, qui m'a aidé à traverser de nombreuses épreuves, et dont j'admire la détermination et la pertinence. J'ai aussi une pensée toute particulière pour Marion, qui m'a montré la voie dans le monde académique, en suivant de près mon parcours. C'est aussi grâce (ou à cause d'elle) que j'utilise \LaTeX{} aujourd'hui. Enfin, je dédie mes derniers mots à mon grand-père Gérard, qui m'aura transmis sa rigueur et sa passion pour les mathématiques, à mon oncle Pascal, avec qui j'ai très tôt exploré l'ingénieurie. Même s'ils ne sont plus là pour lires ces lignes, ils ont toujours eu très à coeur de suivre mes avancées et réussites, et c'est en partie grâce à eux que j'en suis là aujourd'hui.
+
 \end{ThesisAcknowledgments}
 
-%-------------------------------------------------------------------
-%                            dédicace
-%-------------------------------------------------------------------
 
 
 %-------------------------------------------------------------------
