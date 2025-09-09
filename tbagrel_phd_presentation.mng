@@ -776,11 +776,7 @@ Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
   \item only way to refer to and act on an incomplete structure
 \end{itemize}
 \end{minipage} \hfill \begin{minipage}{0.36\linewidth}
-
-\begin{center}
-\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/incomplete}}}
-\end{center}
-
+\hspace*{-1cm}\scalebox{1.2}{\adjustbox{valign=c}{\tikzfig{schemas/incomplete}}}
 \end{minipage}
 
 \end{frame}
@@ -835,9 +831,105 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 \item Spawn new incomplete structure? \mintinline{haskellc}/newAmpar/}
 \only<4>{\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
 \only<5->{
-\item Extract a completed structure? \mintinline{haskellc}/fromAmpar/}
+\item Extract a completed structure? \mintinline{haskellc}/fromAmpar'/}
 \only<6>{\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
 \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Functional DPS API -- Simplified overview}
+\begin{minted}{haskellc}
+data Ampar s t
+newAmpar ⩴ ∀ s. Ampar s (Dest s)
+toAmpar ⩴ ∀ s. s → Ampar s ()
+fromAmpar' ⩴ ∀ s. Ampar s () → s
+updWith ⩴ ∀ s t u. Ampar s t → (t → u) → Ampar s u
+
+data Dest t
+type family DestsOf lCtor t  -- returns dests associated to fields of constructor
+fill ⩴ ∀ lCtor t. Dest t → DestsOf lCtor t
+fillComp ⩴ ∀ s t. Ampar s t → Dest s → t
+fillLeaf ⩴ ∀ t. t → Dest t → ()
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Breadth-first tree traversal/building}
+Schema with queue of dests
+\end{frame}
+
+\section{Safety}
+
+\subsection{Linearity}
+
+\begin{frame}[fragile]{Unrestricted use of destinations}
+\begin{minted}{haskellc}
+-- fromAmpar' ⩴ ∀ s. Ampar s () → s
+let complete :: Ampar [Int] () = newAmpar `updWith` \d → ()
+ in print (fromAmpar' complete)
+-- SEGFAULT!
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Linearity to the rescue}
+Idea : destinations are linear resources
+Each unconsumed destination witnesses a remaining hole
+Destination is consumed when the associated hole is filled
+\end{frame}
+
+\begin{frame}[fragile]{Linear Haskell overview}
+TODO
+\end{frame}
+
+\begin{frame}[fragile]{Linear scopes and tokens}
+TODO
+\end{frame}
+
+\begin{frame}[fragile]{Updating the API with linearity}
+TODO
+\end{frame}
+
+\begin{frame}[fragile]{Functional DPS API -- with linearity}
+{\small
+\begin{minted}{haskellc}
+data Token
+dup ⩴ Token ⊸ (Token, Token)
+drop ⩴ Token ⊸ ()
+withToken ⩴ ∀ t. (Token ⊸ Ur t) ⊸ Ur t
+
+data Ampar s t
+newAmpar ⩴ ∀ s. Token ⊸ Ampar s (Dest s)
+tokenBesides ⩴ ∀ s t. Ampar s t ⊸ (Ampar s t, Token)
+toAmpar ⩴ ∀ s. Token ⊸ s ⊸ Ampar s ()
+fromAmpar ⩴ ∀ s t. Ampar s (Ur t) ⊸ Ur (s, t)
+fromAmpar' ⩴ ∀ s. Ampar s () ⊸ Ur s
+updWith ⩴ ∀ s t u. Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u
+
+data Dest t
+type family DestsOf lCtor t  -- returns dests associated to fields of constructor
+fill ⩴ ∀ lCtor t. Dest t ⊸ DestsOf lCtor t
+fillComp ⩴ ∀ s t. Ampar s t ⊸ Dest s ⊸ t
+fillLeaf ⩴ ∀ t. t ⊸ Dest t ⊸ ()
+\end{minted}
+}
+\end{frame}
+
+\subsection{Safe yet?}
+
+\begin{frame}[fragile]{Scope escape}
+\begin{minted}{haskellc}
+withToken $ \t →
+  let outer :: Ampar (Dest ()) () = (newAmpar :: Ampar (Dest ()) (Dest (Dest ()))) `updWith` \(d0 :: Dest (Dest ())) →
+        let inner :: Ampar () () = (newAmpar :: Ampar () (Dest ())) `updWith` \(d1 :: Dest ()) → d0 &fillLeaf d1
+         in fromAmpar' inner
+   in fromAmpar' outer ; Ur ()
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Scope escape}
+Not \emph{just} an artificial edge-case
+
+Reappear subtly in more complex scenarii
+
+Fundamental issue when storing away linear resource in linear container: break API invariant
 \end{frame}
 
 \end{document}
