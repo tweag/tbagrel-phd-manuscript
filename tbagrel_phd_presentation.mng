@@ -888,7 +888,6 @@ TODO
 \end{frame}
 
 \begin{frame}[fragile]{Functional DPS API -- with linearity}
-{\small
 \begin{minted}{haskellc}
 data Token
 dup ⩴ Token ⊸ (Token, Token)
@@ -909,7 +908,6 @@ fill ⩴ ∀ lCtor t. Dest t ⊸ DestsOf lCtor t
 fillComp ⩴ ∀ s t. Ampar s t ⊸ Dest s ⊸ t
 fillLeaf ⩴ ∀ t. t ⊸ Dest t ⊸ ()
 \end{minted}
-}
 \end{frame}
 
 \subsection{Safe yet?}
@@ -931,5 +929,53 @@ Reappear subtly in more complex scenarii
 
 Fundamental issue when storing away linear resource in linear container: break API invariant
 \end{frame}
+
+\subsection{Solutions to scope escape}
+
+\begin{frame}[fragile]{With just Haskell type system}
+
+\begin{block}{Solution 1: destinations can only store non-linear data}
+TODO
+\end{block}
+
+\begin{block}{Solution 2: do not allow destinations for linear data to be filled with \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/}
+TODO
+\end{block}
+
+\end{frame}
+
+\section{A more general solution: enrich the type system with scope control}
+
+\begin{frame}[fragile]{Age system}
+Principle: we track the age of resources.
+
+Age 0 says the resource comes from the innermost `updWith` scope.
+
+When entering a new `updWith` scope, all existing resources get their age incremented by 1.
+\end{frame}
+
+\begin{frame}[fragile]{Age system -- Example}
+TODO
+\end{frame}
+
+\begin{frame}[fragile]{Age control in \mintinline{haskellc}/fill/ functions}
+
+The RHS (content being stored away) must be exactly 1 scope older than the LHS (destination being filled)
+
+TODO schema
+
+\end{frame}
+
+\begin{frame}[fragile]{Age control prevents scope escape}
+\begin{minted}{haskellc}
+withToken $ \t →
+  let outer :: Ampar (Dest ()) () = (newAmpar :: Ampar (Dest ()) (Dest (Dest ()))) `updWith` \(d0 :: Dest (Dest ())) →
+        let inner :: Ampar () () = (newAmpar :: Ampar () (Dest ())) `updWith` \(d1 :: Dest ()) → d0 &fillLeaf d1
+         in fromAmpar' inner
+   in fromAmpar' outer ; Ur ()
+\end{minted}
+\end{frame}
+
+\subsection{Formalization}
 
 \end{document}
