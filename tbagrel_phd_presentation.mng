@@ -779,6 +779,12 @@ Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
 \hspace*{-1cm}\scalebox{1.2}{\adjustbox{valign=c}{\tikzfig{schemas/incomplete}}}
 \end{minipage}
 
+% NOTE: Dire que le boxing des dests n'est pas spécialement requis, c'est un peu spécifique à Haskell
+
+\end{frame}
+
+\begin{frame}[fragile]{Breadth-first tree traversal/building}
+Schema with queue of dests
 \end{frame}
 
 \begin{frame}[fragile]{Functional DPS API -- Types (1/3)}
@@ -786,7 +792,7 @@ Every operation is done through \mintinline{haskellc}/Ampar/ and \mintinline{has
 
 \medskip
 
-\mintinline{haskellc}/data Ampar s t = ¤Ampar s t/
+\mintinline{haskellc}/data Ampar s t = ¤Ampar s t/ \quad \textit{(opaque)}
 
 \begin{itemize}
   \item \mintinline{haskellc}/s/ is the type of the incomplete structure
@@ -797,7 +803,7 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 
 \medskip
 
-\mintinline{haskellc}/data Dest t = ¤Dest Addr#/
+\mintinline{haskellc}/data Dest t = ¤Dest Addr#/ \quad \textit{(opaque)}
 
 \begin{itemize}
   \item \mintinline{haskellc}/t/ is the type of the hole that the destination references
@@ -850,10 +856,9 @@ fill ⩴ ∀ lCtor t. Dest t → DestsOf lCtor t
 fillComp ⩴ ∀ s t. Ampar s t → Dest s → t
 fillLeaf ⩴ ∀ t. t → Dest t → ()
 \end{minted}
-\end{frame}
 
-\begin{frame}[fragile]{Breadth-first tree traversal/building}
-Schema with queue of dests
+% NOTE: trouver quoi dire, peut être parler de la type family ?
+% NOTE: Dire que c'est un peu un mensonge, que ça ne fonctionne pas encore
 \end{frame}
 
 \section{Safety}
@@ -867,6 +872,7 @@ let complete :: Ampar [Int] () = newAmpar `updWith` \d → ()
  in print (fromAmpar' complete)
 -- SEGFAULT!
 \end{minted}
+% TODO: depending on strictness analysis, insert example with filling the same dest twice
 \end{frame}
 
 \begin{frame}[fragile]{Linearity to the rescue}
@@ -914,9 +920,9 @@ fillLeaf ⩴ ∀ t. t ⊸ Dest t ⊸ ()
 
 \begin{frame}[fragile]{Scope escape}
 \begin{minted}{haskellc}
-withToken $ \t →
-  let outer :: Ampar (Dest ()) () = (newAmpar :: Ampar (Dest ()) (Dest (Dest ()))) `updWith` \(d0 :: Dest (Dest ())) →
-        let inner :: Ampar () () = (newAmpar :: Ampar () (Dest ())) `updWith` \(d1 :: Dest ()) → d0 &fillLeaf d1
+withToken $ \t → case dup t of (t1, t2) →
+  let outer :: Ampar (Dest ()) () = (newAmpar t1 :: Ampar (Dest ()) (Dest (Dest ()))) `updWith` \(d0 :: Dest (Dest ())) →
+        let inner :: Ampar () () = (newAmpar t2 :: Ampar () (Dest ())) `updWith` \(d1 :: Dest ()) → d0 &fillLeaf d1
          in fromAmpar' inner
    in fromAmpar' outer ; Ur ()
 \end{minted}
@@ -974,8 +980,33 @@ withToken $ \t →
          in fromAmpar' inner
    in fromAmpar' outer ; Ur ()
 \end{minted}
+
+% Pas super convaincu par cette slide
 \end{frame}
 
 \subsection{Formalization}
 
+\begin{frame}[fragile]{Modal type system: easy extension}
+
+Explain Linear Haskell
+
+% Linearity only appear in identity/variable rule
+\end{frame}
+
+% Modal system, like Linear Haskell, defined in a generic way
+% All the rules not speaking explicitely about ages are still incorporating them implicitely, through modes, so that we don't have to re-write or change them at all
+% Ages appear only in the rules that need them, like fill rules
+% If we can fit ages in the modal system
+
+\begin{frame}[fragile]{Combining linearity and ages in a same semiring}
+
+Semiring
+
+% Parler de la formalisation en Rocq
+\end{frame}
+
+
+% NOTE: Retombées concrètes (proposal GHC, etc)
+% NOTE: Thèse industrielle ancrée dans le réel
+% 
 \end{document}
