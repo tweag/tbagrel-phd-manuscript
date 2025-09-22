@@ -5,7 +5,7 @@ PDF_OTHER_DEPENDENCIES = *.bib *.py pygmentize_local shell.nix nix/*
 CHAPTERS_MNG := $(wildcard chapters/*.mng)
 CHAPTERS_TEX := $(CHAPTERS_MNG:.mng=.tex)
 
-all: tbagrel_phd_manuscript.pdf tbagrel_phd_presentation.pdf
+all: tbagrel_phd_manuscript.pdf tbagrel_phd_presentation.pdf tbagrel_phd_summary_fr.pdf
 
 # Manual steps to submit to Arxiv:
 # - the no-editing-mark trick isn't used on Arxiv submission. Make
@@ -31,9 +31,11 @@ clean:
 	rm -f chapters/{*.aux,*.bbl,*.ptb,*.toc,*.out,*.run.xml,*.log,*.bcf,*.bcf-SAVE-ERROR,*.fdb_latexmk,*.fls,*.blg,*.toc,*.ind,*.idx,*.gls,*.glo,*.flg,*.ilg,*.lof,*.lop,*.tex}
 	rm -f tbagrel_phd_manuscript.pdf
 	rm -f tbagrel_phd_presentation.pdf
+	rm -f tbagrel_phd_summary_fr.pdf
 	rm -f tbagrel_phd_manuscript.tar.gz
 	rm -rf _minted-tbagrel_phd_manuscript
 	rm -rf _minted-tbagrel_phd_presentation
+	rm -rf _minted-tbagrel_phd_summary_fr
 
 destination_calculus_rules_mod.ott: patch_rules.py destination_calculus_rules.ott
 	python patch_rules.py destination_calculus_rules.ott destination_calculus_rules_mod.ott
@@ -49,6 +51,9 @@ tbagrel_phd_manuscript.pdf tbagrel_phd_manuscript.bbl: tbagrel_phd_manuscript.te
 
 tbagrel_phd_presentation.pdf: tbagrel_phd_presentation.tex destination_calculus_ott.tex $(PDF_ARXIV_DEPENDENCIES) $(PDF_OTHER_DEPENDENCIES)
 	latexmk tbagrel_phd_presentation.tex
+
+tbagrel_phd_summary_fr.pdf: tbagrel_phd_summary_fr.tex destination_calculus_ott.tex $(PDF_ARXIV_DEPENDENCIES) $(PDF_OTHER_DEPENDENCIES)
+	latexmk tbagrel_phd_summary_fr.tex
 
 nix::
 	nix-shell --pure --run "make tbagrel_phd_manuscript.pdf"
@@ -66,6 +71,13 @@ continuous-presentation::
 	ls tbagrel_phd_presentation.mng *.ott $(PDF_ARXIV_DEPENDENCIES) $(PDF_OTHER_DEPENDENCIES) Makefile | entr -s 'make tbagrel_phd_presentation.pdf'
 continuous-nix-presentation:: nix-presentation
 	nix-shell --pure --run "make continuous-presentation"
+
+nix-summary::
+	nix-shell --pure --run "make tbagrel_phd_summary_fr.pdf"
+continuous-summary::
+	ls tbagrel_phd_summary_fr.mng *.ott $(PDF_ARXIV_DEPENDENCIES) $(PDF_OTHER_DEPENDENCIES) Makefile | entr -s 'make tbagrel_phd_summary_fr.pdf'
+continuous-nix-summary:: nix-summary
+	nix-shell --pure --run "make continuous-summary"
 
 # .SECONDARY:
 # Uncommenting the line above prevents deletion of temporary files, which can be helpful for debugging build problems
