@@ -820,11 +820,12 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 \only<3->{
 \item Fill a hole with an already complete value? \mintinline{haskellc}/fillLeaf/}
 \only<4>{
-\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
+\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf}}}}
 \only<5->{
 \item Allocate a hollow data constructor and plug it into a hole? \mintinline{haskellc}/fill @'Ctor/}
 \only<6>{
-\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
+\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons}}}\\[0.3cm]
+\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil}}}}
 \end{itemize}
 \end{frame}
 
