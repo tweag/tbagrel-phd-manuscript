@@ -36,7 +36,7 @@
 		\node [style=normal] (197) at (7.5, -0.5) {};
 		\node [style=normal] (198) at (7.5, -0.5) {\mintinline{haskellc}/¤I#/};
 		\node [style=normal] (199) at (7.5, 0) {};
-		\node [style=medium] (295) at (5.5, -0.5) {\mintinline{haskellc}/&fillLeaf/};
+		\node [style=big] (295) at (5.5, -0.5) {\mintinline{haskellc}/&fillLeaf/};
 		\node [style=normal] (297) at (5.75, -3.125) {};
 		\node [style=normal] (300) at (5.75, -4.125) {};
 		\node [style=normal] (301) at (8, 0) {};

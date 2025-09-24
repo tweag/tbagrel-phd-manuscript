@@ -74,7 +74,7 @@
 		\node [style=normal] (291) at (7, 0) {};
 		\node [style=normal] (293) at (7, -1) {};
 		\node [style=normal] (294) at (8, -0.5) {\mintinline{haskellc}/¤Ampar/};
-		\node [style=medium] (295) at (5.5, -0.5) {\mintinline{haskellc}/&fillComp/};
+		\node [style=big] (295) at (5.5, -0.5) {\mintinline{haskellc}/&fillComp/};
 		\node [style=normal] (296) at (10.75, -2) {};
 		\node [style=normal] (297) at (3.5, -3.125) {};
 		\node [style=normal] (298) at (4.5, -3.125) {};
@@ -165,6 +165,7 @@
 		\node [style=medium] (440) at (24.25, 0.5) {\mintinline{haskellc}/:: Dest [Int]/};
 		\node [style=normal] (441) at (27.5, -1.5) {};
 		\node [style=normal] (442) at (-1.25, -1.5) {};
+		\node [style=medium] (443) at (13, 0.25) {\mintinline{haskellc}/:: Dest [Int]/};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=normaledge] (112.center) to (116.center);
