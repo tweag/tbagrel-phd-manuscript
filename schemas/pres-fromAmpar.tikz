@@ -45,7 +45,7 @@
 		\node [style=normal] (462) at (5.5, 0) {};
 		\node [style=normal] (463) at (5.5, -1) {};
 		\node [style=normal] (464) at (5, -0.525) {\mintinline{haskellc}/¤()/};
-		\node [style=medium] (465) at (5, 0.5) {\mintinline{haskellc}/:: ()/};
+		\node [style=normal] (465) at (5, 0.5) {\mintinline{haskellc}/:: ()/};
 		\node [style=normal] (466) at (-0.25, 1.25) {};
 		\node [style=normal] (467) at (1.75, 1.25) {};
 		\node [style=normal] (468) at (2.75, 1.25) {};
@@ -58,7 +58,7 @@
 		\node [style=bullet] (476) at (2.25, 0.75) {};
 		\node [style=bullet] (477) at (3.25, 0.75) {};
 		\node [style=normal] (478) at (-2.25, 0.75) {\mintinline{haskellc}/fromAmpar/};
-		\node [style=medium] (479) at (1.75, 1.75) {\mintinline{haskellc}/:: Ampar [Int] ()/};
+		\node [style=normal] (479) at (1.75, 1.75) {\mintinline{haskellc}/:: Ampar [Int] ()/};
 		\node [style=normal] (480) at (11.75, 1.25) {};
 		\node [style=normal] (481) at (12.75, 1.25) {};
 		\node [style=normal] (482) at (13.75, 1.25) {};
@@ -92,7 +92,7 @@
 		\node [style=bullet] (510) at (14.25, 0.75) {};
 		\node [style=normal] (511) at (15.5, 0.125) {};
 		\node [style=none] (512) at (11.75, 0.75) {};
-		\node [style=medium] (513) at (13.25, 1.75) {\mintinline{haskellc}/:: [Int]/};
+		\node [style=normal] (513) at (13.25, 1.75) {\mintinline{haskellc}/:: [Int]/};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=normaledge] (307.center) to (308.center);

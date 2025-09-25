@@ -29,8 +29,8 @@
 		\node [style=normal] (308) at (5.75, -0.5) {};
 		\node [style=normal] (309) at (5.5, -0.25) {};
 		\node [style=normal] (310) at (5.5, -0.75) {};
-		\node [style=medium] (400) at (9, 0.5) {\mintinline{haskellc}/:: Ampar [Int] (Dest [Int])/};
-		\node [style=medium] (401) at (13, -0.75) {\mintinline{haskellc}/:: Dest [Int]/};
+		\node [style=normal] (400) at (9, 0.5) {\mintinline{haskellc}/:: Ampar [Int] (Dest [Int])/};
+		\node [style=normal] (401) at (13, -0.75) {\mintinline{haskellc}/:: Dest [Int]/};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=normaledge] (158.center) to (157.center);

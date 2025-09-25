@@ -783,8 +783,19 @@ Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
 
 \end{frame}
 
-\begin{frame}[fragile]{Breadth-first tree traversal/building}
-Schema with queue of dests
+\begin{frame}[fragile]{Breadth-first tree relabeling}
+
+\mintinline{haskellc}/data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)/
+
+\vspace*{0.5cm}
+
+\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem}}}
+\end{frame}
+
+\begin{frame}[fragile]{Breadth-first tree building in DPS}
+\vspace*{1cm}
+
+\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-answer}}}
 \end{frame}
 
 \begin{frame}[fragile]{Functional DPS API -- Types (1/3)}

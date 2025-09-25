@@ -73,7 +73,7 @@
 		\node [style=normal] (395) at (14.75, -3.625) {\mintinline{haskellc}/1#/};
 		\node [style=bullet] (397) at (14.75, -2.5) {};
 		\node [style=normal] (398) at (16, -3.125) {};
-		\node [style=medium] (399) at (2.5, 0.5) {\mintinline{haskellc}/:: Dest [Int]/};
+		\node [style=normal] (399) at (2.5, 0.5) {\mintinline{haskellc}/:: Dest [Int]/};
 		\node [style=none] (402) at (-1, 0.5) {};
 		\node [style=none] (403) at (-0.75, 1) {};
 		\node [style=none] (404) at (1, -0.5) {};
@@ -89,7 +89,7 @@
 		\node [style=normal] (462) at (13.25, 0) {};
 		\node [style=normal] (463) at (13.25, -1) {};
 		\node [style=normal] (464) at (12.75, -0.525) {\mintinline{haskellc}/¤()/};
-		\node [style=medium] (465) at (12.75, 0.5) {\mintinline{haskellc}/:: ()/};
+		\node [style=normal] (465) at (12.75, 0.5) {\mintinline{haskellc}/:: ()/};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=normaledge] (112.center) to (116.center);
