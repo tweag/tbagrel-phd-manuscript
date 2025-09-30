@@ -701,7 +701,7 @@ What about lifting this limitation?
 \hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-3}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
 \end{center}
 
-\vspace*{1cm}
+\vspace*{0.5cm}
 
 {\small\itshape
 \textcolor{hnamecolor}{$\displaystyle\square$} denotes a ``hole'' in the structure (an uninitialized memory cell)
@@ -928,7 +928,7 @@ A value is \textbf{consumed once} when:
   \item \textit{(function)} \textbf{applied} to give a result which is consumed once
 \end{itemize}
 
-\only<2->{\textbf{Examples:}
+\only<2->{\textbf{Examples} (assuming the value on the right is consumed):
 
 \vspace*{-0.1cm}}
 
@@ -938,9 +938,9 @@ A value is \textbf{consumed once} when:
 \only<4->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/(x, x)/}&\only<5->{\textcolor{red}{$\to$ NO}}\\
 \only<6->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/case y of { ¤Nothing -> x ;      ¤Just v -> v}/}&\only<7->{\textcolor{red}{$\to$ NO}}\\
 \only<8->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/case y of { ¤Nothing -> (x, 0) ; ¤Just v -> (x, v) }/}&\only<9->{\textcolor{green}{$\to$ YES}}\\
-\only<10->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/fNonLin x/ \quad where \quad \mintinline{haskellc}/fNonLin :: a → b/}&\only<11->{\textcolor{red}{$\to$ NO}}\\
-\only<12->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/fLin x/ \quad \phantom{aaa}where \quad \mintinline{haskellc}/fLin :: a ⊸ b/}&\only<13->{\textcolor{green}{$\to$ YES}}\\
-\only<14->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/¤Ur x/} &\only<15->{\textcolor{red}{$\to$ NO}, since \mintinline{haskellc}/Ur/ $\simeq$ $\textcolor{typcolor}{!a}$}\\
+\only<10->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/f x/ \phantom{aa,}\quad where \quad \mintinline{haskellc}/f :: t → u/}&\only<11->{\textcolor{red}{$\to$ NO}}\\
+\only<12->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/fLin x/ \quad where \quad \mintinline{haskellc}/fLin :: t ⊸ u/}&\only<13->{\textcolor{green}{$\to$ YES}}\\
+\only<14->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/¤Ur x/} &\only<15->{\textcolor{red}{$\to$ NO}, since \mintinline{haskellc}/Ur/ $\simeq$ $\textcolor{typcolor}{!T}$}\\
 \end{tabular}
 \end{center}
 
@@ -953,7 +953,7 @@ Trick: scoping function
 
 \quad\mintinline{haskellc}/withResource ⩴ ∀ t. (Resource ⊸ Ur t) ⊸ Ur t/
 
-who is the only \textbf{producer} of \mintinline{haskellc}/Resource/ values
+which is the only \textbf{producer} of \mintinline{haskellc}/Resource/ values
 
 User must pass a \textbf{linear function} consuming the resource in this scope:
 \begin{itemize}
@@ -964,22 +964,30 @@ User must pass a \textbf{linear function} consuming the resource in this scope:
 \end{frame}
 
 \begin{frame}[fragile]{Updating the API with linearity}
-TODO
-\end{frame}
-
-\begin{frame}[fragile]{Functional DPS API -- with linearity}
+A \mintinline{haskellc}/dup/able, scope-limited \mintinline{haskellc}/Token/ to infect \mintinline{haskellc}/Ampar/ with linearity:
 \begin{minted}{haskellc}
 data Token
 dup ⩴ Token ⊸ (Token, Token)
 drop ⩴ Token ⊸ ()
 withToken ⩴ ∀ t. (Token ⊸ Ur t) ⊸ Ur t
+\end{minted}
 
+Making sure \mintinline{haskellc}/Ampar/s are used linearly, e.g.:\\[0.1cm]
+\quad\mintinline{haskellc}/toAmpar ⩴ s → Ampar s ()/ \qquad\qquad\qquad becomes\\\quad\mintinline{haskellc}/toAmpar ⩴ Token ⊸ s ⊸ Ampar s ()/\\[0.1cm]
+\quad\mintinline{haskellc}/updWith ⩴ Ampar s t → (t → u) → Ampar s u/ \qquad becomes\\\quad\mintinline{haskellc}/updWith ⩴ Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u/
+
+\mintinline{haskellc}/Dest/s can only ever be accessed through \mintinline{haskellc}/updWith/, which takes a linear function \mintinline{haskellc}/t ⊸ u/ now.\\
+They apparently can't leak out of the \mintinline{haskellc}/Ampar/'s right side...
+\end{frame}
+
+\begin{frame}[fragile]{Functional DPS API -- with linearity}
+\begin{minted}{haskellc}
 data Ampar s t
 newAmpar ⩴ ∀ s. Token ⊸ Ampar s (Dest s)
 tokenBesides ⩴ ∀ s t. Ampar s t ⊸ (Ampar s t, Token)
 toAmpar ⩴ ∀ s. Token ⊸ s ⊸ Ampar s ()
-fromAmpar ⩴ ∀ s t. Ampar s (Ur t) ⊸ Ur (s, t)
-fromAmpar' ⩴ ∀ s. Ampar s () ⊸ Ur s
+fromAmpar ⩴ ∀ s t. Ampar s (Ur t) ⊸ (s, Ur t)
+fromAmpar' ⩴ ∀ s. Ampar s () ⊸ s
 updWith ⩴ ∀ s t u. Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u
 
 data Dest t
@@ -990,15 +998,17 @@ fillLeaf ⩴ ∀ t. t ⊸ Dest t ⊸ ()
 \end{minted}
 \end{frame}
 
-\subsection{Safe yet?}
+\section{Safe yet?}
 
-\begin{frame}[fragile]{Scope escape}
+\begin{frame}[fragile]{Scope escape -- Example}
 \begin{minted}{haskellc}
-withToken $ \t → case dup t of (t1, t2) →
-  let outer :: Ampar (Dest ()) () = (newAmpar t1 :: Ampar (Dest ()) (Dest (Dest ()))) `updWith` \(d0 :: Dest (Dest ())) →
-        let inner :: Ampar () () = (newAmpar t2 :: Ampar () (Dest ())) `updWith` \(d1 :: Dest ()) → d0 &fillLeaf d1
-         in fromAmpar' inner
-   in fromAmpar' outer ; Ur ()
+let outer :: Ampar (Dest ()) ()
+     outer = (newAmpar tok1) `updWith` \(dd :: Dest (Dest ())) →
+                  let inner :: Ampar () ()
+                       inner = (newAmpar tok2) `updWith` \(d :: Dest ()) →
+                                    dd &fillLeaf d
+                    in fromAmpar' inner
+  in fromAmpar' outer
 \end{minted}
 \end{frame}
 
