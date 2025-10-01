@@ -619,6 +619,8 @@
 % Actual presentation content
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Slides de sommaire "déroulant"
+
 \begin{document}
 \maketitle
 
@@ -684,7 +686,7 @@ Data structures: immutable, thus built from the leaves up to the root.
 \end{center}
 
 \begin{itemize}
-  \item Forces us to build structures in an order potentially different from input data flow.
+  \item Forces us to build structures in an order that might not be the most natural one.
 \end{itemize}
 
 \end{frame}
@@ -717,14 +719,14 @@ Unitialized memory/\textbf{holes}:
   \item no read safety (risk of segfault)
 \end{itemize}
 
-Need proper functional API to manipulate incomplete structures.
+Need proper functional abstraction to manipulate incomplete structures.
 
 \end{frame}
 
-\begin{frame}{Table of Contents}
+\begin{frame}{Outline}
 
 \begin{itemize}
-  \item API style: destination passing
+  \item Destination-passing style interface
   \item Safety
   \begin{itemize}
     \item Linear Types
@@ -766,6 +768,8 @@ Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
 
 \begin{frame}[fragile]{Functional DPS API -- Types (1/2)}
 
+% Transition: en C on sait déjà faire ça, c'est assez commun, mais c'est assez nouveau en FP
+
 \begin{minipage}{0.63\linewidth}
 \mintinline{haskellc}/Dest/ination: first-class typed wrapper for a\\\phantom{\mintinline{haskellc}/Dest/ination:} raw pointer to a \textbf{hole}
 
@@ -776,7 +780,7 @@ Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
 
 \medskip
 
-\mintinline{haskellc}/Ampar/: first-class typed wrapper for an\\\phantom{\mintinline{haskellc}/Ampar/:} \textbf{incomplete structure} and its destinations
+\mintinline{haskellc}/Ampar/: first-class opaque wrapper for an\\\phantom{\mintinline{haskellc}/Ampar/:} \textbf{incomplete structure} and its destinations
 \begin{itemize}
   \item only way to refer to and act on an incomplete structure
 \end{itemize}
@@ -818,6 +822,8 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 
 \vspace*{0.5cm}
 
+% On peut dire que l'algo naturel impératif est un peu "fonctionnel" dans l'idée, car la mutation en place est assez optionelle, en soi on process l'arbre dans l'ordre BF et on en créé un nouveau dans cet ordre
+
 \hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem}}}
 \end{frame}
 
@@ -834,6 +840,12 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 \only<2>{
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons}}}\\[0.3cm]
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil}}}}
+% On regarde sous le tapis d'abord
+% On veut agir sur un trou, et y connecter un nouveau chainon pour notre liste chainee, aka hollow cons constructor
+% On alloue ce chainon, et on le connecte au trou
+% Dans le monde du dessus, pour agir sur un trou on doit utiliser la destination qui pointe dessus
+% Et chaque trou restant dans une structure doit etre representé par une destination
+% Conséquemment, l'entrée c'est la dest qui pointe sur le trou sur lequel on veut agir, et la sortie c'est 2 nouvelles dests pour les 2 nouveaux trous dans la structure.
 \only<3->{
 \item Fill a hole with an already complete value? \mintinline{haskellc}/fillLeaf/}
 \only<4>{
@@ -892,7 +904,7 @@ let complete :: Ampar [Int] () = newAmpar `updWith` \d → ()
  in print (fromAmpar' complete)
 -- SEGFAULT!
 \end{minted}
-% TODO: depending on strictness analysis, insert example with filling the same dest twice
+% TODO: ajouter le schéma mémoire associé
 \end{frame}
 
 \section{Linearity}
@@ -904,7 +916,7 @@ Linear types and linearity let us control resource consumption of functions.
 Idea : \textbf{destinations are linear resources} i.e. must be consumed \textbf{exactly once}:
 \begin{itemize}
   \item consumed less than once \phantom{a}$\to$ hole remained unfilled
-  \item consumed more than once $\to$ breaking the write-once/immutability property
+  \item consumed more than once $\to$ breaking the write-once/immutability property % TODO change
 \end{itemize}
 
 Unconsumed destination = witnesses a remaining hole
@@ -1102,6 +1114,8 @@ let outer :: Ampar (Dest ()) ()
 \section{Formalization}
 
 \begin{frame}[fragile]{Modal type system: easy extension}
+
+% Largerly orthogonal
 
 Explain Linear Haskell
 
