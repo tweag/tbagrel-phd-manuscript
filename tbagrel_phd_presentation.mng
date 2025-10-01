@@ -657,7 +657,7 @@ Data structures are heap-allocated; made of \textbf{linked} heap objects:
   \end{itemize}
 
 \begin{center}
-\begin{minipage}{0.12\linewidth}\begin{center} {\Large \mintinline{haskellc}/[1, 2]/}\\\textit{\small or}\\{\Large \mintinline{haskellc}/1 : 2 : []/}\end{center}\end{minipage} \scalebox{1.6}{\qquad $\rightsquigarrow$ \quad \adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\begin{minipage}{0.23\linewidth}\begin{center} {\Large \mintinline{haskellc}/[1, 2]/}\\\textit{\small a.k.a.}\\{\Large \mintinline{haskellc}/¤(:) 1 (¤(:) 2 [])/}\end{center}\end{minipage} \scalebox{1.6}{\qquad $\rightsquigarrow$ \quad \adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
 \end{center}
 
 \vspace*{-0.5cm}
@@ -885,8 +885,6 @@ fillLeaf ⩴ ∀ t. t → Dest t → ()
 
 \section{Safety}
 
-\subsection{Linearity}
-
 \begin{frame}[fragile]{Unrestricted use of destinations}
 \begin{minted}{haskellc}
 -- fromAmpar' ⩴ ∀ s. Ampar s () → s
@@ -896,6 +894,8 @@ let complete :: Ampar [Int] () = newAmpar `updWith` \d → ()
 \end{minted}
 % TODO: depending on strictness analysis, insert example with filling the same dest twice
 \end{frame}
+
+\section{Linearity}
 
 \begin{frame}[fragile]{Linearity to the rescue}
 
@@ -1012,24 +1012,50 @@ let outer :: Ampar (Dest ()) ()
 \end{minted}
 \end{frame}
 
-\begin{frame}[fragile]{Scope escape}
+\begin{frame}[fragile]{Scope escape -- Bigger picture}
+
 Not \emph{just} an artificial edge-case
 
-Reappear subtly in more complex scenarii
+\begin{itemize}
+  \item Linear API are often based on scope-limited resource consumption.
+  \item Any form of (linear) storage for linear resources breaks that.\\
+        \mintinline{haskellc}/storeAway :: t ⊸ ()  -- resource goes away magically/
+\end{itemize}
 
-Fundamental issue when storing away linear resource in linear container: break API invariant
 \end{frame}
 
-\subsection{Solutions to scope escape}
+\section{Solutions to avoid scope escape}
 
-\begin{frame}[fragile]{With just Haskell type system}
+\begin{frame}[fragile]{With just Haskell type system (1/2)}
 
 \begin{block}{Solution 1: destinations can only store non-linear data}
-TODO
+
+\vspace*{0.2cm}
+
+\mintinline{haskellc}/fillLeaf ⩴ t ⊸ Dest t ⊸ ()/ \phantom{aa} becomes \phantom{a} \mintinline{haskellc}/fillLeaf ⩴ t → UDest t ⊸ ()/\\
+\mintinline{haskellc}/fromAmpar' ⩴ Ampar s () ⊸ s/ \phantom{a} becomes \phantom{a} \mintinline{haskellc}/fromUAmpar' ⩴ UAmpar s () ⊸ Ur s/
+
+In other words, \mintinline{haskellc}/UAmpar s t/ builds an unrestricted \mintinline{haskellc}/s/
+
+\textit{Used in our practical prototype ``linear-dest'', Bagrel (2023)}
 \end{block}
 
-\begin{block}{Solution 2: do not allow destinations for linear data to be filled with \mintinline{haskellc}/fillLeaf/ or \mintinline{haskellc}/fillComp/}
-TODO
+\end{frame}
+
+\begin{frame}[fragile]{With just Haskell type system (2/2)}
+
+\begin{block}{Solution 2: destinations for linear data needs new primitives instead of \mintinline{haskellc}/fillLeaf/ / \mintinline{haskellc}/fillComp/}
+
+\vspace*{0.2cm}
+
+Back to Minamide-like system where we operate on \mintinline{haskellc}/Ampar/s directly instead of \mintinline{haskellc}/Dest/s\\ (to prevent scope escape)
+
+\begin{itemize}
+  \item With some complications, can work with multiple holes
+  \item Still allows for efficient queue of \mintinline{haskellc}/Dest/s in BF-traversal
+\end{itemize}
+
+\textit{Developed in Chapter 4 of the PhD manuscript}
 \end{block}
 
 \end{frame}
@@ -1039,13 +1065,16 @@ TODO
 \begin{frame}[fragile]{Age system}
 Principle: we track the age of resources.
 
-Age 0 says the resource comes from the innermost `updWith` scope.
-
-When entering a new `updWith` scope, all existing resources get their age incremented by 1.
+\begin{itemize}
+\item Age 0 says the resource (variable) comes from the innermost \mintinline{haskellc}/`updWith`/ scope.
+\item When entering a new \mintinline{haskellc}/`updWith`/ scope, all existing resources ages are incremented by 1.
+\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{Age system -- Example}
-TODO
+\begin{center}
+\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes}}}
+\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Age control in \mintinline{haskellc}/fill/ functions}
@@ -1058,17 +1087,19 @@ TODO schema
 
 \begin{frame}[fragile]{Age control prevents scope escape}
 \begin{minted}{haskellc}
-withToken $ \t →
-  let outer :: Ampar (Dest ()) () = (newAmpar :: Ampar (Dest ()) (Dest (Dest ()))) `updWith` \(d0 :: Dest (Dest ())) →
-        let inner :: Ampar () () = (newAmpar :: Ampar () (Dest ())) `updWith` \(d1 :: Dest ()) → d0 &fillLeaf d1
-         in fromAmpar' inner
-   in fromAmpar' outer ; Ur ()
+let outer :: Ampar (Dest ()) ()
+     outer = (newAmpar tok1) `updWith` \(dd :: Dest (Dest ())) →
+                  let inner :: Ampar () ()
+                       inner = (newAmpar tok2) `updWith` \(d :: Dest ()) →
+                                    dd &fillLeaf d
+                    in fromAmpar' inner
+  in fromAmpar' outer
 \end{minted}
 
 % Pas super convaincu par cette slide
 \end{frame}
 
-\subsection{Formalization}
+\section{Formalization}
 
 \begin{frame}[fragile]{Modal type system: easy extension}
 
