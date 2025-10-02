@@ -440,6 +440,9 @@
 \newunicodechar{∀}{\ensuremath{\pmb{\forall}}}
 \newunicodechar{⩴}{\hspace{-0.2ex}:\hspace{-0.2ex}:\hspace{-0.2ex}}
 \newunicodechar{Ⴈ}{1}
+\newunicodechar{↑}{\textcolor{modecolor}{$\uparrow$}}
+\newunicodechar{⁰}{\textcolor{modecolor}{$^{0}$}}
+\newunicodechar{¹}{\textcolor{modecolor}{$^{1}$}}
 \newunicodechar{☠}{$\skull$}
 
 \newlength{\widthaugment}
@@ -774,7 +777,7 @@ Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
 \mintinline{haskellc}/Dest/ination: first-class typed wrapper for a\\\phantom{\mintinline{haskellc}/Dest/ination:} raw pointer to a \textbf{hole}
 
 \begin{itemize}
-  \item \textit{breaks from Minimade's approach}
+  \item {\small \textit{breaks from Minimade's approach}}
   \item only way to refer to and act on a hole\\(of an incomplete structure)
 \end{itemize}
 
@@ -797,7 +800,7 @@ Every operation is done through \mintinline{haskellc}/Ampar/ and \mintinline{has
 
 \medskip
 
-\mintinline{haskellc}/data Ampar s t = ¤Ampar s t/ \quad \textit{(opaque)}
+\mintinline{haskellc}/data Ampar s t = ¤Ampar s t/ \quad {\small \textit{(opaque)}}
 
 \begin{itemize}
   \item \mintinline{haskellc}/s/ is the type of the incomplete structure
@@ -808,7 +811,7 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 
 \medskip
 
-\mintinline{haskellc}/data Dest t = ¤Dest Addr#/ \quad \textit{(opaque)}
+\mintinline{haskellc}/data Dest t = ¤Dest Addr#/ \quad {\small \textit{(opaque)}}
 
 \begin{itemize}
   \item \mintinline{haskellc}/t/ is the type of the hole that the destination references
@@ -988,8 +991,8 @@ Making sure \mintinline{haskellc}/Ampar/s are used linearly, e.g.:\\[0.1cm]
 \quad\mintinline{haskellc}/toAmpar ⩴ s → Ampar s ()/ \qquad\qquad\qquad becomes\\\quad\mintinline{haskellc}/toAmpar ⩴ Token ⊸ s ⊸ Ampar s ()/\\[0.1cm]
 \quad\mintinline{haskellc}/updWith ⩴ Ampar s t → (t → u) → Ampar s u/ \qquad becomes\\\quad\mintinline{haskellc}/updWith ⩴ Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u/
 
-\mintinline{haskellc}/Dest/s can only ever be accessed through \mintinline{haskellc}/updWith/, which takes a linear function \mintinline{haskellc}/t ⊸ u/ now.\\
-They apparently can't leak out of the \mintinline{haskellc}/Ampar/'s right side...
+\mintinline{haskellc}/Dest/s can only ever be accessed through \mintinline{haskellc}/updWith/, which takes a linear function \mintinline{haskellc}/t ⊸ u/ now
+%They apparently can't leak out of the \mintinline{haskellc}/Ampar/'s right side...right?
 \end{frame}
 
 \begin{frame}[fragile]{Functional DPS API -- with linearity}
@@ -1044,12 +1047,12 @@ Not \emph{just} an artificial edge-case
 
 \vspace*{0.2cm}
 
-\mintinline{haskellc}/fillLeaf ⩴ t ⊸ Dest t ⊸ ()/ \phantom{aa} becomes \phantom{a} \mintinline{haskellc}/fillLeaf ⩴ t → UDest t ⊸ ()/\\
-\mintinline{haskellc}/fromAmpar' ⩴ Ampar s () ⊸ s/ \phantom{a} becomes \phantom{a} \mintinline{haskellc}/fromUAmpar' ⩴ UAmpar s () ⊸ Ur s/
+\mintinline{haskellc}/fillLeaf ⩴ t ⊸ Dest t ⊸ ()/ \qquad\phantom{aa} becomes\\\mintinline{haskellc}/fillLeaf ⩴ t → UDest t ⊸ ()/\\[0.1cm]
+\mintinline{haskellc}/fromAmpar'  ⩴  Ampar s () ⊸ s/ \qquad becomes\\\mintinline{haskellc}/fromUAmpar' ⩴ UAmpar s () ⊸ Ur s/
 
 In other words, \mintinline{haskellc}/UAmpar s t/ builds an unrestricted \mintinline{haskellc}/s/
 
-\textit{Used in our practical prototype ``linear-dest'', Bagrel (2023)}
+{\small \textit{Used in our practical prototype ``linear-dest'', Bagrel (2023)}}
 \end{block}
 
 \end{frame}
@@ -1067,7 +1070,7 @@ Back to Minamide-like system where we operate on \mintinline{haskellc}/Ampar/s d
   \item Still allows for efficient queue of \mintinline{haskellc}/Dest/s in BF-traversal
 \end{itemize}
 
-\textit{Developed in Chapter 4 of the PhD manuscript}
+{\small \textit{Developed in Chapter 4 of the PhD manuscript}}
 \end{block}
 
 \end{frame}
@@ -1078,8 +1081,8 @@ Back to Minamide-like system where we operate on \mintinline{haskellc}/Ampar/s d
 Principle: we track the age of resources.
 
 \begin{itemize}
-\item Age 0 says the resource (variable) comes from the innermost \mintinline{haskellc}/`updWith`/ scope.
-\item When entering a new \mintinline{haskellc}/`updWith`/ scope, all existing resources ages are incremented by 1.
+\item Age \textcolor{modecolor}{$\uparrow^0$} says the resource (variable) comes from the innermost \mintinline{haskellc}/`updWith`/ scope.
+\item When entering a new \mintinline{haskellc}/`updWith`/ scope, all existing resources ages are multiplied by \textcolor{modecolor}{$\uparrow$}\\(scope number increased by 1)
 \end{itemize}
 \end{frame}
 
@@ -1096,26 +1099,29 @@ Principle: we track the age of resources.
 \def\ottsmode#1{\textcolor{modecolor}{\mathtt{#1}}}
 \def\ottnt#1{\textcolor{ntcolor}{\mathtt{#1}}}
 
-The RHS $\ottnt{y}$ (content being stored away) must be exactly 1 scope older ($\ottsmode{\uparrow}$) than the LHS $\ottnt{x}$ (destination being filled)
+The RHS $\ottnt{c}$ (content being stored away) must be \textbf{exactly 1 scope older} ($\ottsmode{\uparrow}$) than the LHS $\ottnt{d}$ (destination being filled)
 
 \[
 \inferrule{%
-\Gamma_{1}  \,\vdash\,  \ottnt{x}  :   \ottstype{Dest_{\ottsmode{m}}}~\ottstype{t} \\
-\Gamma_{2}  \,\vdash\,  \ottnt{y}  :  \ottstype{t}
+\Gamma_{1}  \,\vdash\,  \ottnt{d}  ::   \ottstype{Dest_{\ottsmode{m}}}~\ottstype{t} \\
+\Gamma_{2}  \,\vdash\,  \ottnt{c}  ::  \ottstype{t}
 }{
-\Gamma_{1}  +    \ottsmode{(} \ottsmode{\uparrow} \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \ottsmode{m} \ottsmode{)}  \hspace{-0.3ex}\cdot\hspace{-0.3ex} \Gamma_{2}   \,\vdash\,   \ottnt{x}~\texttt{\&fillLeaf}~\ottnt{y}   :   \ottstype{()} }
+\Gamma_{1}  +    \ottsmode{(} \ottsmode{\uparrow} \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \ottsmode{m} \ottsmode{)}  \hspace{-0.3ex}\cdot\hspace{-0.3ex} \Gamma_{2}   \,\vdash\,   \ottnt{d}~\texttt{\&fillLeaf}~\ottnt{c}   ::   \ottstype{()} }
 \]
 \egroup
+
+
+{\small \textit{(transcribed from rules of Chapter 2 of the PhD manuscript, about $\lambda_d$)}}
 
 \end{frame}
 
 \begin{frame}[fragile]{Age control prevents scope escape}
 \begin{minted}{haskellc}
 let outer :: Ampar (Dest ()) ()
-     outer = (newAmpar tok1) `updWith` \(dd :: Dest (Dest ())) →
+     outer = (newAmpar tok1) `updWith` \(dd :: ↑⁰ Dest (Dest ())) →
                   let inner :: Ampar () ()
-                       inner = (newAmpar tok2) `updWith` \(d :: Dest ()) →
-                                    dd &fillLeaf d
+                       inner = (newAmpar tok2) `updWith` \(d :: ↑⁰ Dest ()) →
+                                    (dd :: ↑¹) &fillLeaf (d :: ↑⁰) -- REJECTED
                     in fromAmpar' inner
   in fromAmpar' outer
 \end{minted}
@@ -1125,11 +1131,16 @@ let outer :: Ampar (Dest ()) ()
 
 \section{Formalization}
 
-\begin{frame}[fragile]{Modal type system: easy extension}
+\begin{frame}[fragile]{Linearity as a mode: easy extension}
 
-% Largerly orthogonal
+Formal language $\lambda_d$:
 
-Explain Linear Haskell
+\begin{itemize}
+\item $\lambda$-calculus with built-in support for \mintinline{haskellc}/Ampar/ / \mintinline{haskellc}/Dest/ types and operations
+\item linearity encoded as a mode like in \textit{``Linear Haskell''}
+\end{itemize}
+
+\textcolor{teal}{$\pmb{\to}$} Easy to add another mode for ages / scope control
 
 % Linearity only appear in identity/variable rule
 \end{frame}
