@@ -1091,9 +1091,21 @@ Principle: we track the age of resources.
 
 \begin{frame}[fragile]{Age control in \mintinline{haskellc}/fill/ functions}
 
-The RHS (content being stored away) must be exactly 1 scope older than the LHS (destination being filled)
+\bgroup
+\def\ottstype#1{\textcolor{typcolor}{\mathtt{#1}}}
+\def\ottsmode#1{\textcolor{modecolor}{\mathtt{#1}}}
+\def\ottnt#1{\textcolor{ntcolor}{\mathtt{#1}}}
 
-TODO schema
+The RHS $\ottnt{y}$ (content being stored away) must be exactly 1 scope older ($\ottsmode{\uparrow}$) than the LHS $\ottnt{x}$ (destination being filled)
+
+\[
+\inferrule{%
+\Gamma_{1}  \,\vdash\,  \ottnt{x}  :   \ottstype{Dest_{\ottsmode{m}}}~\ottstype{t} \\
+\Gamma_{2}  \,\vdash\,  \ottnt{y}  :  \ottstype{t}
+}{
+\Gamma_{1}  +    \ottsmode{(} \ottsmode{\uparrow} \ottsmode{\hspace{-0.1ex}\cdot\hspace{-0.1ex} }  \ottsmode{m} \ottsmode{)}  \hspace{-0.3ex}\cdot\hspace{-0.3ex} \Gamma_{2}   \,\vdash\,   \ottnt{x}~\texttt{\&fillLeaf}~\ottnt{y}   :   \ottstype{()} }
+\]
+\egroup
 
 \end{frame}
 
