@@ -197,7 +197,7 @@
 %   ItalicFont=*-Italic,
 %   BoldItalicFont=*-BoldItalic,
 %   Scale=1.0]
-\setsansfont{iosevka-quasi-proportional-ss07}[
+\setsansfont{iosevka-term-ss07}[
   Path=fonts/,
   Extension=.ttf,
   UprightFont=*-regular,
@@ -205,7 +205,7 @@
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
   Scale=0.887]
-\setmonofont{iosevka-quasi-proportional-ss07}[
+\setmonofont{iosevka-term-ss07}[
   Path=fonts/,
   Extension=.ttf,
   UprightFont=*-regular,
@@ -221,7 +221,7 @@
 %   ItalicFont=*-Italic,
 %   BoldItalicFont=*-SemiboldItalic,
 %   Scale=0.92]
-\setmathrm{iosevka-quasi-proportional-ss07}[
+\setmathrm{iosevka-term-ss07}[
   Path=fonts/,
   Extension=.ttf,
   UprightFont=*-regular,
@@ -229,7 +229,7 @@
   ItalicFont=*-italic,
   BoldItalicFont=*-semibolditalic,
   Scale=0.887]
-\newfontfamily\mymathbffont{iosevka-quasi-proportional-ss07-semibold}[Path=fonts/,
+\newfontfamily\mymathbffont{iosevka-term-ss07-semibold}[Path=fonts/,
   Extension=.ttf,Scale=0.887]
 \newcommand{\mymathbf}[1]{\text{\mymathbffont #1}}
 \let\mathbf\mymathbf
@@ -438,7 +438,6 @@
 \newunicodechar{¤}{}
 \newunicodechar{;}{\ensuremath{\fatsemi}}
 \newunicodechar{∀}{\ensuremath{\pmb{\forall}}}
-\newunicodechar{⩴}{\hspace{-0.2ex}:\hspace{-0.2ex}:\hspace{-0.2ex}}
 \newunicodechar{Ⴈ}{1}
 \newunicodechar{↑}{\textcolor{modecolor}{$\uparrow$}}
 \newunicodechar{⁰}{\textcolor{modecolor}{$^{0}$}}
@@ -836,10 +835,13 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 \hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-answer}}}
 \end{frame}
 
-\begin{frame}[fragile]{Functional DPS API -- Functions (1/2)}
+\begin{frame}[fragile,t]{Functional DPS API -- Functions (1/2)}
 \begin{itemize}
 \only<1->{
-\item Allocate a hollow data constructor and plug it into a hole? \mintinline{haskellc}/fill @'Ctor/}
+\item Allocate a hollow data constructor and plug it into a hole? \mintinline{haskellc}/&fill @'Ctor/}
+\only<1>{
+\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons-init}}}\\[0.3cm]
+\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil-init}}}}
 \only<2>{
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons}}}\\[0.3cm]
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil}}}}
@@ -850,11 +852,15 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 % Et chaque trou restant dans une structure doit etre representé par une destination
 % Conséquemment, l'entrée c'est la dest qui pointe sur le trou sur lequel on veut agir, et la sortie c'est 2 nouvelles dests pour les 2 nouveaux trous dans la structure.
 \only<3->{
-\item Fill a hole with an already complete value? \mintinline{haskellc}/fillLeaf/}
+\item Fill a hole with an already complete value? \mintinline{haskellc}/&fillLeaf/}
+\only<3>{
+\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf-init}}}}
 \only<4>{
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf}}}}
 \only<5->{
-\item Plug an incomplete structure into the hole of another one? \mintinline{haskellc}/fillComp/}
+\item Plug an incomplete structure into the hole of another one? \mintinline{haskellc}/&fillComp/}
+\only<5>{
+\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp-init}}}}
 \only<6>{
 \hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
 \end{itemize}
@@ -862,7 +868,7 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 
 % Say we won't be able to add an incomplete, unconnected block. Every incomplete block must be wrap in an ampar
 
-\begin{frame}[fragile]{Functional DPS API -- Functions (2/2)}
+\begin{frame}[fragile,t]{Functional DPS API -- Functions (2/2)}
 \begin{itemize}
 \only<1->{
 \item Spawn new incomplete structure? \mintinline{haskellc}/newAmpar/}
@@ -882,16 +888,16 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 \begin{frame}[fragile]{Functional DPS API -- Simplified overview}
 \begin{minted}{haskellc}
 data Ampar s t
-newAmpar ⩴ ∀ s. Ampar s (Dest s)
-toAmpar ⩴ ∀ s. s → Ampar s ()
-fromAmpar' ⩴ ∀ s. Ampar s () → s
-updWith ⩴ ∀ s t u. Ampar s t → (t → u) → Ampar s u
+newAmpar   :: Ampar s (Dest s)
+toAmpar    :: Ampar s ()
+fromAmpar' :: Ampar s () → s
+updWith    :: Ampar s t  → (t → u) → Ampar s u
 
 data Dest t
 type family DestsOf lCtor t  -- returns dests associated to fields of constructor
-fill ⩴ ∀ lCtor t. Dest t → DestsOf lCtor t
-fillComp ⩴ ∀ s t. Ampar s t → Dest s → t
-fillLeaf ⩴ ∀ t. t → Dest t → ()
+fill     :: ∀ lCtor   .  Dest t → DestsOf lCtor t
+fillComp :: Ampar s t → Dest s → t
+fillLeaf :: t         → Dest t → ()
 \end{minted}
 
 % NOTE: trouver quoi dire, peut être parler de la type family ?
@@ -902,7 +908,7 @@ fillLeaf ⩴ ∀ t. t → Dest t → ()
 
 \begin{frame}[fragile]{Unrestricted use of destinations}
 \begin{minted}{haskellc}
--- fromAmpar' ⩴ ∀ s. Ampar s () → s
+-- fromAmpar' :: Ampar s () → s
 let complete :: Ampar [Int] () = newAmpar `updWith` \d → ()
  in print (fromAmpar' complete)
 -- SEGFAULT!
@@ -945,17 +951,17 @@ A value is \textbf{consumed once} when:
 
 \only<2->{\textbf{Examples} (assuming the value on the right is consumed):
 
-\vspace*{-0.1cm}}
+\vspace*{-0.5cm}}
 
 \begin{center}
-\begin{tabular}{p{0.015\linewidth}cp{0.55\linewidth}p{0.28\linewidth}}
-\only<2->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/(x, y)/}&\only<3->{\textcolor{green}{$\to$ YES}}\\
-\only<4->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/(x, x)/}&\only<5->{\textcolor{red}{$\to$ NO}}\\
-\only<6->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/case y of { ¤Nothing -> x ;      ¤Just v -> v}/}&\only<7->{\textcolor{red}{$\to$ NO}}\\
-\only<8->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/case y of { ¤Nothing -> (x, 0) ; ¤Just v -> (x, v) }/}&\only<9->{\textcolor{green}{$\to$ YES}}\\
-\only<10->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/f x/ \phantom{aa,}\quad where \quad \mintinline{haskellc}/f :: t → u/}&\only<11->{\textcolor{red}{$\to$ NO}}\\
-\only<12->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/fLin x/ \quad where \quad \mintinline{haskellc}/fLin :: t ⊸ u/}&\only<13->{\textcolor{green}{$\to$ YES}}\\
-\only<14->{\mintinline{haskellc}/x/ &in& \mintinline{haskellc}/¤Ur x/} &\only<15->{\textcolor{red}{$\to$ NO}, since \mintinline{haskellc}/Ur/ $\simeq$ $\textcolor{typcolor}{!T}$}\\
+\begin{tabular}{p{0.015\linewidth}cp{0.63\linewidth}p{0.28\linewidth}}
+\only<2->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/(x, y)/\quad?}&\only<3->{\textcolor{green}{$\to$ YES}}\\
+\only<4->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/(x, x)/\quad?}&\only<5->{\textcolor{red}{$\to$ NO}}\\
+\only<6->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/case y of {¤Nothing -> x ;      ¤Just v -> v}/\quad?}&\only<7->{\textcolor{red}{$\to$ NO}}\\
+\only<8->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/case y of {¤Nothing -> (x, 0) ; ¤Just v -> (x, v)}/\quad?}&\only<9->{\textcolor{green}{$\to$ YES}}\\
+\only<10->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/f x/ \phantom{aa,}\quad where \quad \mintinline{haskellc}/f :: t → u/\quad?}&\only<11->{\textcolor{red}{$\to$ NO}}\\
+\only<12->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/fLin x/\hspace*{-0.5ex} \quad where \quad \mintinline{haskellc}/fLin :: t ⊸ u/\quad?}&\only<13->{\textcolor{green}{$\to$ YES}}\\
+\only<14->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/¤Ur x/\quad?} &\only<15->{\textcolor{red}{$\to$ NO}, since \mintinline{haskellc}/Ur/ $\simeq$ $\textcolor{typcolor}{!T}$}\\
 \end{tabular}
 \end{center}
 
@@ -966,7 +972,7 @@ Linearity chains consumption requirements, but it needs to be bootstrapped.
 
 Trick: scoping function
 
-\quad\mintinline{haskellc}/withResource ⩴ ∀ t. (Resource ⊸ Ur t) ⊸ Ur t/
+\quad\mintinline{haskellc}/withResource :: ∀ t. (Resource ⊸ Ur t) ⊸ Ur t/
 
 which is the only \textbf{producer} of \mintinline{haskellc}/Resource/ values
 
@@ -982,34 +988,36 @@ User must pass a \textbf{linear function} consuming the resource in this scope:
 A \mintinline{haskellc}/dup/able, scope-limited \mintinline{haskellc}/Token/ to infect \mintinline{haskellc}/Ampar/ with linearity:
 \begin{minted}{haskellc}
 data Token
-dup ⩴ Token ⊸ (Token, Token)
-drop ⩴ Token ⊸ ()
-withToken ⩴ ∀ t. (Token ⊸ Ur t) ⊸ Ur t
+dup :: Token ⊸ (Token, Token)
+drop :: Token ⊸ ()
+withToken :: ∀ t. (Token ⊸ Ur t) ⊸ Ur t
 \end{minted}
 
 Making sure \mintinline{haskellc}/Ampar/s are used linearly, e.g.:\\[0.1cm]
-\quad\mintinline{haskellc}/toAmpar ⩴ s → Ampar s ()/ \qquad\qquad\qquad becomes\\\quad\mintinline{haskellc}/toAmpar ⩴ Token ⊸ s ⊸ Ampar s ()/\\[0.1cm]
-\quad\mintinline{haskellc}/updWith ⩴ Ampar s t → (t → u) → Ampar s u/ \qquad becomes\\\quad\mintinline{haskellc}/updWith ⩴ Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u/
+\quad\mintinline[escapeinside=°°]{haskellc}/toAmpar ::          °\hspace*{0.5ex}°s → Ampar s ()/ \qquad becomes\\
+\quad\mintinline{haskellc}/toAmpar :: Token ⊸ s ⊸ Ampar s ()/\\[0.1cm]
+\quad\mintinline{haskellc}/updWith :: Ampar s t → (t → u) → Ampar s u/ \qquad becomes\\
+\quad\mintinline{haskellc}/updWith :: Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u/
 
 \mintinline{haskellc}/Dest/s can only ever be accessed through \mintinline{haskellc}/updWith/, which takes a linear function \mintinline{haskellc}/t ⊸ u/ now
 %They apparently can't leak out of the \mintinline{haskellc}/Ampar/'s right side...right?
 \end{frame}
 
 \begin{frame}[fragile]{Functional DPS API -- with linearity}
-\begin{minted}{haskellc}
+\begin{minted}[escapeinside=°°]{haskellc}
 data Ampar s t
-newAmpar ⩴ ∀ s. Token ⊸ Ampar s (Dest s)
-tokenBesides ⩴ ∀ s t. Ampar s t ⊸ (Ampar s t, Token)
-toAmpar ⩴ ∀ s. Token ⊸ s ⊸ Ampar s ()
-fromAmpar ⩴ ∀ s t. Ampar s (Ur t) ⊸ (s, Ur t)
-fromAmpar' ⩴ ∀ s. Ampar s () ⊸ s
-updWith ⩴ ∀ s t u. Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u
+newAmpar     :: Token          ⊸ Ampar s (Dest s)
+toAmpar      :: Token   ⊸ s  °\hspace*{0.5ex}°⊸ Ampar s ()
+tokenBesides :: Ampar s t      ⊸ (Ampar s t, Token)
+fromAmpar    :: Ampar s (Ur t) ⊸ (s, Ur t)
+fromAmpar'   :: Ampar s ()     ⊸ s
+updWith      :: Ampar s t      ⊸ (t ⊸ u) ⊸ Ampar s u
 
 data Dest t
 type family DestsOf lCtor t  -- returns dests associated to fields of constructor
-fill ⩴ ∀ lCtor t. Dest t ⊸ DestsOf lCtor t
-fillComp ⩴ ∀ s t. Ampar s t ⊸ Dest s ⊸ t
-fillLeaf ⩴ ∀ t. t ⊸ Dest t ⊸ ()
+fill     :: ∀ lCtor   .  Dest t ⊸ DestsOf lCtor t
+fillComp :: Ampar s t ⊸ Dest s ⊸ t
+fillLeaf :: t         ⊸ Dest t ⊸ ()
 \end{minted}
 \end{frame}
 
@@ -1026,6 +1034,7 @@ let outer :: Ampar (Dest ()) ()
   in fromAmpar' outer
 \end{minted}
 \end{frame}
+% TODO: fix alignment
 
 \begin{frame}[fragile]{Scope escape -- Bigger picture}
 
@@ -1047,8 +1056,8 @@ Not \emph{just} an artificial edge-case
 
 \vspace*{0.2cm}
 
-\mintinline{haskellc}/fillLeaf ⩴ t ⊸ Dest t ⊸ ()/ \qquad\phantom{aa} becomes\\\mintinline{haskellc}/fillLeaf ⩴ t → UDest t ⊸ ()/\\[0.1cm]
-\mintinline{haskellc}/fromAmpar'  ⩴  Ampar s () ⊸ s/ \qquad becomes\\\mintinline{haskellc}/fromUAmpar' ⩴ UAmpar s () ⊸ Ur s/
+\mintinline{haskellc}/fillLeaf :: t ⊸  Dest t ⊸ ()/ \qquad \phantom{,}becomes\\\mintinline[escapeinside=°°]{haskellc}/fillLeaf :: t °\hspace*{0.2ex}°→ UDest t ⊸ ()/\\[0.1cm]
+\mintinline{haskellc}/fromAmpar'  ::  Ampar s () ⊸ s/ \qquad becomes\\\mintinline{haskellc}/fromUAmpar' :: UAmpar s () ⊸ Ur s/
 
 In other words, \mintinline{haskellc}/UAmpar s t/ builds an unrestricted \mintinline{haskellc}/s/
 
@@ -1088,7 +1097,7 @@ Principle: we track the age of resources.
 
 \begin{frame}[fragile]{Age system -- Example}
 \begin{center}
-\hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes}}}
+\hspace*{-0.7cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes}}}
 \end{center}
 \end{frame}
 
@@ -1125,6 +1134,7 @@ let outer :: Ampar (Dest ()) ()
                     in fromAmpar' inner
   in fromAmpar' outer
 \end{minted}
+% TODO: fix alignment
 
 % Pas super convaincu par cette slide
 \end{frame}
@@ -1152,11 +1162,88 @@ Formal language $\lambda_d$:
 
 \begin{frame}[fragile]{Combining linearity and ages in a same semiring}
 
-Semiring
+Modes are elements of a ringoid $(\textcolor{modecolor}{M}, \textcolor{modecolor}{+}, \textcolor{modecolor}{\cdot}, \textcolor{modecolor}{1})$
+\begin{itemize}
+  \item \textcolor{modecolor}{$+$} is used to combine modes when a same variable is used in multiple sub-expressions
+  \item \textcolor{modecolor}{$\cdot$} is used to combine modes when a substitution/function composition happens
+  \item Linearity is represented as ringoid\\
+        $(\{\textcolor{modecolor}{l}, \textcolor{modecolor}{\omega}\}, \textcolor{modecolor}{+}, \textcolor{modecolor}{\cdot}, \textcolor{modecolor}{l})$
+  \item Ages are represented as ringoid\\
+        $(\{\textcolor{modecolor}{\uparrow^n} \mid \textcolor{modecolor}{n} \in \mathbb{N}, \textcolor{modecolor}{\infty}\}, \textcolor{modecolor}{\overset{\infty}{=}}, \textcolor{modecolor}{\cdot}, \textcolor{modecolor}{\uparrow^0})$
+\end{itemize}
+
+\textcolor{teal}{$\pmb{\to}$} Product of ringoids is a ringoid!
+
+\medskip
+
+\textit{\small Technique from ``A Unified View of Modalities in Type Systems'', Bernardy \& al. (2020)}
 
 % Parler de la formalisation en Rocq
 \end{frame}
 
+\begin{frame}[fragile]{Type system -- balancing destinations and holes}
+
+We ensure holes and destinations are balanced using a subtractive typing technique:
+\begin{itemize}
+  \item The presence of a hole \textbf{provides} a special binding in the typing context
+  \item The use of a destination \textbf{requires} a special binding in the typing context\\(same as a variable use)
+\end{itemize}
+
+\textcolor{teal}{$\pmb{\to}$} A closed term is necessarily well-balanced wrt. destinations and holes.
+
+\end{frame}
+
+\begin{frame}[fragile]{Semantics and formal proof of safety}
+
+Theoretical language $\lambda_d$ is equipped with small-step semantics.
+
+\begin{itemize}
+  \item Controlled mutations resulting from destination filling are implemented as substitutions on the evaluation context\\
+  \textit{\small Syntactic manipulation of the evaluation context as a stack}
+  \item No need for dedicated memory model
+\end{itemize}
+
+Type safety theorem (progress + preservation) proved in Coq using standard techniques.
+
+Named hole substitution lemma is the most technical part.
+
+\end{frame}
+
+\begin{frame}[fragile]{Conclusion}
+
+Thanks for your attention! I'll be happy to answer your questions.
+
+\textbf{Contributions}
+\begin{itemize}
+  \item ``Destination-passing style programming: a Haskell implementation'' + \texttt{linear-dest}\\
+  {\small JFLA 2024, \url{inria.hal.science/hal-04406360}}
+  \item ``A zero-copy interface to compact regions powered by destinations'' (talk), Bagrel\\
+  {\small HIW 2024, \url{www.youtube.com/watch?v=UIw0s-yEkfw}}
+  \item ``Destination Calculus: A Linear $\lambda$-Calculus for Purely Functional Memory Writes''\\
+  {\small Co-authored with A. Spiwack, OOPSLA1 2025, \url{dl.acm.org/doi/10.1145/3720423}}
+  \item ``Primitives for zero-copy compact regions'' (GHC Proposal)\\
+  {\small Work in progress, \url{github.com/ghc-proposals/ghc-proposals/pull/683}}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Functional DPS API -- linearity and scope-escape free}
+\begin{minted}[escapeinside=°°]{haskellc}
+data UAmpar s t
+newUAmpar    :: Token           ⊸ UAmpar s (Dest s)
+toUAmpar     :: Token   ⊸ s   °\hspace*{0.7ex}°→ UAmpar s ()
+tokenBesides :: UAmpar s t      ⊸ (UAmpar s t, Token)
+fromUAmpar   :: UAmpar s (Ur t) ⊸ Ur (s, t)
+fromUAmpar'  :: UAmpar s ()     ⊸ Ur s
+updWith      :: UAmpar s t      ⊸ (t ⊸ u) ⊸ UAmpar s u
+
+data UDest t
+type family UDestsOf lCtor t  -- returns dests associated to fields of constructor
+fill     :: ∀ lCtor    .  UDest t ⊸ UDestsOf lCtor t
+fillComp :: UAmpar s t ⊸ UDest s ⊸ t
+fillLeaf :: t          °\hspace*{0.2ex}°→ UDest t ⊸ ()
+\end{minted}
+\end{frame}
 
 % NOTE: Retombées concrètes (proposal GHC, etc)
 % NOTE: Thèse industrielle ancrée dans le réel
