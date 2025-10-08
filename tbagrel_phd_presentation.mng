@@ -661,7 +661,7 @@ Data structures are heap-allocated; made of \textbf{linked} heap objects:
   \end{itemize}
 
 \begin{center}
-\begin{minipage}{0.23\linewidth}\begin{center} {\Large \mintinline{haskellc}/[1, 2]/}\\\textit{\small a.k.a.}\\{\Large \mintinline{haskellc}/¤(:) 1 (¤(:) 2 [])/}\end{center}\end{minipage} \scalebox{1.6}{\qquad $\rightsquigarrow$ \quad \adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\begin{minipage}{0.23\linewidth}\begin{center} {\Large \mintinline{haskellc}/[1, 2]/}\\\textit{\small a.k.a.}\\{\Large \mintinline{haskellc}/¤(:) 1 (¤(:) 2 [])/}\end{center}\end{minipage} \scalebox{1.6}{\qquad $\rightsquigarrow$ \quad \adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
 \end{center}
 
 \vspace*{-0.5cm}
@@ -684,7 +684,7 @@ Data structures: immutable, thus built from the leaves up to the root.
 \end{itemize}
 
 \begin{center}
-\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
 \end{center}
 
 \begin{itemize}
@@ -702,7 +702,7 @@ What about lifting this limitation?
 \end{itemize}
 
 \begin{center}
-\hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj-dps-3}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/constructor-heap-obj}}}
+\hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-3}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
 \end{center}
 
 \vspace*{0.5cm}
@@ -787,7 +787,7 @@ Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
   \item only way to refer to and act on an incomplete structure
 \end{itemize}
 \end{minipage} \hfill \begin{minipage}{0.36\linewidth}
-\hspace*{-1cm}\scalebox{1.2}{\adjustbox{valign=c}{\tikzfig{schemas/incomplete}}}
+\hspace*{-1cm}\scalebox{1.2}{\adjustbox{valign=c}{\tikzfig{schemas/pres-incomplete}}}
 \end{minipage}
 
 % NOTE: Dire que le boxing des dests n'est pas spécialement requis, c'est un peu spécifique à Haskell
@@ -979,7 +979,7 @@ which is the only \textbf{producer} of \mintinline{haskellc}/Resource/ values
 User must pass a \textbf{linear function} consuming the resource in this scope:
 \begin{itemize}
   \item \mintinline{haskellc}/withResource (\res -> linearConsume res ; Ur ())/ \quad is \quad \textcolor{green}{OK}\\[0.1cm]
-  \item \begin{minipage}[c]{0.38\linewidth}\mintinline{haskellc}/withResource (\res -> res)/ or\\\mintinline{haskellc}/withResource (\res -> Ur res)/\end{minipage} are\quad\textcolor{red}{REJECTED} (cannot leak)
+  \item \begin{minipage}[c]{0.38\linewidth}\mintinline{haskellc}/withResource (\res -> res)/ or\\\mintinline{haskellc}/withResource (\res -> Ur res)/\end{minipage} \quad are\quad\textcolor{red}{REJECTED} (cannot leak)
 \end{itemize}
 
 \end{frame}
@@ -988,9 +988,9 @@ User must pass a \textbf{linear function} consuming the resource in this scope:
 A \mintinline{haskellc}/dup/able, scope-limited \mintinline{haskellc}/Token/ to infect \mintinline{haskellc}/Ampar/ with linearity:
 \begin{minted}{haskellc}
 data Token
-dup :: Token ⊸ (Token, Token)
+dup  :: Token ⊸ (Token, Token)
 drop :: Token ⊸ ()
-withToken :: ∀ t. (Token ⊸ Ur t) ⊸ Ur t
+withToken :: (Token ⊸ Ur t) ⊸ Ur t
 \end{minted}
 
 Making sure \mintinline{haskellc}/Ampar/s are used linearly, e.g.:\\[0.1cm]

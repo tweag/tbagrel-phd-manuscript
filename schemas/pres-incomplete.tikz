@@ -8,7 +8,7 @@
 		\node [style=normal] (117) at (7.125, -2.25) {};
 		\node [style=normal] (118) at (6.25, -1.75) {\mintinline{haskellc}/¤Dest/};
 		\node [style=bullet] (119) at (7.5, -1.75) {};
-		\node [style=medium] (125) at (1.25, -0.75) {\mintinline{haskellc}/⩴ Ampar [Int] (Dest [Int])/};
+		\node [style=medium] (125) at (1.25, -0.75) {\mintinline{haskellc}/:: Ampar [Int] (Dest [Int])/};
 		\node [style=normal] (126) at (1.25, -3.75) {};
 		\node [style=normal] (127) at (2.25, -3.75) {};
 		\node [style=normal] (128) at (3.25, -3.75) {};
@@ -47,8 +47,8 @@
 		\node [style=bullet] (304) at (1.75, -1.75) {};
 		\node [style=bullet] (305) at (2.75, -1.75) {};
 		\node [style=none] (306) at (1.75, -3.75) {};
-		\node [style=medium] (307) at (6.5, -0.75) {\mintinline{haskellc}/⩴ Dest [Int]/};
-		\node [style=medium] (308) at (2.75, -3.25) {\mintinline{haskellc}/⩴ [Int]/};
+		\node [style=medium] (307) at (6.5, -0.75) {\mintinline{haskellc}/:: Dest [Int]/};
+		\node [style=medium] (308) at (2.75, -3.25) {\mintinline{haskellc}/:: [Int]/};
 		\node [style=normal] (309) at (3.25, -4.875) {};
 		\node [style=normal] (310) at (4.25, -4.875) {};
 		\node [style=normal] (311) at (4.25, -5.875) {};
