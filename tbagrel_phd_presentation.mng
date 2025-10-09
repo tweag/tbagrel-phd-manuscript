@@ -956,7 +956,7 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Functional DPS API -- Simplified overview}
+\begin{frame}[fragile]{Functional DPS API -- Simplified version}
 \begin{minted}{haskellc}
 data Ampar s t
 newAmpar   :: Ampar s (Dest s)
@@ -965,7 +965,7 @@ fromAmpar' :: Ampar s () → s
 updWith    :: Ampar s t  → (t → u) → Ampar s u
 
 data Dest t
-type family DestsOf lCtor t  -- returns dests associated to fields of constructor
+type family DestsOf lCtor t  -- returns dests corresponding to fields of lCtor
 fill     :: ∀ lCtor   .  Dest t → DestsOf lCtor t
 fillComp :: Ampar s t → Dest s → t
 fillLeaf :: t         → Dest t → ()
@@ -1089,7 +1089,7 @@ fromAmpar'   :: Ampar s ()     ⊸ s
 updWith      :: Ampar s t      ⊸ (t ⊸ u) ⊸ Ampar s u
 
 data Dest t
-type family DestsOf lCtor t  -- returns dests associated to fields of constructor
+type family DestsOf lCtor t  -- returns dests corresponding to fields of lCtor
 fill     :: ∀ lCtor   .  Dest t ⊸ DestsOf lCtor t
 fillComp :: Ampar s t ⊸ Dest s ⊸ t
 fillLeaf :: t         ⊸ Dest t ⊸ ()
@@ -1210,7 +1210,6 @@ let outer :: Ampar (Dest ()) ()
  in fromAmpar' outer
 \end{minted}
 
-% Pas super convaincu par cette slide
 \end{frame}
 
 \section{Formalization}
@@ -1226,7 +1225,7 @@ Formal language $\lambda_d$:
 
 \textcolor{teal}{$\pmb{\to}$} Easy to add another mode for age control
 
-% Linearity only appear in identity/variable rule
+% Linearity or ages only appear in the rules that need them, otherwise modes are just passed around with no cost
 \end{frame}
 
 % Modal system, like Linear Haskell, defined in a generic way
@@ -1277,7 +1276,7 @@ Theoretical language $\lambda_d$ is equipped with small-step semantics.
   \item No need for dedicated memory model
 \end{itemize}
 
-Type safety theorem (progress + preservation) proved in Coq using standard techniques.
+Type safety theorem (progress + preservation) proved in Rocq using standard techniques.
 
 Named hole substitution lemma is the most technical part.
 
@@ -1301,7 +1300,7 @@ Thanks for your attention! I'll be happy to answer your questions.
 \end{frame}
 
 
-\begin{frame}[fragile]{Functional DPS API -- linearity and scope-escape free}
+\begin{frame}[fragile]{Functional DPS API -- scope-escape free}
 \begin{minted}[escapeinside=°°]{haskellc}
 data UAmpar s t
 newUAmpar    :: Token           ⊸ UAmpar s (Dest s)
@@ -1312,7 +1311,7 @@ fromUAmpar'  :: UAmpar s ()     ⊸ Ur s
 updWith      :: UAmpar s t      ⊸ (t ⊸ u) ⊸ UAmpar s u
 
 data UDest t
-type family UDestsOf lCtor t  -- returns dests associated to fields of constructor
+type family UDestsOf lCtor t  -- returns dests corresponding to fields of lCtor
 fill     :: ∀ lCtor    .  UDest t ⊸ UDestsOf lCtor t
 fillComp :: UAmpar s t ⊸ UDest s ⊸ t
 fillLeaf :: t          °\hspace*{0.2ex}°→ UDest t ⊸ ()
