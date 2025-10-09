@@ -392,6 +392,7 @@ TSWLatexianTemp*
 *.tex
 tbagrel_phd_manuscript.pdf
 tbagrel_phd_presentation.pdf
+tbagrel_phd_summary_fr.pdf
 destination_calculus_rules_mod.ott
 
 .direnv

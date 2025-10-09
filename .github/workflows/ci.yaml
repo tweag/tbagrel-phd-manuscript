@@ -17,6 +17,8 @@ jobs:
       run: nix-shell --pure --run "make tbagrel_phd_manuscript.pdf"
     - name: Make Presentation PDF
       run: nix-shell --pure --run "make tbagrel_phd_presentation.pdf"
+    - name: Make Summary PDF
+      run: nix-shell --pure --run "make tbagrel_phd_summary_fr.pdf"
     - name: Upload Manuscript PDF
       uses: actions/upload-artifact@v4
       with:
@@ -28,4 +30,10 @@ jobs:
       with:
         name: tbagrel_phd_presentation
         path: tbagrel_phd_presentation.pdf
+        retention-days: 90
+    - name: Upload Summary PDF
+      uses: actions/upload-artifact@v4
+      with:
+        name: tbagrel_phd_summary_fr
+        path: tbagrel_phd_summary_fr.pdf
         retention-days: 90

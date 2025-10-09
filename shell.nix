@@ -82,6 +82,7 @@ pkgs.mkShell
           supertabular
           textcase
           tikz-cd
+          tikzmark
           todonotes
           tools
           lastpage

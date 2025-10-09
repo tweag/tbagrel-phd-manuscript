@@ -81,6 +81,8 @@
 
 %% For schemas
 \usepackage{tikzit}
+\usetikzlibrary{calc}
+\usetikzlibrary{tikzmark}
 \input{tikzstyle.tikzstyles}
 %\tikzset{every picture/.style={line width=10pt}}
 \newcommand{\figcomment}[1]{\textcolor{gray}{#1}}
@@ -626,6 +628,87 @@
 \begin{document}
 \maketitle
 
+% total sections recorded to .aux (run twice). If you already have this, keep yours.
+\newcounter{TBtotalsections}
+\makeatletter
+\pretocmd{\section}{\stepcounter{TBtotalsections}}{}{}
+\AtEndDocument{%
+  \immediate\write\@auxout{%
+    \string\gdef\string\TBTotalSections{\arabic{TBtotalsections}}%
+  }%
+}
+\providecommand\TBTotalSections{1}
+\makeatother
+
+% Top→bottom left-side progress bar, aligned to a marked block (see usage below).
+\newcommand{\TBSectionProgressBarLeft}[1]{%
+  % #1 = horizontal gap between bar and ToC text (e.g. 6pt)
+  \begin{tikzpicture}[remember picture,overlay]
+    \def\barw{2pt}
+    \def\gap{#1}
+    % anchors from tikzmark (defined around your ToC block)
+    \coordinate (Top) at ($(pic cs:TBtocTop)+(-\gap,-15pt)$);
+    \coordinate (Bot) at ($(pic cs:TBtocBot)+(-\gap,27pt)$);
+    % background track
+    \draw[line width=\barw, draw=black!15] (Top) -- (Bot);
+    % ratio 0..1, fill from Top toward Bot
+    \pgfmathsetmacro{\TBRatio}{min(1, max(0,
+      (\insertsectionnumber-0.5) / max(1, \TBTotalSections)
+    ))}
+    \path (Top) -- (Bot) coordinate[pos=\TBRatio] (FillEnd);
+    \draw[line width=\barw, draw=teal] (Top) -- (FillEnd);
+  \end{tikzpicture}%
+}
+
+% --- colors & fonts (as before) ---
+\setbeamercolor{section in toc}{fg=teal}
+\setbeamercolor{section in toc shaded}{parent=normal text, fg=normal text.fg}
+\setbeamerfont{section in toc shaded}{size=\Large,series=\mdseries}
+\setbeamerfont{section in toc}{size=\LARGE,series=\bfseries}
+
+% Replace Metropolis’ default sectionpage
+\metroset{sectionpage=none}
+
+\AtBeginSection[]{
+  \begin{frame}[plain]
+    \vfill
+    \centering
+    \begin{minipage}{0.7\textwidth}
+      \tikzmark{TBtocTop}
+      % compute neighbors
+      \newcount\PrevSec \PrevSec=\numexpr\insertsectionnumber-1\relax
+      \newcount\NextSec \NextSec=\numexpr\insertsectionnumber+1\relax
+
+      % 1) previous sections (greyed, above) — only if any
+      \ifnum\PrevSec>0
+        \tableofcontents[
+          sections={1-\the\PrevSec},
+          sectionstyle=show/shaded,
+          subsectionstyle=hide
+        ]
+      \fi
+
+      % 2) current section (centered, normal color)
+      \tableofcontents[
+        sections={\insertsectionnumber-\insertsectionnumber},
+        sectionstyle=show/hide,
+        subsectionstyle=hide
+      ]
+
+      % 3) next sections (greyed, below) — open-ended range to the end
+      \tableofcontents[
+        sections={\the\NextSec-},
+        sectionstyle=show/shaded,
+        subsectionstyle=hide
+      ]
+
+      \hbox{}\tikzmark{TBtocBot}
+    \end{minipage}
+    \TBSectionProgressBarLeft{20pt}
+    \vfill
+  \end{frame}
+}
+
 \begin{frame}{Programming languages}
 
 \begin{itemize}
@@ -723,18 +806,6 @@ Unitialized memory/\textbf{holes}:
 
 Need proper functional abstraction to manipulate incomplete structures.
 
-\end{frame}
-
-\begin{frame}{Outline}
-
-\begin{itemize}
-  \item Destination-passing style interface
-  \item Safety
-  \begin{itemize}
-    \item Linear Types
-    \item Scope Control with Ages system
-  \end{itemize}
-\end{itemize}
 \end{frame}
 
 \section{Destination passing}
@@ -904,19 +975,23 @@ fillLeaf :: t         → Dest t → ()
 % NOTE: Dire que c'est un peu un mensonge, que ça ne fonctionne pas encore
 \end{frame}
 
-\section{Safety}
+\section{Safety concerns for functional DPS}
 
 \begin{frame}[fragile]{Unrestricted use of destinations}
 \begin{minted}{haskellc}
 -- fromAmpar' :: Ampar s () → s
-let complete :: Ampar [Int] () = newAmpar `updWith` \d → ()
- in print (fromAmpar' complete)
+let apparentlyComplete :: Ampar [Int] () = newAmpar `updWith` \d → ()
+ in print (fromAmpar' apparentlyComplete)
 -- SEGFAULT!
 \end{minted}
-% TODO: ajouter le schéma mémoire associé
+
+\begin{center}
+\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fromAmpar-segfault}}}
+\end{center}
+
 \end{frame}
 
-\section{Linearity}
+\section{Linear types}
 
 \begin{frame}[fragile]{Linearity to the rescue}
 
@@ -925,7 +1000,7 @@ Linear types and linearity let us control resource consumption of functions.
 Idea : \textbf{destinations are linear resources} i.e. must be consumed \textbf{exactly once}:
 \begin{itemize}
   \item consumed less than once \phantom{a}$\to$ hole remained unfilled
-  \item consumed more than once $\to$ breaking the write-once/immutability property % TODO change
+  \item consumed more than once $\to$ order of evaluation becomes semantically relevant
 \end{itemize}
 
 Unconsumed destination = witnesses a remaining hole
@@ -937,8 +1012,8 @@ Haskell supports linear types since GHC 9.0.1\\
 
 \medskip
 
-\mintinline{haskellc}/a ⊸ b/ = Linear function from \mintinline{haskellc}/a/ to \mintinline{haskellc}/b/\\[0.1cm]
-means that if the result of type \mintinline{haskellc}/b/ is consumed exactly once, then the argument of type \mintinline{haskellc}/a/ is consumed exactly once too.
+\mintinline{haskellc}/s ⊸ t/ = Linear function from \mintinline{haskellc}/s/ to \mintinline{haskellc}/t/\\[0.1cm]
+means that if the result of type \mintinline{haskellc}/t/ is consumed exactly once, then the argument of type \mintinline{haskellc}/s/ is consumed exactly once too.
 \end{frame}
 
 \begin{frame}[fragile]{Linear Haskell overview (2/2)}
@@ -972,7 +1047,7 @@ Linearity chains consumption requirements, but it needs to be bootstrapped.
 
 Trick: scoping function
 
-\quad\mintinline{haskellc}/withResource :: ∀ t. (Resource ⊸ Ur t) ⊸ Ur t/
+\quad\mintinline{haskellc}/withResource :: (Resource ⊸ Ur t) ⊸ Ur t/
 
 which is the only \textbf{producer} of \mintinline{haskellc}/Resource/ values
 
@@ -1026,29 +1101,28 @@ fillLeaf :: t         ⊸ Dest t ⊸ ()
 \begin{frame}[fragile]{Scope escape -- Example}
 \begin{minted}{haskellc}
 let outer :: Ampar (Dest ()) ()
-     outer = (newAmpar tok1) `updWith` \(dd :: Dest (Dest ())) →
-                  let inner :: Ampar () ()
-                       inner = (newAmpar tok2) `updWith` \(d :: Dest ()) →
-                                    dd &fillLeaf d
-                    in fromAmpar' inner
-  in fromAmpar' outer
+    outer = (newAmpar tok1) `updWith` \(dd :: Dest (Dest ())) →
+              let inner :: Ampar () ()
+                  inner = (newAmpar tok2) `updWith` \(d :: Dest ()) →
+                            dd &fillLeaf d
+               in fromAmpar' inner
+ in fromAmpar' outer
 \end{minted}
 \end{frame}
-% TODO: fix alignment
 
 \begin{frame}[fragile]{Scope escape -- Bigger picture}
 
 Not \emph{just} an artificial edge-case
 
 \begin{itemize}
-  \item Linear API are often based on scope-limited resource consumption.
-  \item Any form of (linear) storage for linear resources breaks that.\\
+  \item Linear API are often based on scope-limited resource consumption
+  \item Any form of (linear) storage for linear resources breaks that\\
         \mintinline{haskellc}/storeAway :: t ⊸ ()  -- resource goes away magically/
 \end{itemize}
 
 \end{frame}
 
-\section{Solutions to avoid scope escape}
+\section{Avoiding scope escape in Haskell}
 
 \begin{frame}[fragile]{With just Haskell type system (1/2)}
 
@@ -1084,7 +1158,7 @@ Back to Minamide-like system where we operate on \mintinline{haskellc}/Ampar/s d
 
 \end{frame}
 
-\section{A more general solution: enrich the type system with scope control}
+\section{A more general solution: age control}
 
 \begin{frame}[fragile]{Age system}
 Principle: we track the age of resources.
@@ -1096,6 +1170,7 @@ Principle: we track the age of resources.
 \end{frame}
 
 \begin{frame}[fragile]{Age system -- Example}
+Colors indicate the scope in which each object lives.
 \begin{center}
 \hspace*{-0.7cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes}}}
 \end{center}
@@ -1127,14 +1202,13 @@ The RHS $\ottnt{c}$ (content being stored away) must be \textbf{exactly 1 scope 
 \begin{frame}[fragile]{Age control prevents scope escape}
 \begin{minted}{haskellc}
 let outer :: Ampar (Dest ()) ()
-     outer = (newAmpar tok1) `updWith` \(dd :: ↑⁰ Dest (Dest ())) →
-                  let inner :: Ampar () ()
-                       inner = (newAmpar tok2) `updWith` \(d :: ↑⁰ Dest ()) →
-                                    (dd :: ↑¹) &fillLeaf (d :: ↑⁰) -- REJECTED
-                    in fromAmpar' inner
-  in fromAmpar' outer
+    outer = (newAmpar tok1) `updWith` \(dd :: ↑⁰ Dest (Dest ())) →
+              let inner :: Ampar () ()
+                  inner = (newAmpar tok2) `updWith` \(d :: ↑⁰ Dest ()) →
+                            (dd :: ↑¹) &fillLeaf (d :: ↑⁰) -- REJECTED
+               in fromAmpar' inner
+ in fromAmpar' outer
 \end{minted}
-% TODO: fix alignment
 
 % Pas super convaincu par cette slide
 \end{frame}
@@ -1150,7 +1224,7 @@ Formal language $\lambda_d$:
 \item linearity encoded as a mode like in \textit{``Linear Haskell''}
 \end{itemize}
 
-\textcolor{teal}{$\pmb{\to}$} Easy to add another mode for ages / scope control
+\textcolor{teal}{$\pmb{\to}$} Easy to add another mode for age control
 
 % Linearity only appear in identity/variable rule
 \end{frame}
@@ -1176,7 +1250,7 @@ Modes are elements of a ringoid $(\textcolor{modecolor}{M}, \textcolor{modecolor
 
 \medskip
 
-\textit{\small Technique from ``A Unified View of Modalities in Type Systems'', Bernardy \& al. (2020)}
+\textit{\small Technique borrowed from ``A Unified View of Modalities in Type Systems'', Bernardy \& al. (2020)}
 
 % Parler de la formalisation en Rocq
 \end{frame}
@@ -1217,7 +1291,7 @@ Thanks for your attention! I'll be happy to answer your questions.
 \begin{itemize}
   \item ``Destination-passing style programming: a Haskell implementation'' + \texttt{linear-dest}\\
   {\small JFLA 2024, \url{inria.hal.science/hal-04406360}}
-  \item ``A zero-copy interface to compact regions powered by destinations'' (talk), Bagrel\\
+  \item ``A zero-copy interface to compact regions powered by destinations'' (Talk)\\
   {\small HIW 2024, \url{www.youtube.com/watch?v=UIw0s-yEkfw}}
   \item ``Destination Calculus: A Linear $\lambda$-Calculus for Purely Functional Memory Writes''\\
   {\small Co-authored with A. Spiwack, OOPSLA1 2025, \url{dl.acm.org/doi/10.1145/3720423}}

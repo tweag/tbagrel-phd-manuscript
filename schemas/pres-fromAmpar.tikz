@@ -57,7 +57,7 @@
 		\node [style=normal] (475) at (0.75, 0.75) {\mintinline{haskellc}/¤Ampar/};
 		\node [style=bullet] (476) at (2.25, 0.75) {};
 		\node [style=bullet] (477) at (3.25, 0.75) {};
-		\node [style=normal] (478) at (-2.25, 0.75) {\mintinline{haskellc}/fromAmpar/};
+		\node [style=normal] (478) at (-2.25, 0.75) {\mintinline{haskellc}/fromAmpar'/};
 		\node [style=normal] (479) at (1.75, 1.75) {\mintinline{haskellc}/:: Ampar [Int] ()/};
 		\node [style=normal] (480) at (11.75, 1.25) {};
 		\node [style=normal] (481) at (12.75, 1.25) {};
