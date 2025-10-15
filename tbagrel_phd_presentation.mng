@@ -615,7 +615,7 @@
 \setlist[enumerate]{label=\textbf{(\arabic*)}}
 
 \title{Formalization and Implementation of Safe Destination Passing in Pure Functional Programming Settings}
-\date{PhD Defense --- October 1\textsuperscript{st}, 2025}
+\date{PhD Defense --- November 14\textsuperscript{th}, 2025}
 \author{Thomas \textsc{Bagrel}}
 \institute{LORIA/Inria Nancy \& Tweag}
 
@@ -722,13 +722,13 @@
 
 \begin{frame}[fragile]{Functional languages -- why?}
 
-Modeled after mathematical principles
+Modeled after mathematical principles\pause
 
 \begin{itemize}
   \item[\textcolor{teal}{$\pmb{\to}$}] Easier to reason about behavior
-  \item[\textcolor{teal}{$\pmb{\to}$}] Better safety guarantees
+  \pause\item[\textcolor{teal}{$\pmb{\to}$}] Better safety guarantees
 \end{itemize}
-
+\pause
 Memory managed automatically: unpredictable overhead / hard to tune
 
 \end{frame}
@@ -767,12 +767,14 @@ Data structures: immutable, thus built from the leaves up to the root.
 \end{itemize}
 
 \begin{center}
-\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
+\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-1}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
 \end{center}
 
+\onslide<5->{
 \begin{itemize}
   \item Forces us to build structures in an order that might not be the most natural one.
 \end{itemize}
+}
 
 \end{frame}
 
@@ -785,7 +787,7 @@ What about lifting this limitation?
 \end{itemize}
 
 \begin{center}
-\hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-0}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-1}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-2}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-3}}$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
+\hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-1}}$\pause\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-3}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
 \end{center}
 
 \vspace*{0.5cm}
@@ -814,6 +816,8 @@ Need proper functional abstraction to manipulate incomplete structures.
 Coming from old C days:
 
 \begin{minipage}[t]{0.6\linewidth}
+\textcolor{red}{\textbf{Naive style}}
+
 \begin{minted}{c}
 MyStruct * fooNaive() {
   MyStruct *res = malloc(sizeof(MyStruct));
@@ -822,6 +826,8 @@ MyStruct * fooNaive() {
 }
 \end{minted}
 \end{minipage} \hfill \begin{minipage}[t]{0.39\linewidth}
+\textcolor{green}{\textbf{DPS style}}
+
 \begin{minted}{c}
 void fooDps(MyStruct *dest) {
   dest->f1 = 1; dest->f2 = 2;
@@ -829,12 +835,13 @@ void fooDps(MyStruct *dest) {
 \end{minted}
 \end{minipage}
 
+\pause
+\medskip
+
 Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
 \begin{itemize}
-  \item can allocate several slots at once\\
-  \mintinline{c}/MyStruct *vec = malloc(2 * sizeof(MyStruct)); fooDps(&vec[0]); fooDps(&vec[1]);/
-  \item can allocate on the stack\\
-  \mintinline{c}/MyStruct res; fooDps(&res);/
+  \item can allocate several slots at once
+  \item can allocate on the stack
 \end{itemize}
 
 \end{frame}
@@ -853,11 +860,11 @@ Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
 
 \medskip
 
-\mintinline{haskellc}/Ampar/: first-class opaque wrapper for an\\\phantom{\mintinline{haskellc}/Ampar/:} \textbf{incomplete structure} and its destinations
+\onslide<2->{\mintinline{haskellc}/Ampar/: first-class opaque wrapper for an\\\phantom{\mintinline{haskellc}/Ampar/:} \textbf{incomplete structure} and its destinations
 \begin{itemize}
   \item only way to refer to and act on an incomplete structure
 \end{itemize}
-\end{minipage} \hfill \begin{minipage}{0.36\linewidth}
+}\end{minipage} \hfill \begin{minipage}{0.36\linewidth}
 \hspace*{-1cm}\scalebox{1.2}{\adjustbox{valign=c}{\tikzfig{schemas/pres-incomplete}}}
 \end{minipage}
 
@@ -879,6 +886,7 @@ Every operation is done through \mintinline{haskellc}/Ampar/ and \mintinline{has
 
 E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with two missing values
 
+\pause
 \medskip
 
 \mintinline{haskellc}/data Dest t = ¤Dest Addr#/ \quad {\small \textit{(opaque)}}
@@ -889,7 +897,7 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 
 \end{frame}
 
-\begin{frame}[fragile]{Example: Breadth-first tree relabeling in DPS (1/2)}
+\begin{frame}[fragile,t]{Example: Breadth-first tree relabeling in DPS (1/2)}
 
 \mintinline{haskellc}/data Tree t = ¤Nil | ¤Node t (Tree t) (Tree t)/
 
@@ -897,42 +905,83 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 
 % On peut dire que l'algo naturel impératif est un peu "fonctionnel" dans l'idée, car la mutation en place est assez optionelle, en soi on process l'arbre dans l'ordre BF et on en créé un nouveau dans cet ordre
 
-\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem}}}
+\only<1>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem-0}}}}
+\only<2>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem-1}}}}
+\only<3>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem-2}}}}
+\only<4>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem-3}}}}
+\only<5>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem-4}}}}
+\only<6>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem-5}}}}
+\only<7>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem-6}}}}
+\only<8>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem}}}}
+
 \end{frame}
 
-\begin{frame}[fragile]{Example: Breadth-first tree building in DPS (2/2)}
+\begin{frame}[fragile,t]{Example: Breadth-first tree building in DPS (2/2)}
 \vspace*{1cm}
 
-\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-answer}}}
+\only<1>{\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-answer-0}}}}
+\only<2>{\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-answer-1}}}}
+\only<3>{\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-answer-2}}}}
+\only<4>{\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-answer-3}}}}
+\only<5>{\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-answer}}}}
 \end{frame}
 
-\begin{frame}[fragile,t]{Functional DPS API -- Functions (1/2)}
+\begin{frame}[fragile]{Functional DPS API -- Overview}
+\begin{minted}{haskellc}
+data Ampar s t
+data Dest t
+type family DestsOf 'Ctor t  -- returns dests corresponding to fields of Ctor
+
+-- Functions on destinations (infix)
+&fill @'Ctor :: Dest t              → DestsOf 'Ctor t
+&fillComp    :: Dest s → Ampar s t → t
+&fillLeaf    :: Dest t → t         → ()
+
+-- Functions on Ampar
+newAmpar   :: Ampar s (Dest s)
+fromAmpar' :: Ampar s () → s
+`updWith`  :: Ampar s t  → (t → u) → Ampar s u  -- (infix)
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile,t]{Functional DPS API -- Functions (1/6)}
 \begin{itemize}
 \only<1->{
-\item Allocate a hollow data constructor and plug it into a hole? \mintinline{haskellc}/&fill @'Ctor/}
+\item Allocate a hollow data constructor and plug it into a hole? \mintinline{haskellc}/&fill @'Ctor/\\[0.1cm]
+}
 \only<1>{
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons-init}}}\\[0.3cm]
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil-init}}}}
 \only<2>{
+\mintinline{haskellc}/&fill @'(:) :: Dest [t] → (Dest t, Dest [t])/\\[0.1cm]
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons}}}\\[0.3cm]
+\mintinline{haskellc}/&fill @'[] :: Dest [t] → ()/\\[0.1cm]
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil}}}}
+\end{itemize}
+\end{frame}
 % On regarde sous le tapis d'abord
 % On veut agir sur un trou, et y connecter un nouveau chainon pour notre liste chainee, aka hollow cons constructor
 % On alloue ce chainon, et on le connecte au trou
 % Dans le monde du dessus, pour agir sur un trou on doit utiliser la destination qui pointe dessus
 % Et chaque trou restant dans une structure doit etre representé par une destination
 % Conséquemment, l'entrée c'est la dest qui pointe sur le trou sur lequel on veut agir, et la sortie c'est 2 nouvelles dests pour les 2 nouveaux trous dans la structure.
-\only<3->{
+\begin{frame}[fragile,t]{Functional DPS API -- Functions (2/6)}
+\begin{itemize}
+\only<1->{
 \item Fill a hole with an already complete value? \mintinline{haskellc}/&fillLeaf/}
-\only<3>{
+\only<1>{
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf-init}}}}
-\only<4>{
+\only<2>{
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf}}}}
-\only<5->{
+\end{itemize}
+\end{frame}
+\begin{frame}[fragile,t]{Functional DPS API -- Functions (3/6)}
+\begin{itemize}
+\only<1->{
 \item Plug an incomplete structure into the hole of another one? \mintinline{haskellc}/&fillComp/}
-\only<5>{
+\only<1>{
 \hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp-init}}}}
-\only<6>{
+\only<2>{
 \hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
 \end{itemize}
 \end{frame}
@@ -954,25 +1003,6 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 \only<6>{
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fromAmpar}}}}
 \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Functional DPS API -- Simplified version}
-\begin{minted}{haskellc}
-data Ampar s t
-newAmpar   :: Ampar s (Dest s)
-toAmpar    :: Ampar s ()
-fromAmpar' :: Ampar s () → s
-updWith    :: Ampar s t  → (t → u) → Ampar s u
-
-data Dest t
-type family DestsOf lCtor t  -- returns dests corresponding to fields of lCtor
-fill     :: ∀ lCtor   .  Dest t → DestsOf lCtor t
-fillComp :: Ampar s t → Dest s → t
-fillLeaf :: t         → Dest t → ()
-\end{minted}
-
-% NOTE: trouver quoi dire, peut être parler de la type family ?
-% NOTE: Dire que c'est un peu un mensonge, que ça ne fonctionne pas encore
 \end{frame}
 
 \section{Safety concerns for functional DPS}
