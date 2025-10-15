@@ -968,40 +968,47 @@ fromAmpar' :: Ampar s () → s
 \begin{frame}[fragile,t]{Functional DPS API -- Functions (2/6)}
 \begin{itemize}
 \only<1->{
-\item Fill a hole with an already complete value? \mintinline{haskellc}/&fillLeaf/}
+\item Fill a hole with an already complete value? \mintinline{haskellc}/&fillLeaf/\\[0.1cm]}
 \only<1>{
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf-init}}}}
 \only<2>{
+\mintinline{haskellc}/&fillLeaf :: Dest t → t → ()/\\[0.3cm]
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf}}}}
 \end{itemize}
 \end{frame}
 \begin{frame}[fragile,t]{Functional DPS API -- Functions (3/6)}
 \begin{itemize}
 \only<1->{
-\item Plug an incomplete structure into the hole of another one? \mintinline{haskellc}/&fillComp/}
+\item Plug an incomplete structure into the hole of another one? \mintinline{haskellc}/&fillComp/\\[0.1cm]}
 \only<1>{
 \hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp-init}}}}
 \only<2>{
+\mintinline{haskellc}/&fillComp :: Dest s → Ampar s t → t/\\[0.3cm]
 \hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
 \end{itemize}
 \end{frame}
 
 % Say we won't be able to add an incomplete, unconnected block. Every incomplete block must be wrap in an ampar
 
-\begin{frame}[fragile,t]{Functional DPS API -- Functions (2/2)}
+\begin{frame}[fragile,t]{Functional DPS API -- Functions (4/6)}
 \begin{itemize}
-\only<1->{
-\item Spawn new incomplete structure? \mintinline{haskellc}/newAmpar/}
-\only<2>{
-\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-newAmpar}}}}
-\only<3->{
-\item Access destinations of an Ampar? \mintinline{haskellc}/`updWith`/}
-\only<4>{
-\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWith}}}}
-\only<5->{
-\item Extract a completed structure? \mintinline{haskellc}/fromAmpar'/}
-\only<6>{
-\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fromAmpar}}}}
+\item Spawn new incomplete structure?\\
+\mintinline{haskellc}/newAmpar :: Ampar s (Dest s)/\\[0.7cm]
+\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-newAmpar}}}
+\end{itemize}
+\end{frame}
+\begin{frame}[fragile,t]{Functional DPS API -- Functions (5/6)}
+\begin{itemize}
+\item Access destinations of an Ampar?\\
+\mintinline{haskellc}/`updWith`  :: Ampar s t  → (t → u) → Ampar s u/\\[0.7cm]
+\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWith}}}
+\end{itemize}
+\end{frame}
+\begin{frame}[fragile,t]{Functional DPS API -- Functions (6/6)}
+\begin{itemize}
+\item Extract a completed structure?\\
+\mintinline{haskellc}/fromAmpar' :: Ampar s () → s/\\[0.7cm]
+\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fromAmpar}}}
 \end{itemize}
 \end{frame}
 
