@@ -1,0 +1,57 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=normal] (520) at (11.25, 0.375) {};
+		\node [style=none] (522) at (-7.75, -0.5) {};
+		\node [style=normal] (523) at (-6.5, -0.5) {};
+		\node [style=normal] (524) at (-6.5, -1.5) {};
+		\node [style=normal] (525) at (-5.5, -0.5) {};
+		\node [style=normal] (526) at (-5.5, -1.5) {};
+		\node [style=normal] (528) at (-6.75, 0) {\mintinline{haskellc}/:: Dest [Int]/};
+		\node [style=normal] (529) at (-12, 1.25) {};
+		\node [style=normal] (530) at (-10, 1.25) {};
+		\node [style=normal] (531) at (-9, 1.25) {};
+		\node [style=normal] (532) at (-9, 0.25) {};
+		\node [style=normal] (533) at (-8, 1.25) {};
+		\node [style=normal] (534) at (-8, 0.25) {};
+		\node [style=normal] (535) at (-10, 0.25) {};
+		\node [style=normal] (536) at (-12, 0.25) {};
+		\node [style=normal] (537) at (-11, 0.75) {\mintinline{haskellc}/¤Ampar/};
+		\node [style=bullet] (538) at (-8.5, 0.75) {};
+		\node [style=normal] (539) at (-10, 1.75) {\mintinline{haskellc}/:: Ampar [Int] (Dest [Int])/};
+		\node [style=normal] (540) at (-9.875, 1.125) {};
+		\node [style=normal] (541) at (-9.125, 1.125) {};
+		\node [style=normal] (542) at (-9.125, 0.375) {};
+		\node [style=normal] (543) at (-9.875, 0.375) {};
+		\node [style=normal] (544) at (-8.5, -0.5) {};
+		\node [style=normal] (545) at (-8.5, -1.5) {};
+		\node [style=normal] (546) at (-7.5, -1) {\mintinline{haskellc}/¤Dest/};
+		\node [style=bullet] (547) at (-6, -1) {};
+		\node [style=normal] (548) at (-9.5, 0.375) {};
+		\node [style=normal] (554) at (-9.5, 2.5) {\mintinline{haskellc}/newAmpar/};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=normaledge] (523.center) to (525.center);
+		\draw [style=normaledge] (526.center) to (525.center);
+		\draw [style=normaledge] (526.center) to (524.center);
+		\draw [style=normaledge] (524.center) to (523.center);
+		\draw [style=normaledge] (529.center) to (530.center);
+		\draw [style=normaledge] (530.center) to (531.center);
+		\draw [style=normaledge] (531.center) to (533.center);
+		\draw [style=normaledge] (533.center) to (534.center);
+		\draw [style=normaledge] (534.center) to (532.center);
+		\draw [style=normaledge] (532.center) to (535.center);
+		\draw [style=normaledge] (535.center) to (536.center);
+		\draw [style=normaledge] (536.center) to (529.center);
+		\draw [style=normaledge] (530.center) to (535.center);
+		\draw [style=normaledge] (531.center) to (532.center);
+		\draw [style=arrow, in=105, out=-90] (538) to (522.center);
+		\draw [style=hole] (540.center) to (541.center);
+		\draw [style=hole] (541.center) to (542.center);
+		\draw [style=hole] (542.center) to (543.center);
+		\draw [style=hole] (543.center) to (540.center);
+		\draw [style=normaledge] (545.center) to (524.center);
+		\draw [style=normaledge] (523.center) to (544.center);
+		\draw [style=normaledge] (544.center) to (545.center);
+		\draw [style=arrow, in=-120, out=-90, looseness=1.75] (547.center) to (548.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

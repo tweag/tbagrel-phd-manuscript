@@ -617,7 +617,17 @@
 \title{Formalization and Implementation of Safe Destination Passing in Pure Functional Programming Settings}
 \date{PhD Defense --- November 14\textsuperscript{th}, 2025}
 \author{Thomas \textsc{Bagrel}}
-\institute{LORIA/Inria Nancy \& Tweag}
+\institute{
+\begin{minipage}{\linewidth}
+\begin{center}
+\raisebox{-0.05cm}{\includegraphics[width=2.2cm]{tweag.png}}\qquad
+\includegraphics[width=2.2cm]{Logo_ULorraine-Couleur.png}\qquad
+\raisebox{-0.45cm}{\includegraphics[width=1.5cm]{LOGO_CNRS_BLEU.png}}\qquad
+\includegraphics[width=2.2cm]{inr_logo_rouge.png}\qquad
+\raisebox{-0.45cm}{\includegraphics[width=3cm]{logo_loria_complet_couleur.png}}
+\end{center}
+\end{minipage}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Actual presentation content
@@ -767,7 +777,7 @@ Data structures: immutable, thus built from the leaves up to the root.
 \end{itemize}
 
 \begin{center}
-\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-1}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
+\pause\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-1}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
 \end{center}
 
 \onslide<5->{
@@ -787,7 +797,7 @@ What about lifting this limitation?
 \end{itemize}
 
 \begin{center}
-\hspace*{-0.5cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-1}}$\pause\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-3}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
+\hspace*{-0.5cm}\scalebox{1.1}{\pause\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-1}}$\pause\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-3}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
 \end{center}
 
 \vspace*{0.5cm}
@@ -812,7 +822,7 @@ Need proper functional abstraction to manipulate incomplete structures.
 
 \section{Destination passing}
 
-\begin{frame}[fragile]{Here comes destination passing}
+\begin{frame}[fragile]{Here comes destination passing style (DPS)}
 Coming from old C days:
 
 \begin{minipage}[t]{0.6\linewidth}
@@ -838,10 +848,10 @@ void fooDps(MyStruct *dest) {
 \pause
 \medskip
 
-Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
+Caller is responsible for allocation in destination-passing-style function \mintinline{c}/fooDps/. More flexible:
 \begin{itemize}
   \item can allocate several slots at once
-  \item can allocate on the stack
+  \item can allocate on the stack (no \mintinline{c}/malloc/)
 \end{itemize}
 
 \end{frame}
@@ -862,6 +872,7 @@ Caller is responsible for allocation in \mintinline{c}/fooDps/. More flexible:
 
 \onslide<2->{\mintinline{haskellc}/Ampar/: first-class opaque wrapper for an\\\phantom{\mintinline{haskellc}/Ampar/:} \textbf{incomplete structure} and its destinations
 \begin{itemize}
+  \item read barrier
   \item only way to refer to and act on an incomplete structure
 \end{itemize}
 }\end{minipage} \hfill \begin{minipage}{0.36\linewidth}
@@ -913,6 +924,9 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 \only<6>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem-5}}}}
 \only<7>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem-6}}}}
 \only<8>{\hspace*{-1cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-problem}}}}
+
+\vfill
+\only<2-> {\small \textit{We represent boxed integer values in a compact way on the schema for clarity of the presentation.}}
 
 \end{frame}
 
@@ -1014,17 +1028,39 @@ fromAmpar' :: Ampar s () → s
 
 \section{Safety concerns for functional DPS}
 
-\begin{frame}[fragile]{Unrestricted use of destinations}
-\begin{minted}{haskellc}
--- fromAmpar' :: Ampar s () → s
-let apparentlyComplete :: Ampar [Int] () = newAmpar `updWith` \d → ()
- in print (fromAmpar' apparentlyComplete)
--- SEGFAULT!
-\end{minted}
+\def\greyedout#1{\textcolor{black!25}{\texttt{#1}}}
 
-\begin{center}
-\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fromAmpar-segfault}}}
-\end{center}
+\begin{frame}[fragile]{Unrestricted use of destinations}
+\begin{onlyenv}<1>
+\begin{minted}[escapeinside=°°]{haskellc}
+fromAmpar' :: Ampar s () → s  -- We recall the signature
+
+°\greyedout{let apparentlyComplete :: Ampar [Int] () = }°newAmpar°\greyedout{ `updWith` \textbackslash{}d → ()}°
+ °\greyedout{in fromAmpar' apparentlyComplete}°
+\end{minted}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{minted}[escapeinside=°°]{haskellc}
+fromAmpar' :: Ampar s () → s  -- We recall the signature
+
+let apparentlyComplete :: Ampar [Int] () = newAmpar `updWith` \d → ()
+ °\greyedout{in fromAmpar' apparentlyComplete}°
+\end{minted}
+\end{onlyenv}
+\begin{onlyenv}<3>
+\begin{minted}[escapeinside=°°]{haskellc}
+fromAmpar' :: Ampar s () → s  -- We recall the signature
+
+let apparentlyComplete :: Ampar [Int] () = newAmpar `updWith` \d → ()
+ in fromAmpar' apparentlyComplete
+\end{minted}
+\end{onlyenv}
+
+\medskip
+
+\only<1>{\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fromAmpar-segfault-1}}}}
+\only<2>{\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fromAmpar-segfault-2}}}}
+\only<3>{\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fromAmpar-segfault}}}}
 
 \end{frame}
 
