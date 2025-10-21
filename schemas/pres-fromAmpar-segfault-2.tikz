@@ -53,7 +53,7 @@
 		\node [style=normal] (550) at (-1.75, 0.75) {};
 		\node [style=normal] (551) at (-2, 1) {};
 		\node [style=normal] (552) at (-2, 0.5) {};
-		\node [style=normal] (553) at (-3.25, 1.375) {\mintinline{haskellc}/`updWith` \d ⩴ ()/};
+		\node [style=normal] (553) at (-3.25, 1.375) {\mintinline{haskellc}/`updWith` \d → ()/};
 		\node [style=normal] (554) at (-9.5, 2.5) {\mintinline{haskellc}/newAmpar/};
 		\node [style=normal] (555) at (2.25, 2.5) {\mintinline{haskellc}/apparentlyComplete/};
 	\end{pgfonlayer}

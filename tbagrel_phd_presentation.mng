@@ -1072,11 +1072,11 @@ Linear types and linearity let us control resource consumption of functions.
 
 Idea : \textbf{destinations are linear resources} i.e. must be consumed \textbf{exactly once}:
 \begin{itemize}
-  \item consumed less than once \phantom{a}$\to$ hole remained unfilled
-  \item consumed more than once $\to$ order of evaluation becomes semantically relevant
+  \pause\item consumed less than once \phantom{a}$\to$ hole remained unfilled
+  \pause\item consumed more than once $\to$ order of evaluation becomes semantically relevant
 \end{itemize}
 
-Unconsumed destination = witnesses a remaining hole
+\pause Unconsumed destination = witnesses a remaining hole
 \end{frame}
 
 \begin{frame}[fragile]{Linear Haskell overview (1/2)}

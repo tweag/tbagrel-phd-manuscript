@@ -21,7 +21,7 @@
 		\node [style=normal] (473) at (0, 0.25) {};
 		\node [style=normal] (475) at (1, 0.75) {\mintinline{haskellc}/¤Ampar/};
 		\node [style=bullet] (477) at (3.5, 0.75) {};
-		\node [style=normal] (478) at (8, 1.375) {\mintinline{haskellc}/fromAmpar/};
+		\node [style=normal] (478) at (8, 1.375) {\mintinline{haskellc}/fromAmpar'/};
 		\node [style=normal] (479) at (2, 1.75) {\mintinline{haskellc}/:: Ampar [Int] ()/};
 		\node [style=normal] (513) at (10.875, 1.75) {\mintinline{haskellc}/:: [Int]/};
 		\node [style=normal] (514) at (2.125, 1.125) {};
