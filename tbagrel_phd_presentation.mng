@@ -728,6 +728,7 @@
   \phantom{aa}\textbf{what?} | immutability | purity | first-class functions
 \end{itemize}
 
+% Dire que l'impératif prescript une suite de modifications mémoire, là où le fonctionnel décrit plutôt des constructions par compositions.
 \end{frame}
 
 \begin{frame}[fragile]{Functional languages -- why?}
@@ -826,10 +827,10 @@ Need proper functional abstraction to manipulate incomplete structures.
 Coming from old C days:
 
 \begin{minipage}[t]{0.6\linewidth}
-\textcolor{red}{\textbf{Naive style}}
+\textcolor{red}{\textbf{Traditional style}}
 
 \begin{minted}{c}
-MyStruct * fooNaive() {
+MyStruct * fooTrad() {
   MyStruct *res = malloc(sizeof(MyStruct));
   res->f1 = 1; res->f2 = 2;
   return res;
@@ -1372,6 +1373,7 @@ Thanks for your attention! I'll be happy to answer your questions.
 \end{itemize}
 \end{frame}
 
+% Rappeler la problématique et comment j'y réponds.
 
 \begin{frame}[fragile]{Functional DPS API -- scope-escape free}
 \begin{minted}[escapeinside=°°]{haskellc}
