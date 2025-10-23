@@ -31,7 +31,7 @@
 % \usepackage{unicode-math}
 
 \usepackage[activate={true, nocompatibility}, stretch=10, shrink=10]{microtype}
-%\usepackage[svgnames]{xcolor}
+\usepackage[svgnames]{xcolor}
 \usepackage{graphicx}
 \usepackage{polyglossia}
 \setmainlanguage{english}
@@ -92,12 +92,16 @@
 \definecolor{scicolor}{RGB}{199, 22, 6}
 \definecolor{scifcolor}{RGB}{251, 164, 157}
 \definecolor{sciicolor}{RGB}{60, 103, 163}
+\definecolor{sciifcolor}{RGB}{148, 163, 184}
 \definecolor{sciiicolor}{RGB}{97, 5, 94}
+\definecolor{emerald}{rgb}{0.31, 0.78, 0.47}
+\definecolor{firebrick}{rgb}{0.7, 0.13, 0.13}
 \newcommand{\scz}[1]{\textcolor{sczcolor}{#1}}
 \newcommand{\sczf}[1]{\textcolor{sczfcolor}{#1}}
 \newcommand{\sci}[1]{\textcolor{scicolor}{#1}}
 \newcommand{\scif}[1]{\textcolor{scifcolor}{#1}}
 \newcommand{\scii}[1]{\textcolor{sciicolor}{#1}}
+\newcommand{\sciif}[1]{\textcolor{sciifcolor}{#1}}
 \newcommand{\sciii}[1]{\textcolor{sciiicolor}{#1}}
 
 %% For OTT rendering
@@ -719,6 +723,17 @@
   \end{frame}
 }
 
+\setbeamertemplate{footline}{%
+  \leavevmode
+  \hbox to \paperwidth{%
+    \hfill
+    \usebeamerfont{page number in head/foot}%
+    \usebeamercolor[fg]{page number in head/foot}%
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}%
+  }%
+  \vskip7pt%
+}
+
 \begin{frame}{Programming languages}
 
 \begin{itemize}
@@ -827,7 +842,7 @@ Need proper functional abstraction to manipulate incomplete structures.
 Coming from old C days:
 
 \begin{minipage}[t]{0.6\linewidth}
-\textcolor{red}{\textbf{Traditional style}}
+\textcolor{firebrick}{\textbf{Traditional style}}
 
 \begin{minted}{c}
 MyStruct * fooTrad() {
@@ -837,7 +852,7 @@ MyStruct * fooTrad() {
 }
 \end{minted}
 \end{minipage} \hfill \begin{minipage}[t]{0.39\linewidth}
-\textcolor{green}{\textbf{DPS style}}
+\textcolor{emerald}{\textbf{DPS style}}
 
 \begin{minted}{c}
 void fooDps(MyStruct *dest) {
@@ -1104,13 +1119,13 @@ A value is \textbf{consumed once} when:
 
 \begin{center}
 \begin{tabular}{p{0.015\linewidth}cp{0.63\linewidth}p{0.28\linewidth}}
-\only<2->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/(x, y)/\quad?}&\only<3->{\textcolor{green}{$\to$ YES}}\\
-\only<4->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/(x, x)/\quad?}&\only<5->{\textcolor{red}{$\to$ NO}}\\
-\only<6->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/case y of {¤Nothing -> x ;      ¤Just v -> v}/\quad?}&\only<7->{\textcolor{red}{$\to$ NO}}\\
-\only<8->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/case y of {¤Nothing -> (x, 0) ; ¤Just v -> (x, v)}/\quad?}&\only<9->{\textcolor{green}{$\to$ YES}}\\
-\only<10->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/f x/ \phantom{aa,}\quad where \quad \mintinline{haskellc}/f :: t → u/\quad?}&\only<11->{\textcolor{red}{$\to$ NO}}\\
-\only<12->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/fLin x/\hspace*{-0.5ex} \quad where \quad \mintinline{haskellc}/fLin :: t ⊸ u/\quad?}&\only<13->{\textcolor{green}{$\to$ YES}}\\
-\only<14->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/¤Ur x/\quad?} &\only<15->{\textcolor{red}{$\to$ NO}, since \mintinline{haskellc}/Ur/ $\simeq$ $\textcolor{typcolor}{!T}$}\\
+\only<2->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/(x, y)/\quad?}&\only<2->{\textcolor{emerald}{\textbf{$\to$ YES}}}\\
+\only<3->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/(x, x)/\quad?}&\only<3->{\textcolor{firebrick}{\textbf{$\to$ NO}}}\\
+\only<4->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/case y of {¤Nothing -> x ;      ¤Just v -> v}/\quad?}&\only<4->{\textcolor{firebrick}{\textbf{$\to$ NO}}}\\
+\only<5->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/case y of {¤Nothing -> (x, 0) ; ¤Just v -> (x, v)}/\quad?}&\only<5->{\textcolor{emerald}{\textbf{$\to$ YES}}}\\
+\only<6->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/f x/ \phantom{aa,}\quad where \quad \mintinline{haskellc}/f :: t → u/\quad?}&\only<6->{\textcolor{firebrick}{\textbf{$\to$ NO}}}\\
+\only<7->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/fLin x/\hspace*{-0.5ex} \quad where \quad \mintinline{haskellc}/fLin :: t ⊸ u/\quad?}&\only<7->{\textcolor{emerald}{\textbf{$\to$ YES}}}\\
+\only<8->{\mintinline{haskellc}/x/ &linear in& \mintinline{haskellc}/¤Ur x/\quad?} &\only<8->{\textcolor{firebrick}{\textbf{$\to$ NO}}}\\
 \end{tabular}
 \end{center}
 
@@ -1125,10 +1140,10 @@ Trick: scoping function
 
 which is the only \textbf{producer} of \mintinline{haskellc}/Resource/ values
 
-User must pass a \textbf{linear function} consuming the resource in this scope:
+User must pass a \textbf{linear function} consuming the resource in this scope
 \begin{itemize}
-  \item \mintinline{haskellc}/withResource (\res -> linearConsume res ; Ur ())/ \quad is \quad \textcolor{green}{OK}\\[0.1cm]
-  \item \begin{minipage}[c]{0.38\linewidth}\mintinline{haskellc}/withResource (\res -> res)/ or\\\mintinline{haskellc}/withResource (\res -> Ur res)/\end{minipage} \quad are\quad\textcolor{red}{REJECTED} (cannot leak)
+  \pause\item \mintinline{haskellc}/withResource (\res -> linearConsume res ; Ur ())/ \quad is \quad \textcolor{emerald}{\textbf{OK}}\\[0.1cm]
+  \pause\item \begin{minipage}[c]{0.38\linewidth}\mintinline{haskellc}/withResource (\res -> res)/ or\\\mintinline{haskellc}/withResource (\res -> Ur res)/\end{minipage} \quad are\quad\textcolor{firebrick}{\textbf{REJECTED}} (cannot leak)
 \end{itemize}
 
 \end{frame}
@@ -1142,46 +1157,68 @@ drop :: Token ⊸ ()
 withToken :: (Token ⊸ Ur t) ⊸ Ur t
 \end{minted}
 
-Making sure \mintinline{haskellc}/Ampar/s are used linearly, e.g.:\\[0.1cm]
-\quad\mintinline[escapeinside=°°]{haskellc}/toAmpar ::          °\hspace*{0.5ex}°s → Ampar s ()/ \qquad becomes\\
-\quad\mintinline{haskellc}/toAmpar :: Token ⊸ s ⊸ Ampar s ()/\\[0.1cm]
-\quad\mintinline{haskellc}/updWith :: Ampar s t → (t → u) → Ampar s u/ \qquad becomes\\
-\quad\mintinline{haskellc}/updWith :: Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u/
+\pause
 
-\mintinline{haskellc}/Dest/s can only ever be accessed through \mintinline{haskellc}/updWith/, which takes a linear function \mintinline{haskellc}/t ⊸ u/ now
+Making sure \mintinline{haskellc}/Ampar/s are used linearly, e.g.:\\[0.1cm]
+\textcolor{firebrick}{\textbf{Old:\hspace*{1.4ex}}}~\mintinline[escapeinside=°°]{haskellc}/newAmpar ::          °\hspace*{0.5ex}°Ampar s (Dest s)/\\
+\textcolor{emerald}{\textbf{New: }}~\mintinline{haskellc}/newAmpar :: Token ⊸ Ampar s (Dest s)/\\[0.1cm]
+\pause
+\!\!\textcolor{firebrick}{\textbf{Old:\hspace*{1.4ex}}}~\mintinline{haskellc}/updWith :: Ampar s t → (t → u) → Ampar s u/\\
+\textcolor{emerald}{\textbf{New: }}~\mintinline{haskellc}/updWith :: Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u/\\[0.1cm]
+\pause
+\!\!\mintinline{haskellc}/Dest/s can only ever be accessed through \mintinline{haskellc}/updWith/, which takes a linear function \mintinline{haskellc}/t ⊸ u/ now
 %They apparently can't leak out of the \mintinline{haskellc}/Ampar/'s right side...right?
 \end{frame}
 
 \begin{frame}[fragile]{Functional DPS API -- with linearity}
 \begin{minted}[escapeinside=°°]{haskellc}
 data Ampar s t
+data Dest t
+type family DestsOf 'Ctor t  -- returns dests corresponding to fields of Ctor
+
+&fill @'Ctor :: Dest t              ⊸ DestsOf 'Ctor t
+&fillComp    :: Dest s ⊸ Ampar s t ⊸ t
+&fillLeaf    :: Dest t ⊸ t         ⊸ ()
+
 newAmpar     :: Token          ⊸ Ampar s (Dest s)
 toAmpar      :: Token   ⊸ s  °\hspace*{0.5ex}°⊸ Ampar s ()
 tokenBesides :: Ampar s t      ⊸ (Ampar s t, Token)
 fromAmpar    :: Ampar s (Ur t) ⊸ (s, Ur t)
 fromAmpar'   :: Ampar s ()     ⊸ s
-updWith      :: Ampar s t      ⊸ (t ⊸ u) ⊸ Ampar s u
-
-data Dest t
-type family DestsOf lCtor t  -- returns dests corresponding to fields of lCtor
-fill     :: ∀ lCtor   .  Dest t ⊸ DestsOf lCtor t
-fillComp :: Ampar s t ⊸ Dest s ⊸ t
-fillLeaf :: t         ⊸ Dest t ⊸ ()
+`updWith`    :: Ampar s t      ⊸ (t ⊸ u) ⊸ Ampar s u
 \end{minted}
 \end{frame}
 
 \section{Safe yet?}
 
 \begin{frame}[fragile]{Scope escape -- Example}
+\begin{onlyenv}<1>
+\begin{minted}[escapeinside=°°]{haskellc}
+°\greyedout{let outer :: Ampar (Dest ()) ()}°
+    °\greyedout{outer = }°(newAmpar tok1) `updWith` \(dOuter :: Dest (Dest ())) →
+              °\greyedout{let inner :: Ampar () ()}°
+                  °\greyedout{inner =}° (newAmpar tok2) `updWith` \(dInner :: Dest ()) →
+                            dOuter &fillLeaf dInner
+               °\greyedout{in fromAmpar' inner}°
+ °\greyedout{in fromAmpar' outer}°
+\end{minted}
+\end{onlyenv}
+\begin{onlyenv}<2>
 \begin{minted}{haskellc}
 let outer :: Ampar (Dest ()) ()
-    outer = (newAmpar tok1) `updWith` \(dd :: Dest (Dest ())) →
+    outer = (newAmpar tok1) `updWith` \(dOuter :: Dest (Dest ())) →
               let inner :: Ampar () ()
-                  inner = (newAmpar tok2) `updWith` \(d :: Dest ()) →
-                            dd &fillLeaf d
+                  inner = (newAmpar tok2) `updWith` \(dInner :: Dest ()) →
+                            dOuter &fillLeaf dInner
                in fromAmpar' inner
  in fromAmpar' outer
 \end{minted}
+
+\bigskip
+
+{\small\textit{Minimal example of type-checked code that produce scope-escape/segfault}}
+
+\end{onlyenv}
 \end{frame}
 
 \begin{frame}[fragile]{Scope escape -- Bigger picture}
@@ -1204,12 +1241,12 @@ Not \emph{just} an artificial edge-case
 
 \vspace*{0.2cm}
 
-\mintinline{haskellc}/fillLeaf :: t ⊸  Dest t ⊸ ()/ \qquad \phantom{,}becomes\\\mintinline[escapeinside=°°]{haskellc}/fillLeaf :: t °\hspace*{0.2ex}°→ UDest t ⊸ ()/\\[0.1cm]
-\mintinline{haskellc}/fromAmpar'  ::  Ampar s () ⊸ s/ \qquad becomes\\\mintinline{haskellc}/fromUAmpar' :: UAmpar s () ⊸ Ur s/
+\textcolor{firebrick}{\textbf{Old:\hspace*{1.4ex}}}~\mintinline{haskellc}/fillLeaf :: t ⊸  Dest t ⊸ ()/\\\textcolor{emerald}{\textbf{New: }}~\mintinline[escapeinside=°°]{haskellc}/fillLeaf :: t °\hspace*{0.2ex}°→ UDest t ⊸ ()/\\[0.1cm]
+\textcolor{firebrick}{\textbf{Old:\hspace*{1.4ex}}}~\mintinline{haskellc}/fromAmpar'  ::  Ampar s () ⊸ s/\\\textcolor{emerald}{\textbf{New: }}~\mintinline{haskellc}/fromUAmpar' :: UAmpar s () ⊸ Ur s/
 
 In other words, \mintinline{haskellc}/UAmpar s t/ builds an unrestricted \mintinline{haskellc}/s/
 
-{\small \textit{Used in our practical prototype ``linear-dest'', Bagrel (2023)}}
+{\small \textit{Used in my library \texttt{linear-dest} from ``DPS: a Haskell implementation'', Bagrel, JFLA 2024}}
 \end{block}
 
 \end{frame}
@@ -1227,7 +1264,7 @@ Back to Minamide-like system where we operate on \mintinline{haskellc}/Ampar/s d
   \item Still allows for efficient queue of \mintinline{haskellc}/Dest/s in BF-traversal
 \end{itemize}
 
-{\small \textit{Developed in Chapter 4 of the PhD manuscript}}
+{\small \textit{Developed in Chapter 4 of the PhD manuscript (unpublished)}}
 \end{block}
 
 \end{frame}
@@ -1241,16 +1278,26 @@ Principle: we track the age of resources.
 \item Age \textcolor{modecolor}{$\uparrow^0$} says the resource (variable) comes from the innermost \mintinline{haskellc}/`updWith`/ scope.
 \item When entering a new \mintinline{haskellc}/`updWith`/ scope, all existing resources ages are multiplied by \textcolor{modecolor}{$\uparrow$}\\(scope number increased by 1)
 \end{itemize}
+
+\medskip
+
+{\small \textit{Developed in ``Destination Calculus: A Linear $\lambda$-Calculus for Purely Functional Memory Writes'',\\\phantom{Developed in }Bagrel \& Spiwack, OOPSLA1 2025}}
+
 \end{frame}
 
 \begin{frame}[fragile]{Age system -- Example}
 Colors indicate the scope in which each object lives.
 \begin{center}
-\hspace*{-0.7cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes}}}
+\only<1>{\hspace*{-0.7cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes-0}}}}
+\only<2>{\hspace*{-0.7cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes-1}}}}
+\only<3>{\hspace*{-0.7cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes-2}}}}
+\only<4>{\hspace*{-0.7cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes-3}}}}
+\only<5>{\hspace*{-0.7cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes-4}}}}
+\only<6>{\hspace*{-0.7cm}\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWithScopes}}}}
 \end{center}
 \end{frame}
 
-\begin{frame}[fragile]{Age control in \mintinline{haskellc}/fill/ functions}
+\begin{frame}[fragile]{Age control in \texttt{fill} functions}
 
 \bgroup
 \def\ottstype#1{\textcolor{typcolor}{\mathtt{#1}}}
@@ -1274,19 +1321,18 @@ The RHS $\ottnt{c}$ (content being stored away) must be \textbf{exactly 1 scope 
 \end{frame}
 
 \begin{frame}[fragile]{Age control prevents scope escape}
-\begin{minted}{haskellc}
-let outer :: Ampar (Dest ()) ()
-    outer = (newAmpar tok1) `updWith` \(dd :: ↑⁰ Dest (Dest ())) →
-              let inner :: Ampar () ()
-                  inner = (newAmpar tok2) `updWith` \(d :: ↑⁰ Dest ()) →
-                            (dd :: ↑¹) &fillLeaf (d :: ↑⁰) -- REJECTED
-               in fromAmpar' inner
- in fromAmpar' outer
+\begin{minted}[escapeinside=°°]{haskellc}
+°\greyedout{let outer :: Ampar (Dest ()) ()}°
+    °\greyedout{outer = }°(newAmpar tok1) `updWith` \(dOuter :: ↑⁰ Dest (Dest ())) →
+              °\greyedout{let inner :: Ampar () ()}°
+                  °\greyedout{inner =}° (newAmpar tok2) `updWith` \(dInner :: ↑⁰ Dest ()) →
+                            (dOuter :: ↑¹) &fillLeaf (dInner :: ↑⁰) -- REJECTED
+               °\greyedout{in fromAmpar' inner}°
+ °\greyedout{in fromAmpar' outer}°
 \end{minted}
-
 \end{frame}
 
-\section{Formalization}
+\section{Formalization and mechanized proofs in Rocq}
 
 \begin{frame}[fragile]{Linearity as a mode: easy extension}
 

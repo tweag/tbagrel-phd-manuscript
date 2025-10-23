@@ -90,12 +90,14 @@
 \definecolor{scicolor}{RGB}{199, 22, 6}
 \definecolor{scifcolor}{RGB}{251, 164, 157}
 \definecolor{sciicolor}{RGB}{60, 103, 163}
+\definecolor{sciifcolor}{RGB}{148, 163, 184}
 \definecolor{sciiicolor}{RGB}{97, 5, 94}
 \newcommand{\scz}[1]{\textcolor{sczcolor}{#1}}
 \newcommand{\sczf}[1]{\textcolor{sczfcolor}{#1}}
 \newcommand{\sci}[1]{\textcolor{scicolor}{#1}}
 \newcommand{\scif}[1]{\textcolor{scifcolor}{#1}}
 \newcommand{\scii}[1]{\textcolor{sciicolor}{#1}}
+\newcommand{\sciif}[1]{\textcolor{sciifcolor}{#1}}
 \newcommand{\sciii}[1]{\textcolor{sciiicolor}{#1}}
 
 %% For OTT rendering

@@ -1,0 +1,41 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=code] (181) at (9.525, 7.5) {\scz{\texttt{in (Ampar~($\square$ : $\square$)}}};
+		\node [style=none] (182) at (16.5, 7.875) {};
+		\node [style=none] (183) at (21.975, 7.875) {};
+		\node [style=none] (185) at (21.975, 7.125) {};
+		\node [style=none] (258) at (11.1, 8.5) {\scz{\texttt{let x0 = 1}}};
+		\node [style=code] (259) at (30.75, 9.25) {\scz{\texttt{x0~~:} age $\uparrow^0$}};
+		\node [style=none] (260) at (19.425, 7.5) {\sci{\texttt{(Dest~~, Dest~~)}\scz{\texttt{)}}}};
+		\node [style=none] (272) at (30.5, 9.875) {};
+		\node [style=none] (273) at (30.5, 9.125) {};
+		\node [style=none] (274) at (28.5, 9.125) {};
+		\node [style=none] (275) at (28.5, 9.875) {};
+		\node [style=scopename] (276) at (28.5, 9.5) {\scz{\textit{scope 0}}};
+		\node [style=none] (289) at (16.5, 7.125) {};
+		\node [style=s1bullet] (290) at (18.575, 7.5) {};
+		\node [style=s1bullet] (291) at (21.35, 7.5) {};
+		\node [style=none] (292) at (13.825, 7.875) {};
+		\node [style=none] (293) at (15.4, 7.875) {};
+		\node [style=none] (294) at (9.4, 9.875) {};
+		\node [style=none] (295) at (36.875, 9.875) {};
+		\node [style=none] (299) at (17.625, 7.5) {};
+		\node [style=none] (300) at (36.875, 0.25) {};
+		\node [style=none] (301) at (30.5, 0.25) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=s1d, bend left=15] (182.center) to (183.center);
+		\draw [style=s1d, bend left=15] (183.center) to (185.center);
+		\draw [style=s0s] (275.center) to (274.center);
+		\draw [style=s0s] (274.center) to (273.center);
+		\draw [style=s0s] (272.center) to (273.center);
+		\draw [style=s0s] (275.center) to (272.center);
+		\draw [style=s1d, bend right=15] (182.center) to (289.center);
+		\draw [style=s1d, bend right=15] (289.center) to (185.center);
+		\draw [style=a1, in=75, out=105, looseness=0.75] (290) to (292.center);
+		\draw [style=a1, in=45, out=120, looseness=0.75] (291) to (293.center);
+		\draw [style=s0d] (295.center) to (272.center);
+		\draw [style=s0d] (294.center) to (275.center);
+		\draw [style=s0d] (273.center) to (301.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

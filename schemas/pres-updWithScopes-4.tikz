@@ -46,22 +46,14 @@
 		\node [style=smallannot] (249) at (13.225, 6.85) {\scz{fill}};
 		\node [style=code] (250) at (30.75, 8) {\sczf{\texttt{x0~~:} age $\uparrow^1$}};
 		\node [style=code] (251) at (30.75, 7.25) {\scif{\texttt{d1~~:} age $\uparrow^0$}};
-		\node [style=code] (252) at (30.75, 0.75) {\sciif{\texttt{d2~~:} age $\uparrow^0$}};
-		\node [style=none] (253) at (18.125, 2.05) {};
+		\node [style=code] (252) at (30.75, 0.75) {\scii{\texttt{d2~~:} age $\uparrow^0$}};
 		\node [style=none] (254) at (15.2, 2.925) {};
-		\node [style=smallannot] (255) at (14.675, 2.55) {\sci{fill}};
 		\node [style=none] (258) at (11.1, 8.5) {\scz{\texttt{let x0 = 1}}};
 		\node [style=code] (259) at (30.75, 9.25) {\scz{\texttt{x0~~:} age $\uparrow^0$}};
 		\node [style=none] (260) at (19.425, 7.5) {\sci{\texttt{(Dest~~, Dest~~)}\scz{\texttt{)}}}};
 		\node [style=none] (261) at (15.9, 5.75) {\sci{\texttt{case d1 of (d11, d12) $\to$}}};
 		\node [style=none] (262) at (13.975, 3.25) {\sci{\texttt{(Ampar $\square$}}};
 		\node [style=none] (264) at (17.1, 3.25) {\scii{\texttt{Dest~~}}~\sci{\texttt{)}}};
-		\node [style=code] (265) at (12.975, 1.5) {\scii{\texttt{d2 \&fillLeaf}}};
-		\node [style=none] (266) at (17.65, 1.925) {};
-		\node [style=none] (267) at (18.8, 1.925) {};
-		\node [style=none] (268) at (17.65, 1.175) {};
-		\node [style=none] (269) at (18.8, 1.175) {};
-		\node [style=code] (271) at (17.275, 1.5) {\sci{~\texttt{d{12}}}};
 		\node [style=none] (272) at (30.5, 9.875) {};
 		\node [style=none] (273) at (30.5, 9.125) {};
 		\node [style=none] (274) at (28.5, 9.125) {};
@@ -69,7 +61,7 @@
 		\node [style=scopename] (276) at (28.5, 9.5) {\scz{\textit{scope 0}}};
 		\node [style=code] (277) at (30.75, 6.5) {\scif{\texttt{d11~:} age $\uparrow^0$}};
 		\node [style=code] (278) at (30.75, 5.75) {\sci{\texttt{d12~:} age $\uparrow^0$}};
-		\node [style=code] (279) at (30.75, 1.5) {\scif{\texttt{d12~:} age $\uparrow^1$}};
+		\node [style=code] (279) at (30.75, 1.5) {\sci{\texttt{d12~:} age $\uparrow^1$}};
 		\node [style=code] (280) at (30.75, 3.75) {\sczf{\texttt{x0~~:} age $\uparrow^2$}};
 		\node [style=code] (281) at (30.75, 3) {\scif{\texttt{d1~~:} age $\uparrow^1$}};
 		\node [style=code] (282) at (30.75, 2.25) {\scif{\texttt{d11~:} age $\uparrow^1$}};
@@ -94,8 +86,6 @@
 		\node [style=none] (301) at (36, 8) {\sczf{\small (used)}};
 		\node [style=none] (302) at (36, 7.25) {\scif{\small (used)}};
 		\node [style=none] (303) at (36, 6.5) {\scif{\small (used)}};
-		\node [style=none] (304) at (35.975, 1.5) {\scif{\small (used)}};
-		\node [style=none] (305) at (36, 0.75) {\sciif{\small (used)}};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=s1d, bend left=15] (182.center) to (183.center);
@@ -112,10 +102,6 @@
 		\draw [style=s2s] (244.center) to (242.center);
 		\draw [style=s1s] (241.center) to (240.center);
 		\draw [style=s1s] (240.center) to (239.center);
-		\draw [style=s1d, bend left=15] (266.center) to (267.center);
-		\draw [style=s1d, in=105, out=-105, looseness=1.25] (266.center) to (268.center);
-		\draw [style=s1d, bend right=15] (268.center) to (269.center);
-		\draw [style=s1d, in=285, out=75, looseness=1.25] (269.center) to (267.center);
 		\draw [style=s1s] (235.center) to (239.center);
 		\draw [style=s2s] (236.center) to (242.center);
 		\draw [style=s0s] (275.center) to (274.center);
@@ -143,6 +129,5 @@
 		\draw [style=s2d, bend left=330] (229.center) to (288.center);
 		\draw [style=a2, in=60, out=90, looseness=0.75] (297) to (298.center);
 		\draw [style=a0d, in=-90, out=90, looseness=1.25] (227.center) to (226.center);
-		\draw [style=a1d, in=-90, out=90, looseness=0.75] (253.center) to (254.center);
 	\end{pgfonlayer}
 \end{tikzpicture}
