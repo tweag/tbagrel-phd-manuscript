@@ -117,3 +117,9 @@ Backup slide sur l'implem, la taille des contributions, le fait de modifier GHC 
 41- Détailler ce qu'il y a derrière les papiers
 
     Slide contributions devient la slide post-conclusion
+
+
+Questions: est-ce faisable en Rust modulo linéarité ?
+
+
+Slide Token : on ne comprend pas à quoi sert les tokens
