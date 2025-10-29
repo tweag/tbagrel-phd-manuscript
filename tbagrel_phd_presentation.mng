@@ -888,7 +888,7 @@ Caller is responsible for allocation in destination-passing-style function \mint
 
 \onslide<2->{\mintinline{haskellc}/Ampar/: first-class opaque wrapper for an\\\phantom{\mintinline{haskellc}/Ampar/:} \textbf{incomplete structure} and its destinations
 \begin{itemize}
-  \item read barrier
+  \item prevents reading incomplete structure and its holes
   \item only way to refer to and act on an incomplete structure
 \end{itemize}
 }\end{minipage} \hfill \begin{minipage}{0.36\linewidth}
@@ -956,7 +956,7 @@ E.g. \mintinline{haskellc}/Ampar [Int] (Dest Int, Dest Int)/: list of ints with 
 \only<5>{\hspace*{-0.5cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-bft-answer}}}}
 \end{frame}
 
-\begin{frame}[fragile]{Functional DPS API -- Overview}
+\begin{frame}[fragile]{Functional DPS API -- First attempt}
 \begin{minted}{haskellc}
 data Ampar s t
 data Dest t
@@ -1170,7 +1170,7 @@ Making sure \mintinline{haskellc}/Ampar/s are used linearly, e.g.:\\[0.1cm]
 %They apparently can't leak out of the \mintinline{haskellc}/Ampar/'s right side...right?
 \end{frame}
 
-\begin{frame}[fragile]{Functional DPS API -- with linearity}
+\begin{frame}[fragile]{Functional DPS API -- Second attempt, with linearity}
 \begin{minted}[escapeinside=°°]{haskellc}
 data Ampar s t
 data Dest t
@@ -1192,6 +1192,7 @@ fromAmpar'   :: Ampar s ()     ⊸ s
 \section{Safe yet?}
 
 \begin{frame}[fragile]{Scope escape -- Example}
+% TODO: inverser l'ordre
 \begin{onlyenv}<1>
 \begin{minted}[escapeinside=°°]{haskellc}
 °\greyedout{let outer :: Ampar (Dest ()) ()}°
@@ -1272,7 +1273,7 @@ Back to Minamide-like system where one operate on \mintinline{haskellc}/Ampar/s 
 \section{A more general solution: age control}
 
 \begin{frame}[fragile]{Age system}
-Principle: I track the age of resources.
+Principle: track the age of resources.
 
 \begin{itemize}
 \item Age \textcolor{modecolor}{$\uparrow^0$} says the resource (variable) comes from the innermost \mintinline{haskellc}/`updWith`/ scope.
@@ -1326,7 +1327,7 @@ Essence of {\textit{``Destination Calculus: A Linear $\lambda$-Calculus for Pure
   \item Mechanical proof of type safety (progress + preservation) in Rocq
 \end{itemize}
 
-\textcolor{teal}{$\pmb{\to}$} Prove once for all that it is possible to safely program with destinations in\\\phantom{\textcolor{teal}{$\pmb{\to}$} }a purely functional language!
+\textcolor{teal}{$\pmb{\to}$} Prove definitively that it is possible to safely program with destinations in\\\phantom{\textcolor{teal}{$\pmb{\to}$} }a purely functional language!
 \end{frame}
 
 \begin{frame}[fragile]{Modal type system to track linearity and ages}
@@ -1404,7 +1405,7 @@ Theoretical language $\lambda_d$ is equipped with small-step semantics.
 \begin{itemize}
   \item Controlled mutations resulting from destination filling are implemented as substitutions on the evaluation context $\ottnt{E}$\\
   \textit{\small Syntactic manipulation of the evaluation context as a stack}
-  \item No need for dedicated memory model
+  \item No need for full-blown memory model
 \end{itemize}
 
 Named hole substitution lemma is the most technical part of the proofs
@@ -1442,7 +1443,7 @@ Most of the heavy lifting is done through lemmas and theorems about typing conte
 Direct applications:
 
 \begin{itemize}
-  \item Enable new algorithms with less copying (difference lists, BFT traversal)
+  \item Enable new algorithms with less copying (difference lists, BF tree traversal)
   \item Prototype already available in Haskell (\texttt{linear-dest} library)
   \item Zero-copy interface to compact regions in GHC (\textbf{proposal submitted!})
 \end{itemize}
@@ -1528,11 +1529,11 @@ Iterated list concatenation
 
 In classical linear logic, the linear implication $\ottstype{\multimap}$ can decomposed into $\ottstype{\cdot^{\perp}}$ and $\ottstype{\parr}$:
 
-\quad$\ottstype{t \multimap u}~~\equiv~~\ottstype{t^{\perp} \parr u}\equiv~~\ottstype{u \parr t^{\perp}}$
+\quad$\ottstype{t \multimap u}~~\equiv~~\ottstype{t^{\perp}~\parr~u}~~\equiv~~\ottstype{u~\parr~t^{\perp}}$
 
 Minamide shows that a structure of type $\ottstype{u}$ with a hole of type $\ottstype{t}$ can be represented as a form of linear function $\ottstype{t \overset{mem}{\multimap} u}$
 
-So we decompose it into $\ottstype{u~~\overset{mem}{\parr}~~t^{\overset{mem}{\perp}}}$.\\Actually,
+So we decompose it into~~$\ottstype{u~\overset{mem}{\parr}~t^{\overset{mem}{\perp}}}$.\\Actually,
 
 \begin{itemize}
   \item $\ottstype{t^{\overset{mem}{\perp}}}$ is $\ottstype{Dest~t}$

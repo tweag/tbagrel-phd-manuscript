@@ -69,7 +69,7 @@ The fact that destinations are first-class in our approach is a key difference t
 
 As you can see on the diagram on the right of the slide, objects on top of the grey line are the objects that the programming can interact with, that is, the safe functional API objects, while everything under the grey line are the blocks we want to connect, but that the user can't access or read directly.
 
-## Slides 10 - Function DPS API - Types (2/2)
+## Slides 10 - Functional DPS API - Types (2/2)
 
 Indeed, the user will only be interacting through the `Ampar` and `Dest` types.
 
@@ -164,6 +164,8 @@ As we see here on the memory representation, doing so let us extract a hole into
 
 We ought to control the use of destinations more strictly to prevent this from happening.
 
+% Dire qu'on voit bien ici que l'ampar protège la lecture
+
 ## Slide 18 - TOC - Linear types
 
 To do so, we will mainly use linear types, that we will now briefly introduce.
@@ -195,6 +197,9 @@ One important aspect is that linearity on function arrows is a chains of consump
 If we want the Resource type to be only ever used linearly, we make it so that the only way to obtain a Resource is to call the function `withResource`. The user don't receive a `Resource` directly, but rather, must provide a linear callback to do what they want with the resource. And this callback must consume the resource in the scope of the callback, because the return type must be `Ur t`, which is an infranchissable barrier for any linear argument. So the resource cannot leak.
 
 ## Slide 23 - Updating the API with linearity
+
+% Dire qu'avoir une fonction de scope pour chaque resource qu'on veut contrôler linéairement c'est chiant, donc on va utiliser un trick pour ça. 
+% Linearity is infectious, but not dupability
 
 We can now update our API to use linearity on destinations.
 
