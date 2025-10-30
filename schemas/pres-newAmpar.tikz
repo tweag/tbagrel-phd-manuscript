@@ -24,13 +24,8 @@
 		\node [style=normal] (291) at (7, 0) {};
 		\node [style=normal] (293) at (7, -1) {};
 		\node [style=normal] (294) at (8, -0.5) {\mintinline{haskellc}/¤Ampar/};
-		\node [style=big] (295) at (1.5, -0.5) {\mintinline{haskellc}/newAmpar/};
-		\node [style=normal] (307) at (3.75, -0.5) {};
-		\node [style=normal] (308) at (5.75, -0.5) {};
-		\node [style=normal] (309) at (5.5, -0.25) {};
-		\node [style=normal] (310) at (5.5, -0.75) {};
-		\node [style=normal] (400) at (9, 0.5) {\mintinline{haskellc}/:: Ampar [Int] (Dest [Int])/};
-		\node [style=normal] (401) at (13, -0.75) {\mintinline{haskellc}/:: Dest [Int]/};
+		\node [style=normal] (401) at (13, -0.75) {\mintinline{haskellc}/:: Dest s/};
+		\node [style=none] (402) at (2.5, 0.5) {};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=normaledge] (158.center) to (157.center);
@@ -54,8 +49,5 @@
 		\draw [style=normaledge] (291.center) to (157.center);
 		\draw [style=normaledge] (291.center) to (293.center);
 		\draw [style=normaledge] (293.center) to (159.center);
-		\draw [style=normaledge] (307.center) to (308.center);
-		\draw [style=normaledge] (309.center) to (308.center);
-		\draw [style=normaledge] (308.center) to (310.center);
 	\end{pgfonlayer}
 \end{tikzpicture}

@@ -655,6 +655,9 @@
 \providecommand\TBTotalSections{1}
 \makeatother
 
+\usebeamercolor{frametitle}
+\colorlet{frametitleTealMid}{frametitle.bg!50!teal}
+
 % Top→bottom left-side progress bar, aligned to a marked block (see usage below).
 \newcommand{\TBSectionProgressBarLeft}[1]{%
   % #1 = horizontal gap between bar and ToC text (e.g. 6pt)
@@ -665,30 +668,62 @@
     \coordinate (Top) at ($(pic cs:TBtocTop)+(-\gap,-15pt)$);
     \coordinate (Bot) at ($(pic cs:TBtocBot)+(-\gap,27pt)$);
     % background track
-    \draw[line width=\barw, draw=black!15] (Top) -- (Bot);
+    \draw[line width=\barw, draw=frametitleTealMid!10] (Top) -- (Bot);
     % ratio 0..1, fill from Top toward Bot
     \pgfmathsetmacro{\TBRatio}{min(1, max(0,
       (\insertsectionnumber-0.5) / max(1, \TBTotalSections)
     ))}
     \path (Top) -- (Bot) coordinate[pos=\TBRatio] (FillEnd);
-    \draw[line width=\barw, draw=teal] (Top) -- (FillEnd);
+    \draw[line width=\barw, draw=frametitleTealMid] (Top) -- (FillEnd);
   \end{tikzpicture}%
 }
 
 % --- colors & fonts (as before) ---
-\setbeamercolor{section in toc}{fg=teal}
-\setbeamercolor{section in toc shaded}{parent=normal text, fg=normal text.fg}
+\setbeamercolor{section in toc}{fg=frametitleTealMid}
+\setbeamercolor{section in toc shaded}{parent=normal text, fg=frametitleTealMid!40}
 \setbeamerfont{section in toc shaded}{size=\Large,series=\mdseries}
 \setbeamerfont{section in toc}{size=\LARGE,series=\bfseries}
 
 % Replace Metropolis’ default sectionpage
 \metroset{sectionpage=none}
 
+% Put this in your preamble (after loading beamer/theme)
+\makeatletter
+
+% Helper deciding which article label to show
+\newcommand{\TB@sectionlabel}{%
+  \ifnum\inserttocsectionnumber<6
+    {\normalsize (1\textsuperscript{st} article)}%
+  \else
+    {\normalsize (2\textsuperscript{nd} article)}%
+  \fi
+}
+
+% Normal entries
+\setbeamertemplate{section in toc}{%
+  \leavevmode
+  \usebeamerfont{section in toc}%
+  \usebeamercolor[fg]{section in toc}%
+  \inserttocsection%
+  \hfill \TB@sectionlabel\par%
+}
+
+% Shaded entries (used by sectionstyle=show/shaded)
+\setbeamertemplate{section in toc shaded}{%
+  \leavevmode
+  \usebeamerfont{section in toc shaded}%
+  \usebeamercolor[fg]{section in toc shaded}%
+  \inserttocsection%
+  \hfill \TB@sectionlabel\par%
+}
+
+\makeatother
+
 \AtBeginSection[]{
   \begin{frame}[plain]
     \vfill
     \centering
-    \begin{minipage}{0.7\textwidth}
+    \begin{minipage}{0.9\textwidth}
       \tikzmark{TBtocTop}
       % compute neighbors
       \newcount\PrevSec \PrevSec=\numexpr\insertsectionnumber-1\relax
@@ -730,7 +765,13 @@
     \hfill
     \usebeamerfont{page number in head/foot}%
     \usebeamercolor[fg]{page number in head/foot}%
-    \insertframenumber{} / 48\hspace*{2ex}%  -- TODO CHANGE
+    % --- conditional numbering logic ---
+    \ifnum\value{framenumber}<49
+      \insertframenumber{} / 48%
+    \else
+      Annex~\number\numexpr\value{framenumber}-48\relax%
+    \fi
+    \hspace*{2ex}%
   }%
   \vskip7pt%
 }
@@ -881,7 +922,7 @@ Caller is responsible for allocation in destination-passing-style function \mint
 \mintinline{haskellc}/Dest/ination: first-class typed wrapper for a\\\phantom{\mintinline{haskellc}/Dest/ination:} raw pointer to a \textbf{hole}
 
 \begin{itemize}
-  \item {\small \textit{breaks from Minimade's approach}}
+  \item {\small \textit{breaks from Minamide's approach}}
   \item only way to refer to and act on a hole\\(of an incomplete structure)
 \end{itemize}
 
@@ -1004,7 +1045,7 @@ fromAmpar' :: Ampar s () → s
 \begin{frame}[fragile,t]{Functional DPS API -- Functions (3/6)}
 \begin{itemize}
 \item Plug an incomplete structure into the hole of another one?\\[0.1cm]
-\onslide<2>{\mintinline{haskellc}/&fillComp :: Dest s£££→££££££Ampar s t£££££££££££££→£££££££££££££££££t/\\[0.3cm]}%
+\onslide<2>{\mintinline{haskellc}/&fillComp :: Dest s£££→££££££Ampar s t££££££££££££→££££££££££££££££££t/\\[0.3cm]}%
 \only<1>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp-init}}}}
 \only<2>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
 \end{itemize}
@@ -1015,21 +1056,21 @@ fromAmpar' :: Ampar s () → s
 \begin{frame}[fragile,t]{Functional DPS API -- Functions (4/6)}
 \begin{itemize}
 \item Spawn new incomplete structure?\\
-\mintinline{haskellc}/newAmpar :: Ampar s (Dest s)/\\[0.7cm]
+\mintinline{haskellc}/newAmpar ::£££Ampar s (Dest s)/\\[0.7cm]
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-newAmpar}}}
 \end{itemize}
 \end{frame}
 \begin{frame}[fragile,t]{Functional DPS API -- Functions (5/6)}
 \begin{itemize}
 \item Access destinations of an Ampar?\\
-\mintinline{haskellc}/`updWith`  :: Ampar s t  → (t → u) → Ampar s u/\\[0.7cm]
+\mintinline{haskellc}/`updWith` :: Ampar s t£££££→££(t → u)£££→£££££££Ampar s u/\\[0.7cm]
 \hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-updWith}}}
 \end{itemize}
 \end{frame}
 \begin{frame}[fragile,t]{Functional DPS API -- Functions (6/6)}
 \begin{itemize}
 \item Extract a completed structure?\\
-\mintinline{haskellc}/fromAmpar' :: Ampar s () → s/\\[0.7cm]
+\mintinline{haskellc}/fromAmpar' ::£££Ampar s ()£££££££££££££££→££££££££££££s/\\[0.7cm]
 \scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fromAmpar}}}
 \end{itemize}
 \end{frame}
@@ -1141,7 +1182,7 @@ User must pass a \textbf{linear function} consuming the resource in this scope
 \end{frame}
 
 \begin{frame}[fragile]{Updating the API with linearity}
-A \mintinline{haskellc}/dup/able, scope-limited \mintinline{haskellc}/Token/ to infect \mintinline{haskellc}/Ampar/ with linearity:
+Trick to easier manage linear resources and their scopes: linearity-infectious \mintinline{haskellc}/Token/:
 \begin{minted}{haskellc}
 data Token
 dup  :: Token ⊸ (Token, Token)
@@ -1184,8 +1225,7 @@ fromAmpar'   :: Ampar s ()     ⊸ s
 \section{Safe yet?}
 
 \begin{frame}[fragile]{Scope escape -- Example}
-% TODO: inverser l'ordre
-\begin{onlyenv}<1>
+\begin{onlyenv}<2>
 \begin{minted}[escapeinside=°°]{haskellc}
 °\greyedout{let outer :: Ampar (Dest ()) ()}°
     °\greyedout{outer = }°(newAmpar tok1) `updWith` \(dOuter :: Dest (Dest ())) →
@@ -1196,7 +1236,7 @@ fromAmpar'   :: Ampar s ()     ⊸ s
  °\greyedout{in fromAmpar' outer}°
 \end{minted}
 \end{onlyenv}
-\begin{onlyenv}<2>
+\begin{onlyenv}<1>
 \begin{minted}{haskellc}
 let outer :: Ampar (Dest ()) ()
     outer = (newAmpar tok1) `updWith` \(dOuter :: Dest (Dest ())) →
@@ -1206,12 +1246,12 @@ let outer :: Ampar (Dest ()) ()
                in fromAmpar' inner
  in fromAmpar' outer
 \end{minted}
+\end{onlyenv}
 
 \bigskip
 
 {\small\textit{Minimal example of type-checked code that produce scope-escape/segfault}}
 
-\end{onlyenv}
 \end{frame}
 
 \begin{frame}[fragile]{Scope escape -- Bigger picture}
@@ -1219,7 +1259,7 @@ let outer :: Ampar (Dest ()) ()
 Not \emph{just} an artificial edge-case
 
 \begin{itemize}
-  \item Linear API are often based on scope-limited resource consumption
+  \item Linear API are often based on scope-delimited resource consumption
   \item Any form of (linear) storage for linear resources breaks that\\
         \mintinline{haskellc}/storeAway :: t ⊸ ()  -- resource goes away magically/
 \end{itemize}
@@ -1239,7 +1279,7 @@ Not \emph{just} an artificial edge-case
 
 In other words, \mintinline{haskellc}/UAmpar s t/ builds an unrestricted \mintinline{haskellc}/s/
 
-{\small \textit{Used in my library \texttt{linear-dest} from ``DPS: a Haskell implementation'', Bagrel, JFLA 2024}}
+{\small \textit{Used in my library \texttt{linear-dest} from article ``DPS: a Haskell implementation'', Bagrel, JFLA 2024}}
 \end{block}
 
 \end{frame}
@@ -1457,11 +1497,11 @@ Further work: Use the theoretical language as a framework to prove safety of les
 
 \begin{frame}[fragile]{Contributions}
 \begin{itemize}
-  \item ``Destination-passing style programming: a Haskell implementation'' + \texttt{linear-dest}\\
+  \item ``Destination-passing style programming: a Haskell implementation'' (Article + Impl)\\
   {\small JFLA 2024, \url{inria.hal.science/hal-04406360}}
   \item ``A zero-copy interface to compact regions powered by destinations'' (Talk)\\
   {\small HIW 2024, \url{www.youtube.com/watch?v=UIw0s-yEkfw}}
-  \item ``Destination Calculus: A Linear $\lambda$-Calculus for Purely Functional Memory Writes''\\
+  \item ``Destination Calculus: A Linear $\lambda$-Calculus for Purely Functional Memory Writes'' (Article)\\
   {\small Co-authored with A. Spiwack, OOPSLA1 2025, \url{dl.acm.org/doi/10.1145/3720423}}
   \item ``Primitives for zero-copy compact regions'' (GHC Proposal)\\
   {\small Work in progress, \url{github.com/ghc-proposals/ghc-proposals/pull/683}}
@@ -1532,7 +1572,29 @@ So we decompose it into~~$\ottstype{u~\overset{mem}{\parr}~t^{\overset{mem}{\per
   \item $\ottstype{\overset{mem}{\parr}}$ is $\ottstype{Ampar}$ type constructor (\textit{asymetrical memory par})\\
 \end{itemize}
 
-The asymetrical aspect comes from the fact that we lose some nice properties\\ of the original $\ottstype{\parr}$ connective
+The \emph{asymetrical} aspect comes from the fact that we lose some nice properties\\ of the original $\ottstype{\parr}$ connective because we are not in a classical setting.
+\end{frame}
+
+\begin{frame}[fragile]{Age system VS Rust lifetimes}
+
+\textbf{Ages} in $\lambda_d$ are:
+\begin{itemize}
+  \item relative (relative offsets through modality $\expcons{[[m]]}$)
+  \item locally exact
+  \item equalities and strict inequalities
+\end{itemize}
+
+\medskip
+
+\textbf{Rust lifetimes} are:
+\begin{itemize}
+  \item global/absolute
+  \item lifetime subtyping = (local) loss of information
+  \item supports only large inequalities
+\end{itemize}
+
+To avoid scope escape, we want to know that \textbf{something will die strictly before another} instead of that \textbf{something will live at least as long as another}.
+
 \end{frame}
 
 \egroup

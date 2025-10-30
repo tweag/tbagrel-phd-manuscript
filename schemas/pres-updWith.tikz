@@ -15,7 +15,7 @@
 		\node [style=normal] (336) at (6, -7.375) {};
 		\node [style=normal] (337) at (5, -7.375) {};
 		\node [style=normal] (338) at (5.5, -6.875) {};
-		\node [style=normal] (339) at (5.5, -6.875) {\mintinline{haskellc}/¤I#/};
+		\node [style=normal] (339) at (5.5, -6.875) {\mintinline{haskellc}/1/};
 		\node [style=normal] (340) at (5.5, -6.375) {};
 		\node [style=bullet] (341) at (5.5, -5.75) {};
 		\node [style=normal] (348) at (3.75, -3.25) {};
@@ -43,10 +43,7 @@
 		\node [style=normal] (370) at (9.75, -6.5) {};
 		\node [style=normal] (386) at (4.5, -5.25) {};
 		\node [style=normal] (387) at (6, -6.375) {};
-		\node [style=normal] (388) at (7, -6.375) {};
-		\node [style=normal] (389) at (7, -7.375) {};
 		\node [style=normal] (390) at (6, -7.375) {};
-		\node [style=normal] (395) at (6.5, -6.875) {\mintinline{haskellc}/1#/};
 		\node [style=bullet] (397) at (6.5, -5.75) {};
 		\node [style=normal] (398) at (7.75, -6.375) {};
 		\node [style=none] (436) at (3, -2) {};
@@ -121,7 +118,7 @@
 		\node [style=normal] (510) at (20.5, -7.375) {};
 		\node [style=normal] (511) at (19.5, -7.375) {};
 		\node [style=normal] (512) at (20, -6.875) {};
-		\node [style=normal] (513) at (20, -6.875) {\mintinline{haskellc}/¤I#/};
+		\node [style=normal] (513) at (20, -6.875) {\mintinline{haskellc}/1/};
 		\node [style=normal] (514) at (20, -6.375) {};
 		\node [style=bullet] (515) at (20, -5.75) {};
 		\node [style=normal] (516) at (20, -3.25) {};
@@ -149,10 +146,7 @@
 		\node [style=normal] (538) at (24.25, -6.5) {};
 		\node [style=normal] (539) at (19, -5.25) {};
 		\node [style=normal] (540) at (20.5, -6.375) {};
-		\node [style=normal] (541) at (21.5, -6.375) {};
-		\node [style=normal] (542) at (21.5, -7.375) {};
 		\node [style=normal] (543) at (20.5, -7.375) {};
-		\node [style=normal] (544) at (21, -6.875) {\mintinline{haskellc}/1#/};
 		\node [style=bullet] (545) at (21, -5.75) {};
 		\node [style=normal] (546) at (22.25, -6.375) {};
 		\node [style=none] (547) at (19.25, -2) {};
@@ -216,6 +210,7 @@
 		\node [style=none] (607) at (23.125, -4.875) {};
 		\node [style=none] (608) at (22.125, -4.5) {};
 		\node [style=none] (609) at (23.125, -4.5) {};
+		\node [style=none] (610) at (-3, -4.75) {};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=normaledge] (319.center) to (320.center);
@@ -254,10 +249,7 @@
 		\draw [style=hole] (367.center) to (368.center);
 		\draw [style=hole] (368.center) to (369.center);
 		\draw [style=hole] (369.center) to (366.center);
-		\draw [style=normaledge] (387.center) to (388.center);
-		\draw [style=normaledge] (389.center) to (390.center);
 		\draw [style=normaledge] (390.center) to (387.center);
-		\draw [style=normaledge] (388.center) to (389.center);
 		\draw [style=arrow, in=90, out=0] (397.center) to (398.center);
 		\draw [style=grey] (441.center) to (442.center);
 		\draw [style=hole] (443.center) to (444.center);
@@ -342,10 +334,7 @@
 		\draw [style=hole] (535.center) to (536.center);
 		\draw [style=hole] (536.center) to (537.center);
 		\draw [style=hole] (537.center) to (534.center);
-		\draw [style=normaledge] (540.center) to (541.center);
-		\draw [style=normaledge] (542.center) to (543.center);
 		\draw [style=normaledge] (543.center) to (540.center);
-		\draw [style=normaledge] (541.center) to (542.center);
 		\draw [style=arrow, in=90, out=0] (545.center) to (546.center);
 		\draw [style=hole] (550.center) to (551.center);
 		\draw [style=hole] (551.center) to (552.center);
