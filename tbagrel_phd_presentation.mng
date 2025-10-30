@@ -449,6 +449,7 @@
 \newunicodechar{⁰}{\textcolor{modecolor}{$^{0}$}}
 \newunicodechar{¹}{\textcolor{modecolor}{$^{1}$}}
 \newunicodechar{☠}{$\skull$}
+\newunicodechar{£}{\texttt{~}}
 
 \newlength{\widthaugment}
 \NewEnviron{augmentwidth}[1]
@@ -793,7 +794,7 @@ Data structures: immutable, thus built from the leaves up to the root.
 \end{itemize}
 
 \begin{center}
-\pause\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-1}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
+\pause\scalebox{1.1}{\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-1}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-3}}}
 \end{center}
 
 \onslide<5->{
@@ -813,7 +814,7 @@ What about lifting this limitation?
 \end{itemize}
 
 \begin{center}
-\hspace*{-0.5cm}\scalebox{1.1}{\pause\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-1}}$\pause\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-3}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj}}}
+\hspace*{-0.5cm}\scalebox{1.1}{\pause\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-0}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-1}}$\pause\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-2}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-dps-3}}\pause$\to$\adjustbox{valign=c}{\tikzfig{schemas/pres-constructor-heap-obj-3}}}
 \end{center}
 
 \vspace*{0.5cm}
@@ -976,17 +977,13 @@ fromAmpar' :: Ampar s () → s
 
 \begin{frame}[fragile,t]{Functional DPS API -- Functions (1/6)}
 \begin{itemize}
-\only<1->{
-\item Allocate a hollow data constructor and plug it into a hole? \mintinline{haskellc}/&fill @'Ctor/\\[0.1cm]
-}
-\only<1>{
-\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons-init}}}\\[0.3cm]
-\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil-init}}}}
-\only<2>{
-\mintinline{haskellc}/&fill @'(:) :: Dest [t] → (Dest t, Dest [t])/\\[0.1cm]
-\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons}}}\\[0.3cm]
-\mintinline{haskellc}/&fill @'[] :: Dest [t] → ()/\\[0.1cm]
-\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil}}}}
+\item Allocate a hollow data constructor and plug it into a hole?\\[0.1cm]%
+\onslide<2>{\mintinline{haskellc}/&fill @'(:) :: Dest [t]££££££££→££££££££££££££(Dest t, Dest [t])/\\[0.1cm]}
+\only<1>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons-init}}}\\[0.3cm]}
+\only<2>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillCons}}}\\[0.3cm]}%
+\onslide<2>{\mintinline{haskellc}/&fill @'[]££:: Dest [t]£££££££→£££££££££()/\\[0.1cm]}%
+\only<1>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil-init}}}}
+\only<2>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillNil}}}}
 \end{itemize}
 \end{frame}
 % On regarde sous le tapis d'abord
@@ -997,24 +994,19 @@ fromAmpar' :: Ampar s () → s
 % Conséquemment, l'entrée c'est la dest qui pointe sur le trou sur lequel on veut agir, et la sortie c'est 2 nouvelles dests pour les 2 nouveaux trous dans la structure.
 \begin{frame}[fragile,t]{Functional DPS API -- Functions (2/6)}
 \begin{itemize}
-\only<1->{
-\item Fill a hole with an already complete value? \mintinline{haskellc}/&fillLeaf/\\[0.1cm]}
-\only<1>{
-\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf-init}}}}
-\only<2>{
-\mintinline{haskellc}/&fillLeaf :: Dest t → t → ()/\\[0.3cm]
-\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf}}}}
+\item Fill a hole with an already complete value?\\[0.1cm]
+\onslide<2>{\mintinline{haskellc}/&fillLeaf ::£££Dest t£££→£££t££££££→£££££££££££££££££()/\\[0.3cm]}%
+\only<1>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf-init}}}}
+\only<2>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillLeaf}}}}
 \end{itemize}
 \end{frame}
+
 \begin{frame}[fragile,t]{Functional DPS API -- Functions (3/6)}
 \begin{itemize}
-\only<1->{
-\item Plug an incomplete structure into the hole of another one? \mintinline{haskellc}/&fillComp/\\[0.1cm]}
-\only<1>{
-\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp-init}}}}
-\only<2>{
-\mintinline{haskellc}/&fillComp :: Dest s → Ampar s t → t/\\[0.3cm]
-\hspace*{-1.25cm}\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
+\item Plug an incomplete structure into the hole of another one?\\[0.1cm]
+\onslide<2>{\mintinline{haskellc}/&fillComp :: Dest s£££→££££££Ampar s t£££££££££££££→£££££££££££££££££t/\\[0.3cm]}%
+\only<1>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp-init}}}}
+\only<2>{\scalebox{1.0}{\adjustbox{valign=c}{\tikzfig{schemas/pres-fillComp}}}}
 \end{itemize}
 \end{frame}
 

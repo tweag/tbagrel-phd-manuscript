@@ -5,7 +5,7 @@
 		\node [style=normal] (201) at (0.975, -1) {};
 		\node [style=normal] (202) at (-0.025, -1) {};
 		\node [style=normal] (203) at (0.475, -0.5) {};
-		\node [style=normal] (204) at (0.475, -0.5) {\mintinline{haskellc}/¤I#/};
+		\node [style=normal] (204) at (0.475, -0.5) {\mintinline{haskellc}/1/};
 		\node [style=normal] (205) at (0.475, 0) {};
 		\node [style=normal] (210) at (-0.025, -1.5) {};
 		\node [style=normal] (211) at (0.975, -1.5) {};
@@ -23,7 +23,7 @@
 		\node [style=normal] (224) at (1.975, -2.625) {};
 		\node [style=normal] (225) at (1.975, -3.625) {};
 		\node [style=normal] (226) at (0.975, -3.625) {};
-		\node [style=normal] (227) at (1.475, -3.125) {\mintinline{haskellc}/¤I#/};
+		\node [style=normal] (227) at (1.475, -3.125) {\mintinline{haskellc}/2/};
 		\node [style=normal] (228) at (1.475, -2.625) {};
 		\node [style=normal] (229) at (3.1, -2.625) {};
 		\node [style=normal] (230) at (4.1, -2.625) {};
@@ -34,15 +34,9 @@
 		\node [style=bullet] (235) at (1.475, -2) {};
 		\node [style=bullet] (236) at (2.475, -2) {};
 		\node [style=normal] (237) at (1.975, -2.625) {};
-		\node [style=normal] (238) at (2.975, -2.625) {};
-		\node [style=normal] (239) at (2.975, -3.625) {};
 		\node [style=normal] (240) at (1.975, -3.625) {};
-		\node [style=normal] (241) at (2.475, -3.125) {\mintinline{haskellc}/2#/};
 		\node [style=normal] (242) at (0.975, 0) {};
-		\node [style=normal] (243) at (1.975, 0) {};
-		\node [style=normal] (244) at (1.975, -1) {};
 		\node [style=normal] (245) at (0.975, -1) {};
-		\node [style=normal] (246) at (1.475, -0.5) {\mintinline{haskellc}/1#/};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=normaledge] (199.center) to (200.center);
@@ -70,13 +64,7 @@
 		\draw [style=normaledge] (230.center) to (231.center);
 		\draw [style=arrow] (235.center) to (228.center);
 		\draw [style=arrow] (236.center) to (234.center);
-		\draw [style=normaledge] (237.center) to (238.center);
-		\draw [style=normaledge] (239.center) to (240.center);
 		\draw [style=normaledge] (240.center) to (237.center);
-		\draw [style=normaledge] (238.center) to (239.center);
-		\draw [style=normaledge] (242.center) to (243.center);
-		\draw [style=normaledge] (244.center) to (245.center);
 		\draw [style=normaledge] (245.center) to (242.center);
-		\draw [style=normaledge] (243.center) to (244.center);
 	\end{pgfonlayer}
 \end{tikzpicture}

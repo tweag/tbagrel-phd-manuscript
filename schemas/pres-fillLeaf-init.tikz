@@ -21,20 +21,17 @@
 		\node [style=normal] (149) at (4.75, -4.125) {};
 		\node [style=normal] (150) at (5.25, -3.625) {};
 		\node [style=normal] (151) at (5.25, -3.625) {\mintinline{haskellc}/¤[]/};
-		\node [style=normal] (193) at (7, -2.5) {};
-		\node [style=normal] (194) at (8, -2.5) {};
-		\node [style=normal] (195) at (8, -3.5) {};
-		\node [style=normal] (196) at (7, -3.5) {};
-		\node [style=normal] (197) at (7.5, -3) {};
-		\node [style=normal] (198) at (7.5, -3) {\mintinline{haskellc}/¤I#/};
-		\node [style=normal] (199) at (7.5, -2.5) {};
+		\node [style=normal] (193) at (8, -2.5) {};
+		\node [style=normal] (194) at (9, -2.5) {};
+		\node [style=normal] (195) at (9, -3.5) {};
+		\node [style=normal] (196) at (8, -3.5) {};
+		\node [style=normal] (197) at (8.5, -3) {};
+		\node [style=normal] (198) at (8.5, -3) {\mintinline{haskellc}/1/};
+		\node [style=normal] (199) at (8.5, -2.5) {};
 		\node [style=normal] (297) at (5.75, -3.125) {};
 		\node [style=normal] (300) at (5.75, -4.125) {};
-		\node [style=normal] (301) at (8, -2.5) {};
-		\node [style=normal] (302) at (9, -2.5) {};
-		\node [style=normal] (303) at (9, -3.5) {};
-		\node [style=normal] (304) at (8, -3.5) {};
-		\node [style=normal] (306) at (8.5, -3) {\mintinline{haskellc}/1#/};
+		\node [style=normal] (301) at (9, -2.5) {};
+		\node [style=normal] (304) at (9, -3.5) {};
 		\node [style=normal] (307) at (10.25, -3) {};
 		\node [style=normal] (308) at (12.25, -3) {};
 		\node [style=normal] (309) at (12, -2.75) {};
@@ -70,13 +67,10 @@
 		\node [style=normal] (473) at (17.75, -4.125) {};
 		\node [style=normal] (474) at (16.75, -4.125) {};
 		\node [style=normal] (475) at (17.25, -3.625) {};
-		\node [style=normal] (476) at (17.25, -3.625) {\mintinline{haskellc}/¤I#/};
+		\node [style=normal] (476) at (17.25, -3.625) {\mintinline{haskellc}/1/};
 		\node [style=normal] (477) at (17.25, -3.125) {};
 		\node [style=normal] (478) at (17.75, -3.125) {};
-		\node [style=normal] (479) at (18.75, -3.125) {};
-		\node [style=normal] (480) at (18.75, -4.125) {};
 		\node [style=normal] (481) at (17.75, -4.125) {};
-		\node [style=normal] (482) at (18.25, -3.625) {\mintinline{haskellc}/1#/};
 		\node [style=bullet] (483) at (17.25, -2.5) {};
 		\node [style=none] (485) at (15.75, -2.5) {};
 	\end{pgfonlayer}
@@ -104,10 +98,7 @@
 		\draw [style=normaledge] (196.center) to (193.center);
 		\draw [style=normaledge] (194.center) to (195.center);
 		\draw [style=normaledge] (300.center) to (297.center);
-		\draw [style=normaledge] (301.center) to (302.center);
-		\draw [style=normaledge] (303.center) to (304.center);
 		\draw [style=normaledge] (304.center) to (301.center);
-		\draw [style=normaledge] (302.center) to (303.center);
 		\draw [style=normaledge] (307.center) to (308.center);
 		\draw [style=normaledge] (309.center) to (308.center);
 		\draw [style=normaledge] (308.center) to (310.center);
@@ -132,10 +123,7 @@
 		\draw [style=normaledge] (473.center) to (474.center);
 		\draw [style=normaledge] (474.center) to (471.center);
 		\draw [style=normaledge] (472.center) to (473.center);
-		\draw [style=normaledge] (478.center) to (479.center);
-		\draw [style=normaledge] (480.center) to (481.center);
 		\draw [style=normaledge] (481.center) to (478.center);
-		\draw [style=normaledge] (479.center) to (480.center);
 		\draw [style=arrow] (483.center) to (477.center);
 	\end{pgfonlayer}
 \end{tikzpicture}

@@ -16,7 +16,7 @@
 		\node [style=normal] (224) at (2, -1.125) {};
 		\node [style=normal] (225) at (2, -2.125) {};
 		\node [style=normal] (226) at (1, -2.125) {};
-		\node [style=normal] (227) at (1.5, -1.625) {\mintinline{haskellc}/¤I#/};
+		\node [style=normal] (227) at (1.5, -1.625) {\mintinline{haskellc}/2/};
 		\node [style=normal] (228) at (1.5, -1.125) {};
 		\node [style=normal] (229) at (3.125, -1.125) {};
 		\node [style=normal] (230) at (4.125, -1.125) {};
@@ -27,10 +27,7 @@
 		\node [style=bullet] (235) at (1.5, -0.5) {};
 		\node [style=bullet] (236) at (2.5, -0.5) {};
 		\node [style=normal] (237) at (2, -1.125) {};
-		\node [style=normal] (238) at (3, -1.125) {};
-		\node [style=normal] (239) at (3, -2.125) {};
 		\node [style=normal] (240) at (2, -2.125) {};
-		\node [style=normal] (241) at (2.5, -1.625) {\mintinline{haskellc}/2#/};
 	\end{pgfonlayer}
 	\begin{pgfonlayer}{edgelayer}
 		\draw [style=normaledge] (210.center) to (211.center);
@@ -54,9 +51,6 @@
 		\draw [style=normaledge] (230.center) to (231.center);
 		\draw [style=arrow] (235.center) to (228.center);
 		\draw [style=arrow] (236.center) to (234.center);
-		\draw [style=normaledge] (237.center) to (238.center);
-		\draw [style=normaledge] (239.center) to (240.center);
 		\draw [style=normaledge] (240.center) to (237.center);
-		\draw [style=normaledge] (238.center) to (239.center);
 	\end{pgfonlayer}
 \end{tikzpicture}
