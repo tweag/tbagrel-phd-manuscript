@@ -1270,7 +1270,7 @@ Not \emph{just} an artificial edge-case
 
 \begin{frame}[fragile]{With just Haskell type system (1/2)}
 
-\begin{block}{Solution 1: destinations can only store non-linear data}
+\textbf{Solution 1: destinations can only store non-linear data}
 
 \vspace*{0.2cm}
 
@@ -1280,13 +1280,12 @@ Not \emph{just} an artificial edge-case
 In other words, \mintinline{haskellc}/UAmpar s t/ builds an unrestricted \mintinline{haskellc}/s/
 
 {\small \textit{Used in my library \texttt{linear-dest} from article ``DPS: a Haskell implementation'', Bagrel, JFLA 2024}}
-\end{block}
 
 \end{frame}
 
 \begin{frame}[fragile]{With just Haskell type system (2/2)}
 
-\begin{block}{Solution 2: destinations for linear data needs new primitives instead of \mintinline{haskellc}/fillLeaf/ / \mintinline{haskellc}/fillComp/}
+\textbf{Solution 2: destinations for linear data needs new primitives instead of \mintinline{haskellc}/fillLeaf/ / \mintinline{haskellc}/fillComp/}
 
 \vspace*{0.2cm}
 
@@ -1298,7 +1297,6 @@ Back to Minamide-like system where one operate on \mintinline{haskellc}/Ampar/s 
 \end{itemize}
 
 {\small \textit{Developed in Chapter 4 of the PhD manuscript (unpublished)}}
-\end{block}
 
 \end{frame}
 
