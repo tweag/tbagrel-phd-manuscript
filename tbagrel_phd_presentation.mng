@@ -94,7 +94,7 @@
 \definecolor{sciicolor}{RGB}{60, 103, 163}
 \definecolor{sciifcolor}{RGB}{148, 163, 184}
 \definecolor{sciiicolor}{RGB}{97, 5, 94}
-\definecolor{emerald}{rgb}{0.31, 0.78, 0.47}
+\definecolor{emerald}{RGB}{35, 113, 71}
 \definecolor{firebrick}{rgb}{0.7, 0.13, 0.13}
 \newcommand{\scz}[1]{\textcolor{sczcolor}{#1}}
 \newcommand{\sczf}[1]{\textcolor{sczfcolor}{#1}}
@@ -444,6 +444,7 @@
 \newunicodechar{¤}{}
 \newunicodechar{;}{\ensuremath{\fatsemi}}
 \newunicodechar{∀}{\ensuremath{\pmb{\forall}}}
+\newunicodechar{∃}{\ensuremath{\pmb{\exists}}}
 \newunicodechar{Ⴈ}{1}
 \newunicodechar{↑}{\textcolor{modecolor}{$\uparrow$}}
 \newunicodechar{⁰}{\textcolor{modecolor}{$^{0}$}}
@@ -766,10 +767,10 @@
     \usebeamerfont{page number in head/foot}%
     \usebeamercolor[fg]{page number in head/foot}%
     % --- conditional numbering logic ---
-    \ifnum\value{framenumber}<49
-      \insertframenumber{} / 48%
+    \ifnum\value{framenumber}<50
+      \insertframenumber{} / 49%
     \else
-      Annex~\number\numexpr\value{framenumber}-48\relax%
+      Annex~\number\numexpr\value{framenumber}-49\relax%
     \fi
     \hspace*{2ex}%
   }%
@@ -1447,13 +1448,19 @@ Named hole substitution lemma is the most technical part of the proofs
 Proved using fairly standard techniques (progress + preservation).\\[0.1cm]
 Most of the heavy lifting is done through lemmas and theorems about typing contexts due to the algebraic structure of the type system.
 
-\begin{theorem}[Type preservation]\label{thm:preservation}
-  If\quad$ \,\pmb{\vdash}\, \ottnt{E} \big[\, \ottnt{e} \,\big]~\pmb{\ottstype{::}}~\ottstype{t} $\quad and\quad$ \ottnt{E} \,\big[\, \ottnt{e} \,\big] ~\longrightarrow~ \ottnt{E'} \,\big[\, \ottnt{e'} \,\big]$\quad then\quad$ \,\pmb{\vdash}\, \ottnt{E'} \big[\, \ottnt{e'} \,\big]~\pmb{\ottstype{::}}~\ottstype{t} $
-\end{theorem}
+\medskip
 
-\begin{theorem}[Progress]\label{thm:progress}
-  If\quad$ \,\pmb{\vdash}\, \ottnt{E} \big[\, \ottnt{e} \,\big]~\pmb{\ottstype{::}}~\ottstype{t} $\quad and\quad$\forall \ottnt{v},~\ottnt{E} \biggerbrackl  \ottnt{e}  \biggerbrackr  \neq  \raisebox{0.075em}{$\scriptstyle [\hspace*{0.5ex}]$} \biggerbrackl  \ottnt{v}  \biggerbrackr $\quad then\quad$\exists\,\ottnt{E'}, \ottnt{e'}.~ \ottnt{E} \,\big[\, \ottnt{e} \,\big] ~\longrightarrow~ \ottnt{E'} \,\big[\, \ottnt{e'} \,\big] $
-\end{theorem}
+\textbf{Theorem (Type preservation)}
+
+\textit{
+  If\quad$ \,\pmb{\vdash}\, \ottnt{E} \big[\, \ottnt{e} \,\big]~\pmb{\ottstype{::}}~\ottstype{t} $\quad and\quad$ \ottnt{E} \,\big[\, \ottnt{e} \,\big] ~\longrightarrow~ \ottnt{E'} \,\big[\, \ottnt{e'} \,\big]$\quad then\quad$ \,\pmb{\vdash}\, \ottnt{E'} \big[\, \ottnt{e'} \,\big]~\pmb{\ottstype{::}}~\ottstype{t} $}
+
+\medskip
+
+\textbf{Theorem (Progress)}
+
+\textit{
+  If\quad$ \,\pmb{\vdash}\, \ottnt{E} \big[\, \ottnt{e} \,\big]~\pmb{\ottstype{::}}~\ottstype{t} $\quad and\quad$\forall \ottnt{v},~\ottnt{E} \biggerbrackl  \ottnt{e}  \biggerbrackr  \neq  \raisebox{0.075em}{$\scriptstyle [\hspace*{0.5ex}]$} \biggerbrackl  \ottnt{v}  \biggerbrackr $\quad then\quad$\exists\,\ottnt{E'}, \ottnt{e'}.~ \ottnt{E} \,\big[\, \ottnt{e} \,\big] ~\longrightarrow~ \ottnt{E'} \,\big[\, \ottnt{e'} \,\big] $}
 
 \end{frame}
 
@@ -1592,6 +1599,26 @@ The \emph{asymetrical} aspect comes from the fact that we lose some nice propert
 \end{itemize}
 
 To avoid scope escape, we want to know that \textbf{something will die strictly before another} instead of that \textbf{something will live at least as long as another}.
+
+\end{frame}
+
+\begin{frame}[fragile]{Existentials for scope escape (idea)}
+
+Add an extra type parameter on destinations: \mintinline{haskellc}/Dest t r/
+
+\mintinline{haskellc}/Ampar/ right side is now a type constructor: \mintinline{haskellc}/Ampar s tc/ where \mintinline{haskellc}/tc :: Type -> Type/.
+
+\mintinline{haskellc}/`updWith`/ now has signature \mintinline{haskellc}/Ampar s tc ⊸ (∀r. tc r ⊸ uc r) ⊸ Ampar s uc/.
+
+\pmb{\textcolor{teal}{$\pmb{\to}$}} Destinations only have a concrete type when their \mintinline{haskellc}/Ampar/ is operated upon with \mintinline{haskellc}/`updWith`/.\\
+We shouldn't be able to create a container for them if we don't know their full type yet...
+
+Good start, but:
+\begin{itemize}
+  \item We can use a wrapper \mintinline{haskellc}/data Any where Any :: ∀ t. t ⊸ Any/ and an outer \mintinline{haskellc}/Dest Any rOuter/ to leak a destination \mintinline{haskellc}/Dest t rInner/ even though we don't know \mintinline{haskellc}/rInner/ in the outer scope
+  \\{\small\itshape (Equivalent to storing a dest into a \mintinline{haskellc}/Dest (∃ r. Dest t r)/ with primitive support for existentials)}
+  \item Might prevent scope escape of dests, but still breaks other linear APIs
+\end{itemize}
 
 \end{frame}
 

@@ -46,7 +46,7 @@ class HC(RegexLexer):
 
     reserved = ('case', 'class', 'data', 'default', 'deriving', 'do', 'else',
                 'family', 'if', 'in', 'infix[lr]?', 'instance',
-                'let', 'newtype', 'of', 'then', 'type', 'where', '_', 'forall', '∀') # tbagrel1: added forall
+                'let', 'newtype', 'of', 'then', 'type', 'where', '_', 'forall', '∀', '∃') # tbagrel1: added forall
     ascii = ('NUL', 'SOH', '[SE]TX', 'EOT', 'ENQ', 'ACK',
              'BEL', 'BS', 'HT', 'LF', 'VT', 'FF', 'CR', 'S[OI]', 'DLE',
              'DC[1-4]', 'NAK', 'SYN', 'ETB', 'CAN',
@@ -93,7 +93,7 @@ class HC(RegexLexer):
 
             #  Operators
             (r'\\(?![:!#$%&*+.\\/<=>?@^|~-]+)', Operator.Word),  # lambda operator
-            (r'(<-|⩴|->|=>|=|⊸|→|⇒|←|∀|forall\b)(?![:!#$%&*+.\\/<=>?@^|~-]+)', Operator.Word),  # specials # tbagrel1: added support for some unicode arrows
+            (r'(<-|⩴|->|=>|=|⊸|→|⇒|←|∀|∃|forall\b)(?![:!#$%&*+.\\/<=>?@^|~-]+)', Operator.Word),  # specials # tbagrel1: added support for some unicode arrows
             (r'[=@](?![:!#$%&*+.\\/<=>?@^|~-]+)', Operator.Word),
             (r'[|](?![:!#$%&*+.\\/<=>?@^|~-]+)', Operator.Word),
 #             (r':[!#$%&*+.\\/<=>?@^|~-]*', Keyword.Type),  # Constructor operators

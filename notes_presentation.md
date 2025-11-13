@@ -1,17 +1,25 @@
 ## Slide 1 - Programming languages
 
+My starting point is programming languages.
+
 As many of you know, there exists many different programming languages, each with their own strengths and weaknesses, being more suitable for certain type of tasks or uses.
+
 Among these, common distinction: imperative languages and functional ones.
-Imperative languages are the most know, and are based on a sequence of instructions that change the memory state of the program. In these, mutations happens frequently, and side effects, that is, interaction with the outside world (e.g. file read) can happen at any time.
-In functional languages, instead, the main building blocks are functions and expression. Often, they describe what to do/obtain, rather than how to do obtain it. Commonly, they tend to avoid mutations and untracked side effects, in favor of immutability and pure functions (side effects are pushed to the boundaries of the program as much as possible)
+
+In Imperative languages the focus is on describing a sequence of operations and memory updates to be successively applied to obtain the desired result.
+In functional languages, instead, the focus is more on describing the desired result, by composing expressions and functions, in a more mathematical style.
 
 ## Slide 2 - Functional languages - why?
 
-During my thesis, I focused on functional programming languages, because albeit a bit less known than imperative ones, they present interesting properties.
+During my PhD, and more generally, in my research team, we focus on functional programming languages, because they present very interesting properties.
 
-Among those, they are often quite close to their mathematical foundations, which makes reasoning about programs easier, especially when doing static analysis, aka. studying the properties of a program without running it.
+Indeed, as they functional programming languages are based on mathematical foundations (i.e. lambda calculus), they often have a simpler and more principled core, that makes it easier to do static analysis. aka. studying the properties of a program without running it.
 
-One consequence of their proximity with pure mathematical models is that we often don't want to care about memory management explicitly, and prefer that the language runtime handles it for us, through automatic garbage collection.
+A consequence of that is that in functional programming languages, we tend to focus less on memory management, and prefer that the runtime/compiler handles it for us, through automatic garbage collection.
+
+Aumomatic memory management is quite useful actually, because it makes sure that no memory bugs can happen, while being generally fairly efficient with no need for the programmer to manually intervene.
+
+But still, in some contexts, we might want to retain some control on how memory is managed, for specific parts of a functional program, without sacrificing the nice properties that come with functional programming languages. This is what we will explore in this talk.
 
 ## Slide 3 - Functional data structures
 
