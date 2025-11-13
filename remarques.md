@@ -123,3 +123,11 @@ Questions: est-ce faisable en Rust modulo linéarité ?
 
 
 Slide Token : on ne comprend pas à quoi sert les tokens
+
+===============
+
+Questions Orchard :
+
+4. En fait, on voit des exemples surtout dès que le coût en garbage collection est relativement important (courbe copié > courbe alloc).
+5. On n'a pas essayé, notamment car ce n'est pas clair le rôle du 0 en logique linéaire (e.g. case_0 comme on a un case_m), mais il n'y a pas de raisons que ça casse quoi que ce soit.
+
