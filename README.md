@@ -1,2 +1,3 @@
 # tbagrel-phd-manuscript
-Thomas BAGREL PhD manuscript on _Type systems for memory management in functional programming languages_
+
+Thomas BAGREL PhD manuscript on _Formalization and Implementation of Safe Destination Passing in Pure Functional Programming Settings_

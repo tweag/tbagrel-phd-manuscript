@@ -4,7 +4,7 @@
 
 The main issue with the approach of our DPS Haskell API developed in \cref{chap:dps-haskell} is that data structures built using destination filling cannot store linear data. This is the consequence of having a lot of flexibility in the way destinations can be used, without a system of ages to prevent scope escape in a fine-grained manner. Thus we had to use \emph{unrestrictedness} as a barrier so that destinations cannot escape their scope.
 
-Previous works however, such as~\cite{minamide_functional_1998}, or~\cite{lorenzen_searchtree_2024}, would allow for efficient queues (see \cref{ssec:efficient-queue}) or any structure with holes to store linear data, without issues with scope escape. This happens mainly because they don't have a concept of destinations; in these works we can only fill holes in a structure by interacting with the incomplete structure itself (the ampar). So we ought to find a way for our Haskell implementation to be at least as expressive as these works.
+Previous works however, such as~\cite{minamide_functional_1998}, or~\cite{lorenzen_searchtree_2024}, would allow for efficient queues (see \cref{ssec:efficient-queue}) or any structure with holes to store linear data, without issues with scope escape. This happens mainly because they do not have a concept of destinations; in these works we can only fill holes in a structure by interacting with the incomplete structure itself (the ampar). So we ought to find a way for our Haskell implementation to be at least as expressive as these works.
 
 \section{Challenges of destinations for linear data: scope escape, updated}\label{sec:dps-lin-challenges}
 
@@ -33,7 +33,7 @@ extendLeaf ⩴ t ⊸ Ampar s (Dest Ⴈ t) ⊸ Ampar s ()
 
 The idea is that \mintinline{haskellc}/extendLeaf/ is a way of opening a new scope, filling the linear destination belonging to that fresh scope, and closing it immediately afterwards, without letting the user interfere. So we could think that in \mintinline{haskellc}/extendLeaf (¤Ampar struct d) val/, the linear destination \mintinline{haskellc}/d/ which gets filled by \mintinline{haskellc}/extendLeaf/ would be always strictly younger than \mintinline{haskellc}/val/ which gets stored into it, preventing scope escape (recall the sane example of \cref{sec:scope-escape-dests}, where an older destination is stored into a younger one with no issues).
 
-Except\ldots{}it doesn't work:\nopagebreak[4]%
+Except\ldots{}it does not work:\nopagebreak[4]%
 {\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 newAmpar tok0 `updWith` \(d0 ⩴ Dest Ⴈ (Dest Ⴈ t)) →
@@ -45,7 +45,7 @@ newAmpar tok0 `updWith` \(d0 ⩴ Dest Ⴈ (Dest Ⴈ t)) →
 
 In this particularly convoluted example---which nonetheless typechecks given the API described above\footnote{It would, however, be rejected by \destcalculus{}, as \mintinline{haskellc}/d0/ would have age $[[↑^2]]$ when used as a variable in the innermost scope, which is disallowed by rule \rref*{\CTyTerm\CSep\CId}.}--- an old destination \mintinline{haskellc}/d0/ is hidden inside the nest of a fresher one \mintinline{haskellc}/d2/ that we've just consumed. So we have an ampar \mintinline{haskellc}/(newAmpar tok2 `updWith` \d2 → d2 &fillLeaf () ; d0)/ whose right-hand side contains a destination \mintinline{haskellc}/d0/ which isn't its own, but comes from a previous scope. However, it is indistinguishable from an ampar whose right-hand side contains only its own destinations, if we just look at the types. So we are allowed to use \mintinline{haskellc}/extendLeaf/ on the cursed ampar, which causes scope escape (as \mintinline{haskellc}/d1/ gets stored in the outermost ampar)!
 
-There seems to be an inevitable friction between having a capturing \mintinline{haskellc}/updWith/ function, and having safe linear destinations, when we don't have a proper age system to ensure there is no cheating with scopes.
+There seems to be an inevitable friction between having a capturing \mintinline{haskellc}/updWith/ function, and having safe linear destinations, when we do not have a proper age system to ensure there is no cheating with scopes.
 
 \paragraph{A non-capturing \texttt{updWith} function}
 
@@ -76,9 +76,9 @@ This demonstrates that even with the restriction on \mintinline{haskellc}/updWit
 
 \section{Completing the family of operators for ampars with a single hole}\label{sec:single-hole}
 
-We've just seen that to use linear destinations safely, we need operators that work on closed ampars directly, instead of destinations. In fact, that is exactly what happens in~\cite{minamide_functional_1998}, or~\cite{lorenzen_searchtree_2024}: they only allow incomplete structures with one hole, and extending the structure happens by manipulating the whole incomplete structure itself, not destinations (as they don't exist in these works).
+We've just seen that to use linear destinations safely, we need operators that work on closed ampars directly, instead of destinations. In fact, that is exactly what happens in~\cite{minamide_functional_1998}, or~\cite{lorenzen_searchtree_2024}: they only allow incomplete structures with one hole, and extending the structure happens by manipulating the whole incomplete structure itself, not destinations (as they do not exist in these works).
 
-So as we just did with \mintinline{haskellc}/extendLeaf/ above, we'll be designing new operators for ampars with only one hole, so exactly one destination on their right-hand side.
+So as we just did with \mintinline{haskellc}/extendLeaf/ above, we will be designing new operators for ampars with only one hole, so exactly one destination on their right-hand side.
 
 \paragraph{The generic \mintinline{haskellc}/extend/ function}
 
@@ -133,7 +133,7 @@ nodeR parent ltree x = parent &extend @'Node @2 (ltree, x)
 }
 
 
-Note that \mintinline{haskellc}/extend/ doesn't support constructors with 0 fields (it would make the signature of the function way too complex). But 0-ary constructors can be written to the structure like any other complete value anyway, with \mintinline{haskellc}/extendLeaf/:\nopagebreak[4]%
+Note that \mintinline{haskellc}/extend/ does not support constructors with 0 fields (it would make the signature of the function way too complex). But 0-ary constructors can be written to the structure like any other complete value anyway, with \mintinline{haskellc}/extendLeaf/:\nopagebreak[4]%
 {\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 extendLeaf ⩴ ∀ s t m. t %m→ Ampar s (Dest m t) ⊸ Ampar s ()
@@ -162,7 +162,7 @@ Above, in the definition of \mintinline{haskellc}/extend/, we considered that th
 
 In \destcalculus{}, every data constructor has linear fields, except the exponential constructor $\expcons{[[m]]}$ which has a single field of mode $[[m]]$. In Haskell however, constructors have only linear fields by default, but can have unrestricted fields when the corresponding datatype is defined with GADT syntax and that an unrestricted arrow \mintinline{haskellc}/→/ is following the field's type. An unrestricted field is a way to hold unrestricted data without needing an explicit \mintinline{haskellc}/Ur/ layer.
 
-Ideally, we should thus refine the \mintinline{haskellc}/extend/ function further, and be polymorphic over the multiplicity of each field. However, to this date, we cannot get the information about field multiplicities with \mintinline{haskellc}/GHC.Generics/---and this what we use to make DPS Haskell usable with user-defined types. So, for now, it doesn't seem easy to modify the \mintinline{haskellc}/extend/ function even more to account for arbitrary multiplicity on fields.
+Ideally, we should thus refine the \mintinline{haskellc}/extend/ function further, and be polymorphic over the multiplicity of each field. However, to this date, we cannot get the information about field multiplicities with \mintinline{haskellc}/GHC.Generics/---and this what we use to make DPS Haskell usable with user-defined types. So, for now, it does not seem easy to modify the \mintinline{haskellc}/extend/ function even more to account for arbitrary multiplicity on fields.
 
 There is also another consequence: it means we have to add a dedicated version of \mintinline{haskellc}/extend/ for the \mintinline{haskellc}/¤Ur/ constructor:\nopagebreak[4]%
 {\figtextsize%
@@ -259,7 +259,7 @@ fstNL = ¤LensNL { view = \(¤Triple x y z) → x
 
 With a non-linear lens \mintinline{haskellc}/LensNL/ such as above, if we use the \mintinline{haskellc}/view/ component, then we consume a value of type \mintinline{haskellc}/t1/ but discard most of it except the part of type \mintinline{haskellc}/u1/. If we use the \mintinline{haskellc}/update/ component, it's the opposite; we discard the part of type \mintinline{haskellc}/u1/ but keep all the rest of the original \mintinline{haskellc}/t1/.
 
-For linear lenses, that we'll introduce now, we are not allowed to use the \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ components separately; otherwise we could drop parts of the original structure of type \mintinline{haskellc}/t1/, as we've just seen. So instead, we group the two functions \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ into a single one:\nopagebreak[4]%
+For linear lenses, that we will introduce now, we are not allowed to use the \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ components separately; otherwise we could drop parts of the original structure of type \mintinline{haskellc}/t1/, as we've just seen. So instead, we group the two functions \mintinline{haskellc}/view/ and \mintinline{haskellc}/update/ into a single one:\nopagebreak[4]%
 {\figtextsize%
 \begin{minted}[escapeinside=°°]{haskellc}
 newtype Lens t1 t2 u1 u2 = ¤Lens (t1 ⊸ (u1, u2 ⊸ t2))
@@ -408,7 +408,7 @@ mapAccumBfs tok f s0 tree =
 
 These implementations derive directly from the various iterations and improvements we've made over the different lists, efficient queues and breadth-first traversal examples all along this document.
 
-Notably though, we leverage both the \mintinline{haskellc}/fill/ and the \mintinline{haskellc}/extend/ families of functions in these examples. For instance, we reuse the implementation of difference lists presented in \cref{sec:single-hole}, for which we don't need the flexibility brought by \mintinline{haskellc}/updWith/, and instead rely on the \mintinline{haskellc}/extend/ functions so that we can store linear data in the difference lists (very similarly to what is presented in~\cite{minamide_functional_1998,lorenzen_searchtree_2024}). On the other hand, the breadth-first tree traversal is still implemented using \mintinline{haskellc}/updWith/ and \mintinline{haskellc}/fill/-like functions, which are essential for operating on the destinations stored in the queue.\footnote{It would not be possible to implement the breadth-first traversal using only \mintinline{haskellc}/extend/ functions with lens support. If it is possible at all, it would require more powerful \emph{optics} (the broader family of abstractions that includes lenses), and the resulting code would likely be much more verbose.}
+Notably though, we leverage both the \mintinline{haskellc}/fill/ and the \mintinline{haskellc}/extend/ families of functions in these examples. For instance, we reuse the implementation of difference lists presented in \cref{sec:single-hole}, for which we do not need the flexibility brought by \mintinline{haskellc}/updWith/, and instead rely on the \mintinline{haskellc}/extend/ functions so that we can store linear data in the difference lists (very similarly to what is presented in~\cite{minamide_functional_1998,lorenzen_searchtree_2024}). On the other hand, the breadth-first tree traversal is still implemented using \mintinline{haskellc}/updWith/ and \mintinline{haskellc}/fill/-like functions, which are essential for operating on the destinations stored in the queue.\footnote{It would not be possible to implement the breadth-first traversal using only \mintinline{haskellc}/extend/ functions with lens support. If it is possible at all, it would require more powerful \emph{optics} (the broader family of abstractions that includes lenses), and the resulting code would likely be much more verbose.}
 
 \paragraph{Full, final API for DPS Haskell with linear destination support}
 
@@ -501,6 +501,6 @@ In a second step, we proposed yet another set of functions, denoted by \mintinli
 
 In the end, we recover a system that is as close to \destcalculus{} (\cref{chap:dest-calculus}) as we could safely design within the existing type system of Haskell, with expressivity improvements over the initial DPS Haskell API. Of course, the ergonomics for filling linear destinations are not as smooth as in \destcalculus{}, but our newly gained flexibility let us implement a revised version of breadth-first tree traversal that, this time, used exactly the same algorithm and underlying data structures as the initial version proposed in \cref{sec:bft}.
 
-The final API we obtain, after all these refinements, has not been implemented yet in Haskell, though we don't think that it will be particularly challenging, as most of the hard work for low-level operations has already been done in \cref{sec:implementation}.
+The final API we obtain, after all these refinements, has not been implemented yet in Haskell, though we do not think that it will be particularly challenging, as most of the hard work for low-level operations has already been done in \cref{sec:implementation}.
 
 % Finally, should time be available to devote to this topic in the future, it would be worth exploring how we can leverage the theoretical framework developed in \cref{chap:dest-calculus} to formally prove that our proposed Hakell API in \cref{sec:bf-api-final} is indeed safe.
