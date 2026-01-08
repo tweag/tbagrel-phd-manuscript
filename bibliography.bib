@@ -1078,3 +1078,31 @@ I came up with was not quite so efficient or elegant as the Zipper.},
 	annote = {Comment: In Proceedings Linearity\&TLLA 2020, arXiv:2112.14305},
 	file = {Preprint PDF:C\:\\Users\\Thom-\\Zotero\\storage\\SAPPMM5N\\Hughes et al. - 2021 - Deriving Distributive Laws for Graded Linear Types.pdf:application/pdf;Snapshot:C\:\\Users\\Thom-\\Zotero\\storage\\292EJGSN\\2112.html:text/html},
 }
+
+@misc{bour_tmc_2024,
+	title = {Tail {Modulo} {Cons}, {OCaml}, and {Relational} {Separation} {Logic}},
+	url = {https://arxiv.org/abs/2411.19397v1},
+	abstract = {Common functional languages incentivize tail-recursive functions, as opposed to general recursive functions that consume stack space and may not scale to large inputs. This distinction occasionally requires writing functions in a tail-recursive style that may be more complex and slower than the natural, non-tail-recursive definition. This work describes our implementation of the *tail modulo constructor* (TMC) transformation in the OCaml compiler, an optimization that provides stack-efficiency for a larger class of functions -- tail-recursive *modulo constructors* -- which includes in particular the natural definition of `List.map` and many similar recursive data-constructing functions. We prove the correctness of this program transformation in a simplified setting -- a small untyped calculus -- that captures the salient aspects of the OCaml implementation. Our proof is mechanized in the Coq proof assistant, using the Iris base logic. An independent contribution of our work is an extension of the Simuliris approach to define simulation relations that support different calling conventions. To our knowledge, this is the first use of Simuliris to prove the correctness of a compiler transformation.},
+	language = {en},
+	urldate = {2026-01-08},
+	journal = {arXiv.org},
+	author = {Allain, Clément and Bour, Frédéric and Clément, Basile and Pottier, François and Scherer, Gabriel},
+	month = nov,
+	year = {2024},
+	doi = {10.1145/3704915},
+	file = {Full Text PDF:C\:\\Users\\Thomas BAGREL\\Zotero\\storage\\FEEDMGXQ\\Allain et al. - 2024 - Tail Modulo Cons, OCaml, and Relational Separation Logic.pdf:application/pdf},
+}
+
+
+@misc{scherer_fabulous_2017,
+	title = {{FabULous} {Interoperability} for {ML} and a {Linear} {Language}},
+	url = {https://arxiv.org/abs/1707.04984v3},
+	abstract = {Instead of a monolithic programming language trying to cover all features of interest, some programming systems are designed by combining together simpler languages that cooperate to cover the same feature space. This can improve usability by making each part simpler than the whole, but there is a risk of abstraction leaks from one language to another that would break expectations of the users familiar with only one or some of the involved languages. We propose a formal specification for what it means for a given language in a multi-language system to be usable without leaks: it should embed into the multi-language in a fully abstract way, that is, its contextual equivalence should be unchanged in the larger system. To demonstrate our proposed design principle and formal specification criterion, we design a multi-language programming system that combines an ML-like statically typed functional language and another language with linear types and linear state. Our goal is to cover a good part of the expressiveness of languages that mix functional programming and linear state (ownership), at only a fraction of the complexity. We prove that the embedding of ML into the multi-language system is fully abstract: functional programmers should not fear abstraction leaks. We show examples of combined programs demonstrating in-place memory updates and safe resource handling, and an implementation extending OCaml with our linear language.},
+	language = {en},
+	urldate = {2026-01-08},
+	journal = {arXiv.org},
+	author = {Scherer, Gabriel and New, Max and Rioux, Nick and Ahmed, Amal},
+	month = jul,
+	year = {2017},
+	file = {Full Text PDF:C\:\\Users\\Thomas BAGREL\\Zotero\\storage\\ANG22DJX\\Scherer et al. - 2017 - FabULous Interoperability for ML and a Linear Language.pdf:application/pdf},
+}

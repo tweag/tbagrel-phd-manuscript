@@ -499,9 +499,7 @@ Linear Haskell introduces a wrapper named \mintinline{haskellc}/Ur/ which is use
 As usual with linear type systems, only values already wrapped in \mintinline{haskellc}/Ur/ or coming from the left of a non-linear arrow can be put in another \mintinline{haskellc}/Ur/ without breaking linearity. This echoes rules \rref*{\CLOne\CTy\CSep\CBangProm} or \rref*{\CLTwoOrm\CTy\CSep\CExp} where a term wrapped in $\ottsctor{Many}$ or $\expcons{[[ɷ]]}$ must only depend on an unrestricted context. The only exceptions to this rule are terms of types that implement the \mintinline{haskellc}/Movable/ typeclass\footnote{The \mintinline{haskellc}/Movable/ typeclass is not part of the Linear Haskell language extension, but instead defined in the \texttt{linear-base} library.} such as \mintinline{haskellc}/Int/ or \mintinline{haskellc}/()/. \mintinline{haskellc}/Movable/ provides the function \mintinline{haskellc}/move ⩴ t ⊸ Ur t/, that is, unconditional promotion to \mintinline{haskellc}/Ur/ for types implementing this typeclass.
 
 % Arnaud: this sentence sounds premature to me
-% Destinations are represented by the type \mintinline{haskellc}/UDest t/, where \mintinline{haskellc}/t/ stands for the type of the associated hole. \mintinline{haskellc}/UDest/s are meant to be managed linearly, so do not implement \mintinline{haskellc}/Movable/.
-
-\pagebreak
+% Destinations are represented by the type \mintinline{haskellc}/UDest t/, where \mintinline{haskellc}/t/ stands for the type of the associated hole. \mintinline{haskellc}/UDest/s are meant to be managed linearly, so do not implement \mintinline{haskellc}/Movable/. 
 
 \paragraph{Operators}
 
@@ -535,7 +533,11 @@ In \cref{chap:dps-haskell} however, our main target language will be Haskell, wh
 
 As we said before, in Linear Haskell, as in most linear type systems, functions can be made to use their arguments linearly or not. In other terms, linearity is a contract that links the input and output of a function. But we cannot say anything a priori about what happened to the value passed as a parameter before the function call, or what happens to the function result after. Linearity control can only be enforced on \emph{variables}\footnote{Top-level bindings/definitions are not treated as normal variables, but rather as global constants. Consequently, they are not subject to linearity constraints, which allows for the problematic example we present next.}.
 
-Let say we want to design a file API without monads (that's actually one interesting use of linear/unique types). Assuming the following simplified API, one could write this small program:\nopagebreak[4]%
+Let say we want to design a file API without monads (that's actually one interesting use of linear/unique types).
+
+\pagebreak
+
+Assuming the following simplified API, one could write this small program:\nopagebreak[4]%
 {\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 openFile ⩴ String ⊸ File
@@ -552,9 +554,7 @@ nonLinearUseButValid ⩴ () =
 
 With call-by-value or call-by-need semantics, the side-effects of \mintinline{haskellc}/openFile/ will be produced only once, while the side effects of \mintinline{haskellc}/closeFile/ will be produced twice, resulting in an error.
 
-The solution to that is to forbid the consumer from creating and directly accessing a value of the resource type for which we want to enforce linearity/uniqueness. 
-
-\pagebreak
+The solution to that is to forbid the consumer from creating and directly accessing a value of the resource type for which we want to enforce linearity/uniqueness.
 
 Instead, we force the consumer of a resource to pass a continuation representing what they want to do on the resource, so that we can check through its signature that it is indeed a linear continuation:\nopagebreak[4]%
 {\figtextsize%
@@ -583,7 +583,11 @@ exampleFail ⩴ Ur File =
 }
 
 
-Still, this solution is not perfect. We effectively prevent any linear resource from leaving the scope, even resources that have nothing to do with the file API and have been created in outer scopes! This issue is talked in length by~\citet{spiwack_linear_scopes_2023}. It manifests itself in the following example, which gets rejected:\nopagebreak[4]%
+Still, this solution is not perfect. We effectively prevent any linear resource from leaving the scope, even resources that have nothing to do with the file API and have been created in outer scopes! This issue is talked in length by~\citet{spiwack_linear_scopes_2023}.
+
+\pagebreak
+
+It manifests itself in the following example, which gets rejected:\nopagebreak[4]%
 {\figtextsize%
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
 readLine ⩴ File ⊸ (Ur String, File)

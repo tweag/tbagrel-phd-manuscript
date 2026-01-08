@@ -62,7 +62,7 @@ Yet, everything we've shown so far could, in principle, have been expressed usin
 
 After using $\ottkw{fillWithPair}$, both the first field \emph{and} the second field of the pair must be filled, using the returned destinations of type $[[⌊ T ⌋ ¹ν]]$ and $[[⌊ U ⌋ ¹ν]]$ respectively.
 
-In contrast, a continuation-passing style equivalent of $\ottkw{fillWithPair}$ would need signature $[[ (T ⨂ U ¹ν → S) ¹ν → ( T ¹ν → S) ⨂ (U ¹ν → S)]]$. But $\ottkw{fillWithPairCPS} \pmb{:} [[ (T ⨂ U ¹ν → S) ¹ν → ( T ¹ν → S) ⨂ (U ¹ν → S)]]$ cannot even be defined, as we would need to collect the results of the two created continuations before we can consume the input continuation of type $[[ (T ⨂ U ¹ν → S)]]$ (thus requiring a form of synchronization and state-passing).
+In contrast, a continuation-passing style equivalent of $\ottkw{fillWithPair}$ would need signature\\$[[ (T ⨂ U ¹ν → S) ¹ν → ( T ¹ν → S) ⨂ (U ¹ν → S)]]$. But $\ottkw{fillWithPairCPS} \pmb{:} [[ (T ⨂ U ¹ν → S) ¹ν → ( T ¹ν → S) ⨂ (U ¹ν → S)]]$ cannot even be defined, as we would need to collect the results of the two created continuations before we can consume the input continuation of type $[[ (T ⨂ U ¹ν → S)]]$ (thus requiring a form of synchronization and state-passing).
 
 Similarly to continuation-passing transformation though, we can already note that there is a sort of duality between destination-filling operators and the corresponding data constructors. Usual $[[Inl]]$ constructor has signature $[[T ¹ν → T ⨁ U]]$, while destination-filling $[[⨞]][[Inl]]$ has signature $[[⌊ T ⨁ U ⌋ ¹ν ¹ν → ⌊ T ⌋ ¹ν]]$. Similarly, pair constructor $[[(,)]]$ has signature $[[T ¹ν → U ¹ν → T⨂U]]$, while destination-filling $[[⨞]][[(,)]]$ has signature $[[⌊ T ⨂ U ⌋ ¹ν ¹ν → ⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν]]$. Assuming some flexibility with currying, we see that the types of arguments and results switch sides around the arrow, and get wrapped/unwrapped from $\ottstype{\lfloor\smallbullet\rfloor}$ when we go from the constructor to the destination-filling operator and vice-versa. This observation will generalize to all destination-filling operators and the corresponding constructors.
 
@@ -71,10 +71,10 @@ It is crucial to note that while a destination is used to build a structure, the
 
 Thus, we still need a type to tie the structure under construction---left implicit by destination-filling primitives---with the destinations representing its holes. To represent this, \destcalculus{} introduces a type $[[S ⧔ ⌊ T ⌋ ¹ν]]$ for a structure of type $[[S]]$ missing a value of type $[[T]]$ to be complete. There can be several holes in $[[S]]$---resulting in several destinations on the right hand side---and as long as there remain holes in $[[S]]$, it cannot be read. For instance, $[[S ⧔ (⌊ T ⌋ ¹ν ⨂ ⌊ U ⌋ ¹ν)]]$ represents an $[[S]]$ that misses both a $[[T]]$ and a $[[U]]$ to be complete (thus to be readable). The right hand side of $\ottstype{\ltimes}$ is not restricted to pair and destination types only; it can be of arbitrarily complex type.
 
-The general form $[[S ⧔ T ]]$ is read “$[[S]]$ ampar $[[T]]$”. The name “ampar” stands for “asymmetric memory par”. The “par” $\ottstype{\parr}$ operator originally comes from (classical) linear logic, and is an associative and commutative operator that subsumes linear implication and is more expressive: $[[T ⊸ S]]$ is equivalent to $\ottstype{T^\perp \parr S}$ or $\ottstype{S \parr T^\perp}$. Similarly, $[[T1 ⊸ T2 ⊸ S]]$ is equivalent to $\ottstype{T1^\perp \parr T2^\perp \parr S}$. Function input's types---which are in negative position---are wrapped in the dualizing operator $\ottstype{\smallbullet^\perp}$ when a function is put into ``par'' form.
-Here we take a similar approach:~\citet{minamide_functional_1998} first observed that structures with holes are akin to linear functions $[[T ⊸ S]]$, where $[[T]]$ represents the missing part; so we decide to represent them in a more expressive fashion under the form $[[S ⧔ ⌊ T ⌋ ¹ν]]$ (echoing $\ottstype{S \parr T^\perp}$).
+The general form $[[S ⧔ T ]]$ is read “$[[S]]$ ampar $[[T]]$”. The name “ampar” stands for “asymmetric memory par”. The “par” $\ottstype{\parr}$ operator originally comes from (classical) linear logic, and is an associative and commutative operator that subsumes linear implication and is more expressive: $[[T ⊸ S]]$ is equivalent to $\ottstype{T^\perp \,\parr\, S}$ or $\ottstype{S \,\parr\, T^\perp}$. Similarly, $[[T1 ⊸ T2 ⊸ S]]$ is equivalent to $\ottstype{T1^\perp \,\parr\, T2^\perp \,\parr\, S}$. Function input's types---which are in negative position---are wrapped in the dualizing operator $\ottstype{\smallbullet^\perp}$ when a function is put into ``par'' form.
+Here we take a similar approach:~\citet{minamide_functional_1998} first observed that structures with holes are akin to linear functions $[[T ⊸ S]]$, where $[[T]]$ represents the missing part; so we decide to represent them in a more expressive fashion under the form $[[S ⧔ ⌊ T ⌋ ¹ν]]$ (echoing $\ottstype{S \,\parr\, T^\perp}$).
 
-In this presentation, the \emph{missing part of type $[[T]]$} appears as a first-class type $[[⌊ T ⌋ ¹ν]]$, a.k.a the \emph{destination} type. Reusing terminology from \citet{orchard_inverse_type_2022}, we can say that $[[⌊ T ⌋ ¹ν]]$ is a \emph{lax inverse} of $[[T]]$ for $\ottstype{\otimes}$, because given $[[d : ⌊ T ⌋ ¹ν]]$ and $[[v : T]]$, we have $[[d ◀ v : ①]]$\footnote{Conversely, $[[⌊ T ⌋ ¹ν]]$ would be a \emph{co-lax inverse} of $[[T]]$ for $\ottstype{\ltimes}$, as $[[ˢλ u ¹ν ⟼ u ; alloc]]$ has type $[[① ⊸ T ⧔ ⌊ T ⌋ ¹ν]]$}.
+In this presentation, the \emph{missing part of type $[[T]]$} appears as a first-class type $[[⌊ T ⌋ ¹ν]]$, a.k.a the \emph{destination} type. Reusing terminology from \citet{orchard_inverse_type_2022}, we can say that $[[⌊ T ⌋ ¹ν]]$ is a \emph{lax inverse} of $[[T]]$ for $\ottstype{\otimes}$, because given $[[d]] \pmb{:} [[⌊ T ⌋ ¹ν]]$ and $[[v]] \pmb{:} [[T]]$, we have $[[d ◀ v]] \pmb{:} [[①]]$\footnote{Conversely, $[[⌊ T ⌋ ¹ν]]$ would be a \emph{co-lax inverse} of $[[T]]$ for $\ottstype{\ltimes}$, as $[[ˢλ un ¹ν ⟼ un ; alloc]]$ has type $[[① ⊸ T ⧔ ⌊ T ⌋ ¹ν]]$}.
 
 The asymmetric nature of our memory par is an unfortunate byproduct of wanting simple sequential semantics. Indeed, it seems that having a symmetric memory par would require concurrent semantics, as the structure being constructed and the destinations pointing to it could be consumed alike, meaning that we could have to pause and wait for a hole to be filled\footnote{\cite{deyoung_sax_2020} features such a system with destinations and a concurrent execution model}.
 
@@ -115,6 +115,7 @@ We must reassure the reader here. Of course, using destinations in an unrestrict
   {\ottkw{forget}}{[[from⧔' ((alloc @ T ⧔ ⌊ T ⌋ ¹ν) ►map d ⟼ ())]]}}
 
   then reading the result of $\ottkw{forget}$ would lead to reading a location pointed to by a destination that we never used, in other words, reading uninitialized memory. This must be prevented at all cost;
+\pagebreak
 \item if destinations are written several times, as in:
 
   \codehere{\newoperator
@@ -125,7 +126,7 @@ We must reassure the reader here. Of course, using destinations in an unrestrict
   {\ottkw{ambiguous2}}{[[from⧔' ((alloc @ Bool ⧔ ⌊ Bool ⌋ ¹ν) ►map d ⟼ let x ≔ (d ◀ false) in d ◀ true; x)]]}}
 
   then,
-   we have $\ottkw{ambiguous1}$ that returns $[[false]]$ and $\ottkw{ambiguous2}$ that returns $[[true]]$ due to evaluation order, so we break \emph{let expansion} that is supposed to be valid in a pure language (including \destcalculus{}).
+   we have $\ottkw{ambiguous1}$ that returns $[[false]]$ and $\ottkw{ambiguous2}$ that returns $[[true]]$ due to evaluation order, so we break \emph{let-expansion} that is supposed to be valid in a pure language (including \destcalculus{}).
 \end{itemize}
 
 Actually, we will see in \cref{sec:scope-escape-dests} that a linear discipline is not even enough to ensure fully safe use of destinations in \destcalculus{}. But before dealing with this, let's get more familiar with \destcalculus{} through more complex examples.
@@ -279,8 +280,8 @@ However, when $[[lbd]]$'s scope is parent to $[[lb]]$'s, i.e. when a newer desti
 
 A neighboring issue is when sibling destinations interact with one another:\nopagebreak[4]
 \codehere{\!\!\!\begin{array}{crcl}
-       & $\{ \}$ &|& [[alloc' (ˢλ d ¹ν ⟼ (d ⨞ (::)) ►case ¹ν (d' @ ⌊ Bool ⌋ ¹ν, dd' @ ⌊⌊ Bool ⌋ ¹ν ⌋ ¹ν) ⟼ dd' ◀ d') @ Bool ⨂ ⌊ Bool ⌋ ¹ν]] \\
-[[⟶]] & [[ { lb ≔ +h } ]] &|& [[(-h ⨞ (::)) ►case ¹ν (d' @ ⌊ Bool ⌋ ¹ν, dd' @ ⌊⌊ Bool ⌋ ¹ν ⌋ ¹ν) ⟼ dd' ◀ d' ; deref lb]] \\
+       & $\{ \}$ &|& [[alloc' (ˢλ d ¹ν ⟼ (d ⨞ (,)) ►case ¹ν (d' @ ⌊ Bool ⌋ ¹ν, dd' @ ⌊⌊ Bool ⌋ ¹ν ⌋ ¹ν) ⟼ dd' ◀ d') @ Bool ⨂ ⌊ Bool ⌋ ¹ν]] \\
+[[⟶]] & [[ { lb ≔ +h } ]] &|& [[(-h ⨞ (,)) ►case ¹ν (d' @ ⌊ Bool ⌋ ¹ν, dd' @ ⌊⌊ Bool ⌋ ¹ν ⌋ ¹ν) ⟼ dd' ◀ d' ; deref lb]] \\
 [[⟶]] & [[ { lb ≔ ˢ(+h', +hd') } ]] &|& [[ˢ(-h', -hd') ►case ¹ν (d' @ ⌊ Bool ⌋ ¹ν, dd' @ ⌊⌊ Bool ⌋ ¹ν ⌋ ¹ν) ⟼ dd' ◀ d' ; deref lb]] \\
 [[⟶]] & [[ { lb ≔ ˢ(+h', +hd') } ]] &|& [[-hd' ◀ -h' ; deref lb]] \\
 [[⟶]] & [[ { lb ≔ ˢ(+h', -h') } ]] &|& [[deref lb]] \\
