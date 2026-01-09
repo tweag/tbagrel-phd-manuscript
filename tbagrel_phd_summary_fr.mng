@@ -2,6 +2,7 @@
 % \usepackage{xmpincl}
 \usepackage{luatex85}
 \usepackage[a-1b]{pdfx}
+\usepackage[margin=2cm]{geometry}
 \hypersetup{
   hypertexnames=false,
   pdftitle   = {Formalisation et implémentation de techniques sûres de passage de destinations pour les langages de programmation fonctionnels purs},
@@ -630,9 +631,389 @@ Grâce à la manipulation explicite de \emph{destinations}, il est possible à l
 
 L'ensemble de mon approche repose, comme pour Minamide, sur un système de types incorporant les types linéaires. Grâce aux types linéaires, il est possible d'imposer et d'assurer que chaque destination est bien utilisée une seule et unique fois, garantissant à la fois que chaque champ d’une structure est correctement initialisé avant toute lecture, mais également qu'une valeur ne sera pas écrasée par une autre une fois écrite dans un champ d'une structure (permettant de respecter l'immuabilité chère aux langages fonctionnels).
 
+\section{$\lambda$-calcul linéaire}
+
+Le $\lambda$-calcul linéaire est une variante typée du $\lambda$-calcul dans laquelle l’usage des variables est contrôlé statiquement. Contrairement au $\lambda$-calcul classique, où les règles structurelles autorisent implicitement la duplication et l’abandon de variables, dans le $\lambda$-calcul linéaire, chaque variable doit être utilisée exactement une fois. Cette discipline permet d’exprimer directement, au niveau du système de types, des invariants d’usage sur les ressources.
+
+La base sous-jacente est la logique linéaire, dans laquelle la contraction et l’affaiblissement d'hypothèses n'est pas possible. En restreignant ces règles, les hypothèses sont interprétées comme des ressources qui doivent être utilisées exactement une fois. Cette interprétation se transpose via l’isomorphisme de Curry-Howard : un programme qui fait un usage incorrect de variables linéaires n'est pas typable.
+
+Le $\lambda$-calcul linéaire introduit la flèche de fonction linéaire [[T ⊸ U]], indiquant que l’argument est consommé exactement une fois pour produire le résultat. Les paires linéaires sont données par le tenseur [[T⨂U]], dont les deux composantes doivent être consommées exactement une fois. Les règles d’introduction et d’élimination des connecteurs linéaires imposent une séparation stricte des ressources : il n'est pas possible de partager une variable entre deux sous-termes par exemple.
+
+Un calcul strictement linéaire étant peu utilisable en pratique, le système est enrichi par une modalité exponentielle. Un type de la forme [[!T]] désigne une valeur qui peut être dupliquée ou ignorée. Cette distinction rend explicite, dans les types, la frontière entre ressources linéaires et ressources non-linéaires. Seulement, la gestion de cette modalité doit par défaut être faite explicitement, ce qui complique l’écriture de programmes usuels.
+
+Pour améliorer l’ergonomie du système, on propose une présentation du $\lambda$-calcul linéaire fondée sur des modalités graduées, ou multiplicités. Une variable est alors annotée, dans le contexte de typage, par une multiplicité indiquant son régime d’utilisation. Les multiplicité usuelles distinguent l’usage linéaire (exactement une fois) et l’usage non restreint. Cette information est portée par les contextes de typage et propagée via les règles de typage, ce qui permet d'éviter une partie de la manipulation explicite de la modalité exponentielle.
+
+Dans cette continuité, on introduit les flèches de fonction annotées par une multiplicité, indiquant l’engagement d’usage sur l’argument. Une fonction linéaire impose que l'argument soit consommé exactement une fois, tandis qu’une fonction non restreinte correspond au comportement classique. La polymorphie en multiplicité permet alors d’écrire des fonctions et programmes plus génériques  lorsque cela est possible.
+
+On fait également le choix, pour notre langage d'étude, de  propager les modalités graduées à travers les types de données algébriques, ce qui donne la notion de \emph{modes profonds}. Ainsi, une paire non restreinte [[(T1, T2)]] autorise la duplication et l’abandon de chacune de ses deux composantes, de façon indépendante, ce qui n'est pas usuellement le cas dans le $\lambda$-calcul linéaire traditionnel.
+
+Ces principes sont incarnés concrètement dans Linear Haskell, l'extension de Haskell permettant la gestion des types linéaires. Le langage introduit des flèches de fonctions annotées par des multiplicité, tout en restant rétrocompatible avec Haskell standard. Les fonctions, types de données et abstractions existants peuvent être enrichis de garanties d’usage précises sans modifier la sémantique du code non linéaire. La linéarité devient ainsi un outil modulaire pour exprimer des invariants forts sur l’unicité, la gestion de la mémoire et l’état mutable, directement dans le système de types.
+
+\section*{Résumé technique — Calcul fonctionnel à destinations (\destcalculus{})}
+
+Le langage \destcalculus{} que j'ai créé est un calcul fonctionnel pur qui intègre le \emph{destination-passing style} au niveau du langage, en faisant des destinations des valeurs de première classe. Une destination représente un emplacement abstrait destiné à être rempli par une valeur, et certaines opérations du calcul ont pour rôle explicite d’écrire dans une destination donnée. Ces opérations restent des expressions ordinaires : elles prennent des arguments, retournent une valeur, et s’intègrent au calcul fonctionnel standard.
+
+Le calcul introduit des opérateurs de remplissage de destination. L’opération élémentaire est l’écriture d’une valeur dans une destination, notée dans le calcul par une forme du type
+\[
+[[ d ◀ x ]]
+\]
+qui correspond à l’écriture de la valeur [[x]] dans la destination [[d]]. Cette opération constitue la manière la plus simple d’utiliser une destination et sert de brique de base pour les constructions plus complexes.
+
+Les destinations sont des valeurs manipulables par le langage. Elles peuvent être passées comme arguments à des fonctions, stockées dans des structures de données et utilisées par différents opérateurs. Ceci distingue \destcalculus{} des approches antérieures où les destinations étaient implicites ou limitées à des constructions spécifiques du langage cible.
+
+Le calcul permet de définir des fonctions en style destination-passing de manière simple. \destcalculus{} fournit aussi des constructions permettant de composer plusieurs opérations de remplissage de destinations. Typiquement, on peut remplir une destination avec un constructeur de donnée "creux", et obtenir en résultat des nouvelles destinations correspondant aux trous dans les champs du constructeur. Ainsi on peut construire des structures de données de manière incrémentale.
+
+Le système de types du calcul impose des contraintes sur l’utilisation des destinations. Les règles de typage garantissent que les opérateurs de remplissage sont utilisés de manière cohérente et que chaque destinations est utilisée une fois exactement, pour être sûr que chaque trou finisse par être rempli avant que la structure soit lue.
+
+Une sémantique opérationnelle est définie pour \destcalculus{}. Elle décrit la manière dont les expressions se réduisent et comment les opérations de remplissage affectent les destinations. Les règles de réduction suivent directement la structure syntaxique du calcul et rendent explicite la correspondance entre l’évaluation des expressions et la construction des valeurs dans les destinations.
+
+Le chapitre établit que les propriétés garanties par le système de types sont préservées par la réduction. Les invariants imposés sur l’utilisation des destinations par le typage restent valides au cours de l’exécution des programmes bien typés, assurant la cohérence entre la sémantique statique et la sémantique dynamique du calcul.
+
+Enfin, \destcalculus{} est utilisé comme calcul fondationnel pour raisonner sur le destination-passing style dans un cadre fonctionnel pur. Il fournit une base formelle pour étudier des transformations de programmes et des techniques de construction en place, qui seront exploitées dans les chapitres suivants.
+
+
 \clearpage\phantomsection\addcontentsline{toc}{section}{Bibliographie}\pagestyle{plain}
 
 % Bibliography doesn't count in the page limit
 \printbibliography
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PRES BASED
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{enumitem}
+\geometry{margin=2.6cm}
+
+\title{Résumé de thèse}
+\author{Thomas Bagrel}
+\date{}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\begin{document}
+\maketitle
+
+\section*{Langages de programmation : pureté, immutabilité, et ordre de construction}
+
+Deux paradigmes structurent l’espace des langages.
+Les langages impératifs expriment un \emph{comment} : séquences d’instructions, mutabilité, effets de bord souvent non suivis.
+Les langages fonctionnels expriment un \emph{quoi} : composition d’expressions, immutabilité, pureté, fonctions de première classe.
+Cette différence a des conséquences directes sur la représentation mémoire et sur la manière dont on \emph{construit} les données.
+
+Dans une implémentation fonctionnelle typique, une structure de données algébrique est représentée par (i) un pointeur vers une \emph{info table} (structure statique décrivant le constructeur), puis (ii) pour chaque champ, un pointeur vers la valeur de ce champ (sauf pour des champs primitifs).
+Une conséquence est que la construction d’une structure impose un ordre : la valeur d’un champ doit être une valeur déjà pleinement construite.
+Cela force un ordre de construction parfois artificiel, qui n’épouse pas l’ordre algorithmique naturel (par exemple lorsqu’un algorithme découvre d’abord une « coque » de structure puis remplit progressivement des sous-parties).
+
+Un modèle alternatif consiste à autoriser la manipulation de structures \emph{incomplètes} (structures avec un trou) et à connecter des morceaux « comme des Lego », en séparant la structure globale et les sous-parties encore à construire.
+Ce point est relié à la représentation des structures avec un trou (Minamide, 1998).
+Deux difficultés immédiates apparaissent : (i) l’existence d’un trou implique une forme de mutabilité future, et (ii) la sûreté de lecture n’est pas garantie si l’on peut lire une structure incomplète (jusqu’au segfault en bas niveau).
+
+\section*{Passage de destination : allocations groupées et construction en place}
+
+Le \emph{passage de destination} (destination passing) exprime explicitement la construction d’un résultat \emph{dans} un emplacement fourni.
+Le contraste opérationnel se formule en C comme suit : au lieu de retourner un pointeur vers une structure allouée par \code{malloc}, une fonction reçoit un pointeur destination et remplit la structure en place.
+Deux bénéfices concrets ressortent :
+\begin{itemize}[leftmargin=*]
+  \item allocation de plusieurs cases (slots) en une fois ;
+  \item possibilité d’allouer sur la pile (pas de \code{malloc}).
+\end{itemize}
+
+L’enjeu de la thèse est d’obtenir ces bénéfices dans un cadre \emph{fonctionnel pur}, en rendant la manipulation de trous/destinations sûre et composable.
+
+\section*{API fonctionnelle de passage de destination : types centraux}
+
+L’interface centrale est formulée autour de deux types abstraits :
+\begin{itemize}[leftmargin=*]
+  \item \code{Dest t} : destination d’une valeur de type \code{t} ;
+  \item \code{Ampar s t} : structure incomplète de type \code{s}, paramétrée par un type \code{t} qui transporte « ce qui reste à faire / à remplir ».
+\end{itemize}
+
+Le point de conception mis en avant est le suivant : toute opération passe par \code{Ampar}.
+Cette approche se distingue d’une approche « à la Minamide » : au lieu de manipuler directement « une structure avec trou », on introduit un objet qui encapsule la structure et l’accès aux trous.
+Trois paramètres de types jouent un rôle systématique :
+\begin{itemize}[leftmargin=*]
+  \item \code{s} : type de la structure incomplète ;
+  \item \code{t} : structure arbitraire contenant toutes les destinations des trous de \code{s} ;
+  \item \code{t} (au niveau des \code{Dest}) : type du trou référencé.
+\end{itemize}
+Deux contraintes d’usage sont structurantes :
+\begin{itemize}[leftmargin=*]
+  \item le seul moyen d’agir sur un trou est via une destination ;
+  \item l’interface empêche la lecture de la structure incomplète et de ses trous tant que la construction n’est pas close.
+\end{itemize}
+
+Un schéma de signatures (première tentative, non linéaire) est :
+\begin{quote}\small
+\code{data Ampar s t}\\
+\code{data Dest t}\\
+\code{type family DestsOf 'Ctor t} \quad (destinations associées aux champs d’un constructeur)\\[0.2em]
+\code{\&fill @'Ctor :: Dest t -> DestsOf 'Ctor t}\\
+\code{\&fillComp    :: Dest s -> Ampar s t -> t}\\
+\code{\&fillLeaf    :: Dest t -> t -> ()}\\[0.2em]
+\code{newAmpar   :: Ampar s (Dest s)}\\
+\code{fromAmpar' :: Ampar s () -> s}\\
+\code{updWith    :: Ampar s t -> (t -> u) -> Ampar s u}
+\end{quote}
+
+Des instances illustratives (liste) apparaissent sous forme de signatures :
+\begin{quote}\small
+\code{\&fill @'(:) :: Dest [t] -> (Dest t, Dest [t])}\\
+\code{\&fill @'[]  :: Dest [t] -> ()}
+\end{quote}
+et les briques de construction :
+\begin{quote}\small
+\code{\&fillLeaf :: Dest t -> t -> ()}\\
+\code{\&fillComp :: Dest s -> Ampar s t -> t}\\
+\code{newAmpar   :: Ampar s (Dest s)}\\
+\code{updWith    :: Ampar s t -> (t -> u) -> Ampar s u}\\
+\code{fromAmpar' :: Ampar s () -> s}
+\end{quote}
+
+\section*{Problème : usage non restreint des destinations}
+
+La première tentative (non linéaire) permet d’écrire du code qui fabrique une valeur de type \code{Ampar s ()} sans pour autant avoir rempli le trou associé, puis d’appeler \code{fromAmpar'}.
+Le fragment suivant est accepté par les types mais illustre le problème :
+\begin{quote}\small
+\code{fromAmpar' :: Ampar s () -> s}\\
+\code{let apparentlyComplete :: Ampar [Int] () = newAmpar `updWith` \textbackslash d -> ()}\\
+\code{in  fromAmpar' apparentlyComplete}
+\end{quote}
+La difficulté est structurelle : sans discipline d’usage, rien n’empêche qu’un trou reste non rempli, ni qu’un même trou soit manipulé plusieurs fois.
+Deux effets indésirables apparaissent explicitement :
+\begin{itemize}[leftmargin=*]
+  \item consommation « moins d’une fois » : un trou reste non rempli ;
+  \item consommation « plus d’une fois » : l’ordre d’évaluation devient sémantiquement pertinent.
+\end{itemize}
+
+\section*{Linéarité : amorçage par un producteur unique et scopes}
+
+Une discipline de linéarité élimine les usages illégitimes mais doit être \emph{amorcée} : il faut une source contrôlée de ressources linéaires.
+Une technique centrale consiste à utiliser une fonction de \emph{scope} qui est l’unique producteur d’une ressource, et exige de l’utilisateur une fonction \emph{linéaire} consommant cette ressource dans la portée.
+
+Le schéma-type est :
+\begin{quote}\small
+\code{withResource :: (Resource ⊸ Ur t) ⊸ Ur t}
+\end{quote}
+où \code{withResource} est l’unique producteur de \code{Resource}.
+L’usage correct consomme la ressource dans la portée ; les usages qui « font fuiter » la ressource (par exemple retourner la ressource ou la stocker) sont rejetés.
+
+\section*{Mise à jour de l’API avec linéarité : Token et fonctions linéaires}
+
+Une version linéaire de l’API introduit explicitement une ressource \code{Token} et ses opérations, qui servent à contrôler les points où la construction est autorisée :
+\begin{quote}\small
+\code{data Token}\\
+\code{dup  :: Token ⊸ (Token, Token)}\\
+\code{drop :: Token ⊸ ()}\\
+\code{withToken :: (Token ⊸ Ur t) ⊸ Ur t}
+\end{quote}
+Le rôle de \code{Token} est de \emph{rendre linéairement traçable} l’avancement de la construction.
+
+La seconde tentative d’API (avec linéarité) remplace les flèches ordinaires par des flèches linéaires et rend explicite le passage/retour de jetons :
+\begin{quote}\small
+\code{data Ampar s t}\\
+\code{data Dest t}\\
+\code{type family DestsOf 'Ctor t}\\[0.2em]
+\code{\&fill @'Ctor :: Dest t              ⊸ DestsOf 'Ctor t}\\
+\code{\&fillComp    :: Dest s ⊸ Ampar s t ⊸ t}\\
+\code{\&fillLeaf    :: Dest t ⊸ t         ⊸ ()}\\[0.2em]
+\code{newAmpar     :: Token          ⊸ Ampar s (Dest s)}\\
+\code{toAmpar      :: Token ⊸ s      ⊸ Ampar s ()}\\
+\code{tokenBesides :: Ampar s t      ⊸ (Ampar s t, Token)}\\
+\code{fromAmpar    :: Ampar s (Ur t) ⊸ (s, Ur t)}\\
+\code{fromAmpar'   :: Ampar s ()     ⊸ s}\\
+\code{updWith      :: Ampar s t      ⊸ (t ⊸ u) ⊸ Ampar s u}
+\end{quote}
+
+Cette interface force les usages : remplir un trou consomme une destination linéairement ; \code{updWith} impose que l’étape de mise à jour consomme linéairement son argument ; les sorties portent explicitement un \code{Token} ou une \code{Ur} lorsque le résultat est non linéaire.
+
+\section*{Fuite de scope (scope escape) : contre-exemple}
+
+Même avec une interface linéaire, un problème apparaît lorsque l’on stocke des ressources linéaires (destinations) et qu’on les réutilise en dehors de leur scope de validité.
+Un exemple explicite (fuite d’une destination interne) est :
+\begin{quote}\small
+\begin{verbatim}
+let outer :: Ampar (Dest ()) ()
+    outer = (newAmpar tok1) `updWith` \(dOuter :: Dest (Dest ())) ->
+              let inner :: Ampar () ()
+                  inner = (newAmpar tok2) `updWith` \(dInner :: Dest ()) ->
+                            dOuter &fillLeaf dInner
+               in fromAmpar' inner
+ in fromAmpar' outer
+\end{verbatim}
+\end{quote}
+Le point structurel est général : beaucoup d’API linéaires reposent sur une consommation de ressources délimitée par une portée (\emph{scope-delimited}).
+Toute forme de stockage linéaire de ressources linéaires casse ce modèle, car elle revient à autoriser un opérateur du type
+\begin{quote}\small
+\code{storeAway :: t ⊸ ()}
+\end{quote}
+où une ressource « disparaît » sans être consommée conformément à l’API attendue.
+
+\section*{Deux solutions avec le seul système de types Haskell}
+
+\subsection*{Solution 1 : destinations restreintes aux données non linéaires}
+
+Une première solution consiste à imposer que les destinations ne stockent que des données non linéaires.
+Les types deviennent explicitement \emph{unrestricted} :
+\begin{quote}\small
+\code{UDest t} \quad et \quad \code{UAmpar s t}
+\end{quote}
+et l’extraction retourne une valeur non linéaire :
+\begin{quote}\small
+\code{fromUAmpar' :: UAmpar s () ⊸ Ur s}
+\end{quote}
+Cette solution est simple, donne une interface utilisable immédiatement, et reste pertinente (algorithmes à moindre copie, files de destinations pour parcours en largeur), au prix de l’impossibilité de stocker des données linéaires dans les destinations.
+Une implémentation est disponible sous la forme d’un prototype Haskell (\code{linear-dest}) associé à un article (JFLA 2024).
+
+\subsection*{Solution 2 : nouvelles primitives, retour vers une approche « structure incomplète »}
+
+Une seconde solution consiste à autoriser des destinations pour données linéaires, au prix d’un changement de primitives.
+L’idée est de revenir à une approche où l’on opère sur la structure incomplète elle-même plutôt que de manipuler librement des \code{Dest}, précisément pour empêcher la fuite de scope.
+Cette solution est plus complexe, peut gérer plusieurs trous, et permet toujours des structures efficaces (par exemple une file de destinations dans un parcours en largeur), mais elle requiert des primitives spécifiques et une discipline de programmation plus lourde (développée dans le manuscrit, chap. 4).
+
+\section*{Système d’âges : contrôle de portée par modalités relatives}
+
+Une approche plus expressive introduit un système d’âges qui suit l’origine des ressources.
+Le principe est de suivre l’âge des ressources (variables/destinations) relativement à des scopes \code{updWith}.
+Deux règles informelles, telles qu’énoncées, structurent le système :
+\begin{itemize}[leftmargin=*]
+  \item l’âge $\uparrow^0$ indique qu’une ressource provient du scope \code{updWith} le plus interne ;
+  \item en entrant dans un nouveau scope \code{updWith}, toutes les ressources existantes voient leur âge « relevé » via la modalité $\uparrow$ (incrément relatif de scope).
+\end{itemize}
+Le contrôle par âges empêche la fuite de scope : une ressource créée dans un scope interne ne peut pas être réutilisée comme si elle provenait d’un scope plus externe, car son âge encode précisément cette dépendance.
+
+\section*{Formalisation : langage $\lambda_d$ et sûreté par preuve mécanisée}
+
+Ces idées sont formalisées dans un langage $\lambda_d$ construit \emph{avec le passage de destination comme primitive}, et équipé à la fois de types linéaires et d’un contrôle par âges.
+La sûreté du système est établie par une preuve mécanisée dans Rocq, sous la forme des deux propriétés standard :
+\begin{itemize}[leftmargin=*]
+  \item \emph{préservation} (preservation) ;
+  \item \emph{progrès} (progress).
+\end{itemize}
+
+\section*{Système modal : linéarité et âges comme semiring de ressources}
+
+Le système de types de $\lambda_d$ présente de fortes similarités avec celui de Linear Haskell.
+Chaque variable est annotée par un \emph{mode} qui encode comment elle peut être utilisée.
+Un point clef est l’interprétation des modes comme un \emph{semiring de ressources}, suivant des idées formulées notamment dans :
+\begin{itemize}[leftmargin=*]
+  \item \emph{Bounded Linear Types in a Resource Semiring} (Ghica et al., 2014) ;
+  \item \emph{Coeffects: a calculus of context-dependent computation} (Petricek et al., 2014).
+\end{itemize}
+Les opérations sur les modes sont levées aux contextes de typage, ce qui rend l’extension (ajout des âges) modulaire vis-à-vis des règles existantes de linéarité.
+Deux opérations ressortent explicitement :
+\begin{itemize}[leftmargin=*]
+  \item $+$ combine les modes lorsqu’une même variable est utilisée dans plusieurs sous-expressions ;
+  \item la multiplication combine les modes lors d’une substitution / composition (propagation structurelle d’un usage).
+\end{itemize}
+
+\section*{Équilibrage destinations / trous : typage soustractif}
+
+Un invariant central est l’équilibrage entre la présence de trous et l’usage de destinations.
+Il est assuré par une technique de typage dite « soustractive » :
+\begin{itemize}[leftmargin=*]
+  \item la présence d’un trou \emph{fournit} une liaison spéciale dans le contexte de typage ;
+  \item l’usage d’une destination \emph{requiert} une liaison spéciale correspondante (comme un usage de variable).
+\end{itemize}
+Ces liaisons apparaissent sous forme d’entrées dédiées du contexte (notations Ott dans les règles), et l’invariant obtenu est : un terme clos (un programme fermé) est nécessairement \emph{bien équilibré} vis-à-vis des destinations et des trous.
+
+\section*{Sémantique : mutations contrôlées et contexte d’évaluation en pile}
+
+La sémantique isole explicitement les mutations contrôlées dues au remplissage de destinations.
+L’évaluation peut être formulée sans modèle mémoire « complet » : l’effet des écritures est capturé par une manipulation syntaxique du contexte d’évaluation, représenté comme une pile.
+Cette approche permet de raisonner sur la dynamique du remplissage sans importer l’ensemble des complications d’une sémantique de mémoire bas niveau.
+
+\section*{Nom \code{Ampar} : origine logique}
+
+Le nom \code{Ampar} provient d’une décomposition en logique linéaire classique :
+\[
+t \multimap u \equiv t^\perp \parr u \equiv u \parr t^\perp.
+\]
+Dans l’analogie mémoire (``mem''), un type de structure \code{u} avec un trou de type \code{t} se comporte comme une fonction linéaire de type $t \overset{mem}{\multimap} u$.
+La décomposition correspondante conduit à $u \overset{mem}{\parr} t^{\overset{mem}{\perp}}$, où :
+\begin{itemize}[leftmargin=*]
+  \item $t^{\overset{mem}{\perp}}$ correspond à \code{Dest t} ;
+  \item $\overset{mem}{\parr}$ correspond au constructeur de types \code{Ampar} (\emph{asymmetrical memory par}).
+\end{itemize}
+L’asymétrie reflète la perte de symétrie du connecteur $\parr$ lorsqu’on n’est pas dans un cadre pleinement classique.
+
+\section*{Âges vs lifetimes Rust}
+
+Le contrôle par âges dans $\lambda_d$ est :
+\begin{itemize}[leftmargin=*]
+  \item \emph{relatif} (décalages locaux via la modalité) ;
+  \item localement exact ;
+  \item exprimé par égalités et inégalités strictes.
+\end{itemize}
+Les lifetimes Rust sont :
+\begin{itemize}[leftmargin=*]
+  \item globaux/absolus ;
+  \item fondés sur un sous-typage de durées de vie qui correspond localement à une perte d’information ;
+  \item exprimés surtout via des inégalités larges.
+\end{itemize}
+Pour empêcher les fuites de scope, l’information recherchée est de nature « ceci vivra strictement moins longtemps que cela » plutôt que « ceci vivra au moins aussi longtemps que cela », ce qui motive un contrôle relatif et local.
+
+\section*{Idée : existentielles et paramètre de portée sur les destinations}
+
+Une idée explorée consiste à ajouter un paramètre de type de portée sur les destinations :
+\begin{quote}\small
+\code{Dest t r}
+\end{quote}
+et à faire dépendre le paramètre droit de \code{Ampar} d’un foncteur \code{tc :: Type -> Type}.
+La signature de \code{updWith} devient alors :
+\begin{quote}\small
+\code{updWith :: Ampar s tc ⊸ (∀r. tc r ⊸ uc r) ⊸ Ampar s uc}
+\end{quote}
+L’intuition est qu’une destination ne devrait être construite que sous un \code{updWith} qui quantifie sa portée, empêchant la création d’un conteneur si le type complet n’est pas connu.
+Une limite est explicitement identifiée : un emballage existentiel (p.ex. \code{data Any where ...}) peut contourner l’intuition, et l’approche ne résout pas, à elle seule, la compatibilité avec d’autres API linéaires.
+
+\section*{Applications et compromis}
+
+Deux résultats concrets sont mis en avant :
+\begin{itemize}[leftmargin=*]
+  \item construction de structures immuables dans un ordre plus flexible ;
+  \item structures incomplètes comme citoyens de première classe.
+\end{itemize}
+Des applications directes incluent :
+\begin{itemize}[leftmargin=*]
+  \item nouveaux algorithmes avec moins de copie (difference lists, parcours en largeur d’arbres) ;
+  \item prototype Haskell (\code{linear-dest}) ;
+  \item interface zero-copy vers les compact regions de GHC (proposition soumise).
+\end{itemize}
+
+Un axe de compromis est explicitement formulé :
+\begin{itemize}[leftmargin=*]
+  \item \emph{bas de gamme} : seulement le système de types Haskell, interface simple, destinations ne stockent pas de données linéaires, mais utile ;
+  \item \emph{haut de gamme} : langage théorique avec preuve de sûreté et usage illimité des destinations, au prix d’un système de types dédié.
+\end{itemize}
+
+\section*{Évaluation expérimentale : compact regions zero-copy}
+
+Une évaluation expérimentale compare une implémentation ``zero-copy compact region'' sur trois micro-benchmarks :
+\begin{itemize}[leftmargin=*]
+  \item parseur de S-expressions ;
+  \item relabeling d’arbres (parcours en largeur) ;
+  \item concaténation itérée de listes.
+\end{itemize}
+
+\section*{Publications, artefacts et contributions}
+
+Les productions associées incluent :
+\begin{itemize}[leftmargin=*]
+  \item \emph{Destination-passing style programming: a Haskell implementation} (article + implémentation), JFLA 2024.
+  \item \emph{A zero-copy interface to compact regions powered by destinations} (présentation), HIW 2024.
+  \item \emph{Destination Calculus: A Linear $\lambda$-Calculus for Purely Functional Destination Passing} (avec A.~Spiwack), OOPSLA 2025.
+  \item \emph{Primitives for zero-copy compact regions} (proposition GHC), en cours, \code{ghc-proposals} \#683.
+\end{itemize}
+
+\end{document}
+
 
 \end{document}
