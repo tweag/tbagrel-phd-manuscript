@@ -86,7 +86,7 @@ In Minamide’s system, the (pointer to the) hole and the structure containing i
 
 This idea has been refreshed and extended more recently with~\cite{leijen_tail_2025} and~\cite{lorenzen_searchtree_2024}, where structures with holes are referred to as \emph{first-class contexts}.
 
-To reach true destination-passing style programming however, we need a way to refer to the hole(s) of the incomplete structure without having to pass around the structure that has the hole(s). This in fact hasn't been explored much in functional settings so far.~\cite{bour_tmc_2021} is probably the closest existing work on this matter, but destination-passing style is only used at the intermediary language level, in the compiler, to do optimizations, so the user can't make use of DPS in their code.
+To reach true destination-passing style programming however, we need a way to refer to the hole(s) of the incomplete structure without having to pass around the structure that has the hole(s). This in fact has not been explored much in functional settings so far.~\cite{bour_tmc_2021} is probably the closest existing work on this matter, but destination-passing style is only used at the intermediary language level, in the compiler, to do optimizations, so the user cannot make use of DPS in their code.
 
 \section{Formalizing functional destination passing}
 
