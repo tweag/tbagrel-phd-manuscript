@@ -95,16 +95,19 @@ Of particular relevance to our work is Mezzo’s ability to safely ``freeze'' mu
 
 \section{Rust lifetimes}\label{ssec:rust-lifetimes}
 
-The Rust programming language uses a system of lifetimes (see e.g.~\cite{pearce_lifetime_2021}) that plays a similar role as our system of ages in \destcalculus (\cref{chap:dest-calculus}).
+The Rust programming language uses a system of lifetimes (see e.g.~\cite{pearce_lifetime_2021}) that plays a similar role as our system of ages in \destcalculus{} (\cref{chap:dest-calculus}).
 
 Rust lifetimes are symbolic. Borrows and moves generate constraints (inequalities of the form $\alpha\leqslant\beta$) on the symbolic lifetimes. For example, that the lifetime of a reference is larger than the lifetime of any structure the reference is stored in. Without enforcing these constraints, Rust would face the same kinds of issues described in \cref{sec:scope-escape-dests}: a borrow could outlive the data it refers to, just as destinations in our system could outlive the structures they point to if scope escape were not properly prevented.
 In Rust, the borrow checker must check that the constraints are solvable, while in \destcalculus{}, ages are set explicitly, with no analysis needed.
 
 Another difference between the two systems is that \destcalculus{}'s ages (and modes in general) are relative. An explicit modality $\ottstype{!}_{[[¹↑^ka]]}$ must be used when a part has an age different than its parent, and means that the part is $[[ka]]$ scope older than the parent. On the other hand, Rust's lifetimes are absolute, and the lifetime of a part is tracked independently of the lifetime of its parent.
 
-\makeatletter
-\emptypage@emptypage
-\makeatother
+% \makeatletter
+% \emptypage@emptypage
+% \makeatother
+\clearpage
+\hbox{}\thispagestyle{empty}
+\clearpage
 
 \cleardoublepage\phantomsection\chapter*{Conclusion}\label{chap:global-conclusion}\addcontentsline{toc}{chapter}{Conclusion}\markboth{Conclusion}{Conclusion}
 

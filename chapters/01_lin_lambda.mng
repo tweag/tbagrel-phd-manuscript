@@ -606,9 +606,7 @@ exampleFail' ⩴ Ur () =
 }
 
 
-The problem here is that we cannot return \mintinline{haskellc}/file1'/ from the inner scope, because it's a linear resource that cannot be promoted to \mintinline{haskellc}/Ur/. However, it would be perfectly safe to do so; it's just that we do not have precise enough tools at type level to convince the compiler of this fact.
-
-In that case, the most obvious workaround is to extend the scope of \mintinline{haskellc}/withFile' "test2.txt" (file2 → ...)/ as long as we need to operate on \mintinline{haskellc}/file1'/. Very unfortunate and unpractical indeed to have to prolongate the inner scope because we still need to operate on resources from the outer one!\footnote{This is what is referred to as \emph{sticky end of linear scopes} in~\cite{spiwack_linear_scopes_2023}}
+The problem here is that we cannot return \mintinline{haskellc}/file1'/ from the inner scope, because it's a linear resource that cannot be promoted to \mintinline{haskellc}/Ur/. However, it would be perfectly safe to do so; it's just that we do not have precise enough tools at type level to convince the compiler of this fact. In that case, the most obvious workaround is to extend the scope of \mintinline{haskellc}/withFile' "test2.txt" (file2 → ...)/ as long as we need to operate on \mintinline{haskellc}/file1'/. Very unfortunate and unpractical indeed to have to prolongate the inner scope because we still need to operate on resources from the outer one! (c.f. \emph{sticky end of linear scopes} in~\cite{spiwack_linear_scopes_2023})
 
 One easy improvement we can do is to have a single linear scope, providing a linear token type, and let this token type be used to instantiate any resource for which we want to enforce linearity/uniqueness. That way, we can just have one big linear scope, and write most of the code in direct style, still without monads!\nopagebreak[4]%
 {\figtextsize%

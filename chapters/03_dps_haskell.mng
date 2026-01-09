@@ -909,7 +909,7 @@ It's slightly surprising to see that for this particular example, the \mintinlin
 \subsection{Mapping a function over a list}\label{ssec:benchmark-map}
 
 \begin{figure}\centering
-  \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-map.pdf}
+  \hspace*{-1cm}\includegraphics[width=19cm]{graphics/plot-map.pdf}
   \caption{Benchmark of map function on list}
   \label{fig:bench-map}
 \end{figure}
