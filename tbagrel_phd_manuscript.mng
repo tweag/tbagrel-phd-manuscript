@@ -24,6 +24,7 @@
 \usepackage{mathtools, amsfonts, amssymb, amsthm}
 \usepackage{chngcntr}
 \usepackage{csquotes}
+\usepackage{ragged2e}
 
 % \usepackage[utf8]{inputenc}
 % \usepackage[T1]{fontenc}
@@ -150,8 +151,16 @@
   natbib=true,
   bibstyle=authoryear,
   citestyle=authoryear-comp,
+  dashed=false,
   sorting=nyt]{biblatex}
 \addbibresource{bibliography.bib}
+
+% Force family-given ordering for all authors/editors in the bibliography
+\DeclareNameAlias{author}{family-given}
+\DeclareNameAlias{editor}{family-given}
+\AtBeginBibliography{\renewcommand{\mkbibnamefamily}[1]{\textsc{#1}}}
+\setlength{\bibitemsep}{0.27\baselineskip}
+\renewcommand{\bibfont}{\small}
 
 %% General document setup
 \setmainlanguage{english}
@@ -261,11 +270,6 @@
 %   UprightFont=*-Regular,
 %   BoldFont=*-Medium,
 %   Scale=0.887]
-
-\AtBeginDocument{%
-  \DeclareRobustCommand{\em}{\itshape}%
-  \DeclareTextFontCommand{\emph}{\em}%
-}
 
 \setlength{\parskip}{0.25\baselineskip}
 \setlist[itemize]{topsep=0ex,itemsep=-0.5ex}
@@ -672,6 +676,8 @@
 \begin{document}
 \activespaces
 \normalem
+
+\renewcommand{\emph}[1]{\textit{#1}}
 
 \OddHead={{\leftmark\rightmark}{\hfil\slshape\rightmark}}
 \EvenHead={{\leftmark}{{\slshape\leftmark}\hfil}}

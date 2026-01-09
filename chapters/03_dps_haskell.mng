@@ -834,6 +834,12 @@ Benchmarks have been conducted on a laptop under Kubuntu 22.04 with Intel i7-116
   \label{fig:bench-concat}
 \end{figure}
 
+\begin{figure}\centering
+  \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-parser.pdf}
+  \caption{Benchmark of S-expression parser}
+  \label{fig:bench-parser}
+\end{figure}
+
 We compared three implementations for list concatenation.
 
 The first one, \mintinline{haskellc}/concatListRight.force/, uses usual linked lists, and has calls to \mintinline{haskellc}/(++)/ nested to the right, giving the most optimal context for list concatenation: it should run in $\mathcal{O}(n)$ time. We only include it as a point of reference, since it isn't the most common use-case for concatenation in practice. In real-world programs, list concatenation is often nested to the left, for example when appending lines to a log before eventually flushing it to disk. We chose not to include the version with calls to \mintinline{haskellc}/(++)/ nested to the left, as its time and memory consumption grow so rapidly that it renders the rest of the graph unreadable.
@@ -845,12 +851,6 @@ We see in \cref{fig:bench-concat} that the destination-backed difference lists h
 Compared to the benchmarks initially presented in \cite{bagrel_destination-passing_2024}, it seems that the performance of destination-based difference lists has improved, through more efficient handling of linear programs by the compiler, albeit the difference with naive implementations still isn't substancial enough compared to what we could expect theoretically, especially when other simpler tweaks exist (notably, setting custom GC parameters at program's launch).
 
 \subsection{Breadth-first tree relabeling}\label{par:benchmark-bf-tree-traversal}
-
-\begin{figure}\centering
-  \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-bft.pdf}
-  \caption{Benchmark of breadth-first tree relabeling}
-  \label{fig:bench-bft}
-\end{figure}
 
 For breadth-first tree traversal, we benchmark the destination-passing implementation of \cref{ssec:bf-tree-traversal} against an implementation based on \emph{Phases} applicatives, presented in~\cite{gibbons_phases_2023}---a similarly concise approach to breadth-first tree traversal in a functional setting:\nopagebreak[4]%
 {\figtextsize%
@@ -890,17 +890,17 @@ We see in part \cref{fig:bench-bft} that the destination-based tree traversal is
 
 This is a good example of a program for which the destination-passing version is almost as natural to write as the usual functional-style one, but performs significantly better even at smaller sizes.
 
-\subsection{Parsing S-expressions}
-
 \begin{figure}\centering
-  \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-parser.pdf}
-  \caption{Benchmark of S-expression parser}
-  \label{fig:bench-parser}
+  \hspace*{-1.75cm}\includegraphics[width=19cm]{graphics/plot-bft.pdf}
+  \caption{Benchmark of breadth-first tree relabeling}
+  \label{fig:bench-bft}
 \end{figure}
+
+\subsection{Parsing S-expressions}
 
 In \cref{fig:bench-parser}, we compare the naive and DPS implementations of the S-expression parser presented in \cref{ssec:parser-sexpr}. For this particular program, using compact regions is interesting even without destination-passing considerations, as it will reduce the GC load of the application as long as the data is held in memory (which is quite usual with parsed documents). Thus, we benchmark the naive version twice: once in which the results stays in the GC heap and is evaluated with \mintinline{haskellc}/force/ (its name is suffixed with a star), and once to produce a result that we copy in a compact region (\mintinline{haskellc}/copyCR/).
 
-The DPS implementation starts by being less efficient than the naive versions for small inputs, but gets significantly better than the two other implementations tested as soon as garbage collection kicks in (we see it by the copied memory value rising very fast compared to the allocated and peak memory values, around $2^{16}$).
+The DPS implementation starts by being less efficient than the naive versions for small inputs, but gets significantly better than the two other implementations tested as soon as garbage collection kicks in (c.f. copied memory value rising very fast compared to the allocated and peak memory values, around $2^{16}$).
 
 On the dataset of size $2^{19}$ to $2^{25}$, the DPS implementation uses 35-55\% less time and 10-45\% less memory at its peak than the two naive implementation, despite showing more allocations than \mintinline{haskellc}/parseSExpr.force/. This indicates that most of the data allocated in the GC heap by the DPS version is wrappers such as \mintinline{haskellc}/Ampar/s and \mintinline{haskellc}/Dest/s that just last one generation and thus can be discarded very early by the GC (as intended), without needing to be copied into the next generation, unlike the data nodes allocated by the naive versions that have to be persisted by the GC (by copying them).
 

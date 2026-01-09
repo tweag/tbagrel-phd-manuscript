@@ -10,7 +10,7 @@ Both of these notions inherently involve mutation and uninitialized data and the
 
 \section{Tail modulo constructor}\label{ssec:tmc}
 
-\cite{bour_tmc_2021} (and \cite{bour_tmc_2024}, extended with a correctness proof) focus on the perennial problem that the map function on linked lists isn't tail-recursive, hence consumes stack space. The map function can be made tail recursive, but at the cost of an extra reverse operation on the list. Their observation is that there's a systematic transformation of functions where the only recursive call is under a data constructor application (e.g. \emph{cons} in the map instance) to a destination-passing tail-recursive implementation.
+\cite{bour_tmc_2021} (and \cite{bour_tmc_2024}, expanding the former with a correctness proof) focus on the perennial problem that the map function on linked lists isn't tail-recursive, hence consumes stack space. The map function can be made tail recursive, but at the cost of an extra reverse operation on the list. Their observation is that there's a systematic transformation of functions where the only recursive call is under a data constructor application (e.g. \emph{cons} in the map instance) to a destination-passing tail-recursive implementation.
 
 Here, there's no destination in user land, only in the intermediate representation. However, there is a programmatic interface: the programmer annotates a function like
 \begin{verbatim}

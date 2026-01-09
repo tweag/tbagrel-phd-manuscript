@@ -55,9 +55,9 @@ There seems to be an inevitable friction between having a capturing \mintinline{
 
 If we want to prevent older destinations from hiding in newer ampars, we can ask for \mintinline{haskellc}/updWith/ to \emph{not} capture any linear resource. This way, the only destinations accessible and usable in the scope of \mintinline{haskellc}/updWith/ are the ones coming immediately from the ampar being opened.
 
-This is done by changing the signature from \mintinline{haskellc}/updWith ⩴ Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u/ to \mintinline{haskellc}/updWith ⩴ Ampar s t ⊸ (t ⊸ u) → Ampar s u/. Notice the unrestricted function arrow \mintinline{haskellc}/→/: it means the linear function supplied by the user must not capture anything linear (but still must use its argument linearly). Adding this drastic restriction has many consequences. 
+This is done by changing the signature from \mintinline{haskellc}/updWith ⩴ Ampar s t ⊸ (t ⊸ u) ⊸ Ampar s u/ to \\\mintinline{haskellc}/updWith ⩴ Ampar s t ⊸ (t ⊸ u) → Ampar s u/. Notice the unrestricted function arrow \mintinline{haskellc}/→/: it means the linear function supplied by the user must not capture anything linear (but still must use its argument linearly). Adding this drastic restriction has many consequences. 
 
-First, obviously, we cannot use any linear resource coming from outer scopes inside the scope of \mintinline{haskellc}/updWith/. In particular, we cannot use a \mintinline{haskellc}/Token/ coming from the top-level linear scope (we described how convenient it is to just have one top-level linear scope in \cref{sec:linear-scopes}). Instead, we have to start a new nested linear scope (by calling \mintinline{haskellc}/withToken/) if we want to create new ampars in the body of \mintinline{haskellc}/updWith/, or tweak \mintinline{haskellc}/updWith/ to also provide a linear token to the inner scope, which gives \mintinline{haskellc}/updWithToken ⩴ Ampar s t ⊸ ((t, Token) ⊸ u) → Ampar s u/ (the ampar on which \mintinline{haskellc}/updWithToken/ operates is a linear resource on which we can base the chain of linearity that threads through the new token).
+First, obviously, we cannot use any linear resource coming from outer scopes inside the scope of \mintinline{haskellc}/updWith/. In particular, we cannot use a \mintinline{haskellc}/Token/ coming from the top-level linear scope (we described how convenient it is to just have one top-level linear scope in \cref{sec:linear-scopes}). Instead, we have to start a new nested linear scope (by calling \mintinline{haskellc}/withToken/) if we want to create new ampars in the body of \mintinline{haskellc}/updWith/. Alternatively we can tweak \mintinline{haskellc}/updWith/ to also provide a linear token to the inner scope, which gives \mintinline{haskellc}/updWithToken ⩴ Ampar s t ⊸ ((t, Token) ⊸ u) → Ampar s u/ (the ampar on which \mintinline{haskellc}/updWithToken/ operates is a linear resource on which we can base the chain of linearity that threads through the new token).
 
 % STOPPED HERE %
 
@@ -270,6 +270,7 @@ newtype Lens t1 t2 u1 u2 = ¤Lens (t1 ⊸ (u1, u2 ⊸ t2))
 \end{minted}
 }
 
+\pagebreak
 
 With a linear lens of type \mintinline{haskellc}/Lens t1 t2 u1 u2/, we can split a structure of type \mintinline{haskellc}/t1/ into a pair of a value of type \mintinline{haskellc}/u1/ (the focus), and a closure of type \mintinline{haskellc}/u2 ⊸ t2/ that carries all the rest of the original \mintinline{haskellc}/t1/, and is ready to produce a structure of type \mintinline{haskellc}/t2/ if we give it a \mintinline{haskellc}/u2/. In other terms, this second component of type \mintinline{haskellc}/u2 ⊸ t2/ is really just a functional representation of a \mintinline{haskellc}/t2/ missing a \mintinline{haskellc}/u2/ to be complete. Both of the components of the pair have to be consumed if we want to respect linearity.
 
@@ -423,14 +424,6 @@ At the time of writing the thesis, we have not implemented this whole API yet, b
 \begin{listing}
 \figtextsize
 \begin{minted}[linenos,escapeinside=°°]{haskellc}
-data Token
-dup ⩴ Token ⊸ (Token, Token)
-drop ⩴ Token ⊸ ()
-withToken ⩴ ∀ t. (Token ⊸ Ur t) ⊸ Ur t
-
-type Region r ⩴ Constraint
-inRegion ⩴ ∀ t. (∀ r. Region r ⇒ t) ⊸ t
-
 data Ampar r s t
 newAmpar ⩴ ∀ r s. Region r ⇒ Token ⊸ Ampar s (Dest r Ⴈ s)
 tokenBesides ⩴ ∀ r s t. Region r ⇒ Ampar r s t ⊸ (Ampar r s t, Token)

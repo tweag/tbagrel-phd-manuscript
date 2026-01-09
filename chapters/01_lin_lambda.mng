@@ -569,7 +569,7 @@ nonLinearUseAndEffectivelyRejected ⩴ () =
 
 The \mintinline{haskellc}/File/ type is in positive position in the signature of \mintinline{haskellc}/withFile/, so the function \mintinline{haskellc}/withFile/ should somehow know how to produce a \mintinline{haskellc}/File/, but this is opaque for the user. What matters is that a file can only be accessed by providing a linear continuation to \mintinline{haskellc}/withFile/.
 
-Still, this is not enough; because \mintinline{haskellc}/\file → file/ is indeed a linear continuation, one could use \mintinline{haskellc}/withFile "test.txt" (\file → file)/ to leak a \mintinline{haskellc}/File/, and then use it in a non-linear fashion in the outside world. Hence we must forbid \mintinline{haskellc}/File/ from appearing anywhere in the return type of the continuation.
+Still, this is not enough; because \mintinline{haskellc}/\file → file/ is indeed a linear continuation, one could use\\\mintinline{haskellc}/withFile "test.txt" (\file → file)/ to leak a \mintinline{haskellc}/File/, and then use it in a non-linear fashion in the outside world. Hence we must forbid \mintinline{haskellc}/File/ from appearing anywhere in the return type of the continuation.
 
 To do that, we ask the return type to be wrapped in the unrestricted modality \mintinline{haskellc}/Ur/ (the equivalent in the Linear Haskell realm to the $\ottstype{!}$ modality): because the value of type \mintinline{haskellc}/File/ comes from the left of a linear arrow, it cannot be promoted to an \mintinline{haskellc}/Ur/ without breaking linearity, so it cannot leave the scope and has to be used exactly once in this scope. That's why we speak of \emph{linear scopes}. Here's the updated example:\nopagebreak[4]%
 {\figtextsize%
