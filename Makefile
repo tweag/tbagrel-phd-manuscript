@@ -1,5 +1,5 @@
 OTT_OPTS = -tex_show_meta true -tex_wrap false -picky_multiple_parses false -tex_suppress_ntr Q
-PDF_ARXIV_DEPENDENCIES = *.sty *.tikzstyles *.bst graphics/* schemas/* *.cls
+PDF_ARXIV_DEPENDENCIES = *.sty *.tikzstyles *.bst graphics/* schemas/* *.cls *.ist tulloria.pdf tulul.pdf *.ist fonts/iosevka* fonts/kennerley*
 PDF_OTHER_DEPENDENCIES = *.bib *.py pygmentize_local shell.nix nix/*
 
 CHAPTERS_MNG := $(wildcard chapters/*.mng)
@@ -19,7 +19,7 @@ arxiv:
 	$(MAKE) tbagrel_phd_manuscript.tar.gz
 	sed -i 's/\\usepackage\[frozencache\]{minted}/\\usepackage{minted}/' tbagrel_phd_manuscript.mng
 
-tbagrel_phd_manuscript.tar.gz: tbagrel_phd_manuscript.tex $(CHAPTERS_TEX) destination_calculus_ott.tex tbagrel_phd_manuscript.bbl _minted-tbagrel_phd_manuscript $(PDF_ARXIV_DEPENDENCIES)
+tbagrel_phd_manuscript.tar.gz: tbagrel_phd_manuscript.tex $(CHAPTERS_TEX) destination_calculus_ott.tex tbagrel_phd_manuscript.bbl tbagrel_phd_manuscript.ind tbagrel_phd_manuscript.idx tbagrel_phd_manuscript.glo _minted-tbagrel_phd_manuscript $(PDF_ARXIV_DEPENDENCIES)
 	tar -cvzf $@ $^
 
 arxiv-nix:
