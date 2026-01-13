@@ -809,7 +809,7 @@ Dans mon cercle personnel, je me dois également de remercier Julien, Florian et
 
 \end{ThesisAcknowledgments}
 
-
+\cleardoublepage
 
 %-------------------------------------------------------------------
 %                  écriture de `Chapitre' et `Partie' 
@@ -841,11 +841,19 @@ Dans mon cercle personnel, je me dois également de remercier Julien, Florian et
 \listoffigures\addcontentsline{toc}{section}{List of Figures}\markboth{Frontmatter}{List of Figures}
 \pagestyle{plain}
 
-\cleardoublepage\pagestyle{plain}\phantomsection
+\clearpage
+\begingroup
+  \let\clearpage\relax
+  \let\cleardoublepage\relax
+
+\pagestyle{plain}\phantomsection
 \listof{listing}{List of Listings}\addcontentsline{toc}{section}{List of Listings}\markboth{Frontmatter}{List of Listings}
 \pagestyle{plain}
+\endgroup
 
-\clearpage\pagestyle{ThesisHeadings}\phantomsection
+\clearpage\pagestyle{empty}\phantom{a}
+
+\cleardoublepage\pagestyle{ThesisHeadings}\phantomsection
 \mainmatter
 
 \makeatletter

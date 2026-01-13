@@ -1201,30 +1201,30 @@
     {\global\@tocswitchfalse
      \global\@classic@sectionfalse
      %\@newdoublepage
-     \long\def\@empty@ps{empty}%
-     \newpage
-     \if@twoside
-       \ifodd\c@page
-       \else
-          \hbox{}%
-          \ifx\@empty@ps\abs@ps
-          \else
-             \@empty@ps@cmd
-          \fi
-          \newpage
-          \if@twocolumn\hbox{}\newpage\fi
-          \pagestyle{\saved@ps}%
-       \fi
-     \else
-       \pagestyle{\saved@ps}%
-     \fi
+   %   \long\def\@empty@ps{empty}%
+   %   \newpage
+   %   \if@twoside
+   %     \ifodd\c@page
+   %     \else
+   %        \hbox{}%
+   %        \ifx\@empty@ps\abs@ps
+   %        \else
+   %           \@empty@ps@cmd
+   %        \fi
+   %        \newpage
+   %        \if@twocolumn\hbox{}\newpage\fi
+   %        \pagestyle{\saved@ps}%
+   %     \fi
+   %   \else
+   %     \pagestyle{\saved@ps}%
+   %   \fi
      %\addtocounter{page}{-2}%
     }
 \newcommand{\AcknowledgmentName}{Remerciements}
 \newcommand{\@acknowledgment@hook}{}
 \newenvironment{ThesisAcknowledgments}
-    {\@newdoublepage
-     \chapter*{\@title@lignment\AcknowledgmentName}
+    {%\@newdoublepage
+     \@makeschapterhead{\@title@lignment \AcknowledgmentName}
      \@acknowledgment@hook
      \@mkboth{}{}%
      \if@tocswitch
@@ -1240,7 +1240,7 @@
      \global\@tocswitchfalse
     }
     {\par\@newdoublepage}
-\newcommand{\@dedication@hook}{\thispagestyle{empty}}
+\newcommand{\@dedication@hook}{}
 \newenvironment{ThesisDedication}
     {\@newdoublepage
      \@dedication@hook
