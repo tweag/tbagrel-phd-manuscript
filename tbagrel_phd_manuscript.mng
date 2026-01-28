@@ -749,7 +749,8 @@
 
 %-------------------------------------------------------------------
 
-\begin{ThesisDedication}\pagestyle{plain}
+\pagestyle{empty}
+\begin{ThesisDedication}
 Je dédie cette thèse à Pascal et Gérard, que j'espère rendre fiers aujourd'hui.
 \end{ThesisDedication}
 
@@ -760,41 +761,15 @@ Je dédie cette thèse à Pascal et Gérard, que j'espère rendre fiers aujourd'
 % bibliographie à gauche, c'est sans doute parce que vous avez
 % oublié de générer les fichiers d'index et de glossaire...)
 
-\addcontentsline{toc}{chapter}{Frontmatter}\markboth{Frontmatter}{Frontmatter}\pagestyle{plain}
-
-\clearpage\phantomsection\addcontentsline{toc}{section}{Abstract}\markboth{Frontmatter}{Abstract}
-\NumberAbstractPages
-\AbstractsOnEvenPage
-\begin{ThesisAbstract}
-\pagestyle{plain}
-\begin{FrenchAbstract}
-La programmation par passage de destination introduit le concept de \emph{destination}, qui représente l'adresse d'une cellule mémoire encore vierge sur laquelle on ne peut écrire qu'une fois. Ces destinations peuvent être passées en tant que paramètres de fonction, permettant à l'appelant de garder le contrôle de la gestion mémoire : la fonction appelée se contente de remplir la cellule au lieu d’allouer de l’espace pour une valeur de retour. Bien que principalement utilisé en programmation système, le passage de destination trouve aussi des applications en programmation fonctionnelle pure, où il permet d’écrire des programmes auparavant inexpressibles avec les structures de données immuables usuelles.
-
-Dans cette thèse, nous développons un $\lambda$-calcul avec destinations, \destcalculus{}. Ce nouveau système théorique est plus expressif que les travaux similaires existants, le passage de destination y étant conçu pour être aussi flexible que possible. Cette expressivité est rendue possible par un système de types modaux combinant types linéaires et un système d’âges pour gérer le contrôle lexical des ressources, afin de garantir la sûreté du passage de destination. Nous avons prouvé la sûreté de notre système via les théorèmes habituels de progression et de préservation des types, de façon mécanisée, avec l’assistant de preuve Coq.
-
-Nous montrons ensuite comment le passage de destination, formalisé dans ce calcul théorique, peut être intégré à un langage fonctionnel pur existant, Haskell, dont le système de types est moins puissant que notre système théorique. Préserver la sûreté nécessite alors de restreindre la flexibilité dans la gestion des destinations. Nous affinons par la suite l’implémentation pour retrouver une grande partie de cette flexibilité, au prix d’une complexité accrue pour l’utilisateur.
-
-L'implémentation prototype en Haskell montre des résultats encourageants pour l’adoption du passage de destination pour des parcours ou du mapping de grandes structures de données, telles que les listes ou les arbres.
-
-% \KeyWords{chat, chien, puces.}
-\end{FrenchAbstract}\clearpage
-\begin{EnglishAbstract}
-Destination-passing style programming introduces destinations, which represent the address of a write-once memory cell. These destinations can be passed as function parameters, allowing the caller to control memory management: the callee simply fills the cell instead of allocating space for a return value. While typically used in systems programming, destination passing also has applications in pure functional programming, where it enables programs that were previously unexpressible using usual immutable data structures.
-
-In this thesis, we develop a core $\lambda$-calculus with destinations, \destcalculus{}. Our new calculus is more expressive than similar existing systems, with destination passing designed to be as flexible as possible. This is achieved through a modal type system combining linear types with a system of ages to manage scopes, in order to make destination-passing safe. Type safety of our core calculus was proved formally with the Coq proof assistant.
-
-Then, we see how this core calculus can be adapted into an existing pure functional language, Haskell, whose type system is less powerful than our custom theoretical one. Retaining safety comes at the cost of removing some flexibility in the handling of destinations. We later refine the implementation to recover much of this flexibility, at the cost of increased user complexity.
-
-The prototype implementation in Haskell shows encouraging results for adopting destination-passing style programming when traversing or mapping over large data structures such as lists or data trees.
-\end{EnglishAbstract}
-\end{ThesisAbstract}
-
 %-------------------------------------------------------------------
 %                          remerciements
 %-------------------------------------------------------------------
 
 %\DontFrameThisInToc
-\clearpage\phantomsection\addcontentsline{toc}{section}{Acknowledgments}\markboth{Frontmatter}{Acknowledgments}\pagestyle{plain}
+\cleardoublepage
+\setcounter{page}{1}
+\addcontentsline{toc}{chapter}{Frontmatter}\markboth{Frontmatter}{Frontmatter}
+\phantomsection\addcontentsline{toc}{section}{Acknowledgments}\markboth{Frontmatter}{Acknowledgments}\pagestyle{plain}
 \begin{ThesisAcknowledgments}
 
 C'est avec beaucoup d'émotions que j'arrive au terme de cette aventure qui aura occupé trois années et demi de ma vie. Ce parcours a été difficile et exigeant, autant vis-à-vis de moi-même que du sujet à traiter. Heureusement, j'ai eu l'honneur d'être encadré et soutenu par un très riche entourage, où chacun a contribué, à sa façon, pour que je puisse aujourd'hui déposer le point final sur ce manuscrit. Un entourage plus riche que ce que je peux exprimer sur cette page d'ailleurs; aussi, je dédie mes plus sincères remerciements à ceux que je n'ai pas eu la place de mentionner ici.
@@ -807,7 +782,156 @@ Mais de nombreux autres visages m'ont permis, au quotidien, de rester à flot. D
 
 Dans mon cercle personnel, je me dois également de remercier Julien, Florian et Alexandre, qui ont suivi mes avancées avec attention, et dont j'ai malheureusement souvent dû refuser les propositions de sorties ou d'activités. Ysaline aussi, qui m'a aidé à traverser de nombreuses épreuves, et dont j'admire la détermination et la pertinence. J'ai aussi une pensée toute particulière pour Marion, qui m'a montré la voie dans le monde académique, en suivant de près mon parcours. C'est aussi grâce à elle que j'ai très tôt commencé à utiliser \LaTeX{}; que j'utilise aujourd'hui encore pour produire ce document. Enfin, je dédie mes derniers mots à mon grand-père Gérard, qui m'aura transmis sa rigueur et sa passion pour les mathématiques, et à mon oncle Pascal, avec qui j'ai très tôt exploré l'ingénieurie. Même s'ils ne sont plus là pour lires ces lignes, ils ont toujours eu très à coeur de suivre mes avancées et réussites, et c'est en partie grâce à eux que j'en suis là aujourd'hui.
 
-\end{ThesisAcknowledgments}
+\end{ThesisAcknowledgments}\clearpage\pagestyle{empty}\hbox{}
+
+\cleardoublepage\phantomsection\addcontentsline{toc}{section}{Abstract}\markboth{Frontmatter}{Abstract}
+\NumberAbstractPages
+\AbstractsOnEvenPage
+\begin{ThesisAbstract}
+\pagestyle{plain}
+\begin{FrenchAbstract}
+
+\def\cpp{C+\!\!+}
+
+Tout comme la pléthore de langues humaines, il existe un nombre impressionnant de langages de programmation différents, chacun avec des choix de conception reflétant des compromis entre expressivité, performance, sûreté et facilité d’utilisation.
+
+Un des aspects par lesquels les langages se distinguent est leur approche de la gestion mémoire. Ce choix influence profondément la manière dont les programmes sont écrits. Les langages de haut niveau, comme Python ou Java, délèguent la gestion mémoire à un ramasse-miettes, simplifiant l'écriture de code mais introduisant une latence imprévisible. À l’opposé, les langages bas niveau, tels que C ou Zig, confient la gestion mémoire au programmeur, offrant un contrôle fin mais exposant à des erreurs très coûteuses. Des approches plus récentes, comme les pointeurs intelligents en \cpp{} ou le modèle d’\emph{ownership} en Rust, tentent de concilier sûreté et performance sans recourir à un système de ramasse-miettes, mais ces dernières ne s'appliquent pas trop aux langages fonctionnels, qui sont l'objet de notre étude.
+
+\subsection*{Langages de programmation fonctionnels}
+Les langages de programmation fonctionnels se caractérisent d'abord par l'accès à des fonctions pouvant être manipulées, stockées, ou passés en paramètres comme n'importe quelle autre valeur. Ils affichent également une préférence pour les expressions (à la place des instructions ayant des effets de bords) et les structures immuables. Inspirés et proches de modèles mathématiques, leur formalisation est facilitée, et il présentent de nombreuses propriétés intéressantes pour leur analyse statique (permettant d'éviter de nombreuses classes d'erreurs). C'est d'autant plus le cas pour les langages fonctionnels \emph{purs}, où les effets de bords sont clairement circonscrits et explicitement représentés au niveau du système de type, et où toute fonction est transparente par substitution. La pureté impose alors usuellement l'utilisation d'un système de gestion automatique de la mémoire, typiquement un ramasse-miettes, limitant les possibilités de contrôle explicite (qui peuvent sembler antithétiques avec l'idée de pureté).
+
+\subsection*{Structures à trous}
+
+Cependant, Minamide a présenté en 1998 un premier système permettant de représenter des structures incomplètes, ou ``avec trous'', c'est à dire des structures de données non encore finalisés, au sein d'un langage fonctionnel pur. Ces structures peuvent être progressivement complétées, tout en garantissant, via un usage ingénieux d'un système de types linéaires, qu’elles ne sont lisibles qu’une fois entièrement initialisées. Cette technique permet de dépasser certaines contraintes habituelles des langages fonctionnels purs (par exemple l'immuabilité des structures de données, qui force souvent à créer des copies intermédiaires) sans introduire de risques d'erreurs.
+
+Ma thèse poursuit cette idée en proposant un langage fonctionnel où les structures avec trous sont dotées de pointeurs d’écriture explicites -- les \emph{destinations} -- pointant vers leurs trous. Cette approche n'est pas sans rappeler le passage de paramètres par adresse dans les langages impératifs, mais elle est ici adaptée à un contexte fonctionnel pur, en réutilisant les idées pionnières de Minamide.
+
+Grâce à la manipulation explicite de \emph{destinations}, il est possible à la fois d'exprimer certains algorithmes -- dont l'implémentation fonctionnelle était peu ergonomique -- d'une manière simple se rapprochant des approches impérative ; mais également de permettre une gestion mémoire semi-manuelle afin d’obtenir des gains de performances quand la gestion automatique du ramasse-miette n'est pas optimale. Je développe d'abord un langage formel, servant de cadre théorique pour raisonner sur la sûreté et la correction des approches de passage de destinations, avant de concrétiser mon approche par un prototype en Haskell.
+
+L'ensemble de mon approche repose, comme pour Minamide, sur un système de types incorporant les types linéaires. Grâce aux types linéaires, il est possible d'imposer et d'assurer que chaque destination est bien utilisée une seule et unique fois, garantissant à la fois que chaque champ d’une structure est correctement initialisé avant toute lecture, mais également qu'une valeur ne sera pas écrasée par une autre une fois qu'elle a été écrite dans un champ d'une structure (permettant de respecter l'immuabilité chère aux langages fonctionnels).
+
+\section*{$\lambda$-calcul linéaire}
+
+Le $\lambda$-calcul linéaire est une variante typée du $\lambda$-calcul dans laquelle l’usage des variables est contrôlé statiquement. Contrairement au $\lambda$-calcul classique, où les règles structurelles autorisent implicitement la duplication et l’abandon de variables, dans le $\lambda$-calcul linéaire, chaque variable doit être utilisée exactement une fois. Cette discipline permet d’exprimer directement, au niveau du système de types, des invariants d’usage sur les ressources.
+
+La base sous-jacente est la logique linéaire, dans laquelle la contraction et l’affaiblissement d'hypothèses n'est pas possible. En restreignant ces règles, les hypothèses sont interprétées comme des ressources qui doivent être utilisées exactement une fois. Cette interprétation se transpose via l’isomorphisme de Curry-Howard : un programme qui fait un usage incorrect de variables linéaires n'est pas typable dans un language avec un système de types linéaires.
+
+Le $\lambda$-calcul linéaire introduit en particulier la flèche de fonction linéaire $[[T ⊸ U]]$, indiquant que l’argument est consommé exactement une fois pour produire le résultat de la fonction. Les paires linéaires sont données par le tenseur $[[T⨂U]]$, dont les deux composantes doivent être consommées exactement une fois. Les règles d’introduction et d’élimination des connecteurs linéaires imposent une une utilisation contrôlée des ressources : il n'est pas possible de partager une variable entre deux sous-termes par exemple.
+
+Un calcul strictement linéaire étant peu utilisable en pratique, le système est enrichi par une modalité exponentielle. Un type de la forme $[[!T]]$ désigne une ressource de type $[[T]]$ qui peut être dupliquée ou ignorée. Cette distinction rend explicite, dans les types, la frontière entre ressources linéaires et ressources non-linéaires. Seulement, dans la présentation du $\lambda$-calcul linéaire usuelle, la gestion de cette modalité doit être faite explicitement, via des opérateurs dédiés.
+
+Pour améliorer l’ergonomie du système, on propose une présentation du $\lambda$-calcul linéaire fondée sur des modalités graduées, ou multiplicités. Une variable est alors annotée, dans le contexte de typage, par une multiplicité indiquant son régime d’utilisation. Les multiplicité usuelles distinguent l’usage linéaire (exactement une fois) et l’usage non restreint. Cette information est portée par les contextes de typage et propagée via les règles de typage, ce qui permet d'éviter une partie de la manipulation explicite de la modalité exponentielle.
+
+Dans cette continuité, on introduit les flèches de fonction annotées par une multiplicité $[[T m → U]]$, qui indiquent que l'argument de type $[[T]]$ est utilisé selon la multiplicité $[[m]]$ pour produire le résultat de type $[[U]]$. La polymorphie en multiplicité permet alors d’écrire des fonctions et programmes plus génériques lorsque cela est possible.
+
+On fait également le choix, pour notre langage d'étude, de propager les modalités graduées à travers les types de données algébriques, ce qui donne la notion de \emph{modes profonds}. Ainsi, une paire non restreinte $[[! ɷ (T1⨂T2)]]$ autorise la duplication et l’abandon de chacune de ses deux composantes, de façon indépendante, ce qui n'est pas usuellement le cas dans le $\lambda$-calcul linéaire traditionnel.
+
+Ces principes théoriques, qui forment la base du langage présenté dans la section suivante, sont incarnés concrètement dans \emph{Linear Haskell}, l'extension de Haskell permettant la gestion des types linéaires, qui est utilisées pour nos différents prototypes. Cette extension introduit entre autre des flèches de fonctions annotées par des multiplicité, comme décrit plus haut, tout en restant rétrocompatible avec du code Haskell standard. La linéarité devient ainsi un outil modulaire pour exprimer des invariants forts quand nécessaire.
+
+\section*{Le \emph{Destination Calculus} \destcalculus{}}
+
+Le langage \destcalculus{} que j'ai créé est un calcul fonctionnel pur, linéaire, qui intègre le \emph{destination-passing style} (DPS) à la racine du langage, en faisant des \emph{destinations} des valeurs de première classe. Une destination représente un emplacement abstrait en mémoire destiné à être rempli par une valeur, et toutes les structures de données dans \destcalculus{} sont créées par remplissage de destination, au moyen d'opérateurs spécifiques.
+
+L'opérateur le plus simple est celui permettant d'écrire une valeur dans une destination, ce qui consomme la destination et retourne \emph{unit} (le type ne contenant qu'une seule valeur, dont l'usage se rapproche de \texttt{void} dans les langages impératifs):
+\[
+[[ d ◀ x ]]
+\]
+Par cette expression, la valeur portée $[[x]]$ est écrite dans la cellule mémoire pointée par la destination $[[d]]$. Cette opération constitue la manière la plus simple d’utiliser une destination.
+
+Il est également possible de remplir une destination avec un constructeur de données \emph{creux}, c'est à dire un constructeur de données où les champs sont laissés vides. L'opération retournera alors autant de nouvelles destinations que de champs laissés vides dans le constructeur, pour permettre leur remplissage ultérieur. Par exemple, pour une paire :
+
+\[
+[[ (d ⨞(,)) ►case ¹ν (d1, d2) ⟼ … ]]
+\]
+
+Ici, $[[d1]]$ et $[[d2]]$ sont des destinations pointant respectivement vers les deux champs du constructeur de paire qui a été écrit dans la cellule pointée par $[[d]]$. Elles devront être consommées (remplies) avant que la paire complète ne puisse être lue. Ce système de remplissage des destinations par des constructeurs creux est la base qui permet de construire des structures de données pas à pas, sans avoir besoin de les finaliser immédiatement.
+
+L'accès à ce système de destinations permet d'exprimer de nombreux algorithmes en \emph{destination-passing style}, permettant parfois de net gains d'expressivité par rapport au style fonctionnel usuel.
+
+\pagebreak
+
+Par exemple, il est possible d'implémenter une version \emph{tail-recursive}, en une passe, de la fonction $\texttt{map}$ sur les listes: 
+
+\noindent$\newoperatorb
+  {\ottkw{map'}}{[[(T ¹ν → U) ɷ → List T ¹ν → ⌊ List U ⌋ ¹ν ¹ν → ①]]}
+  {[[map' f l dl]]}{\!\!\!\begin{array}[t]{l}[[
+l ►case ¹ν {⮒
+‥‥ˢ[] ⟼ dl⨞[],⮒
+‥‥x ˢ:: xs ⟼ (dl⨞(::)) ►case ¹ν⮒
+‥‥‥‥(dx, dxs) ⟼ dx ◀ f x ; map' f xs dxs}]]\end{array}}
+\newoperator
+  {\ottkw{map}}{[[(T ¹ν → U) ɷ → List T ¹ν → List U]]}
+  {[[map f l]]}{[[from⧔' ((alloc @ (List U) ⧔ ⌊ List U ⌋ ¹ν) ►map dl ⟼ map' f l dl)]]}$
+
+Ce genre de technique est notamment intéressant dans des langages fonctionnels stricts comme OCaml, où le côté \emph{tail-recursif} permet d'éviter l'explosion de la pile d'appels pour de grandes listes, sans nécessiter de construire une liste intermédiaire qu'il faut ensuite retourner (contrairement à l'approche \emph{tail-recursive} usuelle avec accumulateur).
+
+\subsection*{Système de types pour \destcalculus{}}
+
+Un tel langage nécessite de nombreuses garanties de sûreté pour s'assurer que les destinations sont correctement utilisées. En particulier, il est crucial de garantir qu'une destination est utilisée une seule et unique fois, pour garantir que le champ initialement vide d'une structure est bien rempli (une seule fois, pour éviter tout écrasement de données précédemment écrit) avant d'être lu.
+
+Pour ce faire, nous utilisons un système de types linéaires, comme décrit dans la section précédente. Les destinations sont alors traitées comme des ressources linéaires, qui ne peuvent être ni dupliquées ni abandonnées. Chaque opération de remplissage de destination via $\blacktriangleleft$ or $\triangleleft$ consomme la destination, garantissant ainsi qu'elle ne peut pas être réutilisée.
+
+\subsection*{\emph{Scope-escape} de destinations}
+
+Dans \destcalculus{}, les destinations sont intrinsèquement liées au contexte de remplissage d'une structure à trou; seul espace lexical dans lequel elles sont valides et peuvent être remplies.
+
+Cependant, un soucis majeur qui s'est posé dans la conception de \destcalculus{} est le \emph{scope escape}: en effet, il est possible, en chaînant intelligemment plusieurs contextes de construction de structures à trous, de stocker une destination à l'extérieur du contexte de remplissage de la structure associée. La destination semble alors ``consommée'', alors qu'en réalité elle n'a pas été remplie (seulement stockée pour un usage ultérieur), ce qui viole les garanties de sûreté du langage.
+
+Il s'avère qu'un système de types linéaires classique n'est pas suffisant pour prévenir ce genre de situation. Pour y remédier, j'ai ajouté une deuxième dimension de contrôle des variables (en plus de la linéarité) : le contrôle d'âge. L'idée est d'associer, en plus de la multiplicité, une indication d'âge à chaque variable dans le contexte de typage (le \emph{mode} attachée à une variable dans le contexte de typage est alors une paire d'une multiplicité et d'un âge). Cette indication d'âge reflète le contexte de construction de structure à trous dans lequel la variable a été créée, et les règles de remplissages de destinations sont adaptées de sorte d'interdire la fuite d'une destination dans un contexte plus ancien que celui dont elle dépend (i.e. un contexte parent).
+
+\subsection*{Propriétés de sûreté et preuve formelle}
+
+J'ai équipé \destcalculus{} d'un système de type qui a été formalisé en Rocq, et j'ai prouvé les propriétés de sûreté usuelles par les théorèmes de réduction et progrès. Ces propriétés garantissent que les programmes bien typés dans \destcalculus{} ne peuvent pas se retrouver dans des états erronés, notamment en ce qui concerne l'usage des destinations.
+
+Pour ce faire, il a été nécessaire de développer des techniques de typage nouvelles, notamment pour s'assurer que les destinations et trous restants pour une structure donnée sont correctement équilibrés : il doit rester exactement autant de destinations non consommées que de trous restants dans la structure. Cela a été possible par une technique de typage soustractive, où destinations et trous apparaissent dans le contexte de typage, mais s'annulent (ce qui permet de former un terme clos) s'ils sont correctement appairés. Nous avons donc la garantie que tout terme ou programme clos ne peut pas contenir de destinations ou trous non appairés.
+
+\section*{Implémentation en Haskell d'une version restreinte de \destcalculus{}}
+
+L'idée de cette thèse était également d'aboutir à une implémentation concrète d'un système de passage de destinations sûr pour un langage fonctionnel pur, Haskell.
+
+Cependant, si Haskell dispose de support pour les types linéaires via l'extension Linear Haskell, il ne permet pas d'exprimer nativement les notions d'âge qui ont été développées spécifiquement pour \destcalculus{}. Il n'est donc pas possible d'éviter les problèmes de \emph{scope escape} par le biais de ces mécanismes.
+
+\`A la place, dans cette première implémentation, j'ai pris une décision drastique : empêcher les destinations d'être remplies par des ressources linéaires. Cette fonctionnalité est en effet un prérequis pour que le \emph{scope escape} puisse se produire, et en la retirant, on évite le problème. Cependant, cette restriction limite également l'expressivité du système. En particulier, une structure de données construite via des destinations ne peut pas stocker de données linéaires, ce qui restreint légèrement les cas d'utilisation possibles.
+
+Un travail technique a également été nécessaire pour trouver comment faire des mutations en mémoire dans Haskell, sans que cela ne pose des problèmes avec le ramasse-miettes. J'ai pour cela choisi d'utiliser les \emph{compact regions}, déjà supportées par le compilateur GHC, qui permettent de gérer des blocs de mémoire semi-manuellement, dans lequel le ramasse-miettes ne s'immisce pas, sauf quand l'entièreté de la région n'est plus utilisée (auquel cas elle est libérée d'un coup).
+
+Cette implémentation permet, au final, de conserver de nombreux avantages des approches de passage de destinations, et j'ai obtenu des résultats encourageants dans les benchmarks qui comparent des algorithmes fonctionnels usuels et leur équivalent en \emph{destination-passing style}.
+
+\section*{Vers l'expressivité complète de \destcalculus{} en Haskell}
+
+Il convient de se demander s'il est possible d'implémenter l'entièreté de \destcalculus{} en Haskell, en levant les restrictions mentionnées plus haut.
+
+J'ai donc dédié un chapitre de la thèse à l'exploration de nouvelles techniques, qui permettent d'autoriser le remplissage de destinations par des ressources linéaires, tout en excluant toute possibilité de \emph{scope escape}.
+
+Une des possibilités est de revenir à un système à la Minamide pour les destinations pour ressources linéaires, c'est-à-dire un système où ces destinations ne sont pas exposées directement aux programmeurs (elles ne peuvent donc pas fuiter vers un contexte parent). Cependant, cette approche perd une partie de l'attrait des destinations en tant que valeurs de première classe.
+
+L'autre approche que nous développons est l'utilisation de \emph{lenses} linéaires. Ces dernières permettent de représenter un focus sur une partie d'une structure de données, qui peut être lue et modifiée, de façon très contrôlée, de par la structure même des \emph{lenses}. 
+
+Nous utilisons les \emph{lenses} linéaires pour permettre à l'utilisateur de représenter les manipulations qu'il veut effectuer sur les destinations des structures à trous, sans pour autant exposer directement les destinations elles-mêmes. On retrouve la même flexibilité pratique que le système de \destcalculus{}, sans besoin d'un système d'âge pour en assurer la sûreté, mais au prix d'une ergonomie réduite et de signature de types assez lourdes.
+
+\section*{Conclusion et travaux futurs}
+
+Dans cette thèse, je présente \destcalculus{}, un langage fonctionnel pur intégrant le passage de destinations à son c\oe{}ur, avec un système de types linéaires et un mécanisme de contrôle d'âge pour assurer la sûreté de l'usage des destinations. J'ai formalisé le langage et prouvé ses propriétés de sûreté, avant de développer plusieurs implémentations en Haskell, avec différents niveaux de compromis entre expressivité et complexité des mécanismes assurant la sûreté (puisque nous ne disposons pas du système d'âge développé spécialement pour \destcalculus{}).
+
+Ce travail présente des résultats positifs sur la pertinence du passage de destinations -- qui est historiquement une technique impérative -- dans un contexte fonctionnel pur, mais pose également les bases théoriques pour analyser et prouver la sûreté de futurs systèmes similaires.
+
+Il existe plusieurs axes de travaux futurs pour poursuivre cette recherche. Tout d'abord, il serait intéressant d'explorer des optimisations supplémentaires pour les implémentations en Haskell, afin de maximiser les gains de performance apportés par le passage de destinations, et également envisager des implémentations dans d'autres espaces mémoires que les \emph{compact regions}. Ensuite, l'étude de l'intégration de ces techniques dans d'autres langages, comme OCaml ou Rust, pourrait ouvrir la voie à une adoption plus large, sous réserve que ces langages se voient dotés d'une extension de leur système de types pour la gestion des types linéaires. Enfin, d'un point de vue théorique, il serait pertinent d'adapter la preuve formelle de sûreté de \destcalculus{} pour couvrir les variantes implémentées en Haskell, afin de garantir formellement que les techniques alternatives développées dans ces implémentations sont tout aussi sûres que le système original.
+
+% \KeyWords{chat, chien, puces.}
+\end{FrenchAbstract}\clearpage\hbox{}\pagestyle{empty}\cleardoublepage
+
+\NumberAbstractPages\pagestyle{plain}
+\begin{EnglishAbstract}
+\pagestyle{plain}
+Destination-passing style programming introduces destinations, which represent the address of a write-once memory cell. These destinations can be passed as function parameters, allowing the caller to control memory management: the callee simply fills the cell instead of allocating space for a return value. While typically used in systems programming, destination passing also has applications in pure functional programming, where it enables programs that were previously unexpressible using usual immutable data structures.
+
+In this thesis, we develop a core $\lambda$-calculus with destinations, \destcalculus{}. Our new calculus is more expressive than similar existing systems, with destination passing designed to be as flexible as possible. This is achieved through a modal type system combining linear types with a system of ages to manage scopes, in order to make destination-passing safe. Type safety of our core calculus was proved formally with the Rocq proof assistant.
+
+Then, we see how this core calculus can be adapted into an existing pure functional language, Haskell, whose type system is less powerful than our custom theoretical one. Retaining safety comes at the cost of removing some flexibility in the handling of destinations. We later refine the implementation to recover much of this flexibility, at the cost of increased user complexity.
+
+The prototype implementation in Haskell shows encouraging results for adopting destination-passing style programming when traversing or mapping over large data structures such as lists or data trees.
+\end{EnglishAbstract}
+\end{ThesisAbstract}\pagestyle{plain}\clearpage
 
 \cleardoublepage
 

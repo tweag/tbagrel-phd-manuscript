@@ -603,13 +603,13 @@
 \begin{document}
 
 \title{Formalisation et implémentation de techniques sûres de passage de destinations pour les langages de programmation fonctionnels purs}
-\date{Résumé détaillé de thèse de doctorat, soutenue le 14 novembre 2025}
+\date{Résumé étendu de thèse de doctorat, soutenue le 14 novembre 2025}
 \author{Thomas \textsc{Bagrel}}
 
 % Type de la these
 \maketitle\clearpage
 
-\section{Introduction}
+\section*{Introduction}
 
 \def\cpp{C+\!\!+}
 
@@ -631,7 +631,7 @@ Grâce à la manipulation explicite de \emph{destinations}, il est possible à l
 
 L'ensemble de mon approche repose, comme pour Minamide, sur un système de types incorporant les types linéaires. Grâce aux types linéaires, il est possible d'imposer et d'assurer que chaque destination est bien utilisée une seule et unique fois, garantissant à la fois que chaque champ d’une structure est correctement initialisé avant toute lecture, mais également qu'une valeur ne sera pas écrasée par une autre une fois qu'elle a été écrite dans un champ d'une structure (permettant de respecter l'immuabilité chère aux langages fonctionnels).
 
-\section{$\lambda$-calcul linéaire}
+\section*{$\lambda$-calcul linéaire}
 
 Le $\lambda$-calcul linéaire est une variante typée du $\lambda$-calcul dans laquelle l’usage des variables est contrôlé statiquement. Contrairement au $\lambda$-calcul classique, où les règles structurelles autorisent implicitement la duplication et l’abandon de variables, dans le $\lambda$-calcul linéaire, chaque variable doit être utilisée exactement une fois. Cette discipline permet d’exprimer directement, au niveau du système de types, des invariants d’usage sur les ressources.
 
@@ -645,7 +645,7 @@ Pour améliorer l’ergonomie du système, on propose une présentation du $\lam
 
 Dans cette continuité, on introduit les flèches de fonction annotées par une multiplicité $[[T m → U]]$, qui indique que l'argument de type $[[T]]$ est utilisé selon la multiplicité $[[m]]$ pour produire le résultat de type $[[U]]$. La polymorphie en multiplicité permet alors d’écrire des fonctions et programmes plus génériques lorsque cela est possible.
 
-On fait également le choix, pour notre langage d'étude, de propager les modalités graduées à travers les types de données algébriques, ce qui donne la notion de \emph{modes profonds}. Ainsi, une paire non restreinte $[[! ɷ (T1, T2)]]$ autorise la duplication et l’abandon de chacune de ses deux composantes, de façon indépendante, ce qui n'est pas usuellement le cas dans le $\lambda$-calcul linéaire traditionnel.
+On fait également le choix, pour notre langage d'étude, de propager les modalités graduées à travers les types de données algébriques, ce qui donne la notion de \emph{modes profonds}. Ainsi, une paire non restreinte $[[! ɷ (T1⨂T2)]]$ autorise la duplication et l’abandon de chacune de ses deux composantes, de façon indépendante, ce qui n'est pas usuellement le cas dans le $\lambda$-calcul linéaire traditionnel.
 
 Ces principes sont incarnés concrètement dans \emph{Linear Haskell}, l'extension de Haskell permettant la gestion des types linéaires, qui est utilisées pour nos différents prototypes. Cette extension introduit entre autre des flèches de fonctions annotées par des multiplicité, comme décrit plus haut, tout en restant rétrocompatible avec du code Haskell standard. La linéarité devient ainsi un outil modulaire pour exprimer des invariants forts quand nécessaire.
 
@@ -662,14 +662,14 @@ Par cette expression, la valeur portée $[[x]]$ est écrite dans la cellule mém
 Il est également possible de remplir une destination avec un constructeur de données \emph{creux}, c'est à dire un constructeur de données où les champs sont laissés vides. L'opération retournera alors autant de nouvelles destinations que de champs laissés vides dans le constructeur, pour permettre leur remplissage ultérieur. Par exemple, pour une paire :
 
 \[
-[[ case (d ◀ (,)) of (d1, d2) → ... ]]
+[[ (d ⨞(,)) ►case ¹ν (d1, d2) ⟼ … ]]
 \]
 
-Ici, $[[d1]]$ et $[[d2]]$ sont des destinations pointant respectivement vers les deux champs du constructeur de paire qui a été écrit dans la cellule pointée par $[[d]]$. Elles devront être consommées (remplies) avant que la paire complète ne puisse être lue.
+Ici, $[[d1]]$ et $[[d2]]$ sont des destinations pointant respectivement vers les deux champs du constructeur de paire qui a été écrit dans la cellule pointée par $[[d]]$. Elles devront être consommées (remplies) avant que la paire complète ne puisse être lue. Ce système de remplissage des destinations par des constructeurs creux est la base qui permet de construire des structures de données pas à pas, sans avoir besoin de les finaliser immédiatement.
 
 L'accès à ce système de destinations permet d'exprimer de nombreux algorithmes en \emph{destination-passing style}, permettant parfois de net gains d'expressivité par rapport au style fonctionnel usuel.
 
-En particulier, il est possible d'implémenter une version \emph{tail-recursive}, en une passe, de la fonction $\texttt{map}$ sur les listes: 
+Par exemple, il est possible d'implémenter une version \emph{tail-recursive}, en une passe, de la fonction $\texttt{map}$ sur les listes: 
 
 \[
 \newoperatorb
@@ -684,6 +684,58 @@ l ►case ¹ν {⮒
   {[[map f l]]}{[[from⧔' ((alloc @ (List U) ⧔ ⌊ List U ⌋ ¹ν) ►map dl ⟼ map' f l dl)]]}
 \]
 
-Ce genre de technique est notamment intéressant dans des langages fonctionnels stricts comme OCaml, où le côté \emph{tail-recursif} permet d'éviter l'explosion de la pile d'appels pour de grandes listes, sans nécessiter de construire une liste intermédiaire qu'il faut ensuite retourner (c.f. l'approche \emph{tail-recursive} usuelle avec accumulateur).
+Ce genre de technique est notamment intéressant dans des langages fonctionnels stricts comme OCaml, où le côté \emph{tail-recursif} permet d'éviter l'explosion de la pile d'appels pour de grandes listes, sans nécessiter de construire une liste intermédiaire qu'il faut ensuite retourner (contrairement à l'approche \emph{tail-recursive} usuelle avec accumulateur).
+
+\paragraph{Système de types pour \destcalculus{}}
+
+Un tel langage nécessite de nombreuses garanties de sûreté pour s'assurer que les destinations sont correctement utilisées. En particulier, il est crucial de garantir qu'une destination est utilisée une seule et unique fois, pour garantir que le champ initialement vide d'une structure est bien rempli (une seule fois, pour éviter tout écrasement de données précédemment écrit) avant d'être lu.
+
+Pour ce faire, nous utilisons un système de types linéaires, comme décrit dans la section précédente. Les destinations sont alors traitées comme des ressources linéaires, qui ne peuvent être ni dupliquées ni abandonnées. Chaque opération de remplissage de destination via $\blacktriangleleft$ or $\triangleleft$ consomme la destination, garantissant ainsi qu'elle ne peut pas être réutilisée.
+
+\paragraph{\emph{Scope-escape} de destinations}
+
+Dans \destcalculus{}, les destinations sont intrinsèquement liées au contexte de remplissage d'une structure à trou; seul espace lexical dans lequel elles sont valides et peuvent être remplies.
+
+Cependant, un soucis majeur qui s'est posé dans la conception de \destcalculus{} est le \emph{scope escape}: en effet, il est possible, en chaînant intelligemment plusieurs contextes de construction de structures à trous, de stocker une destination à l'extérieur du contexte de remplissage de la structure associée. La destination semble alors ``consommée'', alors qu'en réalité elle n'a pas été remplie (seulement stockée pour un usage ultérieur), ce qui viole les garanties de sûreté du langage.
+
+Il s'avère qu'un système de types linéaires classique n'est pas suffisant pour prévenir ce genre de situation. Pour y remédier, j'ai ajouté une deuxième dimension de contrôle des variables (en plus de la linéarité) : le contrôle d'âge. L'idée est d'associer, en plus de la multiplicité, une indication d'âge à chaque variable dans le contexte de typage (le \emph{mode} attachée à une variable dans le contexte de typage est alors une paire d'une multiplicité et d'un âge). Cette indication d'âge reflète le contexte de construction de structure à trous dans lequel la variable a été créée, et les règles de remplissages de destinations sont adaptées de sorte d'interdire la fuite d'une destination dans un contexte plus ancien que celui dont elle dépend (i.e. un contexte parent).
+
+\paragraph{Propriétés de sûreté et preuve formelle}
+
+J'ai équipé \destcalculus{} d'un système de type qui a été formalisé en Rocq, et j'ai prouvé les propriétés de sûreté usuelles par les théorèmes de réduction et progrès. Ces propriétés garantissent que les programmes bien typés dans \destcalculus{} ne peuvent pas se retrouver dans des états erronés, notamment en ce qui concerne l'usage des destinations.
+
+Pour ce faire, il a été nécessaire de développer des techniques de typage nouvelles, notamment pour s'assurer que les destinations et trous restants pour une structure donnée sont correctement équilibrés : il doit rester exactement autant de destinations non consommées que de trous restants dans la structure. Cela a été possible par une technique de typage soustractive, où destinations et trous apparaissent dans le contexte de typage, mais s'annulent (ce qui permet de former un terme clos) s'ils sont correctement appairés. Nous avons donc la garantie que tout terme ou programme clos ne peut pas contenir de destinations ou trous non appairés.
+
+\section*{Implémentation en Haskell d'une version restreinte de \destcalculus{}}
+
+L'idée de cette thèse était également d'aboutir à une implémentation concrète d'un système de passage de destinations sûr pour un langage fonctionnel pur, Haskell.
+
+Cependant, si Haskell dispose de support pour les types linéaires via l'extension Linear Haskell, il ne permet pas d'exprimer nativement les notions d'âge qui ont été développées spécifiquement pour \destcalculus{}. Il n'est donc pas possible d'éviter les problèmes de \emph{scope escape} par le biais de ces mécanismes.
+
+\`A la place, dans cette première implémentation, j'ai pris une décision drastique : empêcher les destinations d'être remplies par des ressources linéaires. Cette fonctionnalité est en effet un prérequis pour que le \emph{scope escape} puisse se produire, et en la retirant, on évite le problème. Cependant, cette restriction limite également l'expressivité du système. En particulier, une structure de données construite via des destinations ne peut pas stocker de données linéaires, ce qui restreint légèrement les cas d'utilisation possibles.
+
+Un travail technique a également été nécessaire pour trouver comment faire des mutations en mémoire dans Haskell, sans que cela ne pose des problèmes avec le ramasse-miettes. J'ai pour cela choisi d'utiliser les \emph{compact regions}, déjà supportées par le compilateur GHC, qui permettent de gérer des blocs de mémoire semi-manuellement, dans lequel le ramasse-miettes ne s'immisce pas, sauf quand l'entièreté de la région n'est plus utilisée (auquel cas elle est libérée d'un coup).
+
+Cette implémentation permet, au final, de conserver de nombreux avantages des approches de passage de destinations, et j'ai obtenu des résultats encourageants dans les benchmarks qui comparent des algorithmes fonctionnels usuels et leur équivalent en \emph{destination-passing style}.
+
+\section*{Vers l'expressivité complète de \destcalculus{} en Haskell}
+
+Il convient de se demander s'il est possible d'implémenter l'entièreté de \destcalculus{} en Haskell, en levant les restrictions mentionnées plus haut.
+
+J'ai donc dédié un chapitre de la thèse à l'exploration de nouvelles techniques, qui permettent d'autoriser le remplissage de destinations par des ressources linéaires, tout en excluant toute possibilité de \emph{scope escape}.
+
+Une des possibilités est de revenir à un système à la Minamide pour les destinations pour ressources linéaires, c'est-à-dire un système où ces destinations ne sont pas exposées directement aux programmeurs (elles ne peuvent donc pas fuiter vers un contexte parent). Cependant, cette approche perd une partie de l'attrait des destinations en tant que valeurs de première classe.
+
+L'autre approche que nous développons est l'utilisation de \emph{lenses} linéaires. Ces dernières permettent de représenter un focus sur une partie d'une structure de données, qui peut être lue et modifiée, de façon très contrôlée, de par la structure même des \emph{lenses}. 
+
+Nous utilisons les \emph{lenses} linéaires pour permettre à l'utilisateur de représenter les manipulations qu'il veut effectuer sur les destinations des structures à trous, sans pour autant exposer directement les destinations elles-mêmes. On retrouve la même flexibilité pratique que le système de \destcalculus{}, sans besoin d'un système d'âge pour en assurer la sûreté, mais au prix d'une ergonomie réduite et de signature de types assez lourdes.
+
+\section*{Conclusion et travaux futurs}
+
+Dans cette thèse, j'ai présenté \destcalculus{}, un langage fonctionnel pur intégrant le passage de destinations à son c\oe{}ur, avec un système de types linéaires et un mécanisme de contrôle d'âge pour assurer la sûreté de l'usage des destinations. J'ai formalisé le langage et prouvé ses propriétés de sûreté, avant de développer plusieurs implémentations en Haskell, avec différents niveaux de compromis entre expressivité et complexité des mécanismes assurant la sûreté (puisque nous ne disposons pas du système d'âge développé spécialement pour \destcalculus{}).
+
+Ce travail présente des résultats positifs sur la pertinence du passage de destinations -- qui est historiquement une technique impérative -- dans un contexte fonctionnel pur, mais pose également les bases théoriques pour analyser et prouver la sûreté de futurs systèmes similaires.
+
+Il existe plusieurs axes de travaux futurs pour poursuivre cette recherche. Tout d'abord, il serait intéressant d'explorer des optimisations supplémentaires pour les implémentations en Haskell, afin de maximiser les gains de performance apportés par le passage de destinations, et également envisager des implémentations dans d'autres espaces mémoires que les \emph{compact regions}. Ensuite, l'étude de l'intégration de ces techniques dans d'autres langages, comme OCaml ou Rust, pourrait ouvrir la voie à une adoption plus large, sous réserve que ces langages se voient dotés d'une extension de leur système de types pour la gestion des types linéaires. Enfin, d'un point de vue théorique, il serait pertinent d'adapter la preuve formelle de sûreté de \destcalculus{} pour couvrir les variantes implémentées en Haskell, afin de garantir formellement que les techniques alternatives développées dans ces implémentations sont tout aussi sûres que le système original.
 
 \end{document}
